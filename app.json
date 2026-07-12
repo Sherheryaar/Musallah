@@ -1,0 +1,29 @@
+{
+  "expo": {
+    "name": "Masjid Locator",
+    "slug": "masjid-locator",
+    "version": "0.1.4",
+    "scheme": "masjidlocator",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": false
+    },
+    "android": {
+      "edgeToEdgeEnabled": true
+    },
+    "web": {
+      "output": "static"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "We use your location only to show the nearest places to pray. It never leaves your device."
+        }
+      ]
+    ]
+  }
+}
