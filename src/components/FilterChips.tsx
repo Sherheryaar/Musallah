@@ -55,9 +55,10 @@ export default function FilterChips({ active, onToggle }: Props) {
 }
 
 const styles = StyleSheet.create({
-  // Stops the chip bar from stretching vertically on web.
+  // Stops the chip bar from stretching vertically or being overlapped by the list.
   bar: {
     flexGrow: 0,
+    flexShrink: 0,
   },
   row: {
     gap: spacing.s,
@@ -65,6 +66,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.s,
   },
   wrapRow: {
+    flexShrink: 0,
     flexDirection: "row",
     flexWrap: "wrap",
   },

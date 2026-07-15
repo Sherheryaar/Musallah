@@ -8,10 +8,7 @@ type Props = {
   onSelect: (id: string) => void;
 };
 
-/**
- * TypeScript / Metro fallback — native and web builds resolve to
- * PlacesMap.native.tsx and PlacesMap.web.tsx instead.
- */
+/** Web stub — map view is native-only; never rendered on web. */
 export default function PlacesMap(_props: Props) {
   return null;
 }

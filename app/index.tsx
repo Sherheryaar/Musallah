@@ -16,6 +16,8 @@ import { distanceKm, formatDistance } from "@/lib/distance";
 import { fetchPrayerTimes, PrayerTimes } from "@/lib/prayerTimes";
 import FilterChips from "@/components/FilterChips";
 import PlaceCard from "@/components/PlaceCard";
+import PlacesMap from "@/components/PlacesMap";
+import ViewToggle from "@/components/ViewToggle";
 import { suggestNewPlace } from "@/lib/feedback";
 import { colors, spacing } from "@/lib/theme";
 
@@ -35,6 +37,7 @@ export default function HomeScreen() {
   const [activeFilters, setActiveFilters] = useState<Set<FacilityKey>>(
     new Set(),
   );
+  const [view, setView] = useState<"list" | "map">("list");
 
   // Ask for location once. No account, no tracking — processed on-device.
   useEffect(() => {
@@ -120,6 +123,12 @@ export default function HomeScreen() {
 
       <FilterChips active={activeFilters} onToggle={toggleFilter} />
 
+      {Platform.OS !== "web" ? (
+        <View style={styles.toggleRow}>
+          <ViewToggle value={view} onChange={setView} />
+        </View>
+      ) : null}
+
       {usingFallback ? (
         <Text style={styles.fallbackNote}>
           Showing distances and prayer times for central London — enable
@@ -127,7 +136,17 @@ export default function HomeScreen() {
         </Text>
       ) : null}
 
+      {Platform.OS !== "web" && view === "map" ? (
+        <View style={styles.mapContainer}>
+          <PlacesMap
+            results={results}
+            userLocation={location}
+            onSelect={(id: string) => router.push(`/place/${id}`)}
+          />
+        </View>
+      ) : (
       <FlatList
+        style={styles.listContainer}
         data={results}
         keyExtractor={(item) => item.place.id}
         contentContainerStyle={[
@@ -171,6 +190,7 @@ export default function HomeScreen() {
           </View>
         }
       />
+      )}
       </View>
     </View>
   );
@@ -198,6 +218,7 @@ const styles = StyleSheet.create({
     }),
   },
   timesBar: {
+    flexShrink: 0,
     flexDirection: "row",
     justifyContent: "space-between",
     backgroundColor: colors.canvas,
@@ -221,11 +242,23 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: colors.text,
   },
+  toggleRow: {
+    flexShrink: 0,
+    paddingHorizontal: spacing.l,
+    paddingBottom: spacing.s,
+  },
   fallbackNote: {
+    flexShrink: 0,
     fontSize: 14,
     color: colors.textSecondary,
     paddingHorizontal: spacing.l,
     paddingBottom: spacing.s,
+  },
+  mapContainer: {
+    flex: 1,
+  },
+  listContainer: {
+    flex: 1,
   },
   list: {
     padding: spacing.l,
