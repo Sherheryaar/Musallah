@@ -1,5 +1,12 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { FlatList, Platform, Text, View, StyleSheet } from "react-native";
+import {
+  FlatList,
+  Platform,
+  Text,
+  TouchableOpacity,
+  View,
+  StyleSheet,
+} from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Location from "expo-location";
@@ -9,6 +16,7 @@ import { distanceKm, formatDistance } from "@/lib/distance";
 import { fetchPrayerTimes, PrayerTimes } from "@/lib/prayerTimes";
 import FilterChips from "@/components/FilterChips";
 import PlaceCard from "@/components/PlaceCard";
+import { suggestNewPlace } from "@/lib/feedback";
 import { colors, spacing } from "@/lib/theme";
 
 // Fallback when location is unavailable: central London (Charing Cross).
@@ -140,6 +148,26 @@ export default function HomeScreen() {
               Try removing a filter — or this is a gap in the data worth
               fixing.
             </Text>
+            <TouchableOpacity
+              style={styles.emptyButton}
+              onPress={suggestNewPlace}
+              accessibilityRole="button"
+              accessibilityLabel="Add a missing place"
+            >
+              <Text style={styles.emptyButtonLabel}>Add a missing place</Text>
+            </TouchableOpacity>
+          </View>
+        }
+        ListFooterComponent={
+          <View style={styles.listFooter}>
+            <Text style={styles.listFooterText}>Missing a place? </Text>
+            <TouchableOpacity
+              onPress={suggestNewPlace}
+              accessibilityRole="button"
+              accessibilityLabel="Suggest a missing place"
+            >
+              <Text style={styles.listFooterLink}>Suggest it</Text>
+            </TouchableOpacity>
           </View>
         }
       />
@@ -218,5 +246,31 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     textAlign: "center",
     lineHeight: 20,
+  },
+  emptyButton: {
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: 44,
+    marginTop: spacing.s,
+  },
+  emptyButtonLabel: {
+    fontSize: 14,
+    color: colors.accent,
+    fontWeight: "600",
+  },
+  listFooter: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: spacing.xl,
+  },
+  listFooterText: {
+    fontSize: 14,
+    color: colors.textSecondary,
+  },
+  listFooterLink: {
+    fontSize: 14,
+    color: colors.accent,
+    fontWeight: "600",
   },
 });

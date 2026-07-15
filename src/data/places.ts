@@ -44,6 +44,13 @@ export type Place = {
   lastVerified?: string;
   /** Where this record's info came from (website, phone call, visit...). */
   source?: string;
+  /** Contact and source links — where this place's truth lives online. */
+  phone?: string;
+  website?: string;
+  facebook?: string;
+  instagram?: string;
+  /** How trustworthy this record is. */
+  confidence?: "verified" | "community" | "unverified";
 };
 
 export const PLACES: Place[] = [
@@ -66,6 +73,9 @@ export const PLACES: Place[] = [
     notes: "One of the largest mosques in the UK. Sisters' entrance via the London Muslim Centre.",
     lastVerified: "2026-07-01",
     source: "Sample data — verify via eastlondonmosque.org.uk",
+    phone: "020 7650 3000",
+    website: "https://www.eastlondonmosque.org.uk/",
+    confidence: "unverified",
   },
   {
     id: "london-central-mosque",
@@ -85,6 +95,9 @@ export const PLACES: Place[] = [
     jumuahTimes: ["13:30"],
     lastVerified: "2026-06-20",
     source: "Sample data — verify via iccuk.org",
+    phone: "020 7724 3363",
+    website: "https://www.iccuk.org/",
+    confidence: "unverified",
   },
   {
     id: "brick-lane-jamme-masjid",
@@ -104,6 +117,7 @@ export const PLACES: Place[] = [
     jumuahTimes: ["13:30"],
     lastVerified: "2026-05-14",
     source: "Sample data",
+    confidence: "unverified",
   },
   {
     id: "al-manaar",
@@ -123,6 +137,7 @@ export const PLACES: Place[] = [
     jumuahTimes: ["13:30"],
     lastVerified: "2026-04-02",
     source: "Sample data",
+    confidence: "unverified",
   },
   {
     id: "finsbury-park-mosque",
@@ -142,6 +157,7 @@ export const PLACES: Place[] = [
     jumuahTimes: ["13:15"],
     lastVerified: "2026-03-19",
     source: "Sample data",
+    confidence: "unverified",
   },
   {
     id: "lewisham-islamic-centre",
@@ -161,6 +177,7 @@ export const PLACES: Place[] = [
     jumuahTimes: ["13:05", "14:00"],
     lastVerified: "2026-06-11",
     source: "Sample data",
+    confidence: "unverified",
   },
   {
     id: "croydon-mosque",
@@ -180,6 +197,7 @@ export const PLACES: Place[] = [
     jumuahTimes: ["13:30"],
     lastVerified: "2026-02-27",
     source: "Sample data",
+    confidence: "unverified",
   },
   {
     id: "ucl-prayer-room",
@@ -200,6 +218,7 @@ export const PLACES: Place[] = [
     notes: "Term-time access may require a student card. Jumu'ah run by the ISoc.",
     lastVerified: "2026-01-30",
     source: "Sample data — verify with UCL ISoc",
+    confidence: "unverified",
   },
   {
     id: "guys-hospital-multifaith",
@@ -220,6 +239,7 @@ export const PLACES: Place[] = [
     notes: "Open to patients, visitors and staff. Ask at main reception for directions.",
     lastVerified: "2026-07-05",
     source: "Sample data — verify with GSTT chaplaincy",
+    confidence: "unverified",
   },
   {
     id: "st-thomas-multifaith",
@@ -239,6 +259,7 @@ export const PLACES: Place[] = [
     notes: "Quiet room available 24/7. Wudu facilities nearby.",
     lastVerified: "2026-07-05",
     source: "Sample data — verify with GSTT chaplaincy",
+    confidence: "unverified",
   },
   {
     id: "westfield-stratford-prayer-room",
@@ -258,6 +279,7 @@ export const PLACES: Place[] = [
     notes: "Located near the Chestnut Plaza entrance. Ask guest services if unsure.",
     lastVerified: "2025-12-10",
     source: "Sample data",
+    confidence: "unverified",
   },
   {
     id: "canary-wharf-multifaith",
@@ -277,5 +299,6 @@ export const PLACES: Place[] = [
     jumuahTimes: ["13:10"],
     lastVerified: "2026-05-22",
     source: "Sample data",
+    confidence: "unverified",
   },
 ];
