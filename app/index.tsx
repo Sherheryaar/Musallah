@@ -11,14 +11,16 @@ import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Location from "expo-location";
 
-import { FacilityKey, PLACES } from "@/data/places";
+import { FacilityKey } from "@/data/places";
+import { usePlaces } from "@/context/PlacesContext";
 import { distanceKm, formatDistance } from "@/lib/distance";
 import { fetchPrayerTimes, PrayerTimes } from "@/lib/prayerTimes";
 import FilterChips from "@/components/FilterChips";
 import PlaceCard from "@/components/PlaceCard";
 import PlacesMap from "@/components/PlacesMap";
+import SuggestionForm from "@/components/SuggestionForm";
 import ViewToggle from "@/components/ViewToggle";
-import { suggestNewPlace } from "@/lib/feedback";
+import { submitNewPlaceSuggestion } from "@/lib/feedback";
 import { colors, spacing } from "@/lib/theme";
 
 // Fallback when location is unavailable: central London (Charing Cross).
@@ -29,6 +31,7 @@ export default function HomeScreen() {
   // Bottom inset keeps the list clear of the Android gesture/nav bar
   // (the app draws edge-to-edge on Android).
   const insets = useSafeAreaInsets();
+  const { places } = usePlaces();
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(
     null,
   );
@@ -38,6 +41,7 @@ export default function HomeScreen() {
     new Set(),
   );
   const [view, setView] = useState<"list" | "map">("list");
+  const [showNewPlaceForm, setShowNewPlaceForm] = useState(false);
 
   // Ask for location once. No account, no tracking — processed on-device.
   useEffect(() => {
@@ -89,7 +93,7 @@ export default function HomeScreen() {
   // Filter (must have ALL selected facilities), then sort nearest-first.
   const results = useMemo(() => {
     const origin = location ?? FALLBACK_LOCATION;
-    return PLACES.filter((place) =>
+    return places.filter((place) =>
       [...activeFilters].every((key) => place.facilities[key]),
     )
       .map((place) => ({
@@ -97,7 +101,7 @@ export default function HomeScreen() {
         km: distanceKm(origin.lat, origin.lng, place.lat, place.lng),
       }))
       .sort((a, b) => a.km - b.km);
-  }, [location, activeFilters]);
+  }, [location, activeFilters, places]);
 
   return (
     <View style={styles.screen}>
@@ -169,24 +173,39 @@ export default function HomeScreen() {
             </Text>
             <TouchableOpacity
               style={styles.emptyButton}
-              onPress={suggestNewPlace}
+              onPress={() => setShowNewPlaceForm(true)}
               accessibilityRole="button"
               accessibilityLabel="Add a missing place"
             >
               <Text style={styles.emptyButtonLabel}>Add a missing place</Text>
             </TouchableOpacity>
+            {showNewPlaceForm ? (
+              <SuggestionForm
+                placeholder="Name, address, type, facilities, and a link if you have one..."
+                onSend={submitNewPlaceSuggestion}
+              />
+            ) : null}
           </View>
         }
         ListFooterComponent={
           <View style={styles.listFooter}>
-            <Text style={styles.listFooterText}>Missing a place? </Text>
-            <TouchableOpacity
-              onPress={suggestNewPlace}
-              accessibilityRole="button"
-              accessibilityLabel="Suggest a missing place"
-            >
-              <Text style={styles.listFooterLink}>Suggest it</Text>
-            </TouchableOpacity>
+            {showNewPlaceForm && results.length > 0 ? (
+              <SuggestionForm
+                placeholder="Name, address, type, facilities, and a link if you have one..."
+                onSend={submitNewPlaceSuggestion}
+              />
+            ) : (
+              <View style={styles.listFooterRow}>
+                <Text style={styles.listFooterText}>Missing a place? </Text>
+                <TouchableOpacity
+                  onPress={() => setShowNewPlaceForm(true)}
+                  accessibilityRole="button"
+                  accessibilityLabel="Suggest a missing place"
+                >
+                  <Text style={styles.listFooterLink}>Suggest it</Text>
+                </TouchableOpacity>
+              </View>
+            )}
           </View>
         }
       />
@@ -292,10 +311,16 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   listFooter: {
-    flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: spacing.xl,
+    gap: spacing.m,
+    width: "100%",
+  },
+  listFooterRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
   },
   listFooterText: {
     fontSize: 14,

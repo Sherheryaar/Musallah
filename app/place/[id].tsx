@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Linking,
   Platform,
@@ -14,11 +14,25 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   FACILITY_LABELS,
   FacilityKey,
-  PLACES,
   PLACE_TYPE_LABELS,
 } from "@/data/places";
-import { suggestEdit } from "@/lib/feedback";
+import { usePlaces } from "@/context/PlacesContext";
+import SuggestionForm from "@/components/SuggestionForm";
+import { submitEditSuggestion } from "@/lib/feedback";
+import { fetchPrayerTimes, PrayerTimes } from "@/lib/prayerTimes";
 import { colors, spacing, radius } from "@/lib/theme";
+
+const PRAYER_ROWS: {
+  label: string;
+  jamaatKey: "fajr" | "dhuhr" | "asr" | "maghrib" | "isha";
+  calculatedKey: keyof PrayerTimes;
+}[] = [
+  { label: "Fajr", jamaatKey: "fajr", calculatedKey: "Fajr" },
+  { label: "Dhuhr", jamaatKey: "dhuhr", calculatedKey: "Dhuhr" },
+  { label: "Asr", jamaatKey: "asr", calculatedKey: "Asr" },
+  { label: "Maghrib", jamaatKey: "maghrib", calculatedKey: "Maghrib" },
+  { label: "Isha", jamaatKey: "isha", calculatedKey: "Isha" },
+];
 
 function ukPhoneToTel(display: string): string {
   const digits = display.replace(/\s/g, "");
@@ -42,7 +56,23 @@ function confidenceLabel(confidence?: "verified" | "community" | "unverified"): 
 export default function PlaceDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const insets = useSafeAreaInsets();
-  const place = PLACES.find((p) => p.id === id);
+  const { places } = usePlaces();
+  const place = places.find((p) => p.id === id);
+  const [calculatedTimes, setCalculatedTimes] = useState<PrayerTimes | null>(
+    null,
+  );
+  const [showEditForm, setShowEditForm] = useState(false);
+
+  useEffect(() => {
+    if (!place) return;
+    let cancelled = false;
+    fetchPrayerTimes(place.lat, place.lng).then((times) => {
+      if (!cancelled) setCalculatedTimes(times);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [place?.lat, place?.lng]);
 
   if (!place) {
     return (
@@ -163,6 +193,43 @@ export default function PlaceDetailScreen() {
         </View>
       ) : null}
 
+      {calculatedTimes || place.jamaat ? (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Prayer times</Text>
+          <View style={styles.prayerTable}>
+            <View style={styles.prayerHeaderRow}>
+              <Text style={[styles.prayerNameCell, styles.prayerHeaderCell]} />
+              <Text style={[styles.prayerTimeCell, styles.prayerHeaderCell]}>
+                Jamaat
+              </Text>
+              <Text style={[styles.prayerTimeCell, styles.prayerHeaderCell]}>
+                Start
+              </Text>
+            </View>
+            {PRAYER_ROWS.map((row) => (
+              <View key={row.label} style={styles.prayerRow}>
+                <Text style={styles.prayerNameCell}>{row.label}</Text>
+                <Text style={styles.prayerJamaatCell}>
+                  {place.jamaat?.[row.jamaatKey] ?? "—"}
+                </Text>
+                <Text style={styles.prayerCalculatedCell}>
+                  {calculatedTimes?.[row.calculatedKey] ?? "—"}
+                </Text>
+              </View>
+            ))}
+          </View>
+          {place.jamaat ? (
+            <Text style={styles.jamaatSource}>
+              {"Jamaat times: " +
+                place.jamaat.source +
+                " (" +
+                place.jamaat.recordedOn +
+                ")"}
+            </Text>
+          ) : null}
+        </View>
+      ) : null}
+
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Facilities</Text>
         <View style={styles.facilityList}>
@@ -200,16 +267,23 @@ export default function PlaceDetailScreen() {
         </Text>
       </View>
 
-      <TouchableOpacity
-        style={styles.suggestEditButton}
-        onPress={() => suggestEdit(place)}
-        accessibilityRole="button"
-        accessibilityLabel="Suggest an edit"
-      >
-        <Text style={styles.suggestEditLabel}>
-          Something wrong? Suggest an edit
-        </Text>
-      </TouchableOpacity>
+      {showEditForm ? (
+        <SuggestionForm
+          placeholder="What needs correcting? Times, facilities, address..."
+          onSend={(message) => submitEditSuggestion(place, message)}
+        />
+      ) : (
+        <TouchableOpacity
+          style={styles.suggestEditButton}
+          onPress={() => setShowEditForm(true)}
+          accessibilityRole="button"
+          accessibilityLabel="Suggest an edit"
+        >
+          <Text style={styles.suggestEditLabel}>
+            Something wrong? Suggest an edit
+          </Text>
+        </TouchableOpacity>
+      )}
     </ScrollView>
   );
 }
@@ -280,6 +354,53 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: colors.text,
     lineHeight: 22,
+  },
+  prayerTable: {
+    gap: spacing.s,
+  },
+  prayerHeaderRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  prayerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    minHeight: 44,
+  },
+  prayerNameCell: {
+    flex: 1,
+    fontSize: 16,
+    color: colors.text,
+  },
+  prayerTimeCell: {
+    width: 64,
+    fontSize: 14,
+    textAlign: "center",
+  },
+  prayerHeaderCell: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: colors.textSecondary,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  prayerJamaatCell: {
+    width: 64,
+    fontSize: 16,
+    fontWeight: "700",
+    color: colors.text,
+    textAlign: "center",
+  },
+  prayerCalculatedCell: {
+    width: 64,
+    fontSize: 16,
+    color: colors.textSecondary,
+    textAlign: "center",
+  },
+  jamaatSource: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    lineHeight: 20,
   },
   contactList: {
     gap: spacing.s,

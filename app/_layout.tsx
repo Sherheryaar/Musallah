@@ -1,10 +1,11 @@
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import { PlacesProvider } from "@/context/PlacesContext";
 import { colors } from "@/lib/theme";
 
 export default function RootLayout() {
   return (
-    <>
+    <PlacesProvider>
       <StatusBar style="dark" />
       <Stack
         screenOptions={{
@@ -20,6 +21,6 @@ export default function RootLayout() {
         <Stack.Screen name="index" options={ { title: "Find a place to pray" } } />
         <Stack.Screen name="place/[id]" options={ { title: "" } } />
       </Stack>
-    </>
+    </PlacesProvider>
   );
 }

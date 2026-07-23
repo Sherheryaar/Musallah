@@ -1,6 +1,7 @@
 import { Linking } from "react-native";
 
 import { Place } from "@/data/places";
+import { supabase } from "@/lib/supabase";
 
 const FEEDBACK_EMAIL = "sheheryaarb@hotmail.com";
 
@@ -15,7 +16,27 @@ function openFeedbackEmail(subject: string, body: string): void {
   Linking.openURL(url).catch(() => {});
 }
 
-export function suggestEdit(place: Place): void {
+/** Returns true when stored in Supabase, false when falling back to email. */
+export async function submitEditSuggestion(
+  place: Place,
+  message: string,
+): Promise<boolean> {
+  const trimmed = message.trim();
+  if (!trimmed) return false;
+
+  if (supabase) {
+    try {
+      const { error } = await supabase.from("submissions").insert({
+        kind: "edit",
+        place_id: place.id,
+        message: trimmed,
+      });
+      if (!error) return true;
+    } catch {
+      // Fall through to email.
+    }
+  }
+
   const body =
     "Place: " +
     place.name +
@@ -24,21 +45,30 @@ export function suggestEdit(place: Place): void {
     place.id +
     "\n" +
     "What needs correcting (times, facilities, address...)?\n" +
-    "\n";
+    "\n" +
+    trimmed;
   openFeedbackEmail("Edit suggestion: " + place.name, body);
+  return false;
 }
 
-export function suggestNewPlace(): void {
-  const body =
-    "Name:\n" +
-    "\n" +
-    "Address:\n" +
-    "\n" +
-    "Type (masjid / prayer room / multi-faith room):\n" +
-    "\n" +
-    "Facilities you know (sisters' space, wudu, disabled access, parking, jumu'ah, janazah):\n" +
-    "\n" +
-    "Link if you have one (website, Facebook, Instagram, Google Maps):\n" +
-    "\n";
-  openFeedbackEmail("New place suggestion", body);
+/** Returns true when stored in Supabase, false when falling back to email. */
+export async function submitNewPlaceSuggestion(message: string): Promise<boolean> {
+  const trimmed = message.trim();
+  if (!trimmed) return false;
+
+  if (supabase) {
+    try {
+      const { error } = await supabase.from("submissions").insert({
+        kind: "new_place",
+        place_id: null,
+        message: trimmed,
+      });
+      if (!error) return true;
+    } catch {
+      // Fall through to email.
+    }
+  }
+
+  openFeedbackEmail("New place suggestion", trimmed);
+  return false;
 }

@@ -29,6 +29,19 @@ export const PLACE_TYPE_LABELS: Record<PlaceType, string> = {
   multi_faith_room: "Multi-faith room",
 };
 
+export type JamaatTimes = {
+  /** Display strings "HH:MM" 24h. Only include prayers you actually know. */
+  fajr?: string;
+  dhuhr?: string;
+  asr?: string;
+  maghrib?: string;
+  isha?: string;
+  /** Where these times came from, e.g. "Website timetable, July 2026". */
+  source: string;
+  /** ISO date the times were recorded. */
+  recordedOn: string;
+};
+
 export type Place = {
   id: string;
   name: string;
@@ -39,6 +52,7 @@ export type Place = {
   facilities: Record<FacilityKey, boolean>;
   /** Jumu'ah start time(s) as display strings, if known. */
   jumuahTimes?: string[];
+  jamaat?: JamaatTimes;
   notes?: string;
   /** ISO date this record was last checked by a human. */
   lastVerified?: string;
@@ -70,6 +84,15 @@ export const PLACES: Place[] = [
       janazah: true,
     },
     jumuahTimes: ["13:15", "14:15"],
+    jamaat: {
+      fajr: "05:15",
+      dhuhr: "13:15",
+      asr: "17:45",
+      maghrib: "21:10",
+      isha: "22:30",
+      source: "Sample data — replace with real timetable",
+      recordedOn: "2026-07-23",
+    },
     notes: "One of the largest mosques in the UK. Sisters' entrance via the London Muslim Centre.",
     lastVerified: "2026-07-01",
     source: "Sample data — verify via eastlondonmosque.org.uk",
@@ -175,6 +198,15 @@ export const PLACES: Place[] = [
       janazah: true,
     },
     jumuahTimes: ["13:05", "14:00"],
+    jamaat: {
+      fajr: "05:10",
+      dhuhr: "13:05",
+      asr: "17:40",
+      maghrib: "21:08",
+      isha: "22:25",
+      source: "Sample data — replace with real timetable",
+      recordedOn: "2026-07-23",
+    },
     lastVerified: "2026-06-11",
     source: "Sample data",
     confidence: "unverified",
