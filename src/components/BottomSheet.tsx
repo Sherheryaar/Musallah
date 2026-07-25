@@ -6,6 +6,7 @@ import {
   View,
   useWindowDimensions,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { colors, spacing } from "@/lib/theme";
 
@@ -21,15 +22,19 @@ type Props = {
 
 export default function BottomSheet({ children }: Props) {
   const { height: windowHeight } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
 
   // Positions measured as "distance from the top of the screen".
   const snaps = useMemo(
     () => ({
       full: Math.max(windowHeight * 0.08, 56),
       half: windowHeight * 0.5,
-      peek: windowHeight - 132,
+      // Keep the collapsed sheet (and its drag handle) well clear of the
+      // system gesture area at the bottom of modern gesture-nav phones, so
+      // grabbing the handle never triggers "swipe up to close the app".
+      peek: windowHeight - (insets.bottom + 168),
     }),
-    [windowHeight],
+    [windowHeight, insets.bottom],
   );
 
   const top = useRef(new Animated.Value(snaps.half)).current;
@@ -84,7 +89,9 @@ export default function BottomSheet({ children }: Props) {
       <View style={styles.handleArea} {...panResponder.panHandlers}>
         <View style={styles.handle} />
       </View>
-      <View style={styles.body}>{children}</View>
+      <View style={[styles.body, { paddingBottom: insets.bottom }]}>
+        {children}
+      </View>
     </Animated.View>
   );
 }

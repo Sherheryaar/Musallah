@@ -1,11 +1,12 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
-  Modal,
+  BackHandler,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { FACILITY_LABELS, FacilityKey } from "@/data/places";
 import { colors, radius, spacing } from "@/lib/theme";
@@ -20,7 +21,14 @@ type Props = {
   onClose: () => void;
 };
 
-/** All filters behind one button, in a slide-up sheet. */
+/**
+ * All filters behind one button, in a slide-up sheet.
+ *
+ * Deliberately NOT a native <Modal>: React Native's modal host view was
+ * crashing on iOS when combined with react-native-screens while the map
+ * bottom sheet was being dragged. A plain absolutely-positioned overlay
+ * renders the same UI with no native modal involved.
+ */
 export default function FilterSheet({
   visible,
   active,
@@ -28,74 +36,88 @@ export default function FilterSheet({
   onClear,
   onClose,
 }: Props) {
+  const insets = useSafeAreaInsets();
+
+  // Android hardware/gesture back closes the sheet instead of the screen.
+  useEffect(() => {
+    if (!visible) return;
+    const sub = BackHandler.addEventListener("hardwareBackPress", () => {
+      onClose();
+      return true;
+    });
+    return () => sub.remove();
+  }, [visible, onClose]);
+
+  if (!visible) return null;
+
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="slide"
-      onRequestClose={onClose}
-    >
-      <View style={styles.backdrop}>
-        <TouchableOpacity
-          style={styles.backdropTouch}
-          onPress={onClose}
-          accessibilityLabel="Close filters"
-        />
-        <View style={styles.card}>
-          <View style={styles.headerRow}>
-            <Text style={styles.title}>Filters</Text>
-            {active.size > 0 ? (
-              <TouchableOpacity onPress={onClear} accessibilityRole="button">
-                <Text style={styles.clear}>Clear all</Text>
-              </TouchableOpacity>
-            ) : null}
-          </View>
-          <Text style={styles.subtitle}>
-            Only show places with everything you tick. Your choices are saved
-            for next time.
-          </Text>
-          {FACILITY_KEYS.map((key) => {
-            const isActive = active.has(key);
-            return (
-              <TouchableOpacity
-                key={key}
-                style={styles.row}
-                onPress={() => onToggle(key)}
-                accessibilityRole="checkbox"
-                accessibilityState={{ checked: isActive }}
-                accessibilityLabel={`Filter: ${FACILITY_LABELS[key]}`}
-              >
-                <Text style={styles.rowLabel}>{FACILITY_LABELS[key]}</Text>
-                <View style={[styles.box, isActive && styles.boxActive]}>
-                  {isActive ? <Text style={styles.tick}>{"\u2713"}</Text> : null}
-                </View>
-              </TouchableOpacity>
-            );
-          })}
-          <TouchableOpacity
-            style={styles.doneButton}
-            onPress={onClose}
-            accessibilityRole="button"
-          >
-            <Text style={styles.doneLabel}>
-              {active.size > 0
-                ? `Done \u00B7 ${active.size} filter${
-                    active.size === 1 ? "" : "s"
-                  } on`
-                : "Done"}
-            </Text>
-          </TouchableOpacity>
+    <View style={styles.backdrop}>
+      <TouchableOpacity
+        style={styles.backdropTouch}
+        onPress={onClose}
+        accessibilityLabel="Close filters"
+      />
+      <View
+        style={[
+          styles.card,
+          { paddingBottom: spacing.xl + Math.max(insets.bottom, spacing.s) },
+        ]}
+      >
+        <View style={styles.headerRow}>
+          <Text style={styles.title}>Filters</Text>
+          {active.size > 0 ? (
+            <TouchableOpacity onPress={onClear} accessibilityRole="button">
+              <Text style={styles.clear}>Clear all</Text>
+            </TouchableOpacity>
+          ) : null}
         </View>
+        <Text style={styles.subtitle}>
+          Only show places with everything you tick. Your choices are saved
+          for next time.
+        </Text>
+        {FACILITY_KEYS.map((key) => {
+          const isActive = active.has(key);
+          return (
+            <TouchableOpacity
+              key={key}
+              style={styles.row}
+              onPress={() => onToggle(key)}
+              accessibilityRole="checkbox"
+              accessibilityState={{ checked: isActive }}
+              accessibilityLabel={`Filter: ${FACILITY_LABELS[key]}`}
+            >
+              <Text style={styles.rowLabel}>{FACILITY_LABELS[key]}</Text>
+              <View style={[styles.box, isActive && styles.boxActive]}>
+                {isActive ? <Text style={styles.tick}>{"\u2713"}</Text> : null}
+              </View>
+            </TouchableOpacity>
+          );
+        })}
+        <TouchableOpacity
+          style={styles.doneButton}
+          onPress={onClose}
+          accessibilityRole="button"
+        >
+          <Text style={styles.doneLabel}>
+            {active.size > 0
+              ? `Done \u00B7 ${active.size} filter${
+                  active.size === 1 ? "" : "s"
+                } on`
+              : "Done"}
+          </Text>
+        </TouchableOpacity>
       </View>
-    </Modal>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   backdrop: {
-    flex: 1,
+    ...StyleSheet.absoluteFillObject,
     backgroundColor: "rgba(0,0,0,0.4)",
     justifyContent: "flex-end",
+    zIndex: 50,
+    elevation: 50,
   },
   backdropTouch: {
     flex: 1,
@@ -105,7 +127,6 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: spacing.xl,
-    paddingBottom: spacing.xxl,
     gap: spacing.s,
   },
   headerRow: {

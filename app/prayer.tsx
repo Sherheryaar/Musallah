@@ -7,14 +7,12 @@ import {
   View,
 } from "react-native";
 import { Link } from "expo-router";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Location from "expo-location";
 
-import SunArc from "@/components/SunArc";
 import { useSettings } from "@/context/SettingsContext";
 import { formatHijri } from "@/lib/hijri";
 import { computePrayerSchedule, PrayerScheduleEntry } from "@/lib/prayerTimes";
-import { night, radius, spacing } from "@/lib/theme";
+import { colors, radius, spacing } from "@/lib/theme";
 
 const FALLBACK_LOCATION = { lat: 51.5074, lng: -0.1278 };
 
@@ -91,42 +89,13 @@ function getStatus(
   };
 }
 
-type SkyPhase = "dawn" | "day" | "golden" | "dusk" | "night";
-
-// Overmorrow-style dynamic scene: the sky palette follows the actual time
-// of day instead of being a fixed navy -- indigo dawn, clear blue day with
-// a sun, mauve golden hour, and a starry night with a moon.
-const SKY: Record<
-  SkyPhase,
-  { bg: string; accent: string; celestial: "sun" | "moon"; stars: boolean }
-> = {
-  dawn: { bg: "#2B2350", accent: "#F2A66B", celestial: "moon", stars: true },
-  day: { bg: "#1C5FA8", accent: "#FFD983", celestial: "sun", stars: false },
-  golden: { bg: "#4E3A63", accent: "#F2A66B", celestial: "sun", stars: false },
-  dusk: { bg: "#2C2154", accent: "#F2A66B", celestial: "moon", stars: true },
-  night: { bg: "#0D1F3C", accent: "#F2A66B", celestial: "moon", stars: true },
-};
-
-function getPhase(today: PrayerScheduleEntry[], now: Date): SkyPhase {
-  const at = (key: PrayerScheduleEntry["key"]) =>
-    today.find((e) => e.key === key)?.time.getTime() ?? 0;
-  const n = now.getTime();
-  if (n < at("fajr") || n >= at("isha")) return "night";
-  if (n < at("sunrise")) return "dawn";
-  if (n < at("asr")) return "day";
-  if (n < at("maghrib")) return "golden";
-  return "dusk";
-}
-
 export default function PrayerScreen() {
-  const insets = useSafeAreaInsets();
   const { settings } = useSettings();
   const [location, setLocation] = useState(FALLBACK_LOCATION);
   const [dayOffset, setDayOffset] = useState(0);
   const [now, setNow] = useState(() => new Date());
 
-  // Tick every 30 s so the countdown and sun position stay honest while
-  // the screen is open.
+  // Tick every 30 s so the countdown stays honest while the screen is open.
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 30_000);
     return () => clearInterval(id);
@@ -183,14 +152,7 @@ export default function PrayerScreen() {
     return getStatus(today, tomorrowFajr, now);
   }, [schedule, dayOffset, location, settings, now]);
 
-  const sky = useMemo(() => {
-    const today =
-      dayOffset === 0
-        ? schedule
-        : computePrayerSchedule(location.lat, location.lng, settings, now);
-    return SKY[today ? getPhase(today, now) : "night"];
-  }, [schedule, dayOffset, location, settings, now]);
-
+  // Only highlight a row when we are actually looking at today.
   const highlightKey =
     dayOffset === 0 && status ? status.currentLabel.toLowerCase() : null;
 
@@ -198,35 +160,21 @@ export default function PrayerScreen() {
     selectedDate.getDate(),
   )} ${MONTHS[selectedDate.getMonth()]}`;
 
+  const methodLabel =
+    settings.method === "mwl" ? "Muslim World League" : "Moonsighting Committee";
+  const mithlLabel = settings.madhab === "hanafi" ? "2 mithl" : "1 mithl";
+
   return (
-    <ScrollView
-      style={[styles.screen, { backgroundColor: sky.bg }]}
-      contentContainerStyle={[
-        styles.content,
-        {
-          paddingTop: insets.top + 52,
-          paddingBottom: spacing.xxl + insets.bottom,
-        },
-      ]}
-    >
-      <Text style={styles.currentName}>{status?.currentLabel ?? "Prayer"}</Text>
+    <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
       {status ? (
-        <View style={styles.countdownPill}>
-          <Text style={styles.countdownText}>
-            {`${formatCountdown(status.msUntilNext)} left until ${status.nextLabel}`}
+        <View style={styles.heroCard}>
+          <Text style={styles.heroKicker}>
+            {`Now \u00B7 ${status.currentLabel}`}
+          </Text>
+          <Text style={styles.heroTitle}>
+            {`${status.nextLabel} in ${formatCountdown(status.msUntilNext)}`}
           </Text>
         </View>
-      ) : null}
-
-      {schedule ? (
-        <SunArc
-          schedule={schedule}
-          now={dayOffset === 0 ? now : null}
-          accent={sky.accent}
-          markerBg={sky.bg}
-          celestial={sky.celestial}
-          stars={sky.stars}
-        />
       ) : null}
 
       <View style={styles.dateNav}>
@@ -236,33 +184,20 @@ export default function PrayerScreen() {
           accessibilityRole="button"
           accessibilityLabel="Previous day"
         >
-          <Text style={[styles.chevron, { color: sky.accent }]}>
-            {"\u2039"}
-          </Text>
+          <Text style={styles.chevron}>{"\u2039"}</Text>
         </TouchableOpacity>
         <View style={styles.dateCenter}>
-          <TouchableOpacity
-            onPress={() => setDayOffset(0)}
-            disabled={dayOffset === 0}
-            accessibilityRole="button"
-            accessibilityLabel="Back to today"
-          >
-            <Text
-              style={[
-                styles.todayChip,
-                { color: sky.accent, borderColor: sky.accent },
-                dayOffset !== 0 && styles.todayChipButton,
-              ]}
+          <Text style={styles.dateTitle}>{dateTitle}</Text>
+          <Text style={styles.hijriDate}>{formatHijri(selectedDate)}</Text>
+          {dayOffset !== 0 ? (
+            <TouchableOpacity
+              onPress={() => setDayOffset(0)}
+              accessibilityRole="button"
+              accessibilityLabel="Back to today"
             >
-              {dayOffset === 0 ? "TODAY" : "BACK TO TODAY"}
-            </Text>
-          </TouchableOpacity>
-          <Text style={[styles.dateTitle, { color: sky.accent }]}>
-            {dateTitle}
-          </Text>
-          <Text style={[styles.hijriDate, { color: sky.accent }]}>
-            {formatHijri(selectedDate)}
-          </Text>
+              <Text style={styles.todayChip}>Back to today</Text>
+            </TouchableOpacity>
+          ) : null}
         </View>
         <TouchableOpacity
           style={styles.chevronButton}
@@ -270,39 +205,56 @@ export default function PrayerScreen() {
           accessibilityRole="button"
           accessibilityLabel="Next day"
         >
-          <Text style={[styles.chevron, { color: sky.accent }]}>
-            {"\u203A"}
-          </Text>
+          <Text style={styles.chevron}>{"\u203A"}</Text>
         </TouchableOpacity>
       </View>
 
-      <View style={styles.rows}>
-        {(schedule ?? []).map((entry) => {
-          const active = entry.key === highlightKey;
-          return (
-            <View key={entry.key} style={[styles.row, active && styles.rowActive]}>
-              <Text style={[styles.rowLabel, active && styles.rowTextActive]}>
-                {entry.label}
-              </Text>
-              <Text style={[styles.rowTime, active && styles.rowTextActive]}>
-                {entry.display}
-              </Text>
-            </View>
-          );
-        })}
-      </View>
-
-      <Link href="/settings" style={styles.methodLink}>
-        <Text style={styles.methodText}>
-          {`${
-            settings.method === "moonsighting"
-              ? "Moonsighting Committee"
-              : "Muslim World League"
-          } \u00B7 ${
-            settings.madhab === "hanafi" ? "2" : "1"
-          } mithl Asr \u00B7 change in Settings`}
+      {schedule ? (
+        <View style={styles.card}>
+          {schedule.map((entry) => {
+            const isCurrent = entry.key === highlightKey;
+            const isSunrise = entry.key === "sunrise";
+            return (
+              <View
+                key={entry.key}
+                style={[styles.row, isCurrent && styles.rowCurrent]}
+              >
+                <Text
+                  style={[
+                    styles.rowLabel,
+                    isSunrise && styles.rowMuted,
+                    isCurrent && styles.rowCurrentText,
+                  ]}
+                >
+                  {entry.key === "asr"
+                    ? `${entry.label} (${mithlLabel})`
+                    : entry.label}
+                </Text>
+                <Text
+                  style={[
+                    styles.rowTime,
+                    isSunrise && styles.rowMuted,
+                    isCurrent && styles.rowCurrentText,
+                  ]}
+                >
+                  {entry.display}
+                </Text>
+              </View>
+            );
+          })}
+        </View>
+      ) : (
+        <Text style={styles.note}>
+          Prayer times are unavailable for this location.
         </Text>
-      </Link>
+      )}
+
+      <Text style={styles.footnote}>
+        {`Calculated on this device \u00B7 ${methodLabel} \u00B7 Asr at ${mithlLabel}. `}
+        <Link href="/settings" style={styles.footnoteLink}>
+          Change in Settings
+        </Link>
+      </Text>
     </ScrollView>
   );
 }
@@ -310,114 +262,128 @@ export default function PrayerScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: night.bg,
+    backgroundColor: colors.surface,
   },
   content: {
     padding: spacing.l,
+    paddingBottom: spacing.xxl,
+    gap: spacing.l,
   },
-  currentName: {
-    fontSize: 40,
+  heroCard: {
+    backgroundColor: colors.canvas,
+    borderRadius: radius.l,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: spacing.xl,
+    gap: spacing.xs,
+  },
+  heroKicker: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: colors.textSecondary,
+    textTransform: "uppercase",
+    letterSpacing: 0.6,
+  },
+  heroTitle: {
+    fontSize: 26,
     fontWeight: "700",
-    color: night.text,
-    marginTop: spacing.s,
-  },
-  countdownPill: {
-    alignSelf: "flex-start",
-    backgroundColor: "rgba(246,247,251,0.08)",
-    borderRadius: 999,
-    paddingVertical: 6,
-    paddingHorizontal: spacing.l,
-    marginTop: spacing.s,
-  },
-  countdownText: {
-    color: night.textMuted,
-    fontSize: 15,
+    color: colors.text,
   },
   dateNav: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: spacing.m,
+    justifyContent: "space-between",
   },
   chevronButton: {
-    padding: spacing.m,
+    width: 44,
+    height: 44,
+    borderRadius: radius.l,
+    backgroundColor: colors.canvas,
+    borderWidth: 1,
+    borderColor: colors.border,
+    alignItems: "center",
+    justifyContent: "center",
   },
   chevron: {
-    color: night.accent,
-    fontSize: 28,
+    fontSize: 24,
+    lineHeight: 28,
+    color: colors.accent,
     fontWeight: "600",
   },
   dateCenter: {
     flex: 1,
     alignItems: "center",
-  },
-  todayChip: {
-    color: night.accent,
-    borderColor: night.accent,
-    borderWidth: 1,
-    borderRadius: 6,
+    gap: 2,
     paddingHorizontal: spacing.s,
-    paddingVertical: 2,
-    fontSize: 11,
-    fontWeight: "700",
-    letterSpacing: 1,
-    overflow: "hidden",
-  },
-  todayChipButton: {
-    backgroundColor: night.accentSoft,
   },
   dateTitle: {
-    color: night.accent,
-    fontSize: 24,
+    fontSize: 16,
     fontWeight: "700",
-    marginTop: spacing.s,
+    color: colors.text,
+    textAlign: "center",
   },
   hijriDate: {
-    color: night.accent,
-    opacity: 0.8,
-    fontSize: 14,
-    letterSpacing: 1.5,
-    marginTop: 2,
+    fontSize: 12,
+    fontWeight: "600",
+    color: colors.textSecondary,
+    letterSpacing: 0.4,
   },
-  rows: {
-    marginTop: spacing.l,
-    gap: spacing.m,
+  todayChip: {
+    marginTop: 2,
+    fontSize: 12,
+    fontWeight: "700",
+    color: colors.accent,
+  },
+  card: {
+    backgroundColor: colors.canvas,
+    borderRadius: radius.l,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: spacing.xs,
   },
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    borderWidth: 1,
-    borderColor: night.border,
-    borderRadius: radius.l,
-    paddingVertical: spacing.l,
-    paddingHorizontal: spacing.l,
-    backgroundColor: "rgba(246,247,251,0.02)",
+    minHeight: 52,
+    paddingHorizontal: spacing.m,
+    borderRadius: radius.m,
   },
-  rowActive: {
-    borderColor: night.text,
-    backgroundColor: "rgba(246,247,251,0.05)",
+  rowCurrent: {
+    backgroundColor: colors.accentSoft,
   },
   rowLabel: {
-    color: night.textMuted,
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: "600",
+    color: colors.text,
   },
   rowTime: {
-    color: night.textMuted,
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: "600",
+    color: colors.text,
     fontVariant: ["tabular-nums"],
   },
-  rowTextActive: {
-    color: night.text,
+  rowMuted: {
+    color: colors.textSecondary,
+    fontWeight: "400",
+  },
+  rowCurrentText: {
+    color: colors.accent,
     fontWeight: "700",
   },
-  methodLink: {
-    alignSelf: "center",
-    marginTop: spacing.l,
+  note: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    textAlign: "center",
   },
-  methodText: {
-    color: night.textMuted,
+  footnote: {
     fontSize: 12,
+    color: colors.textSecondary,
+    lineHeight: 18,
+    textAlign: "center",
+  },
+  footnoteLink: {
+    color: colors.accent,
+    fontWeight: "600",
   },
 });

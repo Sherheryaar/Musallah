@@ -3,7 +3,7 @@ import { StatusBar } from "expo-status-bar";
 import { Text, StyleSheet } from "react-native";
 import { PlacesProvider } from "../src/context/PlacesContext";
 import { SettingsProvider } from "../src/context/SettingsContext";
-import { colors, night } from "../src/lib/theme";
+import { colors } from "../src/lib/theme";
 
 function SettingsButton() {
   return (
@@ -37,16 +37,7 @@ export default function RootLayout() {
             }}
           />
           <Stack.Screen name="place/[id]" options={{ title: "" }} />
-          <Stack.Screen
-            name="prayer"
-            options={{
-              title: "",
-              headerTransparent: true,
-              headerTintColor: night.text,
-              contentStyle: { backgroundColor: night.bg },
-              statusBarStyle: "light",
-            }}
-          />
+          <Stack.Screen name="prayer" options={{ title: "Prayer times" }} />
           <Stack.Screen name="settings" options={{ title: "Settings" }} />
         </Stack>
       </PlacesProvider>
