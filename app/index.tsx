@@ -43,9 +43,12 @@ export default function HomeScreen() {
   const [view, setView] = useState<"list" | "map">("list");
   const [showNewPlaceForm, setShowNewPlaceForm] = useState(false);
 
-  // Ask for location once. No account, no tracking — processed on-device.
+  // Get location once at launch, then keep it updated as the user moves
+  // (re-sorts distances after every ~250 m). No account, no tracking --
+  // everything is processed on-device.
   useEffect(() => {
     let cancelled = false;
+    let watcher: Location.LocationSubscription | null = null;
     (async () => {
       let coords = FALLBACK_LOCATION;
       let fellBack = true;
@@ -63,11 +66,29 @@ export default function HomeScreen() {
             }));
           coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
           fellBack = false;
+          watcher = await Location.watchPositionAsync(
+            {
+              accuracy: Location.Accuracy.Balanced,
+              timeInterval: 30 * 1000,
+              distanceInterval: 250,
+            },
+            (p) => {
+              if (!cancelled) {
+                setLocation({
+                  lat: p.coords.latitude,
+                  lng: p.coords.longitude,
+                });
+              }
+            },
+          );
         }
       } catch {
-        // Keep fallback — the app must still work without location.
+        // Keep fallback -- the app must still work without location.
       }
-      if (cancelled) return;
+      if (cancelled) {
+        watcher?.remove();
+        return;
+      }
       setLocation(coords);
       setUsingFallback(fellBack);
       const fetched = await fetchPrayerTimes(coords.lat, coords.lng);
@@ -75,6 +96,7 @@ export default function HomeScreen() {
     })();
     return () => {
       cancelled = true;
+      watcher?.remove();
     };
   }, []);
 
@@ -93,8 +115,10 @@ export default function HomeScreen() {
   // Filter (must have ALL selected facilities), then sort nearest-first.
   const results = useMemo(() => {
     const origin = location ?? FALLBACK_LOCATION;
-    return places.filter((place) =>
-      [...activeFilters].every((key) => place.facilities[key]),
+    return places.filter(
+      (place) =>
+        [...activeFilters].every((key) => place.facilities[key]) &&
+        (!place.jumuahOnly || activeFilters.has("jumuah")),
     )
       .map((place) => ({
         place,

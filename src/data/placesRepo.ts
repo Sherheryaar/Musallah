@@ -20,6 +20,7 @@ type PlacesRow = {
   lat: number;
   lng: number;
   facilities: Record<FacilityKey, boolean>;
+  jumuah_only: boolean | null;
   jumuah_times: string[] | null;
   jamaat: JamaatTimes | null;
   notes: string | null;
@@ -43,6 +44,9 @@ function mapRowToPlace(row: PlacesRow): Place {
     facilities: row.facilities,
   };
 
+  if (row.jumuah_only) {
+    place.jumuahOnly = true;
+  }
   if (row.jumuah_times) {
     place.jumuahTimes = row.jumuah_times;
   }

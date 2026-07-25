@@ -1,7 +1,7 @@
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { PlacesProvider } from "@/context/PlacesContext";
-import { colors } from "@/lib/theme";
+import { PlacesProvider } from "../src/context/PlacesContext";
+import { colors } from "../src/lib/theme";
 
 export default function RootLayout() {
   return (
@@ -18,8 +18,8 @@ export default function RootLayout() {
           contentStyle: { backgroundColor: colors.surface },
         }}
       >
-        <Stack.Screen name="index" options={ { title: "Find a place to pray" } } />
-        <Stack.Screen name="place/[id]" options={ { title: "" } } />
+        <Stack.Screen name="index" options={{ title: "Find a place to pray" }} />
+        <Stack.Screen name="place/[id]" options={{ title: "" }} />
       </Stack>
     </PlacesProvider>
   );

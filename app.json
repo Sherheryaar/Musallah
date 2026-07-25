@@ -2,7 +2,7 @@
   "expo": {
     "name": "Masjid Locator",
     "slug": "masjid-locator",
-    "version": "0.1.4",
+    "version": "0.2.4",
     "scheme": "masjidlocator",
     "orientation": "portrait",
     "userInterfaceStyle": "light",

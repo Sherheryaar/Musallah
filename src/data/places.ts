@@ -50,6 +50,8 @@ export type Place = {
   lat: number;
   lng: number;
   facilities: Record<FacilityKey, boolean>;
+  /** Friday-only venue (e.g. hired Jumu'ah halls). Hidden unless the Jumu'ah filter is active. */
+  jumuahOnly?: boolean;
   /** Jumu'ah start time(s) as display strings, if known. */
   jumuahTimes?: string[];
   jamaat?: JamaatTimes;
