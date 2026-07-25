@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useMemo } from "react";
 import { Text, TouchableOpacity, View, StyleSheet } from "react-native";
 import {
   FACILITY_LABELS,
@@ -11,19 +11,29 @@ import { colors, spacing, radius } from "@/lib/theme";
 type Props = {
   place: Place;
   distanceLabel?: string;
-  onPress: () => void;
+  /** Called with the place id — keeps the prop stable so memo works. */
+  onPress: (id: string) => void;
 };
 
 /** One row in the results list: name, type, distance, key facilities. */
-export default function PlaceCard({ place, distanceLabel, onPress }: Props) {
-  const availableFacilities = (
-    Object.keys(FACILITY_LABELS) as FacilityKey[]
-  ).filter((key) => place.facilities[key]);
+function PlaceCard({ place, distanceLabel, onPress }: Props) {
+  // Memoized: recomputing keys/filter/join for every row on every list
+  // render adds up with hundreds of places.
+  const facilitiesLabel = useMemo(
+    () =>
+      (Object.keys(FACILITY_LABELS) as FacilityKey[])
+        .filter((key) => place.facilities[key])
+        .map((key) => FACILITY_LABELS[key])
+        .join(" \u00b7 "),
+    [place.facilities],
+  );
+
+  const handlePress = useCallback(() => onPress(place.id), [onPress, place.id]);
 
   return (
     <TouchableOpacity
       style={styles.card}
-      onPress={onPress}
+      onPress={handlePress}
       accessibilityRole="button"
       accessibilityLabel={`${place.name}, ${
         distanceLabel ?? "distance unknown"
@@ -51,14 +61,18 @@ export default function PlaceCard({ place, distanceLabel, onPress }: Props) {
         ) : null}
       </View>
 
-      {availableFacilities.length > 0 ? (
+      {facilitiesLabel.length > 0 ? (
         <Text style={styles.facilities} numberOfLines={1}>
-          {availableFacilities.map((key) => FACILITY_LABELS[key]).join(" · ")}
+          {facilitiesLabel}
         </Text>
       ) : null}
     </TouchableOpacity>
   );
 }
+
+// React.memo: rows only re-render when their own place/distance changes,
+// not on every keystroke, GPS tick, or unrelated screen state change.
+export default React.memo(PlaceCard);
 
 const styles = StyleSheet.create({
   card: {

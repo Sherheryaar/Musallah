@@ -105,9 +105,22 @@ async function writeCache(places: Place[]): Promise<void> {
   }
 }
 
-export async function getPlaces(): Promise<Place[]> {
+/**
+ * Last successfully fetched places from the on-device cache, or null.
+ * Read this first on launch (stale-while-revalidate): it renders instantly
+ * with no network wait, then `fetchPlaces` refreshes in the background.
+ */
+export async function getCachedPlaces(): Promise<Place[] | null> {
+  return readCache();
+}
+
+/**
+ * Fetch the latest places from Supabase, or null when offline/unconfigured/
+ * failed. Callers decide the fallback (cache, bundled data, keep current).
+ */
+export async function fetchPlaces(): Promise<Place[] | null> {
   if (!supabase) {
-    return PLACES;
+    return null;
   }
 
   const controller = new AbortController();
@@ -120,16 +133,27 @@ export async function getPlaces(): Promise<Place[]> {
       .abortSignal(controller.signal);
 
     if (error || !data || data.length === 0) {
-      throw new Error("places fetch failed");
+      return null;
     }
 
     const places = (data as PlacesRow[]).map(mapRowToPlace);
-    await writeCache(places);
+    // Fire-and-forget: don't make the UI wait on a disk write.
+    void writeCache(places);
     return places;
   } catch {
-    const cached = await readCache();
-    return cached ?? PLACES;
+    return null;
   } finally {
     clearTimeout(timeoutId);
   }
+}
+
+/**
+ * One-shot answer: network first, then cache, then bundled data.
+ * Prefer getCachedPlaces + fetchPlaces for UI code (no network wait).
+ */
+export async function getPlaces(): Promise<Place[]> {
+  const fetched = await fetchPlaces();
+  if (fetched) return fetched;
+  const cached = await readCache();
+  return cached ?? PLACES;
 }

@@ -46,6 +46,9 @@ export default function PlacesMap({ results, userLocation, onSelect }: Props) {
           title={place.name}
           description={PLACE_TYPE_LABELS[place.type]}
           onCalloutPress={() => onSelect(place.id)}
+          // Static markers: stop re-rasterizing every frame (big Android win
+          // once there are more than a handful of pins).
+          tracksViewChanges={false}
         />
       ))}
     </MapView>

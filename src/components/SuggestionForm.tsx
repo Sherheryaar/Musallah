@@ -30,12 +30,17 @@ export default function SuggestionForm({
   const handleSend = async () => {
     if (sending || sent || !message.trim()) return;
     setSending(true);
-    const stored = await onSend(message);
-    setSending(false);
-    if (stored) {
-      setSent(true);
-      setMessage("");
-      onSent?.();
+    try {
+      const stored = await onSend(message);
+      if (stored) {
+        setSent(true);
+        setMessage("");
+        onSent?.();
+      }
+    } finally {
+      // try/finally: if onSend ever throws, the button must not be stuck
+      // on a spinner forever.
+      setSending(false);
     }
   };
 

@@ -15,25 +15,27 @@ type Props = {
   onToggle: (key: FacilityKey) => void;
 };
 
+// Facility keys never change at runtime -- compute once at module level.
+const FACILITY_KEYS = Object.keys(FACILITY_LABELS) as FacilityKey[];
+
 /** Horizontal row of facility filter chips. Tap to toggle. */
-export default function FilterChips({ active, onToggle }: Props) {
-  const keys = Object.keys(FACILITY_LABELS) as FacilityKey[];
-  const chips = keys.map((key) => {
-        const isActive = active.has(key);
-        return (
-          <TouchableOpacity
-            key={key}
-            onPress={() => onToggle(key)}
-            style={[styles.chip, isActive && styles.chipActive]}
-            accessibilityRole="button"
-            accessibilityState={ { selected: isActive } } 
-            accessibilityLabel={`Filter: ${FACILITY_LABELS[key]}`}
-          >
-            <Text style={[styles.label, isActive && styles.labelActive]}>
-              {FACILITY_LABELS[key]}
-            </Text>
-          </TouchableOpacity>
-        );
+function FilterChips({ active, onToggle }: Props) {
+  const chips = FACILITY_KEYS.map((key) => {
+    const isActive = active.has(key);
+    return (
+      <TouchableOpacity
+        key={key}
+        onPress={() => onToggle(key)}
+        style={[styles.chip, isActive && styles.chipActive]}
+        accessibilityRole="button"
+        accessibilityState={{ selected: isActive }}
+        accessibilityLabel={`Filter: ${FACILITY_LABELS[key]}`}
+      >
+        <Text style={[styles.label, isActive && styles.labelActive]}>
+          {FACILITY_LABELS[key]}
+        </Text>
+      </TouchableOpacity>
+    );
   });
 
   // On web, wrap chips onto multiple lines instead of horizontal scrolling —
@@ -53,6 +55,10 @@ export default function FilterChips({ active, onToggle }: Props) {
     </ScrollView>
   );
 }
+
+// React.memo: the chip bar only re-renders when the active set actually
+// changes, not on every location tick or list update.
+export default React.memo(FilterChips);
 
 const styles = StyleSheet.create({
   // Stops the chip bar from stretching vertically or being overlapped by the list.

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   Linking,
   Platform,
@@ -17,9 +17,10 @@ import {
   PLACE_TYPE_LABELS,
 } from "@/data/places";
 import { usePlaces } from "@/context/PlacesContext";
+import { useSettings } from "@/context/SettingsContext";
 import SuggestionForm from "@/components/SuggestionForm";
 import { submitEditSuggestion } from "@/lib/feedback";
-import { fetchPrayerTimes, PrayerTimes } from "@/lib/prayerTimes";
+import { computePrayerTimes, PrayerTimes } from "@/lib/prayerTimes";
 import { colors, spacing, radius } from "@/lib/theme";
 
 const PRAYER_ROWS: {
@@ -57,22 +58,18 @@ export default function PlaceDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const insets = useSafeAreaInsets();
   const { places } = usePlaces();
-  const place = places.find((p) => p.id === id);
-  const [calculatedTimes, setCalculatedTimes] = useState<PrayerTimes | null>(
-    null,
-  );
+  // Memoized lookup: this screen re-renders on form/times state changes,
+  // and a linear scan per render is wasted work as the dataset grows.
+  const place = useMemo(() => places.find((p) => p.id === id), [places, id]);
+  const { settings } = useSettings();
   const [showEditForm, setShowEditForm] = useState(false);
 
-  useEffect(() => {
-    if (!place) return;
-    let cancelled = false;
-    fetchPrayerTimes(place.lat, place.lng).then((times) => {
-      if (!cancelled) setCalculatedTimes(times);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [place?.lat, place?.lng]);
+  // Computed on-device for this place's exact coordinates -- instant,
+  // offline, and it follows the mithl/method chosen in Settings.
+  const calculatedTimes = useMemo<PrayerTimes | null>(
+    () => (place ? computePrayerTimes(place.lat, place.lng, settings) : null),
+    [place, settings],
+  );
 
   if (!place) {
     return (
@@ -208,7 +205,11 @@ export default function PlaceDetailScreen() {
             </View>
             {PRAYER_ROWS.map((row) => (
               <View key={row.label} style={styles.prayerRow}>
-                <Text style={styles.prayerNameCell}>{row.label}</Text>
+                <Text style={styles.prayerNameCell}>
+                  {row.label === "Asr"
+                    ? `Asr (${settings.madhab === "hanafi" ? "2" : "1"} mithl)`
+                    : row.label}
+                </Text>
                 <Text style={styles.prayerJamaatCell}>
                   {place.jamaat?.[row.jamaatKey] ?? "—"}
                 </Text>

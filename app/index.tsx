@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   FlatList,
   Platform,
@@ -11,10 +11,11 @@ import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Location from "expo-location";
 
-import { FacilityKey } from "@/data/places";
+import { FacilityKey, Place } from "@/data/places";
 import { usePlaces } from "@/context/PlacesContext";
+import { useSettings } from "@/context/SettingsContext";
 import { distanceKm, formatDistance } from "@/lib/distance";
-import { fetchPrayerTimes, PrayerTimes } from "@/lib/prayerTimes";
+import { computePrayerTimes, PrayerTimes } from "@/lib/prayerTimes";
 import FilterChips from "@/components/FilterChips";
 import PlaceCard from "@/components/PlaceCard";
 import PlacesMap from "@/components/PlacesMap";
@@ -26,17 +27,22 @@ import { colors, spacing } from "@/lib/theme";
 // Fallback when location is unavailable: central London (Charing Cross).
 const FALLBACK_LOCATION = { lat: 51.5074, lng: -0.1278 };
 
+type Result = { place: Place; km: number };
+
+// Module-level so the reference is stable across renders (helps FlatList).
+const keyExtractor = (item: Result) => item.place.id;
+
 export default function HomeScreen() {
   const router = useRouter();
   // Bottom inset keeps the list clear of the Android gesture/nav bar
   // (the app draws edge-to-edge on Android).
   const insets = useSafeAreaInsets();
   const { places } = usePlaces();
+  const { settings } = useSettings();
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(
     null,
   );
   const [usingFallback, setUsingFallback] = useState(false);
-  const [times, setTimes] = useState<PrayerTimes | null>(null);
   const [activeFilters, setActiveFilters] = useState<Set<FacilityKey>>(
     new Set(),
   );
@@ -91,8 +97,6 @@ export default function HomeScreen() {
       }
       setLocation(coords);
       setUsingFallback(fellBack);
-      const fetched = await fetchPrayerTimes(coords.lat, coords.lng);
-      if (!cancelled) setTimes(fetched);
     })();
     return () => {
       cancelled = true;
@@ -100,7 +104,7 @@ export default function HomeScreen() {
     };
   }, []);
 
-  const toggleFilter = (key: FacilityKey) => {
+  const toggleFilter = useCallback((key: FacilityKey) => {
     setActiveFilters((prev) => {
       const next = new Set(prev);
       if (next.has(key)) {
@@ -110,22 +114,58 @@ export default function HomeScreen() {
       }
       return next;
     });
-  };
+  }, []);
 
-  // Filter (must have ALL selected facilities), then sort nearest-first.
+  const origin = location ?? FALLBACK_LOCATION;
+
+  // Prayer times are computed on-device (see src/lib/prayerCalc.ts) --
+  // instant and offline, so they can render immediately (with the fallback
+  // origin until a fix arrives) and follow the user's Settings choices.
+  const times = useMemo<PrayerTimes | null>(
+    () => computePrayerTimes(origin.lat, origin.lng, settings),
+    [origin.lat, origin.lng, settings],
+  );
+
+  // Two-stage memo: distances/sorting only recompute when location or data
+  // changes -- NOT on every filter toggle (filtering the pre-sorted list is
+  // cheap; haversine + sort over the whole dataset is not).
+  const byDistance = useMemo<Result[]>(
+    () =>
+      places
+        .map((place) => ({
+          place,
+          km: distanceKm(origin.lat, origin.lng, place.lat, place.lng),
+        }))
+        .sort((a, b) => a.km - b.km),
+    [places, origin.lat, origin.lng],
+  );
+
+  // Filter (must have ALL selected facilities), preserving nearest-first order.
   const results = useMemo(() => {
-    const origin = location ?? FALLBACK_LOCATION;
-    return places.filter(
-      (place) =>
-        [...activeFilters].every((key) => place.facilities[key]) &&
+    const selected = [...activeFilters]; // spread once, not once per place
+    return byDistance.filter(
+      ({ place }) =>
+        selected.every((key) => place.facilities[key]) &&
         (!place.jumuahOnly || activeFilters.has("jumuah")),
-    )
-      .map((place) => ({
-        place,
-        km: distanceKm(origin.lat, origin.lng, place.lat, place.lng),
-      }))
-      .sort((a, b) => a.km - b.km);
-  }, [location, activeFilters, places]);
+    );
+  }, [byDistance, activeFilters]);
+
+  // Stable callbacks keep React.memo'd rows from re-rendering needlessly.
+  const openPlace = useCallback(
+    (id: string) => router.push(`/place/${id}`),
+    [router],
+  );
+
+  const renderItem = useCallback(
+    ({ item }: { item: Result }) => (
+      <PlaceCard
+        place={item.place}
+        distanceLabel={formatDistance(item.km)}
+        onPress={openPlace}
+      />
+    ),
+    [openPlace],
+  );
 
   return (
     <View style={styles.screen}>
@@ -169,25 +209,24 @@ export default function HomeScreen() {
           <PlacesMap
             results={results}
             userLocation={location}
-            onSelect={(id: string) => router.push(`/place/${id}`)}
+            onSelect={openPlace}
           />
         </View>
       ) : (
       <FlatList
         style={styles.listContainer}
         data={results}
-        keyExtractor={(item) => item.place.id}
+        keyExtractor={keyExtractor}
+        // Render tuning: draw a screenful quickly, keep a modest window
+        // mounted instead of the whole list.
+        initialNumToRender={10}
+        maxToRenderPerBatch={10}
+        windowSize={7}
         contentContainerStyle={[
           styles.list,
           { paddingBottom: spacing.xxl + insets.bottom },
         ]}
-        renderItem={({ item }) => (
-          <PlaceCard
-            place={item.place}
-            distanceLabel={formatDistance(item.km)}
-            onPress={() => router.push(`/place/${item.place.id}`)}
-          />
-        )}
+        renderItem={renderItem}
         ListEmptyComponent={
           <View style={styles.empty}>
             <Text style={styles.emptyTitle}>No places match</Text>
