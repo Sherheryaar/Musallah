@@ -1,11 +1,13 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   FlatList,
+  Keyboard,
   Platform,
+  StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
-  StyleSheet,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -14,20 +16,27 @@ import * as Location from "expo-location";
 import { FacilityKey, Place } from "@/data/places";
 import { usePlaces } from "@/context/PlacesContext";
 import { useSettings } from "@/context/SettingsContext";
-import { distanceKm, formatDistance } from "@/lib/distance";
-import { computePrayerTimes, PrayerTimes } from "@/lib/prayerTimes";
-import FilterChips from "@/components/FilterChips";
+import BottomSheet from "@/components/BottomSheet";
+import FilterSheet from "@/components/FilterSheet";
 import PlaceCard from "@/components/PlaceCard";
 import PlacesMap from "@/components/PlacesMap";
 import SuggestionForm from "@/components/SuggestionForm";
-import ViewToggle from "@/components/ViewToggle";
+import { distanceKm, formatDistance } from "@/lib/distance";
+import { computePrayerTimes, PrayerTimes } from "@/lib/prayerTimes";
 import { submitNewPlaceSuggestion } from "@/lib/feedback";
-import { colors, spacing } from "@/lib/theme";
+import { colors, radius, spacing } from "@/lib/theme";
 
 // Fallback when location is unavailable: central London (Charing Cross).
 const FALLBACK_LOCATION = { lat: 51.5074, lng: -0.1278 };
 
+// The list shows a handful of nearby, reasonable options -- not the whole
+// dataset. The map still shows every matching pin.
+const MAX_LIST_RESULTS = 12;
+const MAX_LIST_DISTANCE_KM = 30;
+const MIN_LIST_RESULTS = 5;
+
 type Result = { place: Place; km: number };
+type SearchOrigin = { lat: number; lng: number; label: string };
 
 // Module-level so the reference is stable across renders (helps FlatList).
 const keyExtractor = (item: Result) => item.place.id;
@@ -38,16 +47,16 @@ export default function HomeScreen() {
   // (the app draws edge-to-edge on Android).
   const insets = useSafeAreaInsets();
   const { places } = usePlaces();
-  const { settings } = useSettings();
+  const { settings, updateSettings } = useSettings();
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(
     null,
   );
   const [usingFallback, setUsingFallback] = useState(false);
-  const [activeFilters, setActiveFilters] = useState<Set<FacilityKey>>(
-    new Set(),
-  );
-  const [view, setView] = useState<"list" | "map">("list");
   const [showNewPlaceForm, setShowNewPlaceForm] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+  const [query, setQuery] = useState("");
+  const [searchOrigin, setSearchOrigin] = useState<SearchOrigin | null>(null);
+  const [searchNote, setSearchNote] = useState<string | null>(null);
 
   // Get location once at launch, then keep it updated as the user moves
   // (re-sorts distances after every ~250 m). No account, no tracking --
@@ -104,31 +113,75 @@ export default function HomeScreen() {
     };
   }, []);
 
-  const toggleFilter = useCallback((key: FacilityKey) => {
-    setActiveFilters((prev) => {
-      const next = new Set(prev);
+  // Facility filters live in Settings storage, so a choice like "sisters'
+  // space" made on first launch is remembered on every later launch.
+  const activeFilters = useMemo(
+    () => new Set(settings.facilityFilters),
+    [settings.facilityFilters],
+  );
+
+  const toggleFilter = useCallback(
+    (key: FacilityKey) => {
+      const next = new Set(settings.facilityFilters);
       if (next.has(key)) {
         next.delete(key);
       } else {
         next.add(key);
       }
-      return next;
-    });
+      updateSettings({ facilityFilters: [...next] });
+    },
+    [settings.facilityFilters, updateSettings],
+  );
+
+  const clearFilters = useCallback(
+    () => updateSettings({ facilityFilters: [] }),
+    [updateSettings],
+  );
+
+  // "I'm going here" -- geocode the query and measure distances from there.
+  const searchArea = useCallback(async () => {
+    const text = query.trim();
+    if (!text) return;
+    Keyboard.dismiss();
+    if (Platform.OS === "web") return; // typing already filters names on web
+    setSearchNote(null);
+    try {
+      const matches = await Location.geocodeAsync(text);
+      const hit = matches[0];
+      if (hit) {
+        setSearchOrigin({ lat: hit.latitude, lng: hit.longitude, label: text });
+        setQuery("");
+      } else {
+        setSearchNote(
+          `Couldn't find "${text}" \u2014 showing name matches instead.`,
+        );
+      }
+    } catch {
+      setSearchNote(
+        "Area search needs a connection \u2014 try a place name instead.",
+      );
+    }
+  }, [query]);
+
+  const clearSearchOrigin = useCallback(() => {
+    setSearchOrigin(null);
+    setSearchNote(null);
   }, []);
 
-  const origin = location ?? FALLBACK_LOCATION;
+  const gpsOrigin = location ?? FALLBACK_LOCATION;
+  // Distances come from the searched area when one is set; prayer times
+  // always follow the user's real location.
+  const origin = searchOrigin ?? gpsOrigin;
 
   // Prayer times are computed on-device (see src/lib/prayerCalc.ts) --
-  // instant and offline, so they can render immediately (with the fallback
-  // origin until a fix arrives) and follow the user's Settings choices.
+  // instant and offline, following the user's Settings choices.
   const times = useMemo<PrayerTimes | null>(
-    () => computePrayerTimes(origin.lat, origin.lng, settings),
-    [origin.lat, origin.lng, settings],
+    () => computePrayerTimes(gpsOrigin.lat, gpsOrigin.lng, settings),
+    [gpsOrigin.lat, gpsOrigin.lng, settings],
   );
 
   // Two-stage memo: distances/sorting only recompute when location or data
-  // changes -- NOT on every filter toggle (filtering the pre-sorted list is
-  // cheap; haversine + sort over the whole dataset is not).
+  // changes -- NOT on every filter toggle or keystroke.
   const byDistance = useMemo<Result[]>(
     () =>
       places
@@ -140,15 +193,32 @@ export default function HomeScreen() {
     [places, origin.lat, origin.lng],
   );
 
-  // Filter (must have ALL selected facilities), preserving nearest-first order.
+  // Filter (must have ALL selected facilities + match the typed query),
+  // preserving nearest-first order.
   const results = useMemo(() => {
     const selected = [...activeFilters]; // spread once, not once per place
+    const q = query.trim().toLowerCase();
     return byDistance.filter(
       ({ place }) =>
         selected.every((key) => place.facilities[key]) &&
-        (!place.jumuahOnly || activeFilters.has("jumuah")),
+        (!place.jumuahOnly || activeFilters.has("jumuah")) &&
+        (!q ||
+          place.name.toLowerCase().includes(q) ||
+          place.address.toLowerCase().includes(q)),
     );
-  }, [byDistance, activeFilters]);
+  }, [byDistance, activeFilters, query]);
+
+  // The list only shows the nearest few reasonable options. When the user is
+  // typing a name search, show matches regardless of distance.
+  const listResults = useMemo(() => {
+    if (query.trim()) return results.slice(0, 25);
+    const within = results.filter((r) => r.km <= MAX_LIST_DISTANCE_KM);
+    const base =
+      within.length >= MIN_LIST_RESULTS
+        ? within
+        : results.slice(0, MIN_LIST_RESULTS);
+    return base.slice(0, MAX_LIST_RESULTS);
+  }, [results, query]);
 
   // Stable callbacks keep React.memo'd rows from re-rendering needlessly.
   const openPlace = useCallback(
@@ -167,113 +237,198 @@ export default function HomeScreen() {
     [openPlace],
   );
 
+  const searchRow = (
+    <View style={styles.searchRow}>
+      <TextInput
+        style={styles.searchInput}
+        placeholder='Try "Stratford" or a masjid name...'
+        placeholderTextColor={colors.textSecondary}
+        value={query}
+        onChangeText={setQuery}
+        onSubmitEditing={searchArea}
+        returnKeyType="search"
+        autoCorrect={false}
+        accessibilityLabel="Search for an area or place"
+      />
+      <TouchableOpacity
+        style={[
+          styles.filterButton,
+          activeFilters.size > 0 && styles.filterButtonActive,
+        ]}
+        onPress={() => setShowFilters(true)}
+        accessibilityRole="button"
+        accessibilityLabel="Open filters"
+      >
+        <Text
+          style={[
+            styles.filterButtonLabel,
+            activeFilters.size > 0 && styles.filterButtonLabelActive,
+          ]}
+        >
+          {activeFilters.size > 0
+            ? `Filters (${activeFilters.size})`
+            : "Filters"}
+        </Text>
+      </TouchableOpacity>
+    </View>
+  );
+
+  const contextChips =
+    searchOrigin || searchNote ? (
+      <View style={styles.contextRow}>
+        {searchOrigin ? (
+          <TouchableOpacity
+            style={styles.nearChip}
+            onPress={clearSearchOrigin}
+            accessibilityRole="button"
+            accessibilityLabel={`Stop searching near ${searchOrigin.label}`}
+          >
+            <Text style={styles.nearChipLabel}>
+              {`Near "${searchOrigin.label}"  \u2715`}
+            </Text>
+          </TouchableOpacity>
+        ) : null}
+        {searchNote ? <Text style={styles.searchNote}>{searchNote}</Text> : null}
+      </View>
+    ) : null;
+
+  const timesBar = times ? (
+    <TouchableOpacity
+      style={styles.timesBar}
+      onPress={() => router.push("/prayer")}
+      accessibilityRole="button"
+      accessibilityLabel="Open prayer times"
+      activeOpacity={0.7}
+    >
+      {(
+        [
+          ["Fajr", times.Fajr],
+          ["Dhuhr", times.Dhuhr],
+          ["Asr", times.Asr],
+          ["Maghrib", times.Maghrib],
+          ["Isha", times.Isha],
+        ] as const
+      ).map(([label, value]) => (
+        <View key={label} style={styles.timeItem}>
+          <Text style={styles.timeLabel}>{label}</Text>
+          <Text style={styles.timeValue}>{value}</Text>
+        </View>
+      ))}
+      <Text style={styles.timesChevron}>{"\u203A"}</Text>
+    </TouchableOpacity>
+  ) : null;
+
+  const list = (
+    <FlatList
+      style={styles.listContainer}
+      data={listResults}
+      keyExtractor={keyExtractor}
+      // Render tuning: draw a screenful quickly, keep a modest window
+      // mounted instead of the whole list.
+      initialNumToRender={8}
+      maxToRenderPerBatch={10}
+      windowSize={7}
+      keyboardShouldPersistTaps="handled"
+      contentContainerStyle={[
+        styles.list,
+        { paddingBottom: spacing.xxl + insets.bottom },
+      ]}
+      renderItem={renderItem}
+      ListEmptyComponent={
+        <View style={styles.empty}>
+          <Text style={styles.emptyTitle}>No places match</Text>
+          <Text style={styles.emptyText}>
+            Try removing a filter \u2014 or this is a gap in the data worth
+            fixing.
+          </Text>
+          <TouchableOpacity
+            style={styles.emptyButton}
+            onPress={() => setShowNewPlaceForm(true)}
+            accessibilityRole="button"
+            accessibilityLabel="Add a missing place"
+          >
+            <Text style={styles.emptyButtonLabel}>Add a missing place</Text>
+          </TouchableOpacity>
+          {showNewPlaceForm ? (
+            <SuggestionForm
+              placeholder="Name, address, type, facilities, and a link if you have one..."
+              onSend={submitNewPlaceSuggestion}
+            />
+          ) : null}
+        </View>
+      }
+      ListFooterComponent={
+        <View style={styles.listFooter}>
+          {showNewPlaceForm && listResults.length > 0 ? (
+            <SuggestionForm
+              placeholder="Name, address, type, facilities, and a link if you have one..."
+              onSend={submitNewPlaceSuggestion}
+            />
+          ) : (
+            <View style={styles.listFooterRow}>
+              <Text style={styles.listFooterText}>Missing a place? </Text>
+              <TouchableOpacity
+                onPress={() => setShowNewPlaceForm(true)}
+                accessibilityRole="button"
+                accessibilityLabel="Suggest a missing place"
+              >
+                <Text style={styles.listFooterLink}>Suggest it</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </View>
+      }
+    />
+  );
+
   return (
     <View style={styles.screen}>
-      <View style={styles.container}>
-      {times ? (
-        <View style={styles.timesBar}>
-          {(
-            [
-              ["Fajr", times.Fajr],
-              ["Dhuhr", times.Dhuhr],
-              ["Asr", times.Asr],
-              ["Maghrib", times.Maghrib],
-              ["Isha", times.Isha],
-            ] as const
-          ).map(([label, value]) => (
-            <View key={label} style={styles.timeItem}>
-              <Text style={styles.timeLabel}>{label}</Text>
-              <Text style={styles.timeValue}>{value}</Text>
-            </View>
-          ))}
-        </View>
-      ) : null}
-
-      <FilterChips active={activeFilters} onToggle={toggleFilter} />
-
       {Platform.OS !== "web" ? (
-        <View style={styles.toggleRow}>
-          <ViewToggle value={view} onChange={setView} />
-        </View>
-      ) : null}
-
-      {usingFallback ? (
-        <Text style={styles.fallbackNote}>
-          Showing distances and prayer times for central London — enable
-          location for accurate results.
-        </Text>
-      ) : null}
-
-      {Platform.OS !== "web" && view === "map" ? (
-        <View style={styles.mapContainer}>
-          <PlacesMap
-            results={results}
-            userLocation={location}
-            onSelect={openPlace}
-          />
-        </View>
-      ) : (
-      <FlatList
-        style={styles.listContainer}
-        data={results}
-        keyExtractor={keyExtractor}
-        // Render tuning: draw a screenful quickly, keep a modest window
-        // mounted instead of the whole list.
-        initialNumToRender={10}
-        maxToRenderPerBatch={10}
-        windowSize={7}
-        contentContainerStyle={[
-          styles.list,
-          { paddingBottom: spacing.xxl + insets.bottom },
-        ]}
-        renderItem={renderItem}
-        ListEmptyComponent={
-          <View style={styles.empty}>
-            <Text style={styles.emptyTitle}>No places match</Text>
-            <Text style={styles.emptyText}>
-              Try removing a filter — or this is a gap in the data worth
-              fixing.
-            </Text>
-            <TouchableOpacity
-              style={styles.emptyButton}
-              onPress={() => setShowNewPlaceForm(true)}
-              accessibilityRole="button"
-              accessibilityLabel="Add a missing place"
-            >
-              <Text style={styles.emptyButtonLabel}>Add a missing place</Text>
-            </TouchableOpacity>
-            {showNewPlaceForm ? (
-              <SuggestionForm
-                placeholder="Name, address, type, facilities, and a link if you have one..."
-                onSend={submitNewPlaceSuggestion}
-              />
+        <>
+          {/* Map-first: the map fills the screen; the list floats above it. */}
+          <View style={StyleSheet.absoluteFill}>
+            <PlacesMap
+              results={results}
+              userLocation={location}
+              focus={searchOrigin}
+              onSelect={openPlace}
+            />
+          </View>
+          <View style={styles.overlayTop} pointerEvents="box-none">
+            {searchRow}
+            {contextChips}
+            {usingFallback ? (
+              <Text style={styles.fallbackNote}>
+                Using central London {"\u2014"} enable location for accurate
+                results.
+              </Text>
             ) : null}
           </View>
-        }
-        ListFooterComponent={
-          <View style={styles.listFooter}>
-            {showNewPlaceForm && results.length > 0 ? (
-              <SuggestionForm
-                placeholder="Name, address, type, facilities, and a link if you have one..."
-                onSend={submitNewPlaceSuggestion}
-              />
-            ) : (
-              <View style={styles.listFooterRow}>
-                <Text style={styles.listFooterText}>Missing a place? </Text>
-                <TouchableOpacity
-                  onPress={() => setShowNewPlaceForm(true)}
-                  accessibilityRole="button"
-                  accessibilityLabel="Suggest a missing place"
-                >
-                  <Text style={styles.listFooterLink}>Suggest it</Text>
-                </TouchableOpacity>
-              </View>
-            )}
-          </View>
-        }
-      />
+          <BottomSheet>
+            {timesBar}
+            {list}
+          </BottomSheet>
+        </>
+      ) : (
+        <View style={styles.container}>
+          {searchRow}
+          {timesBar}
+          {usingFallback ? (
+            <Text style={styles.fallbackNoteWeb}>
+              Showing distances and prayer times for central London {"\u2014"}
+              enable location for accurate results.
+            </Text>
+          ) : null}
+          {list}
+        </View>
       )}
-      </View>
+      <FilterSheet
+        visible={showFilters}
+        active={activeFilters}
+        onToggle={toggleFilter}
+        onClear={clearFilters}
+        onClose={() => setShowFilters(false)}
+      />
     </View>
   );
 }
@@ -290,7 +445,6 @@ const styles = StyleSheet.create({
     width: "100%",
     maxWidth: 680,
     alignSelf: "center",
-    // On web, hairline edges visually anchor the centered column.
     ...Platform.select({
       web: {
         borderLeftWidth: 1,
@@ -298,6 +452,106 @@ const styles = StyleSheet.create({
         borderColor: colors.border,
       },
     }),
+  },
+  overlayTop: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    padding: spacing.m,
+    gap: spacing.s,
+  },
+  searchRow: {
+    flexDirection: "row",
+    gap: spacing.s,
+    ...Platform.select({
+      web: { padding: spacing.m },
+    }),
+  },
+  searchInput: {
+    flex: 1,
+    minHeight: 44,
+    backgroundColor: colors.canvas,
+    borderRadius: radius.l,
+    borderWidth: 1,
+    borderColor: colors.border,
+    paddingHorizontal: spacing.l,
+    fontSize: 15,
+    color: colors.text,
+    shadowColor: "#000",
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
+  },
+  filterButton: {
+    minHeight: 44,
+    justifyContent: "center",
+    paddingHorizontal: spacing.l,
+    backgroundColor: colors.canvas,
+    borderRadius: radius.l,
+    borderWidth: 1,
+    borderColor: colors.border,
+    shadowColor: "#000",
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
+  },
+  filterButtonActive: {
+    backgroundColor: colors.accentSoft,
+    borderColor: colors.accent,
+  },
+  filterButtonLabel: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: colors.textSecondary,
+  },
+  filterButtonLabelActive: {
+    color: colors.accent,
+  },
+  contextRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    flexWrap: "wrap",
+    gap: spacing.s,
+  },
+  nearChip: {
+    backgroundColor: colors.accent,
+    borderRadius: 999,
+    paddingHorizontal: spacing.m,
+    paddingVertical: spacing.s,
+  },
+  nearChipLabel: {
+    color: "#FFFFFF",
+    fontSize: 13,
+    fontWeight: "600",
+  },
+  searchNote: {
+    flexShrink: 1,
+    fontSize: 13,
+    color: colors.textSecondary,
+    backgroundColor: colors.canvas,
+    paddingHorizontal: spacing.m,
+    paddingVertical: spacing.s,
+    borderRadius: radius.m,
+    overflow: "hidden",
+  },
+  fallbackNote: {
+    alignSelf: "flex-start",
+    fontSize: 13,
+    color: colors.textSecondary,
+    backgroundColor: colors.canvas,
+    paddingHorizontal: spacing.m,
+    paddingVertical: spacing.s,
+    borderRadius: radius.m,
+    overflow: "hidden",
+  },
+  fallbackNoteWeb: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    paddingHorizontal: spacing.l,
+    paddingBottom: spacing.s,
   },
   timesBar: {
     flexShrink: 0,
@@ -324,20 +578,10 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: colors.text,
   },
-  toggleRow: {
-    flexShrink: 0,
-    paddingHorizontal: spacing.l,
-    paddingBottom: spacing.s,
-  },
-  fallbackNote: {
-    flexShrink: 0,
-    fontSize: 14,
+  timesChevron: {
+    fontSize: 18,
     color: colors.textSecondary,
-    paddingHorizontal: spacing.l,
-    paddingBottom: spacing.s,
-  },
-  mapContainer: {
-    flex: 1,
+    alignSelf: "center",
   },
   listContainer: {
     flex: 1,

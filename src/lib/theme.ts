@@ -29,3 +29,16 @@ export const radius = {
   m: 8,
   l: 12,
 };
+
+// Night-sky palette for the immersive prayer screen (Pillars-style deep
+// navy with a warm peach accent).
+export const night = {
+  bg: "#0D1F3C",
+  bgRaised: "#12294B",
+  text: "#F6F7FB",
+  textMuted: "rgba(246,247,251,0.45)",
+  border: "rgba(246,247,251,0.16)",
+  accent: "#F2A66B",
+  accentSoft: "rgba(242,166,107,0.16)",
+  arcFuture: "rgba(246,247,251,0.30)",
+};

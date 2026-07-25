@@ -9,19 +9,35 @@ import React, {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import type { CalculationMethodKey, Madhab } from "@/lib/prayerCalc";
+import type { FacilityKey } from "@/data/places";
 
 const STORAGE_KEY = "settings:v1";
+
+const FACILITY_KEYS: FacilityKey[] = [
+  "sistersSpace",
+  "wudu",
+  "disabledAccess",
+  "parking",
+  "jumuah",
+  "janazah",
+];
 
 export type PrayerSettings = {
   /** Fajr/Isha rule set. Moonsighting Committee is recommended for the UK. */
   method: CalculationMethodKey;
   /** Asr juristic method: "shafi" = 1 mithl, "hanafi" = 2 mithl. */
   madhab: Madhab;
+  /**
+   * Facility filters chosen on the home screen (sisters' space, wudu, ...).
+   * Persisted so a choice made on first launch sticks on every later launch.
+   */
+  facilityFilters: FacilityKey[];
 };
 
 export const DEFAULT_SETTINGS: PrayerSettings = {
   method: "moonsighting",
   madhab: "shafi",
+  facilityFilters: [],
 };
 
 type SettingsContextValue = {
@@ -52,6 +68,14 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
             : null),
           ...(parsed.madhab === "shafi" || parsed.madhab === "hanafi"
             ? { madhab: parsed.madhab }
+            : null),
+          ...(Array.isArray(parsed.facilityFilters)
+            ? {
+                facilityFilters: parsed.facilityFilters.filter(
+                  (key): key is FacilityKey =>
+                    (FACILITY_KEYS as string[]).includes(key as string),
+                ),
+              }
             : null),
         }));
       })

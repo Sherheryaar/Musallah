@@ -59,3 +59,52 @@ export function computePrayerTimes(
     Isha: format(utc.isha),
   };
 }
+
+export type PrayerScheduleEntry = {
+  key: "fajr" | "sunrise" | "dhuhr" | "asr" | "maghrib" | "isha";
+  label: string;
+  time: Date;
+  display: string;
+};
+
+/**
+ * Like computePrayerTimes, but returns real Date objects (plus "HH:MM"
+ * display strings) so screens can run countdowns, highlight the current
+ * prayer, and draw the sun arc.
+ */
+export function computePrayerSchedule(
+  lat: number,
+  lng: number,
+  options: CalcOptions = {},
+  date: Date = new Date(),
+): PrayerScheduleEntry[] | null {
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+
+  const utc = computePrayerTimesUtc(lat, lng, { year, month, day }, options);
+  if (!utc) return null;
+
+  const make = (
+    key: PrayerScheduleEntry["key"],
+    label: string,
+    hoursUtc: number,
+  ): PrayerScheduleEntry => {
+    const time = new Date(
+      Date.UTC(year, month - 1, day) + Math.round(hoursUtc * 60) * 60_000,
+    );
+    const display = `${String(time.getHours()).padStart(2, "0")}:${String(
+      time.getMinutes(),
+    ).padStart(2, "0")}`;
+    return { key, label, time, display };
+  };
+
+  return [
+    make("fajr", "Fajr", utc.fajr),
+    make("sunrise", "Sunrise", utc.sunrise),
+    make("dhuhr", "Dhuhr", utc.dhuhr),
+    make("asr", "Asr", utc.asr),
+    make("maghrib", "Maghrib", utc.maghrib),
+    make("isha", "Isha", utc.isha),
+  ];
+}
