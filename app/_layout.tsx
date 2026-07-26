@@ -48,7 +48,8 @@ export default function RootLayout() {
 const styles = StyleSheet.create({
   settingsIcon: {
     fontSize: 18,
-    // Generous padding = a comfortable tap target in the header.
-    padding: 6,
+    // Generous padding = a comfortable ~44pt tap target in the header
+    // (18pt glyph + 6pt padding was only ~30pt -- too easy to miss).
+    padding: 12,
   },
 });

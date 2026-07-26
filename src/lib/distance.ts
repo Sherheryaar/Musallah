@@ -17,6 +17,8 @@ export function distanceKm(
 
 /** "350 m" under 1 km, otherwise "2.4 km". */
 export function formatDistance(km: number): string {
-  if (km < 1) return `${Math.round(km * 1000)} m`;
+  const metres = Math.round(km * 1000);
+  // Round before comparing: 0.9996 km used to render as the nonsense "1000 m".
+  if (metres < 1000) return `${metres} m`;
   return `${km.toFixed(1)} km`;
 }

@@ -8,12 +8,13 @@ import {
   StyleSheet,
 } from "react-native";
 
+import type { SubmissionResult } from "@/lib/feedback";
 import { colors, spacing, radius } from "@/lib/theme";
 
 type Props = {
   placeholder: string;
   sendLabel?: string;
-  onSend: (message: string) => Promise<boolean>;
+  onSend: (message: string) => Promise<SubmissionResult>;
   onSent?: () => void;
 };
 
@@ -26,20 +27,36 @@ export default function SuggestionForm({
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
+  const [note, setNote] = useState<string | null>(null);
 
   const handleSend = async () => {
     if (sending || sent || !message.trim()) return;
     setSending(true);
+    setNote(null);
     try {
-      const stored = await onSend(message);
-      if (stored) {
+      const result = await onSend(message);
+      if (result === "stored") {
         setSent(true);
         setMessage("");
         onSent?.();
+      } else if (result === "email") {
+        // This used to fail silently: the spinner stopped and the form just
+        // sat there while an email draft opened underneath. Say what happened.
+        setNote(
+          "We couldn't reach the database, so your email app was opened instead \u2014 send the email to finish.",
+        );
+      } else {
+        setNote(
+          "Couldn't send right now \u2014 check your connection and try again.",
+        );
       }
+    } catch {
+      setNote(
+        "Couldn't send right now \u2014 check your connection and try again.",
+      );
     } finally {
-      // try/finally: if onSend ever throws, the button must not be stuck
-      // on a spinner forever.
+      // finally: if onSend ever throws, the button must not be stuck on a
+      // spinner forever.
       setSending(false);
     }
   };
@@ -78,6 +95,7 @@ export default function SuggestionForm({
           <Text style={styles.sendLabel}>{sendLabel}</Text>
         )}
       </TouchableOpacity>
+      {note ? <Text style={styles.noteText}>{note}</Text> : null}
     </View>
   );
 }
@@ -122,6 +140,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.positive,
     lineHeight: 20,
+    textAlign: "center",
+  },
+  noteText: {
+    fontSize: 13,
+    color: colors.textSecondary,
+    lineHeight: 18,
     textAlign: "center",
   },
 });

@@ -55,6 +55,7 @@ export default function FilterSheet({
       <TouchableOpacity
         style={styles.backdropTouch}
         onPress={onClose}
+        accessibilityRole="button"
         accessibilityLabel="Close filters"
       />
       <View

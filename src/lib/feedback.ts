@@ -5,7 +5,20 @@ import { supabase } from "@/lib/supabase";
 
 const FEEDBACK_EMAIL = "sheheryaarb@hotmail.com";
 
-function openFeedbackEmail(subject: string, body: string): void {
+/**
+ * How a suggestion was (or wasn't) delivered:
+ * - "stored": saved to the Supabase `submissions` table.
+ * - "email":  database unreachable; the user's email app was opened with a
+ *             pre-filled draft instead.
+ * - "failed": nothing worked (offline and no email app) -- the UI must tell
+ *             the user so the suggestion isn't silently lost.
+ */
+export type SubmissionResult = "stored" | "email" | "failed";
+
+async function openFeedbackEmail(
+  subject: string,
+  body: string,
+): Promise<boolean> {
   const url =
     "mailto:" +
     FEEDBACK_EMAIL +
@@ -13,29 +26,41 @@ function openFeedbackEmail(subject: string, body: string): void {
     encodeURIComponent(subject) +
     "&body=" +
     encodeURIComponent(body);
-  Linking.openURL(url).catch(() => {});
+  try {
+    await Linking.openURL(url);
+    return true;
+  } catch {
+    // No email client available (common on tablets/emulators).
+    return false;
+  }
 }
 
-/** Returns true when stored in Supabase, false when falling back to email. */
+async function storeSubmission(
+  kind: "edit" | "new_place",
+  placeId: string | null,
+  message: string,
+): Promise<boolean> {
+  if (!supabase) return false;
+  try {
+    const { error } = await supabase.from("submissions").insert({
+      kind,
+      place_id: placeId,
+      message,
+    });
+    return !error;
+  } catch {
+    return false;
+  }
+}
+
 export async function submitEditSuggestion(
   place: Place,
   message: string,
-): Promise<boolean> {
+): Promise<SubmissionResult> {
   const trimmed = message.trim();
-  if (!trimmed) return false;
+  if (!trimmed) return "failed";
 
-  if (supabase) {
-    try {
-      const { error } = await supabase.from("submissions").insert({
-        kind: "edit",
-        place_id: place.id,
-        message: trimmed,
-      });
-      if (!error) return true;
-    } catch {
-      // Fall through to email.
-    }
-  }
+  if (await storeSubmission("edit", place.id, trimmed)) return "stored";
 
   const body =
     "Place: " +
@@ -47,28 +72,20 @@ export async function submitEditSuggestion(
     "What needs correcting (times, facilities, address...)?\n" +
     "\n" +
     trimmed;
-  openFeedbackEmail("Edit suggestion: " + place.name, body);
-  return false;
+  return (await openFeedbackEmail("Edit suggestion: " + place.name, body))
+    ? "email"
+    : "failed";
 }
 
-/** Returns true when stored in Supabase, false when falling back to email. */
-export async function submitNewPlaceSuggestion(message: string): Promise<boolean> {
+export async function submitNewPlaceSuggestion(
+  message: string,
+): Promise<SubmissionResult> {
   const trimmed = message.trim();
-  if (!trimmed) return false;
+  if (!trimmed) return "failed";
 
-  if (supabase) {
-    try {
-      const { error } = await supabase.from("submissions").insert({
-        kind: "new_place",
-        place_id: null,
-        message: trimmed,
-      });
-      if (!error) return true;
-    } catch {
-      // Fall through to email.
-    }
-  }
+  if (await storeSubmission("new_place", null, trimmed)) return "stored";
 
-  openFeedbackEmail("New place suggestion", trimmed);
-  return false;
+  return (await openFeedbackEmail("New place suggestion", trimmed))
+    ? "email"
+    : "failed";
 }

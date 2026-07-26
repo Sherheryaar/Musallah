@@ -1,9 +1,8 @@
 import React, { useEffect, useMemo, useRef } from "react";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 
 import { PLACE_TYPE_LABELS, Place } from "@/data/places";
-import { colors } from "@/lib/theme";
 
 const FALLBACK_REGION = {
   latitude: 51.5074,
@@ -12,12 +11,17 @@ const FALLBACK_REGION = {
   longitudeDelta: 0.05,
 };
 
-// One colour per place type -- small, calm dots instead of the default
-// oversized red pins.
-const PIN_COLORS: Record<Place["type"], string> = {
-  masjid: colors.accent,
-  musalla: colors.positive,
-  multi_faith_room: colors.attention,
+// Small pre-rendered PNG dots, one colour per place type -- generated at
+// 1x/2x/3x by scripts/gen-pin-assets.js (colours mirror src/lib/theme.ts).
+//
+// Why images instead of <View> children: iOS (Apple Maps) snapshots
+// view-based marker children and drops them after the first frame, so the
+// custom dots flashed once and then disappeared. An image is handed to the
+// native annotation directly, which renders reliably on both platforms.
+const PIN_IMAGES: Record<Place["type"], number> = {
+  masjid: require("../../assets/pins/dot-masjid.png"),
+  musalla: require("../../assets/pins/dot-musalla.png"),
+  multi_faith_room: require("../../assets/pins/dot-multi-faith.png"),
 };
 
 type Props = {
@@ -51,6 +55,32 @@ export default function PlacesMap({
     };
   }, [userLocation, results]);
 
+  // On the first GPS fix after mount, glide from the fallback view to the
+  // user. initialRegion is only read once by the native map, so without this
+  // the map stayed parked on central London forever when the fix arrived
+  // after mount (i.e. on almost every cold start).
+  const hadLocationAtMount = useRef(userLocation !== null);
+  const centredOnUser = useRef(false);
+  useEffect(() => {
+    if (
+      userLocation &&
+      !hadLocationAtMount.current &&
+      !centredOnUser.current &&
+      !focus
+    ) {
+      centredOnUser.current = true;
+      mapRef.current?.animateToRegion(
+        {
+          latitude: userLocation.lat,
+          longitude: userLocation.lng,
+          latitudeDelta: 0.05,
+          longitudeDelta: 0.05,
+        },
+        600,
+      );
+    }
+  }, [userLocation, focus]);
+
   // Fly to the searched area when one is chosen.
   useEffect(() => {
     if (focus) {
@@ -80,15 +110,12 @@ export default function PlacesMap({
           title={place.name}
           description={PLACE_TYPE_LABELS[place.type]}
           onCalloutPress={() => onSelect(place.id)}
+          image={PIN_IMAGES[place.type]}
+          // Centre the dot on the coordinate (Android; iOS centres by default).
           anchor={{ x: 0.5, y: 0.5 }}
-          // Static markers: stop re-rasterizing every frame (big Android win
-          // once there are more than a handful of pins).
+          // Static markers with no view children: never re-rasterize.
           tracksViewChanges={false}
-        >
-          <View
-            style={[styles.pin, { backgroundColor: PIN_COLORS[place.type] }]}
-          />
-        </Marker>
+        />
       ))}
     </MapView>
   );
@@ -97,17 +124,5 @@ export default function PlacesMap({
 const styles = StyleSheet.create({
   map: {
     flex: 1,
-  },
-  pin: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    borderWidth: 2.5,
-    borderColor: "#FFFFFF",
-    shadowColor: "#000",
-    shadowOpacity: 0.25,
-    shadowRadius: 2,
-    shadowOffset: { width: 0, height: 1 },
-    elevation: 2,
   },
 });

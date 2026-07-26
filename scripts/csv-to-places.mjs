@@ -105,6 +105,8 @@ const OPTIONAL_TEXT_COLUMNS = [
   ["confidence", "confidence"],
 ];
 
+const PLACE_TYPES = new Set(["masjid", "musalla", "multi_faith_room"]);
+
 const seen = new Set();
 const places = records.map((record) => {
   const get = (name) => {
@@ -130,6 +132,12 @@ const places = records.map((record) => {
     throw new Error(`Duplicate id "${id}" in places.csv`);
   }
   seen.add(id);
+
+  if (!PLACE_TYPES.has(place.type)) {
+    throw new Error(
+      `Row "${id}": unknown type "${place.type}" (expected one of: ${[...PLACE_TYPES].join(", ")})`,
+    );
+  }
 
   if (parseBool(get("jumuah_only"))) place.jumuahOnly = true;
 

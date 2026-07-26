@@ -31,6 +31,9 @@ export function PlacesProvider({ children }: { children: React.ReactNode }) {
   const lastFetch = useRef(0);
   const hasNetworkData = useRef(false);
   const inFlightRefresh = useRef<Promise<void> | null>(null);
+  // Fingerprint of the last rows applied, so refreshes that return identical
+  // data don't force a pointless re-render of the map and list.
+  const lastApplied = useRef<string | null>(null);
 
   // Deduped network refresh: concurrent callers (launch + foreground +
   // realtime) share a single request instead of racing, and lastFetch only
@@ -42,7 +45,11 @@ export function PlacesProvider({ children }: { children: React.ReactNode }) {
       if (loaded && mounted.current) {
         hasNetworkData.current = true;
         lastFetch.current = Date.now();
-        setPlaces(loaded);
+        const fingerprint = JSON.stringify(loaded);
+        if (fingerprint !== lastApplied.current) {
+          lastApplied.current = fingerprint;
+          setPlaces(loaded);
+        }
       }
     })().finally(() => {
       inFlightRefresh.current = null;

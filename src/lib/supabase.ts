@@ -1,7 +1,10 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
-const url = process.env.EXPO_PUBLIC_SUPABASE_URL;
-const anonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
+// .trim() guards against invisible whitespace or a stray "\r" from a .env
+// file saved with CRLF line endings -- a trailing carriage return in the URL
+// silently breaks every request.
+const url = process.env.EXPO_PUBLIC_SUPABASE_URL?.trim();
+const anonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY?.trim();
 
 /**
  * Single shared Supabase client, or null when env vars are missing so the

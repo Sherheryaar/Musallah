@@ -12,68 +12,120 @@ import { supabase } from "@/lib/supabase";
 const CACHE_KEY = "places:v1";
 const FETCH_TIMEOUT_MS = 8000;
 
+const PLACE_TYPES: readonly PlaceType[] = [
+  "masjid",
+  "musalla",
+  "multi_faith_room",
+];
+
+const FACILITY_KEYS: readonly FacilityKey[] = [
+  "sistersSpace",
+  "wudu",
+  "disabledAccess",
+  "parking",
+  "jumuah",
+  "janazah",
+];
+
+/**
+ * Raw Supabase row. Every field is `unknown` on purpose: the table can be
+ * edited by hand in the dashboard, so nothing is trusted until validated.
+ */
 type PlacesRow = {
-  id: string;
-  name: string;
-  type: string;
-  address: string;
-  lat: number;
-  lng: number;
-  facilities: Record<FacilityKey, boolean>;
-  jumuah_only: boolean | null;
-  jumuah_times: string[] | null;
-  jamaat: JamaatTimes | null;
-  notes: string | null;
-  last_verified: string | null;
-  source: string | null;
-  phone: string | null;
-  website: string | null;
-  facebook: string | null;
-  instagram: string | null;
-  confidence: string | null;
+  id: unknown;
+  name: unknown;
+  type: unknown;
+  address: unknown;
+  lat: unknown;
+  lng: unknown;
+  facilities: unknown;
+  jumuah_only: unknown;
+  jumuah_times: unknown;
+  jamaat: unknown;
+  notes: unknown;
+  last_verified: unknown;
+  source: unknown;
+  phone: unknown;
+  website: unknown;
+  facebook: unknown;
+  instagram: unknown;
+  confidence: unknown;
 };
 
-function mapRowToPlace(row: PlacesRow): Place {
+function asOptionalString(value: unknown): string | undefined {
+  return typeof value === "string" && value !== "" ? value : undefined;
+}
+
+/**
+ * Validate + map one row. Returns null for malformed rows: one bad row (a
+ * half-finished dashboard edit, a broken import) must be skipped quietly,
+ * not crash the list, map, and detail screens for every user.
+ */
+function mapRowToPlace(row: PlacesRow): Place | null {
+  if (typeof row.id !== "string" || row.id === "") return null;
+  if (typeof row.name !== "string" || row.name === "") return null;
+  if (typeof row.address !== "string") return null;
+  if (typeof row.lat !== "number" || !Number.isFinite(row.lat)) return null;
+  if (typeof row.lng !== "number" || !Number.isFinite(row.lng)) return null;
+
+  // An unknown type (e.g. a typo'd enum value) falls back to the most
+  // generic label instead of rendering "undefined" all over the UI.
+  const type: PlaceType = (PLACE_TYPES as readonly string[]).includes(
+    row.type as string,
+  )
+    ? (row.type as PlaceType)
+    : "musalla";
+
+  // Facilities are coerced key-by-key so a missing/malformed JSON column
+  // yields "all false" rather than an undefined-property crash.
+  const rawFacilities =
+    row.facilities && typeof row.facilities === "object"
+      ? (row.facilities as Record<string, unknown>)
+      : {};
+  const facilities = {} as Record<FacilityKey, boolean>;
+  for (const key of FACILITY_KEYS) {
+    facilities[key] = rawFacilities[key] === true;
+  }
+
   const place: Place = {
     id: row.id,
     name: row.name,
-    type: row.type as PlaceType,
+    type,
     address: row.address,
     lat: row.lat,
     lng: row.lng,
-    facilities: row.facilities,
+    facilities,
   };
 
-  if (row.jumuah_only) {
+  if (row.jumuah_only === true) {
     place.jumuahOnly = true;
   }
-  if (row.jumuah_times) {
+  if (
+    Array.isArray(row.jumuah_times) &&
+    row.jumuah_times.length > 0 &&
+    row.jumuah_times.every((t): t is string => typeof t === "string")
+  ) {
     place.jumuahTimes = row.jumuah_times;
   }
-  if (row.jamaat) {
-    place.jamaat = row.jamaat;
+  if (row.jamaat && typeof row.jamaat === "object") {
+    place.jamaat = row.jamaat as JamaatTimes;
   }
-  if (row.notes) {
-    place.notes = row.notes;
-  }
-  if (row.last_verified) {
-    place.lastVerified = row.last_verified;
-  }
-  if (row.source) {
-    place.source = row.source;
-  }
-  if (row.phone) {
-    place.phone = row.phone;
-  }
-  if (row.website) {
-    place.website = row.website;
-  }
-  if (row.facebook) {
-    place.facebook = row.facebook;
-  }
-  if (row.instagram) {
-    place.instagram = row.instagram;
-  }
+
+  const notes = asOptionalString(row.notes);
+  if (notes) place.notes = notes;
+  const lastVerified = asOptionalString(row.last_verified);
+  if (lastVerified) place.lastVerified = lastVerified;
+  const source = asOptionalString(row.source);
+  if (source) place.source = source;
+  const phone = asOptionalString(row.phone);
+  if (phone) place.phone = phone;
+  const website = asOptionalString(row.website);
+  if (website) place.website = website;
+  const facebook = asOptionalString(row.facebook);
+  if (facebook) place.facebook = facebook;
+  const instagram = asOptionalString(row.instagram);
+  if (instagram) place.instagram = instagram;
+
   if (
     row.confidence === "verified" ||
     row.confidence === "community" ||
@@ -136,7 +188,11 @@ export async function fetchPlaces(): Promise<Place[] | null> {
       return null;
     }
 
-    const places = (data as PlacesRow[]).map(mapRowToPlace);
+    const places = (data as PlacesRow[])
+      .map(mapRowToPlace)
+      .filter((place): place is Place => place !== null);
+    if (places.length === 0) return null;
+
     // Fire-and-forget: don't make the UI wait on a disk write.
     void writeCache(places);
     return places;

@@ -4,6 +4,7 @@ import React, {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -52,6 +53,10 @@ const SettingsContext = createContext<SettingsContextValue>({
 
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [settings, setSettings] = useState<PrayerSettings>(DEFAULT_SETTINGS);
+  // Set once the user changes anything. Guards against the (rare but real)
+  // race where disk hydration lands *after* a first-launch tap and silently
+  // reverts the user's choice.
+  const userEdited = useRef(false);
 
   // Hydrate once from disk. Defaults render immediately; a saved preference
   // lands a few milliseconds later, well before the user can notice.
@@ -59,7 +64,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     let cancelled = false;
     AsyncStorage.getItem(STORAGE_KEY)
       .then((raw) => {
-        if (cancelled || !raw) return;
+        if (cancelled || !raw || userEdited.current) return;
         const parsed = JSON.parse(raw) as Partial<PrayerSettings>;
         setSettings((prev) => ({
           ...prev,
@@ -88,6 +93,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const updateSettings = useCallback((patch: Partial<PrayerSettings>) => {
+    userEdited.current = true;
     setSettings((prev) => {
       const next = { ...prev, ...patch };
       // Fire-and-forget persistence -- never block the UI on a disk write.

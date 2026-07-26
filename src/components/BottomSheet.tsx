@@ -47,13 +47,21 @@ export default function BottomSheet({ children }: Props) {
     return () => top.removeListener(id);
   }, [top]);
 
-  const panResponder = useMemo(
-    () =>
-      PanResponder.create({
+  const panResponder = useMemo(() => {
+    // Only the rendered `clampedTop` is clamped -- the raw Animated value can
+    // sit far outside the snap range after a hard overdrag. Starting the next
+    // drag from that phantom position made the handle feel dead until the
+    // finger "caught up", so clamp whenever the raw value is read back.
+    const clamp = (value: number) =>
+      Math.min(Math.max(value, snaps.full), snaps.peek);
+    return PanResponder.create({
         onStartShouldSetPanResponder: () => true,
         onMoveShouldSetPanResponder: (_e, g) => Math.abs(g.dy) > 4,
         onPanResponderGrant: () => {
-          top.setOffset(topValue.current);
+          // Stop any in-flight snap spring so the sheet doesn't keep moving
+          // underneath the user's finger.
+          top.stopAnimation();
+          top.setOffset(clamp(topValue.current));
           top.setValue(0);
         },
         onPanResponderMove: Animated.event([null, { dy: top }], {
@@ -64,7 +72,7 @@ export default function BottomSheet({ children }: Props) {
           // Project the gesture forward by its velocity, then settle on the
           // nearest snap point -- a quick flick moves a full level even if
           // the finger only travelled a short distance.
-          const projected = topValue.current + g.vy * 160;
+          const projected = clamp(topValue.current + g.vy * 160);
           const target = [snaps.full, snaps.half, snaps.peek].reduce((a, b) =>
             Math.abs(b - projected) < Math.abs(a - projected) ? b : a,
           );
@@ -74,9 +82,8 @@ export default function BottomSheet({ children }: Props) {
             bounciness: 3,
           }).start();
         },
-      }),
-    [snaps, top],
-  );
+      });
+  }, [snaps, top]);
 
   const clampedTop = top.interpolate({
     inputRange: [snaps.full, snaps.peek],
