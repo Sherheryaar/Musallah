@@ -8,10 +8,8 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { FACILITY_LABELS, FacilityKey } from "@/data/places";
+import { FACILITY_KEYS, FACILITY_LABELS, FacilityKey } from "@/data/places";
 import { colors, radius, spacing } from "@/lib/theme";
-
-const FACILITY_KEYS = Object.keys(FACILITY_LABELS) as FacilityKey[];
 
 type Props = {
   visible: boolean;

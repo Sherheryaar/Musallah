@@ -8,7 +8,7 @@ import {
   StyleSheet,
 } from "react-native";
 
-import type { SubmissionResult } from "@/lib/feedback";
+import { MAX_MESSAGE_LENGTH, type SubmissionResult } from "@/lib/feedback";
 import { colors, spacing, radius } from "@/lib/theme";
 
 type Props = {
@@ -78,6 +78,7 @@ export default function SuggestionForm({
         placeholder={placeholder}
         placeholderTextColor={colors.textSecondary}
         multiline
+        maxLength={MAX_MESSAGE_LENGTH}
         textAlignVertical="top"
         editable={!sending}
         accessibilityLabel={placeholder}

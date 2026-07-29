@@ -31,6 +31,12 @@ export const FACILITY_LABELS: Record<FacilityKey, string> = {
   janazah: "Janazah",
 };
 
+/**
+ * The canonical facility key list. Derived from the labels so filters,
+ * validation, and settings can never drift out of sync with each other.
+ */
+export const FACILITY_KEYS = Object.keys(FACILITY_LABELS) as FacilityKey[];
+
 export const PLACE_TYPE_LABELS: Record<PlaceType, string> = {
   masjid: "Masjid",
   musalla: "Prayer room",
@@ -80,6 +86,8 @@ export type Place = {
 /**
  * Bundled offline dataset (see header comment). The cast is safe because
  * places.json is only ever produced by scripts/csv-to-places.mjs, which
- * validates ids, coordinates, facilities, and place types before writing.
+ * enforces the full Place shape before writing: ids, coordinates, place
+ * types, facility booleans, jamaat structure (source/recordedOn/HH:MM
+ * times), confidence enum, and http(s) URLs.
  */
 export const PLACES: Place[] = bundledPlaces as unknown as Place[];

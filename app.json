@@ -8,10 +8,12 @@
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": false
+      "supportsTablet": false,
+      "bundleIdentifier": "com.sheheryaarbaber.masjidlocator"
     },
     "android": {
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.sheheryaarbaber.masjidlocator"
     },
     "web": {
       "output": "static"

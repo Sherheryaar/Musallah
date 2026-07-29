@@ -6,6 +6,14 @@ import { supabase } from "@/lib/supabase";
 const FEEDBACK_EMAIL = "sheheryaarb@hotmail.com";
 
 /**
+ * Hard cap on suggestion length, enforced three times over: maxLength on
+ * the TextInput, this slice before insert, and a CHECK constraint on the
+ * table (scripts/schema.sql) — the anon key is public, so the database
+ * must not accept unbounded payloads from anyone who extracts it.
+ */
+export const MAX_MESSAGE_LENGTH = 2000;
+
+/**
  * How a suggestion was (or wasn't) delivered:
  * - "stored": saved to the Supabase `submissions` table.
  * - "email":  database unreachable; the user's email app was opened with a
@@ -57,7 +65,7 @@ export async function submitEditSuggestion(
   place: Place,
   message: string,
 ): Promise<SubmissionResult> {
-  const trimmed = message.trim();
+  const trimmed = message.trim().slice(0, MAX_MESSAGE_LENGTH);
   if (!trimmed) return "failed";
 
   if (await storeSubmission("edit", place.id, trimmed)) return "stored";
@@ -80,7 +88,7 @@ export async function submitEditSuggestion(
 export async function submitNewPlaceSuggestion(
   message: string,
 ): Promise<SubmissionResult> {
-  const trimmed = message.trim();
+  const trimmed = message.trim().slice(0, MAX_MESSAGE_LENGTH);
   if (!trimmed) return "failed";
 
   if (await storeSubmission("new_place", null, trimmed)) return "stored";

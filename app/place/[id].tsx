@@ -36,7 +36,9 @@ const PRAYER_ROWS: {
 ];
 
 function ukPhoneToTel(display: string): string {
-  const digits = display.replace(/\s/g, "");
+  // Strip everything except digits and a leading "+" -- display strings
+  // like "(020) 7650 3000" must still produce a dialable URL.
+  const digits = display.replace(/[^\d+]/g, "");
   if (digits.startsWith("0")) {
     return "tel:+44" + digits.slice(1);
   }
@@ -65,10 +67,18 @@ export default function PlaceDetailScreen() {
   const [showEditForm, setShowEditForm] = useState(false);
 
   // Computed on-device for this place's exact coordinates -- instant,
-  // offline, and it follows the mithl/method chosen in Settings.
+  // offline, and it follows the mithl/method chosen in Settings. Only the
+  // calculation-relevant settings are dependencies.
   const calculatedTimes = useMemo<PrayerTimes | null>(
-    () => (place ? computePrayerTimes(place.lat, place.lng, settings) : null),
-    [place, settings],
+    () =>
+      place
+        ? computePrayerTimes(place.lat, place.lng, {
+            method: settings.method,
+            madhab: settings.madhab,
+            shafaq: settings.shafaq,
+          })
+        : null,
+    [place, settings.method, settings.madhab, settings.shafaq],
   );
 
   if (!place) {
@@ -226,6 +236,14 @@ export default function PlaceDetailScreen() {
                 " (" +
                 place.jamaat.recordedOn +
                 ")"}
+            </Text>
+          ) : null}
+          {place.jamaat && place.confidence !== "verified" ? (
+            // Unverified jamaat times look exactly as authoritative as real
+            // ones -- for prayer times that's dangerous, so say it plainly.
+            <Text style={styles.jamaatCaution}>
+              These jamaat times are unverified — confirm with the masjid
+              before relying on them.
             </Text>
           ) : null}
         </View>
@@ -402,6 +420,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.textSecondary,
     lineHeight: 20,
+  },
+  jamaatCaution: {
+    fontSize: 13,
+    color: colors.attention,
+    lineHeight: 18,
   },
   contactList: {
     gap: spacing.s,

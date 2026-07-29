@@ -119,6 +119,40 @@ export default function SettingsScreen() {
         />
       </View>
 
+      {settings.method === "moonsighting" ? (
+        // Shafaq only affects the Moonsighting Committee Isha rule, so it is
+        // hidden when MWL is selected rather than shown doing nothing.
+        <>
+          <Text style={styles.sectionTitle}>Isha twilight (Shafaq)</Text>
+          <Text style={styles.sectionIntro}>
+            Which evening twilight marks Isha under the Moonsighting Committee
+            method. General is the recommended blend for the UK.
+          </Text>
+          <View style={styles.card}>
+            <OptionRow
+              label="General"
+              detail="Blend of red and white twilight. Recommended up to 55° latitude."
+              selected={settings.shafaq === "general"}
+              onPress={() => updateSettings({ shafaq: "general" })}
+            />
+            <OptionRow
+              label="Shafaq Ahmer (red)"
+              detail="Isha when the red evening glow fades — the earlier opinion."
+              selected={settings.shafaq === "ahmer"}
+              divider
+              onPress={() => updateSettings({ shafaq: "ahmer" })}
+            />
+            <OptionRow
+              label="Shafaq Abyad (white)"
+              detail="Isha when the white glow fades — the later, more cautious opinion."
+              selected={settings.shafaq === "abyad"}
+              divider
+              onPress={() => updateSettings({ shafaq: "abyad" })}
+            />
+          </View>
+        </>
+      ) : null}
+
       <Text style={styles.sectionTitle}>Privacy Centre</Text>
       <View style={styles.card}>
         {PRIVACY_POINTS.map((point, i) => (

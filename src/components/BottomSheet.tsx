@@ -91,9 +91,42 @@ export default function BottomSheet({ children }: Props) {
     extrapolate: "clamp",
   });
 
+  // Screen-reader path: the drag gesture is invisible to VoiceOver/TalkBack,
+  // so the handle is an adjustable that steps through the snap points.
+  const snapToNeighbour = (direction: 1 | -1) => {
+    // Ordered from most open to least (top value increases downwards).
+    const order = [snaps.full, snaps.half, snaps.peek];
+    const current = order.reduce((a, b) =>
+      Math.abs(b - topValue.current) < Math.abs(a - topValue.current) ? b : a,
+    );
+    const target =
+      order[
+        Math.min(Math.max(order.indexOf(current) - direction, 0), order.length - 1)
+      ];
+    Animated.spring(top, {
+      toValue: target,
+      useNativeDriver: false,
+      bounciness: 3,
+    }).start();
+  };
+
   return (
     <Animated.View style={[styles.sheet, { top: clampedTop }]}>
-      <View style={styles.handleArea} {...panResponder.panHandlers}>
+      <View
+        style={styles.handleArea}
+        {...panResponder.panHandlers}
+        accessible
+        accessibilityRole="adjustable"
+        accessibilityLabel="Places list"
+        accessibilityHint="Swipe up or down with one finger to resize the list"
+        accessibilityActions={[
+          { name: "increment", label: "Expand" },
+          { name: "decrement", label: "Collapse" },
+        ]}
+        onAccessibilityAction={(event) => {
+          snapToNeighbour(event.nativeEvent.actionName === "increment" ? 1 : -1);
+        }}
+      >
         <View style={styles.handle} />
       </View>
       <View style={[styles.body, { paddingBottom: insets.bottom }]}>

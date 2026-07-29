@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
+  AppState,
   FlatList,
   Keyboard,
   Platform,
@@ -22,12 +23,10 @@ import PlaceCard from "@/components/PlaceCard";
 import PlacesMap from "@/components/PlacesMap";
 import SuggestionForm from "@/components/SuggestionForm";
 import { distanceKm, formatDistance } from "@/lib/distance";
+import { FALLBACK_LOCATION, isInCoverage } from "@/lib/geo";
 import { computePrayerTimes, PrayerTimes } from "@/lib/prayerTimes";
 import { submitNewPlaceSuggestion } from "@/lib/feedback";
 import { colors, radius, spacing } from "@/lib/theme";
-
-// Fallback when location is unavailable: central London (Charing Cross).
-const FALLBACK_LOCATION = { lat: 51.5074, lng: -0.1278 };
 
 // The list shows a handful of nearby, reasonable options -- not the whole
 // dataset. The map still shows every matching pin.
@@ -40,6 +39,12 @@ type SearchOrigin = { lat: number; lng: number; label: string };
 
 // Module-level so the reference is stable across renders (helps FlatList).
 const keyExtractor = (item: Result) => item.place.id;
+
+/** Local calendar day, e.g. "2026-7-29" — changes exactly at midnight. */
+function todayKey(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+}
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -57,6 +62,26 @@ export default function HomeScreen() {
   const [query, setQuery] = useState("");
   const [searchOrigin, setSearchOrigin] = useState<SearchOrigin | null>(null);
   const [searchNote, setSearchNote] = useState<string | null>(null);
+  const [dateKey, setDateKey] = useState(() => todayKey());
+
+  // Roll the prayer-times bar over at midnight. Without this the memo below
+  // never re-runs on a new day: a user who leaves the app open (or foregrounds
+  // it the next morning without moving 250 m) would see yesterday's times.
+  useEffect(() => {
+    const update = () =>
+      setDateKey((prev) => {
+        const next = todayKey();
+        return next === prev ? prev : next;
+      });
+    const id = setInterval(update, 30_000);
+    const sub = AppState.addEventListener("change", (state) => {
+      if (state === "active") update();
+    });
+    return () => {
+      clearInterval(id);
+      sub.remove();
+    };
+  }, []);
 
   // Get location once at launch, then keep it updated as the user moves
   // (re-sorts distances after every ~250 m). No account, no tracking --
@@ -139,6 +164,9 @@ export default function HomeScreen() {
   );
 
   // "I'm going here" -- geocode the query and measure distances from there.
+  // Hits are only accepted inside the coverage area: the platform geocoder
+  // resolves "Stratford" to Stratford-upon-Avon (or Ontario) just as happily
+  // as Stratford E15, and anchoring distances there would be silently wrong.
   const searchArea = useCallback(async () => {
     const text = query.trim();
     if (!text) return;
@@ -146,14 +174,21 @@ export default function HomeScreen() {
     if (Platform.OS === "web") return; // typing already filters names on web
     setSearchNote(null);
     try {
-      const matches = await Location.geocodeAsync(text);
-      const hit = matches[0];
+      const findHit = async (q: string) =>
+        (await Location.geocodeAsync(q)).find((m) =>
+          isInCoverage(m.latitude, m.longitude),
+        ) ?? null;
+      const hit =
+        (await findHit(text)) ??
+        (text.toLowerCase().includes("london")
+          ? null
+          : await findHit(`${text}, London`));
       if (hit) {
         setSearchOrigin({ lat: hit.latitude, lng: hit.longitude, label: text });
         setQuery("");
       } else {
         setSearchNote(
-          `Couldn't find "${text}" \u2014 showing name matches instead.`,
+          `Couldn't find "${text}" in the London area \u2014 showing name matches instead.`,
         );
       }
     } catch {
@@ -173,11 +208,24 @@ export default function HomeScreen() {
   // always follow the user's real location.
   const origin = searchOrigin ?? gpsOrigin;
 
+  // Only the calculation-relevant settings: depending on the whole settings
+  // object meant toggling a facility filter recomputed prayer times.
+  const calcOptions = useMemo(
+    () => ({
+      method: settings.method,
+      madhab: settings.madhab,
+      shafaq: settings.shafaq,
+    }),
+    [settings.method, settings.madhab, settings.shafaq],
+  );
+
   // Prayer times are computed on-device (see src/lib/prayerCalc.ts) --
-  // instant and offline, following the user's Settings choices.
+  // instant and offline, following the user's Settings choices. dateKey is a
+  // deliberate dependency: it invalidates this memo at midnight.
   const times = useMemo<PrayerTimes | null>(
-    () => computePrayerTimes(gpsOrigin.lat, gpsOrigin.lng, settings),
-    [gpsOrigin.lat, gpsOrigin.lng, settings],
+    () => computePrayerTimes(gpsOrigin.lat, gpsOrigin.lng, calcOptions),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [gpsOrigin.lat, gpsOrigin.lng, calcOptions, dateKey],
   );
 
   // Two-stage memo: distances/sorting only recompute when location or data
@@ -194,14 +242,16 @@ export default function HomeScreen() {
   );
 
   // Filter (must have ALL selected facilities + match the typed query),
-  // preserving nearest-first order.
+  // preserving nearest-first order. Jumu'ah-only venues are hidden by
+  // default, but a typed query overrides that: searching a venue by name is
+  // a stronger signal of intent than the default suppression.
   const results = useMemo(() => {
     const selected = [...activeFilters]; // spread once, not once per place
     const q = query.trim().toLowerCase();
     return byDistance.filter(
       ({ place }) =>
         selected.every((key) => place.facilities[key]) &&
-        (!place.jumuahOnly || activeFilters.has("jumuah")) &&
+        (!place.jumuahOnly || activeFilters.has("jumuah") || q.length > 0) &&
         (!q ||
           place.name.toLowerCase().includes(q) ||
           place.address.toLowerCase().includes(q)),
@@ -241,7 +291,12 @@ export default function HomeScreen() {
     <View style={styles.searchRow}>
       <TextInput
         style={styles.searchInput}
-        placeholder='Try "Stratford" or a masjid name...'
+        // Area search is native-only (no geocoder on web) -- don't promise it.
+        placeholder={
+          Platform.OS === "web"
+            ? "Search by name or address..."
+            : 'Try "Stratford" or a masjid name...'
+        }
         placeholderTextColor={colors.textSecondary}
         value={query}
         onChangeText={setQuery}
@@ -349,22 +404,21 @@ export default function HomeScreen() {
           >
             <Text style={styles.emptyButtonLabel}>Add a missing place</Text>
           </TouchableOpacity>
+        </View>
+      }
+      // The form lives ONLY in the footer (which renders below the empty
+      // state too). A second copy in ListEmptyComponent used to remount --
+      // and wipe -- a half-typed draft whenever a keystroke toggled the list
+      // between empty and non-empty.
+      ListFooterComponent={
+        <View style={styles.listFooter}>
           {showNewPlaceForm ? (
             <SuggestionForm
               placeholder="Name, address, type, facilities, and a link if you have one..."
               onSend={submitNewPlaceSuggestion}
             />
-          ) : null}
-        </View>
-      }
-      ListFooterComponent={
-        <View style={styles.listFooter}>
-          {showNewPlaceForm && listResults.length > 0 ? (
-            <SuggestionForm
-              placeholder="Name, address, type, facilities, and a link if you have one..."
-              onSend={submitNewPlaceSuggestion}
-            />
-          ) : (
+          ) : listResults.length > 0 ? (
+            // The empty state has its own "Add a missing place" CTA.
             <View style={styles.listFooterRow}>
               <Text style={styles.listFooterText}>Missing a place? </Text>
               <TouchableOpacity
@@ -375,7 +429,7 @@ export default function HomeScreen() {
                 <Text style={styles.listFooterLink}>Suggest it</Text>
               </TouchableOpacity>
             </View>
-          )}
+          ) : null}
         </View>
       }
     />

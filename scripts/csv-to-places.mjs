@@ -106,6 +106,64 @@ const OPTIONAL_TEXT_COLUMNS = [
 ];
 
 const PLACE_TYPES = new Set(["masjid", "musalla", "multi_faith_room"]);
+const FACILITY_KEYS = [
+  "sistersSpace",
+  "wudu",
+  "disabledAccess",
+  "parking",
+  "jumuah",
+  "janazah",
+];
+const JAMAAT_PRAYER_KEYS = ["fajr", "dhuhr", "asr", "maghrib", "isha"];
+const CONFIDENCE_VALUES = new Set(["verified", "community", "unverified"]);
+const URL_COLUMNS = new Set(["website", "facebook", "instagram"]);
+const TIME_RE = /^\d{1,2}:\d{2}$/;
+
+/**
+ * The app trusts places.json via a plain type cast (src/data/places.ts), so
+ * this build step must enforce the full shape, not just "is valid JSON".
+ */
+function validateFacilities(value, id) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    throw new Error(`Row "${id}": facilities must be a JSON object`);
+  }
+  const facilities = {};
+  for (const key of FACILITY_KEYS) {
+    const v = value[key];
+    if (v !== undefined && typeof v !== "boolean") {
+      throw new Error(`Row "${id}": facilities.${key} must be true/false, got ${JSON.stringify(v)}`);
+    }
+    facilities[key] = v === true;
+  }
+  return facilities;
+}
+
+function validateJamaat(value, id) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    throw new Error(`Row "${id}": jamaat must be a JSON object`);
+  }
+  if (typeof value.source !== "string" || !value.source) {
+    throw new Error(`Row "${id}": jamaat.source is required (where did the times come from?)`);
+  }
+  if (typeof value.recordedOn !== "string" || !value.recordedOn) {
+    throw new Error(`Row "${id}": jamaat.recordedOn is required (ISO date the times were recorded)`);
+  }
+  const jamaat = { source: value.source, recordedOn: value.recordedOn };
+  let hasTime = false;
+  for (const key of JAMAAT_PRAYER_KEYS) {
+    const t = value[key];
+    if (t === undefined) continue;
+    if (typeof t !== "string" || !TIME_RE.test(t.trim())) {
+      throw new Error(`Row "${id}": jamaat.${key} must be "HH:MM", got ${JSON.stringify(t)}`);
+    }
+    jamaat[key] = t.trim();
+    hasTime = true;
+  }
+  if (!hasTime) {
+    throw new Error(`Row "${id}": jamaat has no prayer times`);
+  }
+  return jamaat;
+}
 
 const seen = new Set();
 const places = records.map((record) => {
@@ -122,7 +180,10 @@ const places = records.map((record) => {
     address: get("address"),
     lat: Number(get("lat")),
     lng: Number(get("lng")),
-    facilities: parseJson(get("facilities"), "facilities", id),
+    facilities: validateFacilities(
+      parseJson(get("facilities"), "facilities", id),
+      id,
+    ),
   };
 
   if (!id || !place.name || Number.isNaN(place.lat) || Number.isNaN(place.lng)) {
@@ -148,11 +209,20 @@ const places = records.map((record) => {
   }
 
   const jamaat = get("jamaat");
-  if (jamaat) place.jamaat = parseJson(jamaat, "jamaat", id);
+  if (jamaat) place.jamaat = validateJamaat(parseJson(jamaat, "jamaat", id), id);
 
   for (const [csvName, key] of OPTIONAL_TEXT_COLUMNS) {
     const value = get(csvName);
-    if (value) place[key] = value;
+    if (!value) continue;
+    if (key === "confidence" && !CONFIDENCE_VALUES.has(value)) {
+      throw new Error(
+        `Row "${id}": confidence "${value}" is not one of: ${[...CONFIDENCE_VALUES].join(", ")}`,
+      );
+    }
+    if (URL_COLUMNS.has(key) && !/^https?:\/\//i.test(value)) {
+      throw new Error(`Row "${id}": ${key} must start with http(s)://, got "${value}"`);
+    }
+    place[key] = value;
   }
 
   return place;

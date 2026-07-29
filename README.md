@@ -8,7 +8,7 @@ An Expo (React Native + TypeScript) app for iOS, Android **and** web from one co
 - **Area search**: type "Stratford" and press search — distances re-anchor to that area (on-device geocoding). Typing also live-filters by name/address, which is what web uses (no geocoder there).
 - **Facility filters**: sisters' space, wudu, disabled access, parking, jumu'ah, janazah — persisted across launches.
 - **Place detail page**: get directions, call/website/social links, jumu'ah times, jamaat times next to calculated start times, facility checklist, verification status + source, and "suggest an edit".
-- **Prayer times calculated on-device** (`src/lib/prayerCalc.ts` — no API): Moonsighting Committee (UK-appropriate) or Muslim World League, Asr at 1 or 2 mithl. A dedicated prayer screen shows the full schedule with current/next prayer countdown, previous/next day navigation and the Hijri date.
+- **Prayer times calculated on-device** (`src/lib/prayerCalc.ts` — no API): Moonsighting Committee (UK-appropriate) or Muslim World League, Asr at 1 or 2 mithl, and a Shafaq (Isha twilight) choice for the Moonsighting method. A dedicated prayer screen shows the full schedule with current/next prayer countdown, previous/next day navigation and the Hijri date.
 - **Live data with offline fallback**: places load from Supabase (realtime updates + refresh when the app foregrounds), are cached on-device, and fall back to the bundled dataset in `src/data/places.json` when offline or unconfigured.
 - **Suggestions**: "suggest an edit" and "add a missing place" write to the Supabase `submissions` table; if that fails, a pre-filled email is opened instead, and the form says which one happened.
 - **Privacy by design**: location never leaves the device; no accounts, no analytics. Suggestions are the only data ever sent.
@@ -53,6 +53,15 @@ Supabase credentials live in `.env` (gitignored):
 
 Without them the app still runs fully, using the bundled dataset. The anon key is shipped inside the app bundle by design, so the Supabase project **must** have Row Level Security enabled: public read on `places`, insert-only on `submissions`.
 
+To set up a fresh Supabase project, run `scripts/schema.sql` in the SQL editor — it creates both tables **with the RLS policies the security model depends on** (plus a length cap on submissions and the realtime publication), then seed data with `scripts/seed-places.sql`.
+
+## Development
+
+    npm test           # unit tests (prayer calculation goldens, Hijri, distance)
+    npm run typecheck  # strict TypeScript, no emit
+
+The prayer-time tests pin golden values that were cross-checked against published ephemeris data and the adhan library's Moonsighting tables — if one fails after a change to `prayerCalc.ts`, the astronomy moved and that must be deliberate.
+
 ## Project structure
 
     app/                     Screens (file-based routing via expo-router)
@@ -80,10 +89,13 @@ Without them the app still runs fully, using the bundled dataset. The anon key i
         prayerTimes.ts       Display helpers over prayerCalc
         hijri.ts             Tabular Hijri date conversion
         distance.ts          Haversine distance + formatting
+        geo.ts               Fallback location + coverage bounding box
         feedback.ts          Submissions: Supabase with email fallback
         supabase.ts          Shared client (null when unconfigured)
         theme.ts             Colours, spacing, radii
+        *.test.ts            Unit tests (vitest)
     scripts/
+      schema.sql             Create tables + RLS policies (run first, once)
       csv-to-places.mjs      Rebuild src/data/places.json from a CSV export
       gen-pin-assets.js      Regenerate map pin PNGs in assets/pins/
       seed-places.sql        Seed/reset the Supabase `places` table

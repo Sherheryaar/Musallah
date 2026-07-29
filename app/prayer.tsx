@@ -10,11 +10,10 @@ import { Link } from "expo-router";
 import * as Location from "expo-location";
 
 import { useSettings } from "@/context/SettingsContext";
+import { FALLBACK_LOCATION } from "@/lib/geo";
 import { formatHijri } from "@/lib/hijri";
 import { computePrayerSchedule, PrayerScheduleEntry } from "@/lib/prayerTimes";
 import { colors, radius, spacing } from "@/lib/theme";
-
-const FALLBACK_LOCATION = { lat: 51.5074, lng: -0.1278 };
 
 const WEEKDAYS = [
   "Sunday",
@@ -92,6 +91,7 @@ function getStatus(
 export default function PrayerScreen() {
   const { settings } = useSettings();
   const [location, setLocation] = useState(FALLBACK_LOCATION);
+  const [usingFallback, setUsingFallback] = useState(false);
   const [dayOffset, setDayOffset] = useState(0);
   const [now, setNow] = useState(() => new Date());
 
@@ -108,7 +108,13 @@ export default function PrayerScreen() {
     (async () => {
       try {
         const { status } = await Location.getForegroundPermissionsAsync();
-        if (status !== "granted") return;
+        if (status !== "granted") {
+          // Permission was never granted (or this screen was deep-linked to
+          // before the home screen could ask). Say so instead of silently
+          // showing central-London times as if they were the user's.
+          if (!cancelled) setUsingFallback(true);
+          return;
+        }
         const pos =
           (await Location.getLastKnownPositionAsync({
             maxAge: 10 * 60 * 1000,
@@ -120,7 +126,7 @@ export default function PrayerScreen() {
           setLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
         }
       } catch {
-        // Fallback location already set.
+        if (!cancelled) setUsingFallback(true);
       }
     })();
     return () => {
@@ -130,27 +136,43 @@ export default function PrayerScreen() {
 
   const selectedDate = useMemo(() => addDays(now, dayOffset), [now, dayOffset]);
 
+  // Only the calculation-relevant settings, so unrelated settings changes
+  // (facility filters) don't recompute the schedule.
+  const calcOptions = useMemo(
+    () => ({
+      method: settings.method,
+      madhab: settings.madhab,
+      shafaq: settings.shafaq,
+    }),
+    [settings.method, settings.madhab, settings.shafaq],
+  );
+
   const schedule = useMemo(
     () =>
-      computePrayerSchedule(location.lat, location.lng, settings, selectedDate),
-    [location, settings, selectedDate],
+      computePrayerSchedule(
+        location.lat,
+        location.lng,
+        calcOptions,
+        selectedDate,
+      ),
+    [location, calcOptions, selectedDate],
   );
 
   const status = useMemo(() => {
     const today =
       dayOffset === 0
         ? schedule
-        : computePrayerSchedule(location.lat, location.lng, settings, now);
+        : computePrayerSchedule(location.lat, location.lng, calcOptions, now);
     if (!today) return null;
     const tomorrow = computePrayerSchedule(
       location.lat,
       location.lng,
-      settings,
+      calcOptions,
       addDays(now, 1),
     );
     const tomorrowFajr = tomorrow?.find((e) => e.key === "fajr")?.time ?? null;
     return getStatus(today, tomorrowFajr, now);
-  }, [schedule, dayOffset, location, settings, now]);
+  }, [schedule, dayOffset, location, calcOptions, now]);
 
   // Only highlight a row when we are actually looking at today.
   const highlightKey =
@@ -248,6 +270,13 @@ export default function PrayerScreen() {
           Prayer times are unavailable for this location.
         </Text>
       )}
+
+      {usingFallback ? (
+        <Text style={styles.note}>
+          Times shown for central London \u2014 enable location access for your
+          exact times.
+        </Text>
+      ) : null}
 
       <Text style={styles.footnote}>
         {`Calculated on this device \u00B7 ${methodLabel} \u00B7 Asr at ${mithlLabel}. `}
