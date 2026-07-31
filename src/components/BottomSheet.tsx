@@ -17,11 +17,21 @@ import { spacing, type ThemeColors } from "@/lib/theme";
 // keeps its own scrolling because the pan responder only lives on the
 // handle area, so the two gestures never fight.
 
+// Vertical room reserved for `aboveSheet` controls (button + breathing room).
+const ABOVE_SHEET_HEIGHT = 64;
+
 type Props = {
   children: React.ReactNode;
+  /**
+   * Floating controls pinned just above the sheet's top-right corner (e.g.
+   * the "back to my location" map button). They ride the sheet between the
+   * half and peek positions; when the sheet is opened full they stay put and
+   * the sheet slides over them — there is no visible map to act on then.
+   */
+  aboveSheet?: React.ReactNode;
 };
 
-export default function BottomSheet({ children }: Props) {
+export default function BottomSheet({ children, aboveSheet }: Props) {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { height: windowHeight } = useWindowDimensions();
@@ -113,8 +123,29 @@ export default function BottomSheet({ children }: Props) {
     }).start();
   };
 
+  // Rides the sheet's top edge, but never above the half position: past
+  // that the sheet (rendered later, higher elevation) covers it, which both
+  // hides it and blocks its touches while the map is hidden anyway.
+  const aboveSheetTop = top.interpolate({
+    inputRange: [snaps.half, snaps.peek],
+    outputRange: [
+      snaps.half - ABOVE_SHEET_HEIGHT,
+      snaps.peek - ABOVE_SHEET_HEIGHT,
+    ],
+    extrapolate: "clamp",
+  });
+
   return (
-    <Animated.View style={[styles.sheet, { top: clampedTop }]}>
+    <>
+      {aboveSheet ? (
+        <Animated.View
+          pointerEvents="box-none"
+          style={[styles.aboveSheet, { top: aboveSheetTop }]}
+        >
+          {aboveSheet}
+        </Animated.View>
+      ) : null}
+      <Animated.View style={[styles.sheet, { top: clampedTop }]}>
       <View
         style={styles.handleArea}
         {...panResponder.panHandlers}
@@ -135,12 +166,24 @@ export default function BottomSheet({ children }: Props) {
       <View style={[styles.body, { paddingBottom: insets.bottom }]}>
         {children}
       </View>
-    </Animated.View>
+      </Animated.View>
+    </>
   );
 }
 
 const createStyles = (colors: ThemeColors) =>
   StyleSheet.create({
+  aboveSheet: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    height: ABOVE_SHEET_HEIGHT,
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    alignItems: "flex-end",
+    paddingRight: spacing.l,
+    paddingBottom: spacing.m,
+  },
   sheet: {
     position: "absolute",
     left: 0,

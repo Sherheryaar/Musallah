@@ -69,6 +69,8 @@ type Props = {
   userLocation: { lat: number; lng: number } | null;
   /** When set (area search), the map animates to this point. */
   focus?: { lat: number; lng: number } | null;
+  /** Increment to fly the map back to the user's location. */
+  recenterNonce?: number;
   onSelect: (id: string) => void;
 };
 
@@ -76,6 +78,7 @@ export default function PlacesMap({
   results,
   userLocation,
   focus,
+  recenterNonce,
   onSelect,
 }: Props) {
   const { scheme } = useTheme();
@@ -121,6 +124,25 @@ export default function PlacesMap({
       );
     }
   }, [userLocation, focus]);
+
+  // "Back to my location" button: fly home whenever the nonce ticks. A
+  // nonce (not a boolean) so pressing the button twice in a row still works.
+  const lastRecenter = useRef(recenterNonce ?? 0);
+  useEffect(() => {
+    const nonce = recenterNonce ?? 0;
+    if (nonce === lastRecenter.current) return;
+    lastRecenter.current = nonce;
+    if (!userLocation) return;
+    mapRef.current?.animateToRegion(
+      {
+        latitude: userLocation.lat,
+        longitude: userLocation.lng,
+        latitudeDelta: 0.05,
+        longitudeDelta: 0.05,
+      },
+      600,
+    );
+  }, [recenterNonce, userLocation]);
 
   // Fly to the searched area when one is chosen.
   useEffect(() => {

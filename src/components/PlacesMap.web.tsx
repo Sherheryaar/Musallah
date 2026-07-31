@@ -7,6 +7,8 @@ type Props = {
   userLocation: { lat: number; lng: number } | null;
   /** When set (area search), the map animates to this point. Unused on web. */
   focus?: { lat: number; lng: number } | null;
+  /** Increment to fly the map back to the user's location. Unused on web. */
+  recenterNonce?: number;
   onSelect: (id: string) => void;
 };
 

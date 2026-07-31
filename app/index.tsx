@@ -87,6 +87,7 @@ export default function HomeScreen() {
   const [searchOrigin, setSearchOrigin] = useState<SearchOrigin | null>(null);
   const [searchNote, setSearchNote] = useState<string | null>(null);
   const [dateKey, setDateKey] = useState(() => todayKey());
+  const [recenterNonce, setRecenterNonce] = useState(0);
 
   // Roll the prayer-times bar over at midnight. Without this the memo below
   // never re-runs on a new day: a user who leaves the app open (or foregrounds
@@ -232,6 +233,14 @@ export default function HomeScreen() {
   const clearSearchOrigin = useCallback(() => {
     setSearchOrigin(null);
     setSearchNote(null);
+  }, []);
+
+  // "Back to my location": fly the map home and drop any area search, so
+  // distances re-anchor to the user at the same time as the view does.
+  const recenter = useCallback(() => {
+    setSearchOrigin(null);
+    setSearchNote(null);
+    setRecenterNonce((n) => n + 1);
   }, []);
 
   // Distances come from the searched area when one is set; prayer times
@@ -532,6 +541,7 @@ export default function HomeScreen() {
               results={mapResults}
               userLocation={location}
               focus={searchOrigin}
+              recenterNonce={recenterNonce}
               onSelect={openPlace}
             />
           </View>
@@ -546,7 +556,19 @@ export default function HomeScreen() {
               </Text>
             ) : null}
           </View>
-          <BottomSheet>
+          <BottomSheet
+            aboveSheet={
+              <TouchableOpacity
+                style={styles.recenterButton}
+                onPress={recenter}
+                accessibilityRole="button"
+                accessibilityLabel="Back to my location"
+              >
+                {/* Blue on purpose — it points at the blue you-are-here dot. */}
+                <Text style={styles.recenterGlyph}>{"◎"}</Text>
+              </TouchableOpacity>
+            }
+          >
             {timesBar}
             {list}
           </BottomSheet>
@@ -760,6 +782,28 @@ const createStyles = (colors: ThemeColors) =>
     fontSize: 18,
     color: colors.textSecondary,
     alignSelf: "center",
+  },
+  recenterButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: colors.canvas,
+    borderWidth: 1,
+    borderColor: colors.border,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    // Below the sheet's elevation (12) so the sheet slides over it when
+    // dragged to full — see BottomSheet's aboveSheet contract.
+    elevation: 4,
+  },
+  recenterGlyph: {
+    fontSize: 24,
+    lineHeight: 28,
+    color: colors.accent,
   },
   listContainer: {
     flex: 1,

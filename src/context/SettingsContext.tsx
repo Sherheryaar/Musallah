@@ -9,34 +9,16 @@ import React, {
 } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-import type { CalculationMethodKey, Madhab, Shafaq } from "@/lib/prayerCalc";
-import { FACILITY_KEYS, type FacilityKey } from "@/data/places";
+import {
+  DEFAULT_SETTINGS,
+  LEGACY_SETTINGS_STORAGE_KEY,
+  migrateV1Settings,
+  sanitizeSettings,
+  SETTINGS_STORAGE_KEY,
+  type PrayerSettings,
+} from "./settingsStorage";
 
-const STORAGE_KEY = "settings:v1";
-
-export type PrayerSettings = {
-  /** Fajr/Isha rule set. Moonsighting Committee is recommended for the UK. */
-  method: CalculationMethodKey;
-  /** Asr juristic method: "shafi" = 1 mithl, "hanafi" = 2 mithl. */
-  madhab: Madhab;
-  /** Moonsighting Isha twilight rule: general (default), ahmer, or abyad. */
-  shafaq: Shafaq;
-  /**
-   * Facility filters chosen on the home screen (sisters' space, wudu, ...).
-   * Persisted so a choice made on first launch sticks on every later launch.
-   */
-  facilityFilters: FacilityKey[];
-};
-
-export const DEFAULT_SETTINGS: PrayerSettings = {
-  method: "moonsighting",
-  // Hanafi (2 mithl, later Asr) by default — the majority practice among
-  // UK Muslims. Anyone following 1 mithl changes it once in Settings and
-  // the choice persists.
-  madhab: "hanafi",
-  shafaq: "general",
-  facilityFilters: [],
-};
+export { DEFAULT_SETTINGS, type PrayerSettings } from "./settingsStorage";
 
 type SettingsContextValue = {
   settings: PrayerSettings;
@@ -54,41 +36,46 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   // race where disk hydration lands *after* a first-launch tap and silently
   // reverts the user's choice.
   const userEdited = useRef(false);
+  // Only the fields the user has explicitly set — this, not the full
+  // settings object, is what gets written to disk. Writing everything froze
+  // then-current defaults into storage, so a later default change (shafi →
+  // hanafi Asr) never reached anyone who had touched any other setting.
+  const persisted = useRef<Partial<PrayerSettings>>({});
 
   // Hydrate once from disk. Defaults render immediately; a saved preference
   // lands a few milliseconds later, well before the user can notice.
   useEffect(() => {
     let cancelled = false;
-    AsyncStorage.getItem(STORAGE_KEY)
-      .then((raw) => {
-        if (cancelled || !raw || userEdited.current) return;
-        const parsed = JSON.parse(raw) as Partial<PrayerSettings>;
-        setSettings((prev) => ({
-          ...prev,
-          ...(parsed.method === "moonsighting" || parsed.method === "mwl"
-            ? { method: parsed.method }
-            : null),
-          ...(parsed.madhab === "shafi" || parsed.madhab === "hanafi"
-            ? { madhab: parsed.madhab }
-            : null),
-          ...(parsed.shafaq === "general" ||
-          parsed.shafaq === "ahmer" ||
-          parsed.shafaq === "abyad"
-            ? { shafaq: parsed.shafaq }
-            : null),
-          ...(Array.isArray(parsed.facilityFilters)
-            ? {
-                facilityFilters: parsed.facilityFilters.filter(
-                  (key): key is FacilityKey =>
-                    (FACILITY_KEYS as string[]).includes(key as string),
-                ),
-              }
-            : null),
-        }));
-      })
-      .catch(() => {
+    (async () => {
+      try {
+        let stored: Partial<PrayerSettings> | null = null;
+        const raw = await AsyncStorage.getItem(SETTINGS_STORAGE_KEY);
+        if (raw) {
+          stored = sanitizeSettings(JSON.parse(raw));
+        } else {
+          const legacy = await AsyncStorage.getItem(
+            LEGACY_SETTINGS_STORAGE_KEY,
+          );
+          if (legacy) {
+            stored = migrateV1Settings(JSON.parse(legacy));
+            await AsyncStorage.setItem(
+              SETTINGS_STORAGE_KEY,
+              JSON.stringify(stored),
+            );
+            await AsyncStorage.removeItem(LEGACY_SETTINGS_STORAGE_KEY);
+          }
+        }
+        if (cancelled || !stored) return;
+        // Anything the user set before hydration finished wins over disk.
+        persisted.current = { ...stored, ...persisted.current };
+        if (!userEdited.current) {
+          const fromDisk = stored;
+          setSettings((prev) => ({ ...prev, ...fromDisk }));
+        }
+      } catch {
         // Corrupt/missing settings must never break launch -- keep defaults.
-      });
+      }
+    })();
     return () => {
       cancelled = true;
     };
@@ -96,14 +83,13 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 
   const updateSettings = useCallback((patch: Partial<PrayerSettings>) => {
     userEdited.current = true;
-    setSettings((prev) => {
-      const next = { ...prev, ...patch };
-      // Fire-and-forget persistence -- never block the UI on a disk write.
-      void AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(next)).catch(
-        () => {},
-      );
-      return next;
-    });
+    persisted.current = { ...persisted.current, ...patch };
+    // Fire-and-forget persistence -- never block the UI on a disk write.
+    void AsyncStorage.setItem(
+      SETTINGS_STORAGE_KEY,
+      JSON.stringify(persisted.current),
+    ).catch(() => {});
+    setSettings((prev) => ({ ...prev, ...patch }));
   }, []);
 
   const value = useMemo(
