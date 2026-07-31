@@ -5,16 +5,17 @@
 export const FALLBACK_LOCATION = { lat: 51.5074, lng: -0.1278 };
 
 /**
- * Rough Greater London bounding box. Area search only accepts geocoder hits
- * inside it — without this, "Stratford" happily resolves to
- * Stratford-upon-Avon (or Ontario) and every distance silently re-anchors
- * to the wrong place.
+ * Rough UK & Ireland bounding box — matches the dataset's actual coverage
+ * (MuslimsInBritain.org spans both). Area search only accepts geocoder hits
+ * inside it, so "Paris" can't silently re-anchor every distance to France.
+ * Ambiguity WITHIN the box ("Stratford" in London vs Stratford-upon-Avon)
+ * is resolved by picking the hit nearest the user, not the first hit.
  */
 export const COVERAGE_BOUNDS = {
-  minLat: 51.2,
-  maxLat: 51.8,
-  minLng: -0.6,
-  maxLng: 0.4,
+  minLat: 49.0,
+  maxLat: 61.0, // includes Shetland
+  minLng: -11.0, // includes the west of Ireland
+  maxLng: 2.0,
 };
 
 export function isInCoverage(lat: number, lng: number): boolean {

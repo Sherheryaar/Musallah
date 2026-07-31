@@ -156,7 +156,9 @@ export default function PlaceDetailScreen() {
       <Stack.Screen options={ { title: PLACE_TYPE_LABELS[place.type] } } />
 
       <Text style={styles.name}>{place.name}</Text>
-      <Text style={styles.address}>{place.address}</Text>
+      {place.address ? (
+        <Text style={styles.address}>{place.address}</Text>
+      ) : null}
 
       <TouchableOpacity
         style={styles.directionsButton}

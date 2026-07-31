@@ -12,75 +12,21 @@
  */
 const fs = require("fs");
 const path = require("path");
-const zlib = require("zlib");
+const { encodePng, hexToRgb } = require("./lib/png");
 
-// Colours mirror src/lib/theme.ts -- keep them in sync if the theme changes.
+// Colours mirror placeTypeColors in src/lib/theme.ts -- keep in sync.
+// No blue: the map's user-location dot is blue, and a blue pin was
+// indistinguishable from "you are here".
 const PINS = {
-  "dot-masjid": "#2783DE", // colors.accent
-  "dot-musalla": "#46A171", // colors.positive
-  "dot-multi-faith": "#D5803B", // colors.attention
+  "dot-masjid": "#2E7D57", // placeTypeColors.masjid (green)
+  "dot-musalla": "#D5803B", // placeTypeColors.musalla (amber)
+  "dot-multi-faith": "#7A5FA8", // placeTypeColors.multi_faith_room (purple)
 };
 
 const SIZE_PT = 16; // rendered size in points
 const BORDER_PT = 2.5; // white ring width in points
 
-// ---- Minimal PNG encoder (8-bit RGBA, no filtering) ----
-
-const CRC_TABLE = (() => {
-  const t = [];
-  for (let n = 0; n < 256; n++) {
-    let c = n;
-    for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
-    t[n] = c >>> 0;
-  }
-  return t;
-})();
-
-function crc32(buf) {
-  let c = 0xffffffff;
-  for (const b of buf) c = CRC_TABLE[(c ^ b) & 0xff] ^ (c >>> 8);
-  return (c ^ 0xffffffff) >>> 0;
-}
-
-function chunk(type, data) {
-  const len = Buffer.alloc(4);
-  len.writeUInt32BE(data.length);
-  const t = Buffer.from(type, "ascii");
-  const crc = Buffer.alloc(4);
-  crc.writeUInt32BE(crc32(Buffer.concat([t, data])));
-  return Buffer.concat([len, t, data, crc]);
-}
-
-function encodePng(width, height, rgba) {
-  const sig = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
-  const ihdr = Buffer.alloc(13);
-  ihdr.writeUInt32BE(width, 0);
-  ihdr.writeUInt32BE(height, 4);
-  ihdr[8] = 8; // bit depth
-  ihdr[9] = 6; // colour type: RGBA
-  // Each scanline is prefixed with a 0 (no filter) byte.
-  const raw = Buffer.alloc((width * 4 + 1) * height);
-  for (let y = 0; y < height; y++) {
-    raw[y * (width * 4 + 1)] = 0;
-    rgba.copy(raw, y * (width * 4 + 1) + 1, y * width * 4, (y + 1) * width * 4);
-  }
-  return Buffer.concat([
-    sig,
-    chunk("IHDR", ihdr),
-    chunk("IDAT", zlib.deflateSync(raw, { level: 9 })),
-    chunk("IEND", Buffer.alloc(0)),
-  ]);
-}
-
 // ---- Dot drawing (4x4 supersampled for smooth edges) ----
-
-function hexToRgb(hex) {
-  return [
-    parseInt(hex.slice(1, 3), 16),
-    parseInt(hex.slice(3, 5), 16),
-    parseInt(hex.slice(5, 7), 16),
-  ];
-}
 
 function makeDot(scale, fillHex) {
   const size = SIZE_PT * scale;

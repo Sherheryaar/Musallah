@@ -273,8 +273,8 @@ export default function PrayerScreen() {
 
       {usingFallback ? (
         <Text style={styles.note}>
-          Times shown for central London \u2014 enable location access for your
-          exact times.
+          Times shown for central London {"\u2014"} enable location access for
+          your exact times.
         </Text>
       ) : null}
 

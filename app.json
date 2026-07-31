@@ -4,6 +4,7 @@
     "slug": "masjid-locator",
     "version": "0.1.4",
     "scheme": "masjidlocator",
+    "icon": "./assets/icon.png",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
@@ -16,7 +17,8 @@
       "package": "com.sheheryaarbaber.masjidlocator"
     },
     "web": {
-      "output": "static"
+      "output": "single",
+      "favicon": "./public/icon-192.png"
     },
     "plugins": [
       "expo-router",

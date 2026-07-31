@@ -16,6 +16,19 @@ export const colors = {
   attentionSoft: "#FBEBDE",
 };
 
+/**
+ * One colour per place type — used for map pins, the map legend, and the
+ * type badges on list cards, so the colour language is consistent
+ * everywhere. Deliberately NO blue: the map's user-location dot is blue on
+ * both platforms, and a blue pin was indistinguishable from "you are here".
+ * Mirrored in scripts/gen-pin-assets.js (regenerate the PNGs on change).
+ */
+export const placeTypeColors = {
+  masjid: "#2E7D57",
+  musalla: "#D5803B",
+  multi_faith_room: "#7A5FA8",
+} as const;
+
 export const spacing = {
   xs: 4,
   s: 8,

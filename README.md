@@ -1,11 +1,11 @@
 # Masjid & Prayer Space Locator
 
-An Expo (React Native + TypeScript) app for iOS, Android **and** web from one codebase: find the nearest masjid or prayer space in London, check facilities, and see accurate prayer times — no account, no tracking.
+An Expo (React Native + TypeScript) app for iOS, Android **and** web from one codebase: find the nearest masjid or prayer space, check facilities, and see accurate prayer times — no account, no tracking. Covers 2,200+ places across the UK & Ireland (data from [MuslimsInBritain.org](https://muslimsinbritain.org), with permission).
 
 ## What's in the app
 
 - **Map-first home screen** (iOS/Android): every matching place pinned on a map, with a draggable bottom sheet listing the nearest places. Web falls back to a list-only layout.
-- **Area search**: type "Stratford" and press search — distances re-anchor to that area (on-device geocoding). Typing also live-filters by name/address, which is what web uses (no geocoder there).
+- **Area search**: type "Stratford" and press search — distances re-anchor to that area (on-device geocoding). Ambiguous names resolve to the hit nearest you, and hits outside the UK & Ireland are rejected. Typing also live-filters by name/address, which is what web uses (no geocoder there).
 - **Facility filters**: sisters' space, wudu, disabled access, parking, jumu'ah, janazah — persisted across launches.
 - **Place detail page**: get directions, call/website/social links, jumu'ah times, jamaat times next to calculated start times, facility checklist, verification status + source, and "suggest an edit".
 - **Prayer times calculated on-device** (`src/lib/prayerCalc.ts` — no API): Moonsighting Committee (UK-appropriate) or Muslim World League, Asr at 1 or 2 mithl, and a Shafaq (Isha twilight) choice for the Moonsighting method. A dedicated prayer screen shows the full schedule with current/next prayer countdown, previous/next day navigation and the Hijri date.
@@ -102,15 +102,28 @@ The prayer-time tests pin golden values that were cross-checked against publishe
 
 ## Data pipeline
 
-The Supabase `places` table is the source of truth (`scripts/seed-places.sql` seeds it). The bundled offline dataset is generated from it:
+The Supabase `places` table is the source of truth. The bundled offline dataset (`src/data/places.json`) is synced from it directly:
 
-1. Supabase Dashboard → Table Editor → `places` → Export data → CSV
-2. Save it as `data/places.csv`
-3. Run:
+    npm run sync:places
 
-    npm run build:places
+This fetches every row over the public read policy (anon key from `.env`), validates each one with the same rules the app enforces at runtime, and rewrites `src/data/places.json`. Re-run it whenever the database changes meaningfully, and commit the result — it's what offline and unconfigured installs see.
 
-This validates the rows and rewrites `src/data/places.json`. Commit both files together.
+(`npm run build:places` still exists for the older CSV-export route: dashboard → export `places` as CSV → save as `data/places.csv` → run it.)
+
+## Deploying the web app
+
+The web build is a single-page app, installable as a PWA (manifest + icons in `public/`; `scripts/postbuild-web.mjs` injects the head tags after export, because SPA output ignores `+html.tsx`).
+
+    npm run build:web    # writes the site to dist/
+
+**Netlify** (config already in `netlify.toml`):
+
+1. [app.netlify.com](https://app.netlify.com) → Add new site → Import an existing project → pick this GitHub repo.
+2. Build settings are read from `netlify.toml` automatically (command `npx expo export --platform web`, publish directory `dist`).
+3. Site settings → Environment variables → add `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_ANON_KEY` (the same values as your local `.env` — the anon key is public by design).
+4. Deploy. Every push to `main` redeploys automatically.
+
+Or without linking the repo: `npm run build:web`, then drag the `dist/` folder onto [app.netlify.com/drop](https://app.netlify.com/drop) (env vars come from your local `.env` in that case).
 
 ## Notes
 

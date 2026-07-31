@@ -3,6 +3,7 @@ import { StyleSheet } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 
 import { PLACE_TYPE_LABELS, Place } from "@/data/places";
+import { formatDistance } from "@/lib/distance";
 
 const FALLBACK_REGION = {
   latitude: 51.5074,
@@ -103,12 +104,14 @@ export default function PlacesMap({
       initialRegion={initialRegion}
       showsUserLocation={userLocation !== null}
     >
-      {results.map(({ place }) => (
+      {results.map(({ place, km }) => (
         <Marker
           key={place.id}
           coordinate={{ latitude: place.lat, longitude: place.lng }}
           title={place.name}
-          description={PLACE_TYPE_LABELS[place.type]}
+          // Type + distance in the callout, so "is it walkable?" is answered
+          // without leaving the map.
+          description={`${PLACE_TYPE_LABELS[place.type]} · ${formatDistance(km)}`}
           onCalloutPress={() => onSelect(place.id)}
           image={PIN_IMAGES[place.type]}
           // Centre the dot on the coordinate (Android; iOS centres by default).

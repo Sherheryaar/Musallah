@@ -182,6 +182,12 @@ export default function SettingsScreen() {
           <Text style={styles.aboutLabel}>Prayer times</Text>
           <Text style={styles.aboutValue}>Calculated on-device</Text>
         </View>
+        <View style={[styles.aboutRow, styles.rowDivider]}>
+          <Text style={styles.aboutLabel}>Place data</Text>
+          <Text style={styles.aboutValue}>
+            MuslimsInBritain.org (with permission)
+          </Text>
+        </View>
       </View>
     </ScrollView>
   );

@@ -26,13 +26,23 @@ import { distanceKm, formatDistance } from "@/lib/distance";
 import { FALLBACK_LOCATION, isInCoverage } from "@/lib/geo";
 import { computePrayerTimes, PrayerTimes } from "@/lib/prayerTimes";
 import { submitNewPlaceSuggestion } from "@/lib/feedback";
-import { colors, radius, spacing } from "@/lib/theme";
+import { colors, placeTypeColors, radius, spacing } from "@/lib/theme";
 
 // The list shows a handful of nearby, reasonable options -- not the whole
-// dataset. The map still shows every matching pin.
+// dataset. The map shows the nearest pins up to a cap: the dataset covers
+// the whole UK (2000+ places) and rendering every marker makes the map
+// stutter, while the 300 nearest cover any zoom level someone would
+// realistically browse at.
 const MAX_LIST_RESULTS = 12;
 const MAX_LIST_DISTANCE_KM = 30;
 const MIN_LIST_RESULTS = 5;
+const MAX_MAP_PINS = 300;
+
+const LEGEND_ITEMS: { type: keyof typeof placeTypeColors; label: string }[] = [
+  { type: "masjid", label: "Masjid" },
+  { type: "musalla", label: "Prayer room" },
+  { type: "multi_faith_room", label: "Multi-faith" },
+];
 
 type Result = { place: Place; km: number };
 type SearchOrigin = { lat: number; lng: number; label: string };
@@ -163,10 +173,13 @@ export default function HomeScreen() {
     [updateSettings],
   );
 
+  const gpsOrigin = location ?? FALLBACK_LOCATION;
+
   // "I'm going here" -- geocode the query and measure distances from there.
-  // Hits are only accepted inside the coverage area: the platform geocoder
-  // resolves "Stratford" to Stratford-upon-Avon (or Ontario) just as happily
-  // as Stratford E15, and anchoring distances there would be silently wrong.
+  // Hits outside the UK & Ireland are rejected ("Paris" must not re-anchor
+  // every distance to France), and ambiguity inside the box ("Stratford" in
+  // London vs Stratford-upon-Avon) is resolved by picking the geocoder hit
+  // NEAREST the user -- the local one is almost always the one they meant.
   const searchArea = useCallback(async () => {
     const text = query.trim();
     if (!text) return;
@@ -174,21 +187,25 @@ export default function HomeScreen() {
     if (Platform.OS === "web") return; // typing already filters names on web
     setSearchNote(null);
     try {
-      const findHit = async (q: string) =>
-        (await Location.geocodeAsync(q)).find((m) =>
+      const nearestHit = async (q: string) => {
+        const matches = (await Location.geocodeAsync(q)).filter((m) =>
           isInCoverage(m.latitude, m.longitude),
-        ) ?? null;
-      const hit =
-        (await findHit(text)) ??
-        (text.toLowerCase().includes("london")
-          ? null
-          : await findHit(`${text}, London`));
+        );
+        if (matches.length === 0) return null;
+        return matches.reduce((best, m) =>
+          distanceKm(gpsOrigin.lat, gpsOrigin.lng, m.latitude, m.longitude) <
+          distanceKm(gpsOrigin.lat, gpsOrigin.lng, best.latitude, best.longitude)
+            ? m
+            : best,
+        );
+      };
+      const hit = (await nearestHit(text)) ?? (await nearestHit(`${text}, UK`));
       if (hit) {
         setSearchOrigin({ lat: hit.latitude, lng: hit.longitude, label: text });
         setQuery("");
       } else {
         setSearchNote(
-          `Couldn't find "${text}" in the London area \u2014 showing name matches instead.`,
+          `Couldn't find "${text}" \u2014 showing name matches instead.`,
         );
       }
     } catch {
@@ -196,14 +213,13 @@ export default function HomeScreen() {
         "Area search needs a connection \u2014 try a place name instead.",
       );
     }
-  }, [query]);
+  }, [query, gpsOrigin.lat, gpsOrigin.lng]);
 
   const clearSearchOrigin = useCallback(() => {
     setSearchOrigin(null);
     setSearchNote(null);
   }, []);
 
-  const gpsOrigin = location ?? FALLBACK_LOCATION;
   // Distances come from the searched area when one is set; prayer times
   // always follow the user's real location.
   const origin = searchOrigin ?? gpsOrigin;
@@ -269,6 +285,14 @@ export default function HomeScreen() {
         : results.slice(0, MIN_LIST_RESULTS);
     return base.slice(0, MAX_LIST_RESULTS);
   }, [results, query]);
+
+  // Nearest pins only (see MAX_MAP_PINS comment). results is sorted
+  // nearest-first, so slicing keeps everything a user could pan to locally.
+  const mapResults = useMemo(
+    () =>
+      results.length > MAX_MAP_PINS ? results.slice(0, MAX_MAP_PINS) : results,
+    [results],
+  );
 
   // Stable callbacks keep React.memo'd rows from re-rendering needlessly.
   const openPlace = useCallback(
@@ -347,6 +371,28 @@ export default function HomeScreen() {
       </View>
     ) : null;
 
+  // What each pin colour means. Sits under the search bar (the bottom of the
+  // map is covered by the list sheet, so a bottom-corner key would be hidden
+  // at the default sheet position).
+  const mapLegend = (
+    <View
+      style={styles.legend}
+      accessibilityLabel="Map key: green is a masjid, amber is a prayer room, purple is a multi-faith room. The blue dot is your location."
+    >
+      {LEGEND_ITEMS.map(({ type, label }) => (
+        <View key={type} style={styles.legendItem}>
+          <View
+            style={[
+              styles.legendDot,
+              { backgroundColor: placeTypeColors[type] },
+            ]}
+          />
+          <Text style={styles.legendLabel}>{label}</Text>
+        </View>
+      ))}
+    </View>
+  );
+
   const timesBar = times ? (
     <TouchableOpacity
       style={styles.timesBar}
@@ -393,8 +439,8 @@ export default function HomeScreen() {
         <View style={styles.empty}>
           <Text style={styles.emptyTitle}>No places match</Text>
           <Text style={styles.emptyText}>
-            Try removing a filter \u2014 or this is a gap in the data worth
-            fixing.
+            Try removing a filter {"\u2014"} or this is a gap in the data
+            worth fixing.
           </Text>
           <TouchableOpacity
             style={styles.emptyButton}
@@ -442,7 +488,7 @@ export default function HomeScreen() {
           {/* Map-first: the map fills the screen; the list floats above it. */}
           <View style={StyleSheet.absoluteFill}>
             <PlacesMap
-              results={results}
+              results={mapResults}
               userLocation={location}
               focus={searchOrigin}
               onSelect={openPlace}
@@ -451,6 +497,7 @@ export default function HomeScreen() {
           <View style={styles.overlayTop} pointerEvents="box-none">
             {searchRow}
             {contextChips}
+            {mapLegend}
             {usingFallback ? (
               <Text style={styles.fallbackNote}>
                 Using central London {"\u2014"} enable location for accurate
@@ -590,6 +637,41 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.s,
     borderRadius: radius.m,
     overflow: "hidden",
+  },
+  legend: {
+    alignSelf: "flex-start",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "center",
+    gap: spacing.m,
+    backgroundColor: colors.canvas,
+    borderRadius: radius.m,
+    borderWidth: 1,
+    borderColor: colors.border,
+    paddingHorizontal: spacing.m,
+    paddingVertical: spacing.s,
+    shadowColor: "#000",
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
+  },
+  legendItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.xs,
+  },
+  legendDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    borderWidth: 1.5,
+    borderColor: colors.canvas,
+  },
+  legendLabel: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: colors.textSecondary,
   },
   fallbackNote: {
     alignSelf: "flex-start",

@@ -1,0 +1,18 @@
+# Netlify configuration for the web build.
+#
+# The site is a single-page app (app.json web.output = "single"): every
+# route — including /place/<id> deep links — must serve index.html and let
+# expo-router handle the path on the client.
+#
+# Remember to set EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY
+# in Netlify's environment variables (Site settings → Environment variables):
+# EXPO_PUBLIC_* values are baked into the bundle at build time.
+
+[build]
+  command = "npx expo export --platform web && node scripts/postbuild-web.mjs"
+  publish = "dist"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

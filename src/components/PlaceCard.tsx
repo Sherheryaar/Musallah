@@ -6,7 +6,7 @@ import {
   Place,
   PLACE_TYPE_LABELS,
 } from "@/data/places";
-import { colors, spacing, radius } from "@/lib/theme";
+import { colors, placeTypeColors, spacing, radius } from "@/lib/theme";
 
 type Props = {
   place: Place;
@@ -49,7 +49,14 @@ function PlaceCard({ place, distanceLabel, onPress }: Props) {
       </View>
 
       <View style={styles.metaRow}>
+        {/* Dot colour matches the place's map pin and the map legend. */}
         <View style={styles.typeBadge}>
+          <View
+            style={[
+              styles.typeDot,
+              { backgroundColor: placeTypeColors[place.type] },
+            ]}
+          />
           <Text style={styles.typeBadgeText}>
             {PLACE_TYPE_LABELS[place.type]}
           </Text>
@@ -106,10 +113,18 @@ const styles = StyleSheet.create({
     gap: spacing.m,
   },
   typeBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.xs,
     backgroundColor: colors.surfaceSecondary,
     borderRadius: radius.m,
     paddingHorizontal: spacing.s,
     paddingVertical: spacing.xs,
+  },
+  typeDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
   },
   typeBadgeText: {
     fontSize: 12,
