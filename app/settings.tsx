@@ -1,10 +1,16 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Constants from "expo-constants";
 
 import { useSettings } from "@/context/SettingsContext";
-import { colors, radius, spacing } from "@/lib/theme";
+import { useTheme } from "@/context/ThemeContext";
+import { radius, spacing, type ThemeColors } from "@/lib/theme";
+
+function useStyles() {
+  const { colors } = useTheme();
+  return useMemo(() => createStyles(colors), [colors]);
+}
 
 const PRIVACY_POINTS: { title: string; body: string }[] = [
   {
@@ -38,6 +44,7 @@ function OptionRow({
   divider?: boolean;
   onPress: () => void;
 }) {
+  const styles = useStyles();
   return (
     <TouchableOpacity
       style={[
@@ -62,6 +69,7 @@ function OptionRow({
 }
 
 export default function SettingsScreen() {
+  const styles = useStyles();
   const insets = useSafeAreaInsets();
   const { settings, updateSettings } = useSettings();
 
@@ -193,7 +201,8 @@ export default function SettingsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: colors.surface,

@@ -3,7 +3,46 @@ import { StyleSheet } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 
 import { PLACE_TYPE_LABELS, Place } from "@/data/places";
+import { useTheme } from "@/context/ThemeContext";
 import { formatDistance } from "@/lib/distance";
+
+// Google Maps (Android) needs an explicit style array for dark mode; Apple
+// Maps (iOS) follows the userInterfaceStyle prop instead and ignores this.
+const DARK_MAP_STYLE = [
+  { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
+  { elementType: "labels.text.fill", stylers: [{ color: "#8f9bab" }] },
+  { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
+  {
+    featureType: "poi",
+    elementType: "labels.text.fill",
+    stylers: [{ color: "#93817c" }],
+  },
+  {
+    featureType: "road",
+    elementType: "geometry",
+    stylers: [{ color: "#38414e" }],
+  },
+  {
+    featureType: "road",
+    elementType: "geometry.stroke",
+    stylers: [{ color: "#212a37" }],
+  },
+  {
+    featureType: "road",
+    elementType: "labels.text.fill",
+    stylers: [{ color: "#9ca5b3" }],
+  },
+  {
+    featureType: "transit",
+    elementType: "geometry",
+    stylers: [{ color: "#2f3948" }],
+  },
+  {
+    featureType: "water",
+    elementType: "geometry",
+    stylers: [{ color: "#17263c" }],
+  },
+];
 
 const FALLBACK_REGION = {
   latitude: 51.5074,
@@ -39,6 +78,7 @@ export default function PlacesMap({
   focus,
   onSelect,
 }: Props) {
+  const { scheme } = useTheme();
   const mapRef = useRef<MapView>(null);
 
   const initialRegion = useMemo(() => {
@@ -103,6 +143,8 @@ export default function PlacesMap({
       style={styles.map}
       initialRegion={initialRegion}
       showsUserLocation={userLocation !== null}
+      userInterfaceStyle={scheme}
+      customMapStyle={scheme === "dark" ? DARK_MAP_STYLE : undefined}
     >
       {results.map(({ place, km }) => (
         <Marker

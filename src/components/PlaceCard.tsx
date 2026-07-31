@@ -6,7 +6,13 @@ import {
   Place,
   PLACE_TYPE_LABELS,
 } from "@/data/places";
-import { colors, placeTypeColors, spacing, radius } from "@/lib/theme";
+import { useTheme } from "@/context/ThemeContext";
+import {
+  placeTypeColors,
+  spacing,
+  radius,
+  type ThemeColors,
+} from "@/lib/theme";
 
 type Props = {
   place: Place;
@@ -17,6 +23,8 @@ type Props = {
 
 /** One row in the results list: name, type, distance, key facilities. */
 function PlaceCard({ place, distanceLabel, onPress }: Props) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   // Memoized: recomputing keys/filter/join for every row on every list
   // render adds up with hundreds of places.
   const facilitiesLabel = useMemo(
@@ -81,7 +89,8 @@ function PlaceCard({ place, distanceLabel, onPress }: Props) {
 // not on every keystroke, GPS tick, or unrelated screen state change.
 export default React.memo(PlaceCard);
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
   card: {
     backgroundColor: colors.canvas,
     borderRadius: radius.l,
@@ -102,10 +111,17 @@ const styles = StyleSheet.create({
     color: colors.text,
     lineHeight: 22,
   },
+  // Pill chip: reads as "at a glance" info rather than body text.
   distance: {
-    fontSize: 14,
+    fontSize: 13,
     color: colors.accent,
-    fontWeight: "600",
+    fontWeight: "700",
+    backgroundColor: colors.accentSoft,
+    borderRadius: 999,
+    paddingHorizontal: spacing.s + 2,
+    paddingVertical: 3,
+    overflow: "hidden",
+    alignSelf: "flex-start",
   },
   metaRow: {
     flexDirection: "row",

@@ -10,10 +10,11 @@ import { Link } from "expo-router";
 import * as Location from "expo-location";
 
 import { useSettings } from "@/context/SettingsContext";
+import { useTheme } from "@/context/ThemeContext";
 import { FALLBACK_LOCATION } from "@/lib/geo";
 import { formatHijri } from "@/lib/hijri";
 import { computePrayerSchedule, PrayerScheduleEntry } from "@/lib/prayerTimes";
-import { colors, radius, spacing } from "@/lib/theme";
+import { radius, spacing, type ThemeColors } from "@/lib/theme";
 
 const WEEKDAYS = [
   "Sunday",
@@ -88,7 +89,13 @@ function getStatus(
   };
 }
 
+function useStyles() {
+  const { colors } = useTheme();
+  return useMemo(() => createStyles(colors), [colors]);
+}
+
 export default function PrayerScreen() {
+  const styles = useStyles();
   const { settings } = useSettings();
   const [location, setLocation] = useState(FALLBACK_LOCATION);
   const [usingFallback, setUsingFallback] = useState(false);
@@ -288,7 +295,8 @@ export default function PrayerScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: colors.surface,
@@ -298,18 +306,19 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.xxl,
     gap: spacing.l,
   },
+  // Accent-tinted hero so the countdown reads as the screen's focal point.
   heroCard: {
-    backgroundColor: colors.canvas,
+    backgroundColor: colors.accentSoft,
     borderRadius: radius.l,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.accentSoft,
     padding: spacing.xl,
     gap: spacing.xs,
   },
   heroKicker: {
     fontSize: 13,
     fontWeight: "600",
-    color: colors.textSecondary,
+    color: colors.accent,
     textTransform: "uppercase",
     letterSpacing: 0.6,
   },

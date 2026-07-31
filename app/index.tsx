@@ -23,10 +23,17 @@ import PlaceCard from "@/components/PlaceCard";
 import PlacesMap from "@/components/PlacesMap";
 import SuggestionForm from "@/components/SuggestionForm";
 import { distanceKm, formatDistance } from "@/lib/distance";
+import { fuzzyMatches, tokenize } from "@/lib/fuzzy";
 import { FALLBACK_LOCATION, isInCoverage } from "@/lib/geo";
 import { computePrayerTimes, PrayerTimes } from "@/lib/prayerTimes";
 import { submitNewPlaceSuggestion } from "@/lib/feedback";
-import { colors, placeTypeColors, radius, spacing } from "@/lib/theme";
+import { useTheme } from "@/context/ThemeContext";
+import {
+  placeTypeColors,
+  radius,
+  spacing,
+  type ThemeColors,
+} from "@/lib/theme";
 
 // The list shows a handful of nearby, reasonable options -- not the whole
 // dataset. The map shows the nearest pins up to a cap: the dataset covers
@@ -56,7 +63,14 @@ function todayKey(): string {
   return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
 }
 
+function useStyles() {
+  const { colors } = useTheme();
+  return useMemo(() => createStyles(colors), [colors]);
+}
+
 export default function HomeScreen() {
+  const styles = useStyles();
+  const { colors } = useTheme();
   const router = useRouter();
   // Bottom inset keeps the list clear of the Android gesture/nav bar
   // (the app draws edge-to-edge on Android).
@@ -257,22 +271,49 @@ export default function HomeScreen() {
     [places, origin.lat, origin.lng],
   );
 
+  // Pre-tokenised name+address per place, so typo-tolerant matching doesn't
+  // re-tokenise 2,000+ strings on every keystroke.
+  const searchTokens = useMemo(() => {
+    const map = new Map<string, string[]>();
+    for (const place of places) {
+      map.set(place.id, tokenize(`${place.name} ${place.address}`));
+    }
+    return map;
+  }, [places]);
+
   // Filter (must have ALL selected facilities + match the typed query),
   // preserving nearest-first order. Jumu'ah-only venues are hidden by
   // default, but a typed query overrides that: searching a venue by name is
   // a stronger signal of intent than the default suppression.
+  //
+  // Query matching runs in two tiers: exact substring matches first, then
+  // typo-tolerant matches ("birmingam", "masjed", "mosque"→masjid) — so a
+  // spelling mistake still finds the place, but exact hits always outrank
+  // guesses. Distance order is preserved within each tier.
   const results = useMemo(() => {
     const selected = [...activeFilters]; // spread once, not once per place
     const q = query.trim().toLowerCase();
-    return byDistance.filter(
+    const base = byDistance.filter(
       ({ place }) =>
         selected.every((key) => place.facilities[key]) &&
-        (!place.jumuahOnly || activeFilters.has("jumuah") || q.length > 0) &&
-        (!q ||
-          place.name.toLowerCase().includes(q) ||
-          place.address.toLowerCase().includes(q)),
+        (!place.jumuahOnly || activeFilters.has("jumuah") || q.length > 0),
     );
-  }, [byDistance, activeFilters, query]);
+    if (!q) return base;
+    const exact: Result[] = [];
+    const fuzzy: Result[] = [];
+    for (const result of base) {
+      const { place } = result;
+      if (
+        place.name.toLowerCase().includes(q) ||
+        place.address.toLowerCase().includes(q)
+      ) {
+        exact.push(result);
+      } else if (fuzzyMatches(searchTokens.get(place.id) ?? [], q)) {
+        fuzzy.push(result);
+      }
+    }
+    return exact.concat(fuzzy);
+  }, [byDistance, activeFilters, query, searchTokens]);
 
   // The list only shows the nearest few reasonable options. When the user is
   // typing a name search, show matches regardless of distance.
@@ -534,7 +575,8 @@ export default function HomeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: colors.surface,

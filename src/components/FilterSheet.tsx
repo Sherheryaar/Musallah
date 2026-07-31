@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import {
   BackHandler,
   StyleSheet,
@@ -9,7 +9,8 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { FACILITY_KEYS, FACILITY_LABELS, FacilityKey } from "@/data/places";
-import { colors, radius, spacing } from "@/lib/theme";
+import { useTheme } from "@/context/ThemeContext";
+import { radius, spacing, type ThemeColors } from "@/lib/theme";
 
 type Props = {
   visible: boolean;
@@ -34,6 +35,8 @@ export default function FilterSheet({
   onClear,
   onClose,
 }: Props) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const insets = useSafeAreaInsets();
 
   // Android hardware/gesture back closes the sheet instead of the screen.
@@ -110,7 +113,8 @@ export default function FilterSheet({
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
   backdrop: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: "rgba(0,0,0,0.4)",

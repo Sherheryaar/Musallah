@@ -31,6 +31,9 @@ const tags = [
   '<link rel="manifest" href="/manifest.json" />',
   '<link rel="icon" type="image/png" href="/icon-192.png" />',
   '<link rel="apple-touch-icon" href="/icon-192.png" />',
+  // Match the app's dark surface behind the root element, so overscroll
+  // and load flashes aren't white in dark mode.
+  "<style>@media (prefers-color-scheme: dark){body{background-color:#141312}}</style>",
 ].join("\n    ");
 
 if (!html.includes("</head>")) {

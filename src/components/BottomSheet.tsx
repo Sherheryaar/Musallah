@@ -8,7 +8,8 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { colors, spacing } from "@/lib/theme";
+import { useTheme } from "@/context/ThemeContext";
+import { spacing, type ThemeColors } from "@/lib/theme";
 
 // Dependency-free bottom sheet: plain Animated + PanResponder, no gesture
 // library needed. Three snap points -- peek (mostly hidden, map visible),
@@ -21,6 +22,8 @@ type Props = {
 };
 
 export default function BottomSheet({ children }: Props) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const { height: windowHeight } = useWindowDimensions();
   const insets = useSafeAreaInsets();
 
@@ -136,7 +139,8 @@ export default function BottomSheet({ children }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
   sheet: {
     position: "absolute",
     left: 0,

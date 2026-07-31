@@ -1,6 +1,9 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import {
+  applyFacilityDefaults,
+  cleanNotes,
+  disambiguateName,
   FACILITY_KEYS,
   FacilityKey,
   JamaatTimes,
@@ -127,14 +130,18 @@ function buildPlace(raw: Record<string, unknown>): Place | null {
   if (typeof raw.lat !== "number" || !Number.isFinite(raw.lat)) return null;
   if (typeof raw.lng !== "number" || !Number.isFinite(raw.lng)) return null;
 
+  const type = coerceType(raw.type);
   const place: Place = {
     id: raw.id,
-    name: raw.name,
-    type: coerceType(raw.type),
+    // "Prayer Room" x63 in the dataset — append the venue from the address
+    // so identical generic names stop being indistinguishable.
+    name: disambiguateName(raw.name, raw.address),
+    type,
     address: raw.address,
     lat: raw.lat,
     lng: raw.lng,
-    facilities: coerceFacilities(raw.facilities),
+    // Masjid ⇒ jumu'ah + wudu by definition; nothing else is assumed.
+    facilities: applyFacilityDefaults(type, coerceFacilities(raw.facilities)),
   };
 
   if (raw.jumuahOnly === true) {
@@ -151,7 +158,10 @@ function buildPlace(raw: Record<string, unknown>): Place | null {
   if (jamaat) place.jamaat = jamaat;
 
   const notes = asOptionalString(raw.notes);
-  if (notes) place.notes = notes;
+  if (notes) {
+    const cleaned = cleanNotes(notes);
+    if (cleaned) place.notes = cleaned;
+  }
   const lastVerified = asOptionalString(raw.lastVerified);
   if (lastVerified) place.lastVerified = lastVerified;
   const source = asOptionalString(raw.source);

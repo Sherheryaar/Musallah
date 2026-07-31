@@ -6,7 +6,7 @@
     "scheme": "masjidlocator",
     "icon": "./assets/icon.png",
     "orientation": "portrait",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": false,

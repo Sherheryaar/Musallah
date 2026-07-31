@@ -18,10 +18,11 @@ import {
 } from "@/data/places";
 import { usePlaces } from "@/context/PlacesContext";
 import { useSettings } from "@/context/SettingsContext";
+import { useTheme } from "@/context/ThemeContext";
 import SuggestionForm from "@/components/SuggestionForm";
 import { submitEditSuggestion } from "@/lib/feedback";
 import { computePrayerTimes, PrayerTimes } from "@/lib/prayerTimes";
-import { colors, spacing, radius } from "@/lib/theme";
+import { spacing, radius, type ThemeColors } from "@/lib/theme";
 
 const PRAYER_ROWS: {
   label: string;
@@ -56,7 +57,13 @@ function confidenceLabel(confidence?: "verified" | "community" | "unverified"): 
   }
 }
 
+function useStyles() {
+  const { colors } = useTheme();
+  return useMemo(() => createStyles(colors), [colors]);
+}
+
 export default function PlaceDetailScreen() {
+  const styles = useStyles();
   const { id } = useLocalSearchParams<{ id: string }>();
   const insets = useSafeAreaInsets();
   const { places } = usePlaces();
@@ -290,7 +297,14 @@ export default function PlaceDetailScreen() {
 
       {showEditForm ? (
         <SuggestionForm
-          placeholder="What needs correcting? Times, facilities, address..."
+          placeholder="Tell us what's wrong or missing..."
+          topics={[
+            "Prayer times",
+            "Facilities",
+            "Address or location",
+            "Contact details",
+            "Closed or moved",
+          ]}
           onSend={(message) => submitEditSuggestion(place, message)}
         />
       ) : (
@@ -309,7 +323,8 @@ export default function PlaceDetailScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: colors.surface,

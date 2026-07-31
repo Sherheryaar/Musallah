@@ -30,7 +30,10 @@ export type PrayerSettings = {
 
 export const DEFAULT_SETTINGS: PrayerSettings = {
   method: "moonsighting",
-  madhab: "shafi",
+  // Hanafi (2 mithl, later Asr) by default — the majority practice among
+  // UK Muslims. Anyone following 1 mithl changes it once in Settings and
+  // the choice persists.
+  madhab: "hanafi",
   shafaq: "general",
   facilityFilters: [],
 };
