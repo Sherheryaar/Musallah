@@ -1,9 +1,9 @@
-// Chooses which pins to render for the visible map region. Rendering all
-// 2,000+ markers makes the native map stutter, but the old approach (the
-// 300 nearest the user) made every other city look EMPTY when panning or
-// zooming out. Instead: take what's in the viewport, and when that's over
-// budget, decimate on a grid so the pins spread evenly across the screen
-// rather than clustering in one corner.
+// Decides what the map renders for the visible region. Rendering all
+// 2,000+ markers makes the native map stutter, but hiding far-away places
+// made zoomed-out views look empty. So: when the viewport holds more than
+// the render budget, places are grouped into numbered CLUSTER bubbles on a
+// grid (tap to zoom in); under budget they render as individual pins. Every
+// place in view is always represented one way or the other.
 
 import type { Place } from "@/data/places";
 
@@ -16,29 +16,48 @@ export type MapRegion = {
   longitudeDelta: number;
 };
 
+export type PinCluster = {
+  key: string;
+  lat: number;
+  lng: number;
+  count: number;
+  /** Region to fly to when the cluster is tapped (its cell, padded). */
+  latitudeDelta: number;
+  longitudeDelta: number;
+};
+
+export type PinGroups = {
+  /** Render as individual pins, nearest-first. */
+  singles: PinCandidate[];
+  /** Render as numbered bubbles. */
+  clusters: PinCluster[];
+};
+
 /** Render budget: ~300 image markers stay smooth on low-end phones. */
 export const MAX_PINS = 300;
 
-// Grid used for decimation. 16x16 = 256 cells, under MAX_PINS, so at least
-// one pin per occupied cell always fits the budget.
+// Clustering grid. 16x16 = 256 cells, so even a fully-clustered screen
+// renders at most 256 markers — under the budget.
 const GRID = 16;
 
+// Never zoom deeper than this when tapping a cluster; below it the cell is
+// small enough that its places resolve to individual pins anyway.
+const MIN_TAP_ZOOM_DELTA = 0.02;
+
 /**
- * Pins for the current viewport, nearest-first order preserved.
+ * Group the in-view places for rendering.
  *
- * - Everything inside the (padded) region qualifies; padding keeps pins
- *   alive just off-screen so small pans don't pop markers in and out.
- * - Under budget: return them all.
- * - Over budget: bucket by grid cell and round-robin one pin per cell per
- *   pass, so a dense city can't starve the rest of the screen. `results`
- *   arrives sorted nearest-first, so each cell contributes its closest
- *   places first.
+ * - The region is padded so pins just off-screen don't pop during pans.
+ * - Under budget: everything is an individual pin.
+ * - Over budget: bucket by grid cell; lone places stay pins, shared cells
+ *   become clusters centred on their members' mean position. `results`
+ *   arrives sorted nearest-first, so single picks stay nearest-first.
  */
-export function selectPinsForRegion(
+export function buildPinGroups(
   results: readonly PinCandidate[],
   region: MapRegion,
   maxPins: number = MAX_PINS,
-): PinCandidate[] {
+): PinGroups {
   const latPad = region.latitudeDelta * 0.6;
   const lngPad = region.longitudeDelta * 0.6;
   const minLat = region.latitude - latPad;
@@ -53,7 +72,7 @@ export function selectPinsForRegion(
       place.lng >= minLng &&
       place.lng <= maxLng,
   );
-  if (inView.length <= maxPins) return inView;
+  if (inView.length <= maxPins) return { singles: inView, clusters: [] };
 
   const cellLat = (maxLat - minLat) / GRID;
   const cellLng = (maxLng - minLng) / GRID;
@@ -76,18 +95,27 @@ export function selectPinsForRegion(
     }
   }
 
-  const buckets = [...cells.values()];
-  const picked: PinCandidate[] = [];
-  for (let depth = 0; picked.length < maxPins; depth++) {
-    let added = false;
-    for (const bucket of buckets) {
-      if (depth < bucket.length) {
-        picked.push(bucket[depth]);
-        added = true;
-        if (picked.length >= maxPins) break;
-      }
+  const singles: PinCandidate[] = [];
+  const clusters: PinCluster[] = [];
+  for (const [key, bucket] of cells) {
+    if (bucket.length === 1) {
+      singles.push(bucket[0]);
+      continue;
     }
-    if (!added) break;
+    let sumLat = 0;
+    let sumLng = 0;
+    for (const { place } of bucket) {
+      sumLat += place.lat;
+      sumLng += place.lng;
+    }
+    clusters.push({
+      key: `cell-${key}`,
+      lat: sumLat / bucket.length,
+      lng: sumLng / bucket.length,
+      count: bucket.length,
+      latitudeDelta: Math.max(cellLat * 1.4, MIN_TAP_ZOOM_DELTA),
+      longitudeDelta: Math.max(cellLng * 1.4, MIN_TAP_ZOOM_DELTA),
+    });
   }
-  return picked;
+  return { singles, clusters };
 }

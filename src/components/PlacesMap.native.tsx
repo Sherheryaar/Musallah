@@ -1,11 +1,11 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { StyleSheet } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 
 import { PLACE_TYPE_LABELS, Place } from "@/data/places";
 import { useTheme } from "@/context/ThemeContext";
 import { formatDistance } from "@/lib/distance";
-import { selectPinsForRegion, type MapRegion } from "@/lib/mapPins";
+import { buildPinGroups, type MapRegion } from "@/lib/mapPins";
 
 // Google Maps (Android) needs an explicit style array for dark mode; Apple
 // Maps (iOS) follows the userInterfaceStyle prop instead and ignores this.
@@ -82,7 +82,7 @@ export default function PlacesMap({
   recenterNonce,
   onSelect,
 }: Props) {
-  const { scheme } = useTheme();
+  const { scheme, colors } = useTheme();
   const mapRef = useRef<MapView>(null);
   // Wherever the user has panned/zoomed to; null until the first gesture.
   const [region, setRegion] = useState<MapRegion | null>(null);
@@ -162,12 +162,35 @@ export default function PlacesMap({
     }
   }, [focus]);
 
-  // Pins follow the VIEWPORT, not the user: panning to another city or
-  // zooming out must show that area's places (capped + grid-spread for
-  // performance — see src/lib/mapPins.ts).
-  const pins = useMemo(
-    () => selectPinsForRegion(results, region ?? initialRegion),
+  // What the viewport renders: individual pins while under budget, numbered
+  // cluster bubbles for dense areas when zoomed out — every place in view is
+  // always represented (see src/lib/mapPins.ts).
+  const { singles, clusters } = useMemo(
+    () => buildPinGroups(results, region ?? initialRegion),
     [results, region, initialRegion],
+  );
+
+  // Neutral (never blue — blue is the you-are-here dot) theme-aware bubble.
+  const clusterStyles = useMemo(
+    () => ({
+      bubble: {
+        minWidth: 34,
+        height: 34,
+        borderRadius: 17,
+        paddingHorizontal: 8,
+        alignItems: "center" as const,
+        justifyContent: "center" as const,
+        backgroundColor: colors.text,
+        borderWidth: 2,
+        borderColor: colors.canvas,
+      },
+      label: {
+        color: colors.canvas,
+        fontSize: 12,
+        fontWeight: "700" as const,
+      },
+    }),
+    [colors],
   );
 
   return (
@@ -180,7 +203,35 @@ export default function PlacesMap({
       userInterfaceStyle={scheme}
       customMapStyle={scheme === "dark" ? DARK_MAP_STYLE : undefined}
     >
-      {pins.map(({ place, km }) => (
+      {clusters.map((cluster) => (
+        <Marker
+          key={cluster.key}
+          coordinate={{ latitude: cluster.lat, longitude: cluster.lng }}
+          anchor={{ x: 0.5, y: 0.5 }}
+          // Tap = zoom into the cluster's cell; the closer view either
+          // resolves it into pins or into smaller clusters.
+          onPress={() =>
+            mapRef.current?.animateToRegion(
+              {
+                latitude: cluster.lat,
+                longitude: cluster.lng,
+                latitudeDelta: cluster.latitudeDelta,
+                longitudeDelta: cluster.longitudeDelta,
+              },
+              350,
+            )
+          }
+          accessibilityLabel={`${cluster.count} places — tap to zoom in`}
+          // View-based marker, so iOS must keep tracking view changes (the
+          // image-marker optimisation below doesn't apply). Clusters are few
+          // (max 256), so this stays cheap.
+        >
+          <View style={clusterStyles.bubble}>
+            <Text style={clusterStyles.label}>{cluster.count}</Text>
+          </View>
+        </Marker>
+      ))}
+      {singles.map(({ place, km }) => (
         <Marker
           key={place.id}
           coordinate={{ latitude: place.lat, longitude: place.lng }}

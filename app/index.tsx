@@ -417,7 +417,7 @@ export default function HomeScreen() {
   const mapLegend = (
     <View
       style={styles.legend}
-      accessibilityLabel="Map key: green is a masjid, amber is a prayer room, purple is a multi-faith room. The blue dot is your location."
+      accessibilityLabel="Map key: green is a masjid, amber is a prayer room, purple is a multi-faith room. The blue dot is your location. A numbered circle groups several places — tap it to zoom in."
     >
       {LEGEND_ITEMS.map(({ type, label }) => (
         <View key={type} style={styles.legendItem}>
