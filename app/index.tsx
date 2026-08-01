@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Location from "expo-location";
@@ -30,7 +31,7 @@ import {
   isInCoverage,
   queryMatchesPlaceFields,
 } from "@/lib/geo";
-import { computePrayerTimes, PrayerTimes } from "@/lib/prayerTimes";
+import { CalcOptions, computePrayerSchedule } from "@/lib/prayerTimes";
 import { submitNewPlaceSuggestion } from "@/lib/feedback";
 import { useTheme } from "@/context/ThemeContext";
 import {
@@ -63,16 +64,126 @@ type SearchOrigin = { lat: number; lng: number; label: string };
 // Module-level so the reference is stable across renders (helps FlatList).
 const keyExtractor = (item: Result) => item.place.id;
 
-/** Local calendar day, e.g. "2026-7-29" — changes exactly at midnight. */
-function todayKey(): string {
-  const d = new Date();
-  return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
-}
-
 function useStyles() {
   const { colors } = useTheme();
   return useMemo(() => createStyles(colors), [colors]);
 }
+
+/**
+ * The times bar answers the question people actually have — "when is the
+ * next prayer?" — with the following ones small beside it and a progress
+ * line through the current window. Self-contained and memoized so its
+ * 30-second countdown tick re-renders THIS bar, not the map and list.
+ */
+const NextPrayerBar = React.memo(function NextPrayerBar({
+  lat,
+  lng,
+  options,
+  onPress,
+}: {
+  lat: number;
+  lng: number;
+  options: CalcOptions;
+  onPress: () => void;
+}) {
+  const styles = useStyles();
+  const { colors } = useTheme();
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 30_000);
+    // Refresh immediately on foreground — the interval may have been
+    // frozen for hours in the background.
+    const sub = AppState.addEventListener("change", (state) => {
+      if (state === "active") setNow(Date.now());
+    });
+    return () => {
+      clearInterval(id);
+      sub.remove();
+    };
+  }, []);
+
+  const info = useMemo(() => {
+    // Sunrise isn't a prayer; yesterday/tomorrow bracket the edges (before
+    // Fajr the "current window" started at yesterday's Isha; after Isha
+    // the next prayer is tomorrow's Fajr).
+    const prayersOf = (d: Date) =>
+      (computePrayerSchedule(lat, lng, options, d) ?? []).filter(
+        (e) => e.key !== "sunrise",
+      );
+    const all = [
+      ...prayersOf(new Date(now - 86_400_000)),
+      ...prayersOf(new Date(now)),
+      ...prayersOf(new Date(now + 86_400_000)),
+    ];
+    const idx = all.findIndex((e) => e.time.getTime() > now);
+    if (idx < 0) return null; // polar conditions
+    const next = all[idx];
+    const prev = idx > 0 ? all[idx - 1] : null;
+    const minutes = Math.max(
+      1,
+      Math.ceil((next.time.getTime() - now) / 60_000),
+    );
+    const progress = prev
+      ? Math.min(
+          1,
+          Math.max(
+            0,
+            (now - prev.time.getTime()) /
+              (next.time.getTime() - prev.time.getTime()),
+          ),
+        )
+      : 0;
+    return { next, upcoming: all.slice(idx + 1, idx + 3), minutes, progress };
+  }, [lat, lng, options, now]);
+
+  if (!info) return null;
+
+  const countdown =
+    info.minutes >= 60
+      ? `${Math.floor(info.minutes / 60)} h ${info.minutes % 60} min`
+      : `${info.minutes} min`;
+
+  return (
+    <TouchableOpacity
+      style={styles.timesBar}
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={`Next prayer: ${info.next.label} at ${info.next.display}, in ${countdown}. Open prayer times.`}
+      activeOpacity={0.7}
+    >
+      <View style={styles.timesTopRow}>
+        <View style={styles.nextBlock}>
+          <Text style={styles.nextLabel}>
+            Next {"·"} {info.next.label} in {countdown}
+          </Text>
+          <Text style={styles.nextTime}>{info.next.display}</Text>
+        </View>
+        <View style={styles.upcomingRow}>
+          {info.upcoming.map((e) => (
+            <View key={`${e.key}-${e.time.getTime()}`} style={styles.timeItem}>
+              <Text style={styles.timeLabel}>{e.label}</Text>
+              <Text style={styles.timeValue}>{e.display}</Text>
+            </View>
+          ))}
+          <MaterialCommunityIcons
+            name="chevron-right"
+            size={20}
+            color={colors.textSecondary}
+          />
+        </View>
+      </View>
+      <View style={styles.progressTrack}>
+        <View
+          style={[
+            styles.progressFill,
+            { width: `${Math.round(info.progress * 100)}%` },
+          ]}
+        />
+      </View>
+    </TouchableOpacity>
+  );
+});
 
 export default function HomeScreen() {
   const styles = useStyles();
@@ -93,27 +204,7 @@ export default function HomeScreen() {
   const [query, setQuery] = useState("");
   const [searchOrigin, setSearchOrigin] = useState<SearchOrigin | null>(null);
   const [searchNote, setSearchNote] = useState<string | null>(null);
-  const [dateKey, setDateKey] = useState(() => todayKey());
   const [recenterNonce, setRecenterNonce] = useState(0);
-
-  // Roll the prayer-times bar over at midnight. Without this the memo below
-  // never re-runs on a new day: a user who leaves the app open (or foregrounds
-  // it the next morning without moving 250 m) would see yesterday's times.
-  useEffect(() => {
-    const update = () =>
-      setDateKey((prev) => {
-        const next = todayKey();
-        return next === prev ? prev : next;
-      });
-    const id = setInterval(update, 30_000);
-    const sub = AppState.addEventListener("change", (state) => {
-      if (state === "active") update();
-    });
-    return () => {
-      clearInterval(id);
-      sub.remove();
-    };
-  }, []);
 
   // Get location once at launch, then keep it updated as the user moves
   // (re-sorts distances after every ~250 m). No account, no tracking --
@@ -309,15 +400,6 @@ export default function HomeScreen() {
     [settings.method, settings.madhab, settings.shafaq],
   );
 
-  // Prayer times are computed on-device (see src/lib/prayerCalc.ts) --
-  // instant and offline, following the user's Settings choices. dateKey is a
-  // deliberate dependency: it invalidates this memo at midnight.
-  const times = useMemo<PrayerTimes | null>(
-    () => computePrayerTimes(gpsOrigin.lat, gpsOrigin.lng, calcOptions),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [gpsOrigin.lat, gpsOrigin.lng, calcOptions, dateKey],
-  );
-
   // Two-stage memo: distances/sorting only recompute when location or data
   // changes -- NOT on every filter toggle or keystroke.
   // When an area search is active the two anchors differ: places are chosen
@@ -463,7 +545,11 @@ export default function HomeScreen() {
             accessibilityLabel="Clear search"
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
-            <Text style={styles.clearGlyph}>{"✕"}</Text>
+            <MaterialCommunityIcons
+              name="close"
+              size={14}
+              color={colors.textSecondary}
+            />
           </TouchableOpacity>
         ) : null}
       </View>
@@ -516,31 +602,16 @@ export default function HomeScreen() {
     </View>
   );
 
-  const timesBar = times ? (
-    <TouchableOpacity
-      style={styles.timesBar}
-      onPress={() => router.push("/prayer")}
-      accessibilityRole="button"
-      accessibilityLabel="Open prayer times"
-      activeOpacity={0.7}
-    >
-      {(
-        [
-          ["Fajr", times.Fajr],
-          ["Dhuhr", times.Dhuhr],
-          ["Asr", times.Asr],
-          ["Maghrib", times.Maghrib],
-          ["Isha", times.Isha],
-        ] as const
-      ).map(([label, value]) => (
-        <View key={label} style={styles.timeItem}>
-          <Text style={styles.timeLabel}>{label}</Text>
-          <Text style={styles.timeValue}>{value}</Text>
-        </View>
-      ))}
-      <Text style={styles.timesChevron}>{"\u203A"}</Text>
-    </TouchableOpacity>
-  ) : null;
+  const openPrayer = useCallback(() => router.push("/prayer"), [router]);
+
+  const timesBar = (
+    <NextPrayerBar
+      lat={gpsOrigin.lat}
+      lng={gpsOrigin.lng}
+      options={calcOptions}
+      onPress={openPrayer}
+    />
+  );
 
   const list = (
     <FlatList
@@ -632,7 +703,11 @@ export default function HomeScreen() {
                 accessibilityLabel="Back to my location"
               >
                 {/* Blue on purpose — it points at the blue you-are-here dot. */}
-                <Text style={styles.recenterGlyph}>{"◎"}</Text>
+                <MaterialCommunityIcons
+                  name="crosshairs-gps"
+                  size={24}
+                  color={colors.youAreHere}
+                />
               </TouchableOpacity>
             }
           >
@@ -739,11 +814,6 @@ const createStyles = (colors: ThemeColors) =>
     justifyContent: "center",
     backgroundColor: colors.surfaceSecondary,
   },
-  clearGlyph: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: colors.textSecondary,
-  },
   filterButton: {
     minHeight: 44,
     justifyContent: "center",
@@ -839,19 +909,40 @@ const createStyles = (colors: ThemeColors) =>
   },
   timesBar: {
     flexShrink: 0,
-    flexDirection: "row",
-    justifyContent: "space-between",
     backgroundColor: colors.canvas,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
-    paddingHorizontal: spacing.xl,
-    paddingVertical: spacing.m,
+    paddingHorizontal: spacing.l,
+    paddingTop: spacing.m,
+    paddingBottom: spacing.m,
+    gap: spacing.m,
+  },
+  timesTopRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    gap: spacing.l,
+  },
+  nextBlock: {
+    gap: 2,
+  },
+  nextLabel: {
+    fontSize: 11,
+    color: colors.textSecondary,
+  },
+  nextTime: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: colors.accent,
+  },
+  upcomingRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.l,
   },
   timeItem: {
-    // Equal-width slots so times distribute evenly on any screen width.
-    flex: 1,
     alignItems: "center",
-    gap: spacing.xs,
+    gap: 2,
   },
   timeLabel: {
     fontSize: 12,
@@ -862,10 +953,16 @@ const createStyles = (colors: ThemeColors) =>
     fontWeight: "600",
     color: colors.text,
   },
-  timesChevron: {
-    fontSize: 18,
-    color: colors.textSecondary,
-    alignSelf: "center",
+  progressTrack: {
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: colors.surfaceSecondary,
+    overflow: "hidden",
+  },
+  progressFill: {
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: colors.accent,
   },
   recenterButton: {
     width: 48,
@@ -883,11 +980,6 @@ const createStyles = (colors: ThemeColors) =>
     // Below the sheet's elevation (12) so the sheet slides over it when
     // dragged to full — see BottomSheet's aboveSheet contract.
     elevation: 4,
-  },
-  recenterGlyph: {
-    fontSize: 24,
-    lineHeight: 28,
-    color: colors.accent,
   },
   listContainer: {
     flex: 1,

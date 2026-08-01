@@ -167,7 +167,7 @@ export default function SuggestionForm({
         accessibilityLabel={sendLabel}
       >
         {sending ? (
-          <ActivityIndicator color="#FFFFFF" size="small" />
+          <ActivityIndicator color={colors.canvas} size="small" />
         ) : (
           <Text style={styles.sendLabel}>{sendLabel}</Text>
         )}
@@ -242,8 +242,9 @@ const createStyles = (colors: ThemeColors) =>
     sendButtonDisabled: {
       opacity: 0.6,
     },
+    // canvas, not white: the dark theme's accent is light — white would fail.
     sendLabel: {
-      color: "#FFFFFF",
+      color: colors.canvas,
       fontSize: 16,
       fontWeight: "600",
     },

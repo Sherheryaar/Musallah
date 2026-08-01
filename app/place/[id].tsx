@@ -3,11 +3,13 @@ import {
   Linking,
   Platform,
   ScrollView,
+  Share,
   Text,
   TouchableOpacity,
   View,
   StyleSheet,
 } from "react-native";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Stack, useLocalSearchParams } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -15,6 +17,7 @@ import {
   FACILITY_LABELS,
   FacilityKey,
   isCorroborated,
+  Place,
   PLACE_TYPE_LABELS,
 } from "@/data/places";
 import { usePlaces } from "@/context/PlacesContext";
@@ -22,8 +25,26 @@ import { useSettings } from "@/context/SettingsContext";
 import { useTheme } from "@/context/ThemeContext";
 import SuggestionSheet from "@/components/SuggestionSheet";
 import { submitEditSuggestion } from "@/lib/feedback";
+import { FACILITY_ICONS, PLACE_TYPE_ICONS, type IconName } from "@/lib/icons";
 import { computePrayerTimes, PrayerTimes } from "@/lib/prayerTimes";
-import { spacing, radius, type ThemeColors } from "@/lib/theme";
+import {
+  placeTypeColors,
+  spacing,
+  radius,
+  type ThemeColors,
+} from "@/lib/theme";
+
+// The hero band is always the deep masjid green — the identity colour the
+// pins already use. Deliberately NOT per-type: white text fails contrast
+// on the amber musalla colour, and a header that changes colour per page
+// reads as inconsistency, not information (the type is stated in words).
+const HERO_BACKGROUND = placeTypeColors.masjid;
+const HERO_TEXT = "#FFFFFF";
+
+function mapsSearchUrl(place: Place): string {
+  const query = encodeURIComponent(place.name + ", " + place.address);
+  return "https://www.google.com/maps/search/?api=1&query=" + query;
+}
 
 const PRAYER_ROWS: {
   label: string;
@@ -65,6 +86,7 @@ function useStyles() {
 
 export default function PlaceDetailScreen() {
   const styles = useStyles();
+  const { colors } = useTheme();
   const { id } = useLocalSearchParams<{ id: string }>();
   const insets = useSafeAreaInsets();
   const { places } = usePlaces();
@@ -99,7 +121,7 @@ export default function PlaceDetailScreen() {
 
   const openDirections = () => {
     const query = encodeURIComponent(place.name + ", " + place.address);
-    const webUrl = "https://www.google.com/maps/search/?api=1&query=" + query;
+    const webUrl = mapsSearchUrl(place);
     const url = Platform.select({
       ios: "maps:0,0?q=" + query,
       android: "geo:0,0?q=" + query,
@@ -112,16 +134,25 @@ export default function PlaceDetailScreen() {
     });
   };
 
+  const sharePlace = () => {
+    // A maps link, not an app link: the recipient may not have the app.
+    Share.share({
+      message: `${place.name}\n${place.address}\n${mapsSearchUrl(place)}`,
+    }).catch(() => {});
+  };
+
   const facilityKeys = Object.keys(FACILITY_LABELS) as FacilityKey[];
 
   const contactRows: {
     label: string;
+    icon: IconName;
     url: string;
     accessibilityLabel: string;
   }[] = [];
   if (place.phone) {
     contactRows.push({
       label: "Phone",
+      icon: "phone",
       url: ukPhoneToTel(place.phone),
       accessibilityLabel: "Call phone",
     });
@@ -129,6 +160,7 @@ export default function PlaceDetailScreen() {
   if (place.website) {
     contactRows.push({
       label: "Website",
+      icon: "web",
       url: place.website,
       accessibilityLabel: "Open website",
     });
@@ -136,6 +168,7 @@ export default function PlaceDetailScreen() {
   if (place.facebook) {
     contactRows.push({
       label: "Facebook",
+      icon: "facebook",
       url: place.facebook,
       accessibilityLabel: "Open Facebook",
     });
@@ -143,6 +176,7 @@ export default function PlaceDetailScreen() {
   if (place.instagram) {
     contactRows.push({
       label: "Instagram",
+      icon: "instagram",
       url: place.instagram,
       accessibilityLabel: "Open Instagram",
     });
@@ -172,19 +206,91 @@ export default function PlaceDetailScreen() {
     >
       <Stack.Screen options={ { title: PLACE_TYPE_LABELS[place.type] } } />
 
-      <Text style={styles.name}>{place.name}</Text>
-      {place.address ? (
-        <Text style={styles.address}>{place.address}</Text>
-      ) : null}
+      <View style={styles.hero}>
+        <View style={styles.heroMetaRow}>
+          <MaterialCommunityIcons
+            name={PLACE_TYPE_ICONS[place.type]}
+            size={15}
+            color={HERO_TEXT}
+          />
+          <Text style={styles.heroMeta}>{PLACE_TYPE_LABELS[place.type]}</Text>
+          {place.confidence === "verified" ? (
+            <>
+              <Text style={styles.heroMeta}>{"·"}</Text>
+              <MaterialCommunityIcons
+                name="check-decagram"
+                size={15}
+                color={HERO_TEXT}
+              />
+              <Text style={styles.heroMeta}>Verified</Text>
+            </>
+          ) : null}
+        </View>
+        <Text style={styles.heroName}>{place.name}</Text>
+        {place.address ? (
+          <Text style={styles.heroAddress}>{place.address}</Text>
+        ) : null}
+      </View>
 
-      <TouchableOpacity
-        style={styles.directionsButton}
-        onPress={openDirections}
-        accessibilityRole="button"
-        accessibilityLabel="Get directions"
-      >
-        <Text style={styles.directionsLabel}>Get directions</Text>
-      </TouchableOpacity>
+      <View style={styles.actionRow}>
+        <TouchableOpacity
+          style={styles.directionsButton}
+          onPress={openDirections}
+          accessibilityRole="button"
+          accessibilityLabel="Get directions"
+        >
+          <MaterialCommunityIcons
+            name="navigation-variant"
+            size={18}
+            color={colors.canvas}
+          />
+          <Text style={styles.directionsLabel}>Directions</Text>
+        </TouchableOpacity>
+        {place.phone ? (
+          <TouchableOpacity
+            style={styles.quickAction}
+            onPress={() => {
+              Linking.openURL(ukPhoneToTel(place.phone!)).catch(() => {});
+            }}
+            accessibilityRole="button"
+            accessibilityLabel="Call phone"
+          >
+            <MaterialCommunityIcons
+              name="phone"
+              size={19}
+              color={colors.accent}
+            />
+          </TouchableOpacity>
+        ) : null}
+        {place.website ? (
+          <TouchableOpacity
+            style={styles.quickAction}
+            onPress={() => {
+              Linking.openURL(place.website!).catch(() => {});
+            }}
+            accessibilityRole="button"
+            accessibilityLabel="Open website"
+          >
+            <MaterialCommunityIcons
+              name="web"
+              size={19}
+              color={colors.accent}
+            />
+          </TouchableOpacity>
+        ) : null}
+        <TouchableOpacity
+          style={styles.quickAction}
+          onPress={sharePlace}
+          accessibilityRole="button"
+          accessibilityLabel="Share this place"
+        >
+          <MaterialCommunityIcons
+            name="share-variant"
+            size={19}
+            color={colors.accent}
+          />
+        </TouchableOpacity>
+      </View>
 
       {contactRows.length > 0 ? (
         <View style={styles.section}>
@@ -200,7 +306,14 @@ export default function PlaceDetailScreen() {
                 accessibilityRole="button"
                 accessibilityLabel={row.accessibilityLabel}
               >
-                <Text style={styles.contactLabel}>{row.label}</Text>
+                <View style={styles.contactLabelWrap}>
+                  <MaterialCommunityIcons
+                    name={row.icon}
+                    size={17}
+                    color={colors.textSecondary}
+                  />
+                  <Text style={styles.contactLabel}>{row.label}</Text>
+                </View>
                 <Text style={styles.contactValue} numberOfLines={1}>
                   {row.label === "Phone" ? place.phone : row.url}
                 </Text>
@@ -275,17 +388,25 @@ export default function PlaceDetailScreen() {
             const available = place.facilities[key];
             return (
               <View key={key} style={styles.facilityRow}>
+                <MaterialCommunityIcons
+                  name={FACILITY_ICONS[key]}
+                  size={19}
+                  color={available ? colors.accent : colors.border}
+                />
                 <Text
                   style={[
-                    styles.facilityMark,
-                    available ? styles.markYes : styles.markNo,
+                    styles.facilityLabel,
+                    !available && styles.facilityLabelMissing,
                   ]}
                 >
-                  {available ? "\u2713" : "\u2717"}
-                </Text>
-                <Text style={styles.facilityLabel}>
                   {FACILITY_LABELS[key]}
                 </Text>
+                <MaterialCommunityIcons
+                  name={available ? "check" : "close"}
+                  size={17}
+                  color={available ? colors.positive : colors.textSecondary}
+                  style={styles.facilityMark}
+                />
               </View>
             );
           })}
@@ -302,7 +423,13 @@ export default function PlaceDetailScreen() {
       <View style={styles.verification}>
         <Text style={styles.verificationText}>
           {isCorroborated(place) ? (
-            <Text style={styles.verificationTick}>{"✓ "}</Text>
+            <>
+              <MaterialCommunityIcons
+                name="check-decagram"
+                size={14}
+                color={colors.positive}
+              />{" "}
+            </>
           ) : null}
           <Text style={styles.verificationStatus}>
             {confidenceLabel(place.confidence)}
@@ -367,29 +494,64 @@ const createStyles = (colors: ThemeColors) =>
     fontSize: 16,
     color: colors.textSecondary,
   },
-  name: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: colors.text,
-    lineHeight: 30,
+  hero: {
+    backgroundColor: HERO_BACKGROUND,
+    borderRadius: 16,
+    padding: spacing.l,
+    paddingVertical: spacing.xl - spacing.xs,
+    gap: spacing.xs,
   },
-  address: {
-    fontSize: 16,
-    color: colors.textSecondary,
-    lineHeight: 22,
+  heroMetaRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.xs + 2,
+  },
+  heroMeta: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: HERO_TEXT,
+    opacity: 0.95,
+  },
+  heroName: {
+    fontSize: 22,
+    fontWeight: "700",
+    color: HERO_TEXT,
+    lineHeight: 28,
+  },
+  heroAddress: {
+    fontSize: 14,
+    color: HERO_TEXT,
+    opacity: 0.9,
+    lineHeight: 20,
+  },
+  actionRow: {
+    flexDirection: "row",
+    gap: spacing.s,
   },
   directionsButton: {
+    flex: 1,
+    flexDirection: "row",
+    gap: spacing.s,
     backgroundColor: colors.accent,
-    borderRadius: radius.m,
+    borderRadius: radius.l,
     paddingVertical: spacing.m,
     alignItems: "center",
-    minHeight: 44,
+    minHeight: 48,
     justifyContent: "center",
   },
+  // canvas, not white: the dark theme's accent is light green.
   directionsLabel: {
     color: colors.canvas,
     fontSize: 16,
     fontWeight: "600",
+  },
+  quickAction: {
+    width: 48,
+    minHeight: 48,
+    borderRadius: radius.l,
+    backgroundColor: colors.accentSoft,
+    alignItems: "center",
+    justifyContent: "center",
   },
   section: {
     backgroundColor: colors.canvas,
@@ -473,6 +635,11 @@ const createStyles = (colors: ThemeColors) =>
     gap: spacing.m,
     minHeight: 44,
   },
+  contactLabelWrap: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.s,
+  },
   contactLabel: {
     fontSize: 16,
     fontWeight: "600",
@@ -493,20 +660,14 @@ const createStyles = (colors: ThemeColors) =>
     gap: spacing.m,
   },
   facilityMark: {
-    fontSize: 16,
-    fontWeight: "700",
-    width: 20,
-    textAlign: "center",
-  },
-  markYes: {
-    color: colors.positive,
-  },
-  markNo: {
-    color: colors.textSecondary,
+    marginLeft: "auto",
   },
   facilityLabel: {
     fontSize: 16,
     color: colors.text,
+  },
+  facilityLabelMissing: {
+    color: colors.textSecondary,
   },
   verification: {
     backgroundColor: colors.surfaceSecondary,
@@ -517,10 +678,6 @@ const createStyles = (colors: ThemeColors) =>
     fontSize: 14,
     color: colors.textSecondary,
     lineHeight: 20,
-  },
-  verificationTick: {
-    color: colors.positive,
-    fontWeight: "700",
   },
   verificationStatus: {
     fontWeight: "600",

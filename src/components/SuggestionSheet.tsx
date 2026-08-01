@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import SuggestionForm from "@/components/SuggestionForm";
@@ -78,7 +79,11 @@ export default function SuggestionSheet({
             accessibilityLabel="Close"
             hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
           >
-            <Text style={styles.closeGlyph}>{"✕"}</Text>
+            <MaterialCommunityIcons
+              name="close"
+              size={20}
+              color={colors.textSecondary}
+            />
           </TouchableOpacity>
         </View>
         <ScrollView
@@ -145,9 +150,5 @@ const createStyles = (colors: ThemeColors) =>
       fontSize: 17,
       fontWeight: "700",
       color: colors.text,
-    },
-    closeGlyph: {
-      fontSize: 18,
-      color: colors.textSecondary,
     },
   });

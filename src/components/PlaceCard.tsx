@@ -1,11 +1,14 @@
 import React, { useCallback, useMemo } from "react";
 import { Text, TouchableOpacity, View, StyleSheet } from "react-native";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+
 import {
+  FACILITY_KEYS,
   FACILITY_LABELS,
-  FacilityKey,
   Place,
   PLACE_TYPE_LABELS,
 } from "@/data/places";
+import { FACILITY_ICONS, PLACE_TYPE_ICONS } from "@/lib/icons";
 import { useTheme } from "@/context/ThemeContext";
 import {
   placeTypeColors,
@@ -21,66 +24,93 @@ type Props = {
   onPress: (id: string) => void;
 };
 
-/** One row in the results list: name, type, distance, key facilities. */
+/**
+ * One row in the results list: type tile, name (+ verified rosette),
+ * Jumu'ah time, and the available facilities as an icon strip. Icons show
+ * only what a place HAS — a row of crossed-out absences is noise, and
+ * "not listed" isn't the same as "not there".
+ */
 function PlaceCard({ place, distanceLabel, onPress }: Props) {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  // Memoized: recomputing keys/filter/join for every row on every list
-  // render adds up with hundreds of places.
-  const facilitiesLabel = useMemo(
-    () =>
-      (Object.keys(FACILITY_LABELS) as FacilityKey[])
-        .filter((key) => place.facilities[key])
-        .map((key) => FACILITY_LABELS[key])
-        .join(" \u00b7 "),
+  // Memoized: recomputing per row on every list render adds up with
+  // hundreds of places.
+  const available = useMemo(
+    () => FACILITY_KEYS.filter((key) => place.facilities[key]),
     [place.facilities],
   );
 
   const handlePress = useCallback(() => onPress(place.id), [onPress, place.id]);
+
+  const facilitiesLabel =
+    available.length > 0
+      ? `Facilities: ${available.map((key) => FACILITY_LABELS[key]).join(", ")}`
+      : "";
 
   return (
     <TouchableOpacity
       style={styles.card}
       onPress={handlePress}
       accessibilityRole="button"
-      accessibilityLabel={`${place.name}, ${
+      accessibilityLabel={`${place.name}, ${PLACE_TYPE_LABELS[place.type]}, ${
         distanceLabel ?? "distance unknown"
-      }`}
+      }${place.confidence === "verified" ? ", verified" : ""}. ${facilitiesLabel}`}
     >
-      <View style={styles.topRow}>
-        <Text style={styles.name} numberOfLines={2}>
-          {place.name}
-        </Text>
-        {distanceLabel ? (
-          <Text style={styles.distance}>{distanceLabel}</Text>
-        ) : null}
+      {/* Tile colour matches the place's map pin and the map legend. */}
+      <View style={styles.typeTile}>
+        <MaterialCommunityIcons
+          name={PLACE_TYPE_ICONS[place.type]}
+          size={22}
+          color={placeTypeColors[place.type]}
+        />
       </View>
 
-      <View style={styles.metaRow}>
-        {/* Dot colour matches the place's map pin and the map legend. */}
-        <View style={styles.typeBadge}>
-          <View
-            style={[
-              styles.typeDot,
-              { backgroundColor: placeTypeColors[place.type] },
-            ]}
-          />
-          <Text style={styles.typeBadgeText}>
-            {PLACE_TYPE_LABELS[place.type]}
+      <View style={styles.body}>
+        <View style={styles.topRow}>
+          <Text style={styles.name} numberOfLines={2}>
+            {place.name}
+            {place.confidence === "verified" ? (
+              <>
+                {" "}
+                <MaterialCommunityIcons
+                  name="check-decagram"
+                  size={15}
+                  color={colors.accent}
+                />
+              </>
+            ) : null}
           </Text>
+          {distanceLabel ? (
+            <Text style={styles.distance}>{distanceLabel}</Text>
+          ) : null}
         </View>
+
         {place.jumuahTimes?.length ? (
-          <Text style={styles.metaText}>
-            Jumu'ah {place.jumuahTimes.join(" & ")}
-          </Text>
+          <View style={styles.metaRow}>
+            <MaterialCommunityIcons
+              name="clock-outline"
+              size={14}
+              color={colors.textSecondary}
+            />
+            <Text style={styles.metaText}>
+              Jumu'ah {place.jumuahTimes.join(" & ")}
+            </Text>
+          </View>
+        ) : null}
+
+        {available.length > 0 ? (
+          <View style={styles.facilityRow}>
+            {available.map((key) => (
+              <MaterialCommunityIcons
+                key={key}
+                name={FACILITY_ICONS[key]}
+                size={17}
+                color={colors.accent}
+              />
+            ))}
+          </View>
         ) : null}
       </View>
-
-      {facilitiesLabel.length > 0 ? (
-        <Text style={styles.facilities} numberOfLines={1}>
-          {facilitiesLabel}
-        </Text>
-      ) : null}
     </TouchableOpacity>
   );
 }
@@ -92,12 +122,27 @@ export default React.memo(PlaceCard);
 const createStyles = (colors: ThemeColors) =>
   StyleSheet.create({
   card: {
+    flexDirection: "row",
+    gap: spacing.m,
     backgroundColor: colors.canvas,
     borderRadius: radius.l,
     borderWidth: 1,
     borderColor: colors.border,
     padding: spacing.l,
+  },
+  typeTile: {
+    width: 42,
+    height: 42,
+    borderRadius: radius.l,
+    backgroundColor: colors.surfaceSecondary,
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+  },
+  body: {
+    flex: 1,
     gap: spacing.s,
+    minWidth: 0,
   },
   topRow: {
     flexDirection: "row",
@@ -126,33 +171,15 @@ const createStyles = (colors: ThemeColors) =>
   metaRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: spacing.m,
-  },
-  typeBadge: {
-    flexDirection: "row",
-    alignItems: "center",
     gap: spacing.xs,
-    backgroundColor: colors.surfaceSecondary,
-    borderRadius: radius.m,
-    paddingHorizontal: spacing.s,
-    paddingVertical: spacing.xs,
-  },
-  typeDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
-  typeBadgeText: {
-    fontSize: 12,
-    color: colors.textSecondary,
-    fontWeight: "600",
   },
   metaText: {
-    fontSize: 14,
+    fontSize: 13,
     color: colors.textSecondary,
   },
-  facilities: {
-    fontSize: 14,
-    color: colors.textSecondary,
+  facilityRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.m,
   },
 });

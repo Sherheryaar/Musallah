@@ -27,7 +27,7 @@ if (html.includes('rel="manifest"')) {
 
 const tags = [
   '<meta name="description" content="Find the nearest masjid or prayer space — facilities, jamaat times, and accurate prayer times. No account, no tracking." />',
-  '<meta name="theme-color" content="#2783DE" />',
+  '<meta name="theme-color" content="#2E7D57" />',
   '<link rel="manifest" href="/manifest.json" />',
   '<link rel="icon" type="image/png" href="/icon-192.png" />',
   '<link rel="apple-touch-icon" href="/icon-192.png" />',

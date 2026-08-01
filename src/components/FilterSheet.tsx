@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { FACILITY_KEYS, FACILITY_LABELS, FacilityKey } from "@/data/places";
@@ -96,7 +97,13 @@ export default function FilterSheet({
             >
               <Text style={styles.rowLabel}>{FACILITY_LABELS[key]}</Text>
               <View style={[styles.box, isActive && styles.boxActive]}>
-                {isActive ? <Text style={styles.tick}>{"\u2713"}</Text> : null}
+                {isActive ? (
+                  <MaterialCommunityIcons
+                    name="check-bold"
+                    size={15}
+                    color={colors.canvas}
+                  />
+                ) : null}
               </View>
             </TouchableOpacity>
           );
@@ -118,7 +125,11 @@ export default function FilterSheet({
           </View>
           <View style={[styles.box, corroboratedOnly && styles.boxActive]}>
             {corroboratedOnly ? (
-              <Text style={styles.tick}>{"\u2713"}</Text>
+              <MaterialCommunityIcons
+                name="check-bold"
+                size={15}
+                color={colors.canvas}
+              />
             ) : null}
           </View>
         </TouchableOpacity>
@@ -222,11 +233,6 @@ const createStyles = (colors: ThemeColors) =>
     backgroundColor: colors.accent,
     borderColor: colors.accent,
   },
-  tick: {
-    color: "#FFFFFF",
-    fontSize: 14,
-    fontWeight: "700",
-  },
   doneButton: {
     marginTop: spacing.m,
     minHeight: 48,
@@ -235,8 +241,10 @@ const createStyles = (colors: ThemeColors) =>
     alignItems: "center",
     justifyContent: "center",
   },
+  // canvas, not literal white: the dark theme's accent is a LIGHT green,
+  // where white text fails contrast — canvas flips to near-black there.
   doneLabel: {
-    color: "#FFFFFF",
+    color: colors.canvas,
     fontSize: 16,
     fontWeight: "700",
   },

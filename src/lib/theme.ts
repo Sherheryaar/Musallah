@@ -10,18 +10,24 @@ export const lightColors = {
   surface: "#F9F8F7",
   surfaceSecondary: "#F0EFED",
   border: "#E6E5E3",
-  accent: "#2783DE",
-  accentSoft: "#E5F2FC",
+  // The identity colour: the same deep masjid green as the map pins.
+  // (Was a generic blue; green is the app's most meaningful colour.)
+  accent: "#2E7D57",
+  accentSoft: "#E6F0EA",
   positive: "#46A171",
   positiveSoft: "#E8F1EC",
   attention: "#D5803B",
   attentionSoft: "#FBEBDE",
+  // Blue is reserved for ONE meaning: the you-are-here dot the map draws
+  // on both platforms. Anything pointing at the user (the recenter button)
+  // uses this, and nothing else does.
+  youAreHere: "#2783DE",
 };
 
 export type ThemeColors = typeof lightColors;
 
 // Dark palette: same roles, tuned for contrast on near-black. The accent is
-// lightened — the light-mode blue fails contrast on dark surfaces.
+// lightened — the light-mode green fails contrast on dark surfaces.
 export const darkColors: ThemeColors = {
   text: "#ECEAE6",
   textSecondary: "#A29E96",
@@ -29,12 +35,13 @@ export const darkColors: ThemeColors = {
   surface: "#141312",
   surfaceSecondary: "#2C2B28",
   border: "#3A3835",
-  accent: "#6FB1EF",
-  accentSoft: "#1D2F42",
+  accent: "#6FC59B",
+  accentSoft: "#1C332A",
   positive: "#63B98D",
   positiveSoft: "#1D2F26",
   attention: "#E09A5C",
   attentionSoft: "#37281B",
+  youAreHere: "#6FB1EF",
 };
 
 /**

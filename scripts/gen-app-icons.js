@@ -1,6 +1,6 @@
 /**
  * Generates the app icon and PWA icons: a white mosque silhouette (dome,
- * two minarets, arched doorway) on the app's accent-blue background.
+ * two minarets, arched doorway) on the app's accent-green background.
  * Dependency-free — same procedural PNG approach as gen-pin-assets.js.
  *
  * Run with: node scripts/gen-app-icons.js
@@ -16,7 +16,7 @@ const fs = require("fs");
 const path = require("path");
 const { encodePng, hexToRgb } = require("./lib/png");
 
-const BACKGROUND = "#2783DE"; // colors.accent in src/lib/theme.ts
+const BACKGROUND = "#2E7D57"; // colors.accent in src/lib/theme.ts (masjid green)
 const GLYPH = "#FFFFFF";
 
 // All geometry in unit coordinates (0..1), so every size renders identically.
