@@ -10,6 +10,7 @@
     "tunnel": "expo start --tunnel",
     "build:places": "node scripts/csv-to-places.mjs",
     "sync:places": "node scripts/sync-places.mjs",
+    "verify:places": "node scripts/verify-places.mjs",
     "build:web": "expo export --platform web && node scripts/postbuild-web.mjs",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
