@@ -354,6 +354,7 @@
 		"notes": "Capacity ~1450 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-1131)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 8571 6839",
+		"website": "https://www.abubakrmosque-southall.org.uk",
 		"confidence": "community"
 	},
 	{
@@ -434,6 +435,8 @@
 		"notes": "Capacity ~700 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-1298)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 8257 1786",
+		"website": "https://minhajlondon.org",
+		"facebook": "https://www.facebook.com/MQILondon/",
 		"confidence": "community"
 	},
 	{
@@ -473,6 +476,9 @@
 		"notes": "Capacity ~450 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-1058)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 8459 6111",
+		"website": "https://aiccmosque.org.uk/",
+		"facebook": "https://www.facebook.com/afghanislamicculturalcentre",
+		"instagram": "https://www.instagram.com/aiccmasjed",
 		"confidence": "community"
 	},
 	{
@@ -731,6 +737,9 @@
 		"notes": "Capacity ~200 (MuslimsInBritain.org); Denomination: Salafi; Data: MIB (mib-812)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 8597 5092",
+		"website": "https://masjidansar.com/",
+		"facebook": "https://www.facebook.com/alansariec",
+		"instagram": "https://www.instagram.com/alansariec/",
 		"confidence": "community"
 	},
 	{
@@ -1734,6 +1743,8 @@
 		"notes": "Capacity ~450 (MuslimsInBritain.org); Denomination: Salafi; Data: MIB+OSM (mib-1363)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 7780 9495",
+		"website": "https://www.alhudamosque.com/",
+		"facebook": "https://www.facebook.com/AlHudaCCM/",
 		"confidence": "community"
 	},
 	{
@@ -2474,6 +2485,9 @@
 		],
 		"lastVerified": "2026-04-02",
 		"source": "Sample data",
+		"website": "https://www.almanaar.org.uk",
+		"facebook": "https://www.facebook.com/almanaarmchc",
+		"instagram": "https://www.instagram.com/almanaarmchc/",
 		"confidence": "unverified"
 	},
 	{
@@ -2926,6 +2940,8 @@
 		"notes": "Capacity ~150 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-1092)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 7916 8260",
+		"website": "https://www.alrahmanmosque.org/",
+		"instagram": "https://www.instagram.com/alrahmanmosque_camden/",
 		"confidence": "community"
 	},
 	{
@@ -3224,6 +3240,9 @@
 		"notes": "Capacity ~600 (MuslimsInBritain.org); Denomination: Salafi; Data: MIB (mib-2628)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 8993 6650",
+		"website": "https://www.annoorcentre.com",
+		"facebook": "https://www.facebook.com/annoormasjid",
+		"instagram": "https://www.instagram.com/accctrust/",
 		"confidence": "community"
 	},
 	{
@@ -3904,6 +3923,9 @@
 		"notes": "Capacity ~650 (MuslimsInBritain.org); Denomination: Salafi; Data: MIB (mib-1173)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 8808 7951",
+		"website": "https://assunnah.co.uk/",
+		"facebook": "https://www.facebook.com/AssunnahICentre/",
+		"instagram": "https://www.instagram.com/AssunnahICentre/",
 		"confidence": "community"
 	},
 	{
@@ -3924,6 +3946,7 @@
 		"notes": "Capacity ~30 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-1086)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 3603 8464",
+		"website": "https://attaqwa.org/",
 		"confidence": "community"
 	},
 	{
@@ -3984,6 +4007,8 @@
 		"notes": "Capacity ~80 (MuslimsInBritain.org); Denomination: Arab mainstream; Data: MIB (mib-1013)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 8591 5917",
+		"facebook": "https://www.facebook.com/MasjidTaqwaBarking",
+		"instagram": "https://www.instagram.com/attaqwabarking/",
 		"confidence": "community"
 	},
 	{
@@ -4124,6 +4149,7 @@
 		"notes": "Capacity ~600 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-1297)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 8534 5959",
+		"facebook": "https://www.facebook.com/officialazharmasjid/",
 		"confidence": "community"
 	},
 	{
@@ -4144,6 +4170,9 @@
 		"notes": "Capacity ~2000 (MuslimsInBritain.org); Denomination: Sufi; Data: MIB+OSM (mib-1160)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 7254 0046",
+		"website": "https://www.aziziye.org.uk/",
+		"facebook": "https://www.facebook.com/aziziyemosque",
+		"instagram": "https://www.instagram.com/aziziye_mosque/",
 		"confidence": "community"
 	},
 	{
@@ -4223,6 +4252,8 @@
 		"notes": "Capacity ~2500 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-1322)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 7378 7764",
+		"website": "https://www.baitulazizmosque.org.uk/",
+		"facebook": "https://www.facebook.com/BaitulAzizMosque/",
 		"confidence": "community"
 	},
 	{
@@ -4343,6 +4374,8 @@
 		"notes": "Capacity ~2500 (MuslimsInBritain.org); Denomination: Sufi; Data: MIB+OSM (mib-2647)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 8983 3409",
+		"website": "https://baitulaman.org/",
+		"facebook": "https://www.facebook.com/baitulamanmosqueandcc/",
 		"confidence": "community"
 	},
 	{
@@ -4465,6 +4498,9 @@
 		"notes": "Capacity ~750 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-1400)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 8673 1000",
+		"website": "https://balhammosque.org/",
+		"facebook": "https://www.facebook.com/balhammosque",
+		"instagram": "https://www.instagram.com/balhammosque_tic/",
 		"confidence": "community"
 	},
 	{
@@ -4724,6 +4760,9 @@
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Data: MIB (mib-1719)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "07904 544207",
+		"website": "https://barnetislamiccentre.org",
+		"facebook": "https://www.facebook.com/barnetislamiccentre/",
+		"instagram": "https://www.instagram.com/barnetislamiccentre/",
 		"confidence": "community"
 	},
 	{
@@ -5341,6 +5380,8 @@
 		"notes": "Capacity ~200 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-707)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 3489 5589",
+		"website": "https://www.bilalmasjid.co.uk/",
+		"facebook": "https://www.facebook.com/bilalmasjidtrust/",
 		"confidence": "community"
 	},
 	{
@@ -5840,6 +5881,9 @@
 		],
 		"lastVerified": "2026-05-14",
 		"source": "Sample data",
+		"website": "https://www.bricklanejammemasjid.org.uk",
+		"facebook": "https://www.facebook.com/BrickLaneMosque",
+		"instagram": "https://www.instagram.com/bricklanejammemasjid",
 		"confidence": "unverified"
 	},
 	{
@@ -6237,6 +6281,7 @@
 		"notes": "Capacity ~200 (MuslimsInBritain.org); Denomination: Arab mainstream; Data: MIB+OSM (mib-307)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 7701 3687",
+		"website": "https://camberwellislamiccentre.co.uk",
 		"confidence": "community"
 	},
 	{
@@ -6615,6 +6660,8 @@
 		"notes": "Capacity ~2500 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-1128)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 8813 9219",
+		"website": "https://cjmsouthall.co.uk/",
+		"facebook": "https://www.facebook.com/centraljamia.masjid",
 		"confidence": "community"
 	},
 	{
@@ -6816,6 +6863,9 @@
 		"notes": "Capacity ~900 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-1078)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 8450 1986",
+		"website": "https://www.centralmosqueofbrent.com/",
+		"facebook": "https://www.facebook.com/CentralMosqueofBrent/",
+		"instagram": "https://www.instagram.com/centralmosqueofbrent/",
 		"confidence": "community"
 	},
 	{
@@ -7403,6 +7453,8 @@
 		"notes": "Capacity ~200 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-1382)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 8523 5826",
+		"website": "https://www.chingfordmasjid.org/",
+		"facebook": "https://www.facebook.com/Chingford-Islamic-Society-161442217202686/",
 		"confidence": "community"
 	},
 	{
@@ -7891,6 +7943,9 @@
 		},
 		"notes": "Capacity ~200 (MuslimsInBritain.org); Denomination: Salafi; Data: MIB (mib-2768)",
 		"source": "MuslimsInBritain.org (with permission)",
+		"website": "https://croydonict.com/",
+		"facebook": "https://www.facebook.com/croydonict",
+		"instagram": "https://www.instagram.com/croydonict/",
 		"confidence": "community"
 	},
 	{
@@ -7911,6 +7966,8 @@
 		"notes": "Capacity ~3000 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-1114)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 8684 8200",
+		"website": "https://www.croydonmosque.com",
+		"facebook": "https://www.facebook.com/croydonmasjid",
 		"confidence": "community"
 	},
 	{
@@ -7933,6 +7990,8 @@
 		],
 		"lastVerified": "2026-02-27",
 		"source": "Sample data",
+		"website": "https://www.croydonmosque.com/",
+		"facebook": "https://www.facebook.com/croydonmasjid",
 		"confidence": "unverified"
 	},
 	{
@@ -7994,6 +8053,8 @@
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-453)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "07838 144899",
+		"website": "https://bhis.org.uk",
+		"facebook": "https://www.facebook.com/dagenhammasjid",
 		"confidence": "community"
 	},
 	{
@@ -8948,6 +9009,7 @@
 		"notes": "Capacity ~2000 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-1698)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "01274 442612",
+		"website": "https://wembleylondonproject.co.uk",
 		"confidence": "community"
 	},
 	{
@@ -9564,6 +9626,7 @@
 		"notes": "Capacity ~100 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-289)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 8472 9977",
+		"website": "https://ebict.co.uk/",
 		"confidence": "community"
 	},
 	{
@@ -9658,6 +9721,9 @@
 		"notes": "Capacity ~5000 (MuslimsInBritain.org); Denomination: Maududi / Jamaat-e-Islami; Data: MIB+OSM (mib-1378)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 7650 3000",
+		"website": "https://eastlondonmosque.org.uk/",
+		"facebook": "https://www.facebook.com/eastlondonmosque/",
+		"instagram": "https://www.instagram.com/eastlondonmosque/",
 		"confidence": "community"
 	},
 	{
@@ -9797,6 +9863,7 @@
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Data: MIB (mib-15063001)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "0845 644 8585",
+		"website": "https://edgwarecentralmosque.org/",
 		"confidence": "community"
 	},
 	{
@@ -9878,6 +9945,7 @@
 		"notes": "Capacity ~1750 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-2630)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 8807 5151",
+		"website": "https://eicalmasjid.org.uk",
 		"confidence": "community"
 	},
 	{
@@ -10254,6 +10322,8 @@
 		"notes": "Capacity ~30 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-2814)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 8518 7167",
+		"website": "https://faizaneislam.com/",
+		"facebook": "https://www.facebook.com/faizaneislam.org.uk/",
 		"confidence": "community"
 	},
 	{
@@ -11085,6 +11155,9 @@
 		],
 		"lastVerified": "2026-03-19",
 		"source": "Sample data",
+		"website": "https://www.finsburyparkmosque.org",
+		"facebook": "https://www.facebook.com/FinsburyParkMosque",
+		"instagram": "https://www.instagram.com/finsburyparkmosque/",
 		"confidence": "unverified"
 	},
 	{
@@ -11106,6 +11179,8 @@
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 7424 5252",
 		"website": "https://finsburyparkmosque.org",
+		"facebook": "https://www.facebook.com/FinsburyParkMosque",
+		"instagram": "https://www.instagram.com/finsburyparkmosque/",
 		"confidence": "community"
 	},
 	{
@@ -11184,6 +11259,9 @@
 		"notes": "Capacity ~400 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-1300)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 8555 6258",
+		"website": "https://forestgatecentralmasjid.org",
+		"facebook": "https://www.facebook.com/forestgatecentralmasjid/",
+		"instagram": "https://www.instagram.com/forestgatecentralmasjid/",
 		"confidence": "community"
 	},
 	{
@@ -12032,6 +12110,8 @@
 		"notes": "Capacity ~330 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-2820)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 8575 2695",
+		"website": "https://www.wlicgreenfordmosque.com/",
+		"facebook": "https://www.facebook.com/p/West-London-Islamic-Centre-Greenford-Medina-Mosque-100069480220314/",
 		"confidence": "community"
 	},
 	{
@@ -12536,6 +12616,7 @@
 		},
 		"notes": "Capacity ~30 (MuslimsInBritain.org); Denomination: Salafi; Data: MIB (mib-1065)",
 		"source": "MuslimsInBritain.org (with permission)",
+		"facebook": "https://www.facebook.com/Hanwell.Masjid.1/",
 		"confidence": "community"
 	},
 	{
@@ -12676,6 +12757,9 @@
 		"notes": "Capacity ~250 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-2642)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "01708 741333",
+		"website": "https://haveringislamiccentre.org.uk/",
+		"facebook": "https://www.facebook.com/haveringmosque",
+		"instagram": "https://www.instagram.com/haveringmosque/",
 		"confidence": "community"
 	},
 	{
@@ -13617,6 +13701,9 @@
 		"notes": "Capacity ~2500 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-1307)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 8478 0347",
+		"website": "https://ilfordmosque.com",
+		"facebook": "https://www.facebook.com/ilfordmosque",
+		"instagram": "https://www.instagram.com/ilfordmosque/",
 		"confidence": "community"
 	},
 	{
@@ -14129,6 +14216,7 @@
 		"notes": "Capacity ~1500 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-1357)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 7790 0693",
+		"facebook": "https://www.facebook.com/fordsquaremosque",
 		"confidence": "community"
 	},
 	{
@@ -14269,6 +14357,9 @@
 		"notes": "Capacity ~700 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-1047)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 8492 0028",
+		"website": "https://ianl.org.uk",
+		"facebook": "https://www.facebook.com/finchleymosque",
+		"instagram": "https://www.instagram.com/finchley.mosque/",
 		"confidence": "community"
 	},
 	{
@@ -14727,6 +14818,8 @@
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-1067)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 8903 3760",
+		"website": "https://www.iccwembley.co.uk/",
+		"facebook": "https://www.facebook.com/MonksParkMosque/",
 		"confidence": "community"
 	},
 	{
@@ -14747,6 +14840,9 @@
 		"notes": "Capacity ~6000 (MuslimsInBritain.org); Denomination: Arab mainstream; Data: MIB+OSM (mib-1433)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 7724 3363",
+		"website": "https://www.iccuk.org/",
+		"facebook": "https://www.facebook.com/iccuk.org/",
+		"instagram": "https://www.instagram.com/londoncentralmosque/",
 		"confidence": "community"
 	},
 	{
@@ -15084,6 +15180,9 @@
 		"notes": "Capacity ~600 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-1204)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 8561 7149",
+		"website": "https://hayesmuslimcentre.org.uk/",
+		"facebook": "https://www.facebook.com/hayesmuslimcentre/",
+		"instagram": "https://www.instagram.com/hayesmuslimcentre/",
 		"confidence": "community"
 	},
 	{
@@ -17286,6 +17385,7 @@
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB (mib-1132)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 8571 9542",
+		"website": "https://www.jamiamasjid-southall.org.uk/",
 		"confidence": "community"
 	},
 	{
@@ -17644,6 +17744,9 @@
 		"notes": "Capacity ~4000 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-1392)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 8539 4282",
+		"website": "https://www.wfia.org.uk/",
+		"facebook": "https://www.facebook.com/wfialondon",
+		"instagram": "https://www.instagram.com/wfialondon/",
 		"confidence": "community"
 	},
 	{
@@ -17885,6 +17988,9 @@
 		"notes": "Capacity ~3200 (MuslimsInBritain.org); Denomination: Sufi; Data: MIB+OSM (mib-1347)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 7247 6052",
+		"website": "https://bricklanejammemasjid.org.uk",
+		"facebook": "https://www.facebook.com/BrickLaneMosque",
+		"instagram": "https://www.instagram.com/bricklanejammemasjid",
 		"confidence": "community"
 	},
 	{
@@ -22463,6 +22569,7 @@
 		"notes": "Denomination: Deobandi; Data: MIB (mib-704)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "07947 107076",
+		"website": "https://kilburnhampsteadmasjid.org.uk",
 		"confidence": "community"
 	},
 	{
@@ -22561,6 +22668,9 @@
 		"notes": "Capacity ~900 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-1242)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 8549 5315",
+		"website": "https://www.kingstonmosque.org",
+		"facebook": "https://www.facebook.com/kmosque/",
+		"instagram": "https://www.instagram.com/kingstonmosque/",
 		"confidence": "community"
 	},
 	{
@@ -23182,6 +23292,9 @@
 		},
 		"lastVerified": "2026-06-11",
 		"source": "Sample data",
+		"website": "https://lewishamislamiccentre.com/",
+		"facebook": "https://www.facebook.com/Lewishamislamiccentre",
+		"instagram": "https://www.instagram.com/lewishammosque/",
 		"confidence": "unverified"
 	},
 	{
@@ -23203,6 +23316,8 @@
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 8690 5090",
 		"website": "https://www.lewishamislamiccentre.com",
+		"facebook": "https://www.facebook.com/Lewishamislamiccentre",
+		"instagram": "https://www.instagram.com/lewishammosque/",
 		"confidence": "community"
 	},
 	{
@@ -23262,6 +23377,8 @@
 		"notes": "Capacity ~1000 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-1384)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 8539 7251",
+		"website": "https://leytonstonemasjid.org.uk/",
+		"facebook": "https://www.facebook.com/LeytonstoneMosque/",
 		"confidence": "community"
 	},
 	{
@@ -23562,6 +23679,7 @@
 		"notes": "Capacity ~1500 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-1178)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 8348 0353",
+		"website": "https://www.londonislamicculturalsociety.org/",
 		"confidence": "community"
 	},
 	{
@@ -24413,6 +24531,8 @@
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-1286)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 8472 3069",
+		"website": "https://www.madinamasjideastham.com",
+		"facebook": "https://www.facebook.com/p/Madina-Masjid-East-Ham-100070330414440/",
 		"confidence": "community"
 	},
 	{
@@ -28984,6 +29104,8 @@
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Denomination: Maududi / Jamaat-e-Islami; Data: MIB+OSM (mib-1169)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 8808 5506",
+		"website": "https://masjidayesha.com",
+		"facebook": "https://www.facebook.com/MasjidAyesha84",
 		"confidence": "community"
 	},
 	{
@@ -29204,6 +29326,8 @@
 		"notes": "Capacity ~50 (MuslimsInBritain.org); Denomination: Salafi; Data: MIB (mib-2842)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 8749 6187",
+		"website": "https://dusunnah.com",
+		"instagram": "https://www.instagram.com/dusunnah/",
 		"confidence": "community"
 	},
 	{
@@ -30155,6 +30279,7 @@
 		"notes": "Capacity ~2000 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-1146)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 8806 6540",
+		"website": "https://mquba.org/",
 		"confidence": "community"
 	},
 	{
@@ -30833,6 +30958,7 @@
 		},
 		"notes": "Capacity ~110 (MuslimsInBritain.org); Denomination: Arab mainstream; Data: MIB+OSM (mib-523)",
 		"source": "MuslimsInBritain.org (with permission)",
+		"website": "https://ezzeitouna.com/en",
 		"confidence": "community"
 	},
 	{
@@ -31130,6 +31256,8 @@
 		"notes": "Capacity ~550 (MuslimsInBritain.org); Denomination: Salafi; Data: MIB+OSM (mib-1251)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 7326 4098",
+		"facebook": "https://www.facebook.com/brixtonmosque/",
+		"instagram": "https://www.instagram.com/brixtonmosque/",
 		"confidence": "community"
 	},
 	{
@@ -31250,6 +31378,7 @@
 		"notes": "Capacity ~1000 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-1277)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 8534 5000",
+		"website": "https://www.london-markaz.com/",
 		"confidence": "community"
 	},
 	{
@@ -32079,6 +32208,9 @@
 		"notes": "Capacity ~350 (MuslimsInBritain.org); Denomination: Sufi; Data: MIB+OSM (mib-1159)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 7249 2244",
+		"website": "https://www.masjidramadan.org/",
+		"facebook": "https://www.facebook.com/pages/Masjid-Ramadan-Hackney/459000050963088",
+		"instagram": "https://www.instagram.com/masjidramadan/",
 		"confidence": "community"
 	},
 	{
@@ -32894,6 +33026,8 @@
 		"notes": "Capacity ~600 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-1365)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 7790 0622",
+		"website": "https://mulmosque.org.uk",
+		"facebook": "https://www.facebook.com/mazahirululoomlondon/",
 		"confidence": "community"
 	},
 	{
@@ -33565,6 +33699,7 @@
 		"notes": "Capacity ~2300 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-1072)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 8450 1986",
+		"website": "https://micb.org.uk/",
 		"confidence": "community"
 	},
 	{
@@ -34675,6 +34810,9 @@
 		"notes": "Capacity ~500 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-1389)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 8532 8858",
+		"website": "https://mctleyton.org.uk/",
+		"facebook": "https://www.facebook.com/mctleyton",
+		"instagram": "https://www.instagram.com/mctleyton",
 		"confidence": "community"
 	},
 	{
@@ -34756,6 +34894,9 @@
 		"notes": "Capacity ~1500 (MuslimsInBritain.org); Denomination: Arab mainstream; Data: MIB (mib-1228)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 8964 1496",
+		"website": "https://www.almanaar.org.uk",
+		"facebook": "https://www.facebook.com/almanaarmchc",
+		"instagram": "https://www.instagram.com/almanaarmchc/",
 		"confidence": "community"
 	},
 	{
@@ -35336,6 +35477,9 @@
 		"notes": "Capacity ~150 (MuslimsInBritain.org); Denomination: Arab mainstream; Data: MIB+OSM (mib-2634)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 7394 5237",
+		"website": "https://nasfat.org.uk",
+		"facebook": "https://www.facebook.com/nasfat.pageswalk/",
+		"instagram": "https://www.instagram.com/nasfatpgwalk/",
 		"confidence": "community"
 	},
 	{
@@ -35955,6 +36099,7 @@
 		"notes": "Capacity ~400 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-1113)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "07956 501066",
+		"website": "https://norbury.org/",
 		"confidence": "community"
 	},
 	{
@@ -36490,6 +36635,9 @@
 		"notes": "Capacity ~250 (MuslimsInBritain.org); Denomination: Arab mainstream; Data: MIB (mib-1326)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 7231 0100",
+		"website": "https://www.manuk.org/",
+		"facebook": "https://www.facebook.com/OKR.Mosque.MANUK",
+		"instagram": "https://www.instagram.com/okr_mosque_manuk/",
 		"confidence": "community"
 	},
 	{
@@ -36970,6 +37118,7 @@
 		"notes": "Capacity ~500 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-1432)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 7515 5680",
+		"facebook": "https://www.facebook.com/poplarmcc/",
 		"confidence": "community"
 	},
 	{
@@ -38235,6 +38384,9 @@
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Data: MIB (mib-374)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "07801 554874",
+		"website": "https://purleymasjid.com/",
+		"facebook": "https://www.facebook.com/PurleyMosque",
+		"instagram": "https://www.instagram.com/purleymasjid/",
 		"confidence": "community"
 	},
 	{
@@ -38904,6 +39056,8 @@
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Denomination: Maududi / Jamaat-e-Islami; Data: MIB (mib-1309)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "07872 332321",
+		"website": "https://www.redbridgeislamiccentre.co.uk",
+		"facebook": "https://www.facebook.com/Redbridge-Islamic-Centre-143328075729175/",
 		"confidence": "community"
 	},
 	{
@@ -38924,6 +39078,8 @@
 		"notes": "Capacity ~100 (MuslimsInBritain.org); Denomination: Maududi / Jamaat-e-Islami; Data: MIB (mib-1317)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 8551 6189",
+		"website": "https://www.redbridgeislamiccentre.co.uk/",
+		"facebook": "https://www.facebook.com/Redbridge-Islamic-Centre-143328075729175",
 		"confidence": "community"
 	},
 	{
@@ -39004,6 +39160,8 @@
 		"notes": "Capacity ~60 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-1192)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "07877 052411",
+		"website": "https://romfordmosque.co.uk",
+		"facebook": "https://www.facebook.com/romfordmosque",
 		"confidence": "community"
 	},
 	{
@@ -39044,6 +39202,7 @@
 		"notes": "Capacity ~2750 (MuslimsInBritain.org); Denomination: Sufi; Data: MIB+OSM (mib-1154)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 7684 9900",
+		"website": "https://www.suleymaniye.org",
 		"confidence": "community"
 	},
 	{
@@ -39439,6 +39598,7 @@
 		"notes": "Capacity ~600 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-1313)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 8590 8600",
+		"website": "https://skmet.org/",
 		"confidence": "community"
 	},
 	{
@@ -39517,6 +39677,8 @@
 		"notes": "Capacity ~1700 (MuslimsInBritain.org); Denomination: Sufi; Data: MIB (mib-1373)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 3217 3048",
+		"website": "https://shadwelljamemasjid.org.uk/",
+		"facebook": "https://www.facebook.com/shadwellmasjidofficial/",
 		"confidence": "community"
 	},
 	{
@@ -39796,6 +39958,8 @@
 		"notes": "Capacity ~200 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-1100)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 7387 0046",
+		"website": "https://shahjalaljamemasjid.com/",
+		"facebook": "https://www.facebook.com/eustonmosque/",
 		"confidence": "community"
 	},
 	{
@@ -40156,6 +40320,8 @@
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-1153)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 7613 0186",
+		"website": "https://shahporanmasjid.uk/",
+		"facebook": "https://www.facebook.com/ShahporanMasjid",
 		"confidence": "community"
 	},
 	{
@@ -40633,6 +40799,8 @@
 		"notes": "Capacity ~450 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-1370)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 8507 3640",
+		"website": "https://shoreditchmosque.com",
+		"facebook": "https://www.facebook.com/shoreditch.masjid/",
 		"confidence": "community"
 	},
 	{
@@ -40974,6 +41142,8 @@
 		"notes": "Capacity ~1100 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-1252)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 8677 0588",
+		"website": "https://slicmosque.org/",
+		"instagram": "https://www.instagram.com/streathammosque",
 		"confidence": "community"
 	},
 	{
@@ -41568,6 +41738,8 @@
 		},
 		"notes": "Capacity ~100 (MuslimsInBritain.org); Denomination: Salafi; Data: MIB (mib-876)",
 		"source": "MuslimsInBritain.org (with permission)",
+		"website": "https://streathamhillmosque.co.uk",
+		"instagram": "https://www.instagram.com/streathamhillmosque/",
 		"confidence": "community"
 	},
 	{
@@ -41806,6 +41978,7 @@
 		"notes": "Capacity ~120 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-1332)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 8641 6869",
+		"website": "https://www.suttonislamiccentre.co.uk",
 		"confidence": "community"
 	},
 	{
@@ -42858,6 +43031,7 @@
 		},
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-2378)",
 		"source": "MuslimsInBritain.org (with permission)",
+		"website": "https://www.thislamiccentre.org/",
 		"confidence": "community"
 	},
 	{
@@ -42958,6 +43132,9 @@
 		"notes": "Capacity ~2300 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-1412)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 8767 2344",
+		"website": "https://www.balhammosque.org/",
+		"facebook": "https://www.facebook.com/balhammosque",
+		"instagram": "https://www.instagram.com/balhammosque_tic",
 		"confidence": "community"
 	},
 	{
@@ -43077,6 +43254,8 @@
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Denomination: Sufi; Data: MIB+OSM (mib-15063004)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 8340 5500",
+		"facebook": "https://www.facebook.com/ingiltere.diyanet/",
+		"instagram": "https://www.instagram.com/diyanetunitedkingdom/",
 		"confidence": "community"
 	},
 	{
@@ -44099,6 +44278,7 @@
 		"notes": "Capacity ~170 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-1196)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "01895 235092",
+		"website": "https://www.uxbridgemasjid.org.uk/",
 		"confidence": "community"
 	},
 	{
@@ -44378,6 +44558,9 @@
 		"notes": "Capacity ~2200 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-1063)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 8900 9673",
+		"website": "https://wembleycentralmasjid.co.uk",
+		"facebook": "https://www.facebook.com/WembleyCentralMasjidOfficial/",
+		"instagram": "https://www.instagram.com/wembleycentralmasjid_/",
 		"confidence": "community"
 	},
 	{
@@ -44495,6 +44678,9 @@
 		"notes": "Capacity ~1000 (MuslimsInBritain.org); Denomination: Maududi / Jamaat-e-Islami; Data: MIB+OSM (mib-1122)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 8840 4140",
+		"website": "https://www.wliconline.org/",
+		"facebook": "https://www.facebook.com/westlondonislamiccentre",
+		"instagram": "https://www.instagram.com/ukim.wlic",
 		"confidence": "community"
 	},
 	{
@@ -44515,6 +44701,9 @@
 		"notes": "Capacity ~1100 (MuslimsInBritain.org); Denomination: Salafi; Data: MIB+OSM (mib-1161)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 7471 8291",
+		"website": "https://almuntadatrust.org/",
+		"facebook": "https://www.facebook.com/Almuntadatrust",
+		"instagram": "https://www.instagram.com/almuntadatrust/",
 		"confidence": "community"
 	},
 	{
@@ -44534,6 +44723,8 @@
 		},
 		"notes": "Capacity ~60 (MuslimsInBritain.org); Denomination: Salafi; Data: MIB+OSM (mib-1444)",
 		"source": "MuslimsInBritain.org (with permission)",
+		"website": "https://westnorwoodmosque.com",
+		"facebook": "https://www.facebook.com/WestNorwoodMosque",
 		"confidence": "community"
 	},
 	{
