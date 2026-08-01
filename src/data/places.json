@@ -115,6 +115,11 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:30",
+			"14:00",
+			"14:30"
+		],
 		"notes": "Capacity ~250 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-1112)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "07961 184460",
@@ -412,6 +417,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:30"
+		],
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Data: MIB (mib-1744)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "0121 440 6066",
@@ -473,6 +481,10 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:45",
+			"14:15"
+		],
 		"notes": "Capacity ~450 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-1058)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 8459 6111",
@@ -615,6 +627,10 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:30",
+			"14:30"
+		],
 		"notes": "Capacity ~1500 (MuslimsInBritain.org); Denomination: Arab mainstream; Data: MIB+OSM (mib-242)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "0121 753 0297",
@@ -734,6 +750,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"12:35"
+		],
 		"notes": "Capacity ~200 (MuslimsInBritain.org); Denomination: Salafi; Data: MIB (mib-812)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 8597 5092",
@@ -817,6 +836,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:00"
+		],
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Denomination: Salafi; Data: MIB+OSM (mib-2651)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "0117 941 3331",
@@ -980,6 +1002,10 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:30",
+			"14:15"
+		],
 		"notes": "Capacity ~150 (MuslimsInBritain.org); Data: MIB+OSM (mib-927)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "01376 802786",
@@ -1042,6 +1068,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:30"
+		],
 		"notes": "Capacity ~700 (MuslimsInBritain.org); Denomination: Arab mainstream; Data: MIB (mib-1032)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "0121 249 0309",
@@ -1188,6 +1217,31 @@
 		"confidence": "community"
 	},
 	{
+		"id": "al-furqan-education-trust-hounslow",
+		"name": "Al Furqan Education Trust",
+		"type": "masjid",
+		"address": "41 Cross Lances Road, Hounslow, TW3 2AD",
+		"lat": 51.463682,
+		"lng": -0.36372,
+		"facilities": {
+			"sistersSpace": true,
+			"wudu": true,
+			"disabledAccess": false,
+			"parking": true,
+			"jumuah": true,
+			"janazah": false
+		},
+		"jumuahTimes": [
+			"13:30"
+		],
+		"notes": "Registered charity 1187230. Madrasah and youth programmes on site; daily prayer timetable published on Masjidbox.",
+		"lastVerified": "2026-08-01",
+		"source": "Official website (alfurqaneducationtrust.org.uk)",
+		"phone": "020 8432 9477",
+		"website": "https://www.alfurqaneducationtrust.org.uk/",
+		"confidence": "verified"
+	},
+	{
 		"id": "al-furqan-islamic-centre-mib-783",
 		"name": "Al Furqan Islamic Centre",
 		"type": "masjid",
@@ -1202,6 +1256,10 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:50",
+			"14:30"
+		],
 		"notes": "Capacity ~500 (MuslimsInBritain.org); Denomination: Maududi / Jamaat-e-Islami; Data: MIB+OSM (mib-783)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "0141 331 1119",
@@ -1900,6 +1958,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:00"
+		],
 		"notes": "Capacity ~200 (MuslimsInBritain.org); Denomination: Salafi; Data: MIB+OSM (mib-3116)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "07565 513526",
@@ -2741,6 +2802,10 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:30",
+			"14:00"
+		],
 		"notes": "Capacity ~350 (MuslimsInBritain.org); Denomination: Sufi; Data: MIB+OSM (mib-1217)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 7833 5959",
@@ -2937,6 +3002,11 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:20",
+			"14:00",
+			"14:30"
+		],
 		"notes": "Capacity ~150 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-1092)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 7916 8260",
@@ -2959,6 +3029,10 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"12:30",
+			"13:30"
+		],
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Data: MIB+OSM (mib-495)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 7700 3733",
@@ -3019,6 +3093,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:30"
+		],
 		"notes": "Capacity ~400 (MuslimsInBritain.org); Denomination: Salafi; Data: MIB (mib-1869)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "0161 492 0699",
@@ -3880,6 +3957,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:00"
+		],
 		"notes": "Denomination: Deobandi; Data: MIB (mib-2719)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "0161 339 7898",
@@ -4126,6 +4206,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:30"
+		],
 		"notes": "Capacity ~100 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-3713)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "01204 841876",
@@ -4878,6 +4961,10 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:30",
+			"14:15"
+		],
 		"notes": "Capacity ~250 (MuslimsInBritain.org); Data: MIB+OSM (mib-44)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "01225 460922",
@@ -5039,6 +5126,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:45"
+		],
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-1736)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "07940 722941",
@@ -5079,6 +5169,10 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:30",
+			"14:15"
+		],
 		"notes": "Capacity ~500 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-15032801)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "0115 9258576",
@@ -5278,6 +5372,10 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:40",
+			"16:00"
+		],
 		"notes": "Capacity ~1200 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-2404)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "01902 771980",
@@ -5479,6 +5577,10 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:45",
+			"14:30"
+		],
 		"notes": "Capacity ~40 (MuslimsInBritain.org); Data: MIB (mib-1601)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"confidence": "unverified"
@@ -5740,6 +5842,10 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:15",
+			"14:00"
+		],
 		"notes": "Capacity ~200 (MuslimsInBritain.org); Data: MIB (mib-1743)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"confidence": "unverified"
@@ -5778,6 +5884,10 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:30",
+			"14:10"
+		],
 		"notes": "Capacity ~350 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-1544)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 8983 1661",
@@ -5982,6 +6092,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:21"
+		],
 		"notes": "Capacity ~30 (MuslimsInBritain.org); Denomination: Sufi; Data: MIB (mib-2794)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "0117 944 4564",
@@ -6561,6 +6674,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:50"
+		],
 		"notes": "Data: MIB (mib-600)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"confidence": "community"
@@ -6738,6 +6854,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"14:00"
+		],
 		"notes": "Capacity ~2500 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-822)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "01422 365645",
@@ -7368,6 +7487,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:20"
+		],
 		"notes": "Capacity ~50 (MuslimsInBritain.org); Data: MIB (mib-15042204)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 7018 1313",
@@ -7491,6 +7613,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:20"
+		],
 		"notes": "Capacity ~400 (MuslimsInBritain.org); Denomination: Salafi; Data: MIB+OSM (mib-1446)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"confidence": "community"
@@ -7607,6 +7732,10 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:30",
+			"14:15"
+		],
 		"notes": "Capacity ~260 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-622)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "01206 794919",
@@ -7843,6 +7972,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:00"
+		],
 		"notes": "Denomination: muslim; Data: OSM (node/13208406265)",
 		"source": "OpenStreetMap ((c) OpenStreetMap contributors)",
 		"confidence": "unverified"
@@ -7862,6 +7994,9 @@
 			"jumuah": false,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:15"
+		],
 		"notes": "Capacity ~130 (MuslimsInBritain.org); Data: MIB+OSM (mib-69)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "07900 586895",
@@ -8212,6 +8347,10 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:20",
+			"14:00"
+		],
 		"notes": "Capacity ~800 (MuslimsInBritain.org); Denomination: Salafi; Data: MIB+OSM (mib-1893)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "01642 884224",
@@ -9086,6 +9225,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:45"
+		],
 		"notes": "Capacity ~190 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-792)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "0141 357 3733",
@@ -10001,6 +10143,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"14:00"
+		],
 		"notes": "Capacity ~200 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-819)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "01422 253222",
@@ -10381,6 +10526,10 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:30",
+			"14:30"
+		],
 		"notes": "Capacity ~250 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-1479)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"confidence": "community"
@@ -10519,6 +10668,11 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:30",
+			"14:30",
+			"15:40"
+		],
 		"notes": "Capacity ~263 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB (mib-1584)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "07714 263188",
@@ -10600,6 +10754,10 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:30",
+			"14:30"
+		],
 		"notes": "Data: OSM (node/13129750366)",
 		"source": "OpenStreetMap ((c) OpenStreetMap contributors)",
 		"confidence": "unverified"
@@ -10619,6 +10777,11 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:30",
+			"14:30",
+			"16:00"
+		],
 		"notes": "Capacity ~700 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-1653)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "0121 247 9310",
@@ -10718,6 +10881,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:30"
+		],
 		"notes": "Data: OSM (node/13129929764)",
 		"source": "OpenStreetMap ((c) OpenStreetMap contributors)",
 		"confidence": "unverified"
@@ -10794,6 +10960,11 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:30",
+			"14:30",
+			"16:15"
+		],
 		"notes": "Data: OSM (way/1428002130)",
 		"source": "OpenStreetMap ((c) OpenStreetMap contributors)",
 		"confidence": "unverified"
@@ -10933,6 +11104,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:45"
+		],
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-764)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "01324 611018",
@@ -10974,6 +11148,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:30"
+		],
 		"notes": "Data: OSM (way/687656246)",
 		"source": "OpenStreetMap ((c) OpenStreetMap contributors)",
 		"phone": "+44 1642 679943",
@@ -11175,6 +11352,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:00"
+		],
 		"notes": "Capacity ~2100 (MuslimsInBritain.org); Denomination: Salafi; Data: MIB+OSM (mib-1226)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 7424 5252",
@@ -11376,6 +11556,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:30"
+		],
 		"notes": "Capacity ~400 (MuslimsInBritain.org); Denomination: Salafi; Data: MIB (mib-2016062002)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "0121 238 5540",
@@ -11771,6 +11954,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:30"
+		],
 		"notes": "Capacity ~500 (MuslimsInBritain.org); Denomination: Arab mainstream; Data: MIB (mib-18032502)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"confidence": "unverified"
@@ -11809,6 +11995,10 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:30",
+			"14:00"
+		],
 		"notes": "Capacity ~100 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-2788)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "07545 348176",
@@ -12391,6 +12581,10 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:30",
+			"15:00"
+		],
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-1853)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "0161 877 6034",
@@ -12674,6 +12868,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:30"
+		],
 		"notes": "Denomination: sunni; Data: OSM (node/13128414737)",
 		"source": "OpenStreetMap ((c) OpenStreetMap contributors)",
 		"website": "https://harrogatemuslims.org",
@@ -13036,6 +13233,10 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:20",
+			"14:00"
+		],
 		"notes": "Capacity ~800 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-1042)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 8202 3236",
@@ -13176,6 +13377,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:20"
+		],
 		"notes": "Capacity ~200 (MuslimsInBritain.org); Data: MIB (mib-1291)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 3712 4531",
@@ -13438,6 +13642,10 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:30",
+			"14:15"
+		],
 		"notes": "Capacity ~104 (MuslimsInBritain.org); Denomination: Arab mainstream; Data: MIB (mib-2830)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "0121 448 5058",
@@ -14194,6 +14402,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:15"
+		],
 		"notes": "Data: OSM (node/12169889359)",
 		"source": "OpenStreetMap ((c) OpenStreetMap contributors)",
 		"confidence": "unverified"
@@ -14314,6 +14525,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:30"
+		],
 		"notes": "Capacity ~200 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-183)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "0121 440 1758",
@@ -14815,6 +15029,10 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:30",
+			"14:00"
+		],
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-1067)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 8903 3760",
@@ -15118,6 +15336,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"12:30"
+		],
 		"notes": "Capacity ~160 (MuslimsInBritain.org); Denomination: Salafi; Data: MIB (mib-1284)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 8586 2140",
@@ -15836,6 +16057,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:45"
+		],
 		"notes": "Capacity ~700 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB (mib-2619)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "029 2022 1309",
@@ -16354,6 +16578,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"14:00"
+		],
 		"notes": "Data: OSM (way/252172173)",
 		"source": "OpenStreetMap ((c) OpenStreetMap contributors)",
 		"confidence": "community"
@@ -17542,6 +17769,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"14:00"
+		],
 		"notes": "Capacity ~500 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-587)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "029 2039 7640",
@@ -18785,6 +19015,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"14:00"
+		],
 		"notes": "Capacity ~2400 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-2864)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "01282 692764",
@@ -19714,6 +19947,10 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"14:00",
+			"15:00"
+		],
 		"notes": "Capacity ~200 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-434)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "01274 732958",
@@ -22644,6 +22881,10 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:30",
+			"14:20"
+		],
 		"notes": "Capacity ~200 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-1091)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 7837 5971",
@@ -23056,6 +23297,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:00"
+		],
 		"notes": "Capacity ~900 (MuslimsInBritain.org); Denomination: Salafi; Data: MIB+OSM (mib-945)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "0113 246 8789",
@@ -23513,6 +23757,10 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:20",
+			"14:15"
+		],
 		"notes": "Capacity ~500 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-2294156)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "01522 543103",
@@ -23930,6 +24178,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"12:50"
+		],
 		"notes": "Capacity ~550 (MuslimsInBritain.org); Denomination: Salafi; Data: MIB+OSM (mib-1765)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "01582 724647",
@@ -25008,6 +25259,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"14:00"
+		],
 		"notes": "Capacity ~950 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-1972)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "0115 962 6688",
@@ -25108,6 +25362,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:35"
+		],
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-1346)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "07946 469090",
@@ -25128,6 +25385,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:30"
+		],
 		"notes": "Capacity ~600 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-34)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "01295 276662",
@@ -26021,6 +26281,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:30"
+		],
 		"notes": "Capacity ~375 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-825)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"confidence": "community"
@@ -26182,6 +26445,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:30"
+		],
 		"notes": "Capacity ~400 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-2614)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "01283 568768",
@@ -26481,6 +26747,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"12:30"
+		],
 		"notes": "Capacity ~100 (MuslimsInBritain.org); Denomination: Salafi; Data: MIB (mib-2863)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "01753 533376",
@@ -26501,6 +26770,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:30"
+		],
 		"notes": "Capacity ~400 (MuslimsInBritain.org); Denomination: Salafi; Data: MIB+OSM (mib-15032901)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "0116 319 0220",
@@ -26722,6 +26994,10 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"12:30",
+			"13:30"
+		],
 		"notes": "Capacity ~800 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-873)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "01484 513248",
@@ -27242,6 +27518,10 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:45",
+			"16:00"
+		],
 		"notes": "Denomination: sunni; Data: OSM (way/117007188)",
 		"source": "OpenStreetMap ((c) OpenStreetMap contributors)",
 		"confidence": "unverified"
@@ -27359,6 +27639,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:00"
+		],
 		"notes": "Denomination: sunni; Data: OSM (way/1322886232)",
 		"source": "OpenStreetMap ((c) OpenStreetMap contributors)",
 		"website": "https://oadbych.org/",
@@ -27399,6 +27682,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:00"
+		],
 		"notes": "Capacity ~400 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-1071)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "0116 212 4883",
@@ -27582,6 +27868,10 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:30",
+			"14:00"
+		],
 		"notes": "Capacity ~50 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-1358)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"confidence": "unverified"
@@ -27661,6 +27951,10 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:30",
+			"14:10"
+		],
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-2813)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 8478 0347",
@@ -27964,6 +28258,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:25"
+		],
 		"notes": "Capacity ~1000 (MuslimsInBritain.org); Data: MIB (mib-16062301)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "01753 315618",
@@ -28741,6 +29038,11 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:30",
+			"14:15",
+			"15:40"
+		],
 		"notes": "Data: OSM (node/13129966917)",
 		"source": "OpenStreetMap ((c) OpenStreetMap contributors)",
 		"confidence": "unverified"
@@ -28981,6 +29283,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:30"
+		],
 		"notes": "Capacity ~100 (MuslimsInBritain.org); Denomination: Salafi; Data: MIB (mib-1938)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "01239 215420",
@@ -29062,6 +29367,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:30"
+		],
 		"notes": "Capacity ~500 (MuslimsInBritain.org); Denomination: Salafi; Data: MIB+OSM (mib-1720)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "029 2140 9834",
@@ -30676,6 +30984,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"14:00"
+		],
 		"notes": "Capacity ~180 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-572)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "029 2048 8454",
@@ -30876,6 +31187,10 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:30",
+			"14:15"
+		],
 		"notes": "Capacity ~200 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-1723)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "07956 546564",
@@ -31115,6 +31430,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:45"
+		],
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Denomination: Sufi; Data: MIB+OSM (mib-177)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "0121 449 7195",
@@ -31275,6 +31593,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:15"
+		],
 		"notes": "Capacity ~800 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-664)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"confidence": "community"
@@ -31748,6 +32069,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:00"
+		],
 		"notes": "Capacity ~200 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-631)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "07809 570132",
@@ -32205,6 +32529,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:00"
+		],
 		"notes": "Capacity ~350 (MuslimsInBritain.org); Denomination: Sufi; Data: MIB+OSM (mib-1159)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 7249 2244",
@@ -32766,6 +33093,10 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:30",
+			"14:15"
+		],
 		"notes": "Capacity ~70 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-1031)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "07971 482049",
@@ -32826,6 +33157,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:35"
+		],
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-584)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "029 2022 1309",
@@ -32846,6 +33180,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"14:00"
+		],
 		"notes": "Capacity ~200 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-1913)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"confidence": "unverified"
@@ -33696,6 +34033,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:30"
+		],
 		"notes": "Capacity ~2300 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-1072)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 8450 1986",
@@ -34871,6 +35211,10 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"12:30",
+			"13:30"
+		],
 		"notes": "Data: OSM (way/356861004)",
 		"source": "OpenStreetMap ((c) OpenStreetMap contributors)",
 		"website": "https://www.karimia.com/",
@@ -35192,6 +35536,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"12:30"
+		],
 		"notes": "Capacity ~1600 (MuslimsInBritain.org); Denomination: Salafi; Data: MIB+OSM (mib-1225)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 7263 3071",
@@ -35315,6 +35662,11 @@
 			"jumuah": false,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"12:00",
+			"12:30",
+			"13:15"
+		],
 		"notes": "Capacity ~200 (MuslimsInBritain.org); Denomination: Arab mainstream; Irregular / part-time venue per MIB; Data: MIB+OSM (mib-1861)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "0161 832 5352",
@@ -35817,6 +36169,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:30"
+		],
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-1948)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "01633 251330",
@@ -35838,6 +36193,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:20"
+		],
 		"notes": "Data: OSM (node/12227799229)",
 		"source": "OpenStreetMap ((c) OpenStreetMap contributors)",
 		"website": "https://newportdiyanet.org/",
@@ -36034,6 +36392,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:15"
+		],
 		"notes": "Capacity ~270 (MuslimsInBritain.org); Denomination: Salafi; Data: MIB+OSM (mib-577)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "029 2022 5044",
@@ -36976,6 +37337,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:20"
+		],
 		"notes": "Data: OSM (way/1287258792)",
 		"source": "OpenStreetMap ((c) OpenStreetMap contributors)",
 		"confidence": "unverified"
@@ -37094,6 +37458,10 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:22",
+			"14:05"
+		],
 		"notes": "Capacity ~225 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-2068)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "01752 662330",
@@ -38838,6 +39206,10 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"14:00",
+			"14:30"
+		],
 		"notes": "Capacity ~200 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-634)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"confidence": "community"
@@ -39075,6 +39447,10 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:30",
+			"14:20"
+		],
 		"notes": "Capacity ~100 (MuslimsInBritain.org); Denomination: Maududi / Jamaat-e-Islami; Data: MIB (mib-1317)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 8551 6189",
@@ -40097,6 +40473,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:45"
+		],
 		"notes": "Capacity ~525 (MuslimsInBritain.org); Denomination: Sufi; Data: MIB+OSM (mib-573)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "029 2048 0217",
@@ -40277,6 +40656,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"14:15"
+		],
 		"notes": "Capacity ~800 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-1946)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "01633 243413",
@@ -40597,6 +40979,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"14:00"
+		],
 		"notes": "Capacity ~2300 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-2222)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "0114 258 5021",
@@ -40617,6 +41002,10 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"12:40",
+			"13:40"
+		],
 		"notes": "Capacity ~100 (MuslimsInBritain.org); Denomination: Salafi; Data: MIB+OSM (mib-35)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "01295 268307",
@@ -40938,6 +41327,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:30"
+		],
 		"notes": "Capacity ~150 (MuslimsInBritain.org); Data: MIB+OSM (mib-1756)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "07808 203990",
@@ -41220,6 +41612,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"12:30"
+		],
 		"notes": "Capacity ~250 (MuslimsInBritain.org); Denomination: Sufi; Data: MIB (mib-570)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "029 2046 0243",
@@ -41655,6 +42050,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:30"
+		],
 		"notes": "Capacity ~250 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-1276)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 8519 6367",
@@ -41716,6 +42114,9 @@
 			"jumuah": false,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:00"
+		],
 		"notes": "Data: MIB (mib-780)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "0141 552 4400",
@@ -41817,6 +42218,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:00"
+		],
 		"notes": "Capacity ~200 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-230)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "07912 603981",
@@ -41996,6 +42400,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:30"
+		],
 		"notes": "Capacity ~600 (MuslimsInBritain.org); Denomination: Salafi; Data: MIB+OSM (mib-2819)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "01792 654532",
@@ -42096,6 +42503,10 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:15",
+			"14:00"
+		],
 		"notes": "Capacity ~80 (MuslimsInBritain.org); Data: MIB (mib-718)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 8952 7005",
@@ -42217,6 +42628,10 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"12:30",
+			"13:30"
+		],
 		"notes": "Capacity ~200 (MuslimsInBritain.org); Data: MIB+OSM (mib-1735)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "01375 886212",
@@ -42258,6 +42673,10 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:30",
+			"14:15"
+		],
 		"notes": "Capacity ~450 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-696)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "07903 551803",
@@ -42298,6 +42717,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:45"
+		],
 		"notes": "Capacity ~350 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-261)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"confidence": "community"
@@ -42356,6 +42778,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:00"
+		],
 		"notes": "Capacity ~900 (MuslimsInBritain.org); Denomination: Arab mainstream; Data: MIB+OSM (mib-15041601)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "0117 329 0184",
@@ -42376,6 +42801,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:00"
+		],
 		"notes": "Capacity ~240 (MuslimsInBritain.org); Denomination: Salafi; Data: MIB (mib-2740)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "07714 210998",
@@ -42396,6 +42824,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:11"
+		],
 		"notes": "Capacity ~350 (MuslimsInBritain.org); Denomination: Salafi; Data: MIB+OSM (mib-2844)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "0116 249 0076",
@@ -42812,6 +43243,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:30"
+		],
 		"notes": "Capacity ~100 (MuslimsInBritain.org); Data: MIB (mib-1633)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "0121 507 0166",
@@ -43070,6 +43504,10 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:30",
+			"14:15"
+		],
 		"notes": "Capacity ~60 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-1748)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "07931 517678",
@@ -43191,6 +43629,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:15"
+		],
 		"notes": "Capacity ~450 (MuslimsInBritain.org); Data: MIB+OSM (mib-2323)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "01225 777993",
@@ -44296,6 +44737,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:20"
+		],
 		"notes": "Capacity ~550 (MuslimsInBritain.org); Denomination: Sufi; Data: MIB+OSM (mib-1148)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 7241 5425",
@@ -44476,6 +44920,9 @@
 			"jumuah": false,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:30"
+		],
 		"notes": "Capacity ~100 (MuslimsInBritain.org); Data: MIB (mib-2365)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"confidence": "unverified"
@@ -44943,6 +45390,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:30"
+		],
 		"notes": "Capacity ~550 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-1260)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 8946 3350",
@@ -45144,6 +45594,10 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"14:00",
+			"15:15"
+		],
 		"notes": "Capacity ~200 (MuslimsInBritain.org); Data: MIB (mib-805)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "07807 673119",
@@ -45263,6 +45717,10 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:30",
+			"14:30"
+		],
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Denomination: Arab mainstream; Data: MIB (mib-2949)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "0121 525 3909",
@@ -45483,6 +45941,10 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:30",
+			"14:30"
+		],
 		"notes": "Capacity ~250 (MuslimsInBritain.org); Data: MIB (mib-1741)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "0121 448 9800",
@@ -45524,6 +45986,10 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:15",
+			"13:50"
+		],
 		"notes": "Capacity ~1100 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-239)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "0121 326 0040",
@@ -45564,6 +46030,9 @@
 			"jumuah": true,
 			"janazah": false
 		},
+		"jumuahTimes": [
+			"13:45"
+		],
 		"notes": "Capacity ~50 (MuslimsInBritain.org); Denomination: Arab mainstream; Data: MIB (mib-1732)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "0121 572 5315",
