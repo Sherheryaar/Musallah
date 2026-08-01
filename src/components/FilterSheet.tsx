@@ -15,7 +15,9 @@ import { radius, spacing, type ThemeColors } from "@/lib/theme";
 type Props = {
   visible: boolean;
   active: Set<FacilityKey>;
+  corroboratedOnly: boolean;
   onToggle: (key: FacilityKey) => void;
+  onToggleCorroborated: () => void;
   onClear: () => void;
   onClose: () => void;
 };
@@ -31,7 +33,9 @@ type Props = {
 export default function FilterSheet({
   visible,
   active,
+  corroboratedOnly,
   onToggle,
+  onToggleCorroborated,
   onClear,
   onClose,
 }: Props) {
@@ -51,6 +55,8 @@ export default function FilterSheet({
 
   if (!visible) return null;
 
+  const totalActive = active.size + (corroboratedOnly ? 1 : 0);
+
   return (
     <View style={styles.backdrop}>
       <TouchableOpacity
@@ -67,7 +73,7 @@ export default function FilterSheet({
       >
         <View style={styles.headerRow}>
           <Text style={styles.title}>Filters</Text>
-          {active.size > 0 ? (
+          {active.size > 0 || corroboratedOnly ? (
             <TouchableOpacity onPress={onClear} accessibilityRole="button">
               <Text style={styles.clear}>Clear all</Text>
             </TouchableOpacity>
@@ -95,15 +101,37 @@ export default function FilterSheet({
             </TouchableOpacity>
           );
         })}
+        <Text style={styles.sectionTitle}>Data quality</Text>
+        <TouchableOpacity
+          style={styles.row}
+          onPress={onToggleCorroborated}
+          accessibilityRole="checkbox"
+          accessibilityState={{ checked: corroboratedOnly }}
+          accessibilityLabel="Filter: hide unconfirmed places"
+        >
+          <View style={styles.rowTextWrap}>
+            <Text style={styles.rowLabel}>Hide unconfirmed places</Text>
+            <Text style={styles.rowHint}>
+              Only show places backed by more than one source. Useful when
+              you&apos;re travelling and can&apos;t afford a wasted trip.
+            </Text>
+          </View>
+          <View style={[styles.box, corroboratedOnly && styles.boxActive]}>
+            {corroboratedOnly ? (
+              <Text style={styles.tick}>{"\u2713"}</Text>
+            ) : null}
+          </View>
+        </TouchableOpacity>
+
         <TouchableOpacity
           style={styles.doneButton}
           onPress={onClose}
           accessibilityRole="button"
         >
           <Text style={styles.doneLabel}>
-            {active.size > 0
-              ? `Done \u00B7 ${active.size} filter${
-                  active.size === 1 ? "" : "s"
+            {totalActive > 0
+              ? `Done \u00B7 ${totalActive} filter${
+                  totalActive === 1 ? "" : "s"
                 } on`
               : "Done"}
           </Text>
@@ -158,10 +186,28 @@ const createStyles = (colors: ThemeColors) =>
     justifyContent: "space-between",
     alignItems: "center",
     minHeight: 48,
+    gap: spacing.m,
+  },
+  rowTextWrap: {
+    flex: 1,
   },
   rowLabel: {
     fontSize: 16,
     color: colors.text,
+  },
+  rowHint: {
+    fontSize: 12,
+    color: colors.textSecondary,
+    lineHeight: 16,
+    marginTop: 2,
+  },
+  sectionTitle: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: colors.textSecondary,
+    textTransform: "uppercase",
+    letterSpacing: 0.6,
+    marginTop: spacing.l,
   },
   box: {
     width: 26,

@@ -43,6 +43,20 @@ export const PLACE_TYPE_LABELS: Record<PlaceType, string> = {
   multi_faith_room: "Multi-faith room",
 };
 
+export type Confidence = "verified" | "community" | "unverified";
+
+/**
+ * A record counts as corroborated unless it is explicitly "unverified".
+ * Used by the "hide unconfirmed places" filter: some entries in the source
+ * directory are years old and can't be found on the ground, so users who
+ * are travelling need a way to see only places backed by more than one
+ * source. Records with no confidence set are treated as corroborated —
+ * absence of a value is not evidence of doubt.
+ */
+export function isCorroborated(place: Place): boolean {
+  return place.confidence !== "unverified";
+}
+
 export type JamaatTimes = {
   /** Display strings "HH:MM" 24h. Only include prayers you actually know. */
   fajr?: string;

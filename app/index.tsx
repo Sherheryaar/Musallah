@@ -14,7 +14,7 @@ import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Location from "expo-location";
 
-import { FacilityKey, Place } from "@/data/places";
+import { FacilityKey, isCorroborated, Place } from "@/data/places";
 import { usePlaces } from "@/context/PlacesContext";
 import { useSettings } from "@/context/SettingsContext";
 import BottomSheet from "@/components/BottomSheet";
@@ -182,8 +182,13 @@ export default function HomeScreen() {
   );
 
   const clearFilters = useCallback(
-    () => updateSettings({ facilityFilters: [] }),
+    () => updateSettings({ facilityFilters: [], corroboratedOnly: false }),
     [updateSettings],
+  );
+
+  const toggleCorroborated = useCallback(
+    () => updateSettings({ corroboratedOnly: !settings.corroboratedOnly }),
+    [settings.corroboratedOnly, updateSettings],
   );
 
   const gpsOrigin = location ?? FALLBACK_LOCATION;
@@ -303,6 +308,7 @@ export default function HomeScreen() {
     const base = byDistance.filter(
       ({ place }) =>
         selected.every((key) => place.facilities[key]) &&
+        (!settings.corroboratedOnly || isCorroborated(place)) &&
         (!place.jumuahOnly || activeFilters.has("jumuah") || q.length > 0),
     );
     if (!q) return base;
@@ -320,7 +326,13 @@ export default function HomeScreen() {
       }
     }
     return exact.concat(fuzzy);
-  }, [byDistance, activeFilters, query, searchTokens]);
+  }, [
+    byDistance,
+    activeFilters,
+    query,
+    searchTokens,
+    settings.corroboratedOnly,
+  ]);
 
   // The list only shows the nearest few reasonable options. When the user is
   // typing a name search, show matches regardless of distance.
@@ -351,6 +363,8 @@ export default function HomeScreen() {
     [openPlace],
   );
 
+  const filterCount = activeFilters.size + (settings.corroboratedOnly ? 1 : 0);
+
   const searchRow = (
     <View style={styles.searchRow}>
       <TextInput
@@ -372,7 +386,7 @@ export default function HomeScreen() {
       <TouchableOpacity
         style={[
           styles.filterButton,
-          activeFilters.size > 0 && styles.filterButtonActive,
+          filterCount > 0 && styles.filterButtonActive,
         ]}
         onPress={() => setShowFilters(true)}
         accessibilityRole="button"
@@ -381,12 +395,10 @@ export default function HomeScreen() {
         <Text
           style={[
             styles.filterButtonLabel,
-            activeFilters.size > 0 && styles.filterButtonLabelActive,
+            filterCount > 0 && styles.filterButtonLabelActive,
           ]}
         >
-          {activeFilters.size > 0
-            ? `Filters (${activeFilters.size})`
-            : "Filters"}
+          {filterCount > 0 ? `Filters (${filterCount})` : "Filters"}
         </Text>
       </TouchableOpacity>
     </View>
@@ -579,7 +591,9 @@ export default function HomeScreen() {
       <FilterSheet
         visible={showFilters}
         active={activeFilters}
+        corroboratedOnly={settings.corroboratedOnly}
         onToggle={toggleFilter}
+        onToggleCorroborated={toggleCorroborated}
         onClear={clearFilters}
         onClose={() => setShowFilters(false)}
       />

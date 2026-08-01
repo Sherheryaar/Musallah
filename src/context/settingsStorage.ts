@@ -25,6 +25,12 @@ export type PrayerSettings = {
    * Persisted so a choice made on first launch sticks on every later launch.
    */
   facilityFilters: FacilityKey[];
+  /**
+   * Hide places whose existence isn't corroborated by a second source.
+   * Off by default: showing everything with an honest label beats hiding
+   * places that are probably real, and most of the dataset is corroborated.
+   */
+  corroboratedOnly: boolean;
 };
 
 export const DEFAULT_SETTINGS: PrayerSettings = {
@@ -35,6 +41,7 @@ export const DEFAULT_SETTINGS: PrayerSettings = {
   madhab: "hanafi",
   shafaq: "general",
   facilityFilters: [],
+  corroboratedOnly: false,
 };
 
 // The defaults as they stood for the whole life of settings:v1. Because v1
@@ -71,6 +78,9 @@ export function sanitizeSettings(parsed: unknown): Partial<PrayerSettings> {
           ),
         }
       : null),
+    ...(typeof raw.corroboratedOnly === "boolean"
+      ? { corroboratedOnly: raw.corroboratedOnly }
+      : null),
   };
 }
 
@@ -90,5 +100,7 @@ export function migrateV1Settings(parsed: unknown): Partial<PrayerSettings> {
   if (clean.facilityFilters && clean.facilityFilters.length > 0) {
     kept.facilityFilters = clean.facilityFilters;
   }
+  // corroboratedOnly postdates v1, so a v1 blob can never carry a
+  // deliberate choice for it — always let the current default apply.
   return kept;
 }

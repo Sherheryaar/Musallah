@@ -43,11 +43,16 @@ export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
   );
 }
 
-function SettingsButton() {
+function HeaderButtons() {
   return (
-    <Link href="/settings" accessibilityLabel="Settings">
-      <Text style={staticStyles.settingsIcon}>{"⚙️"}</Text>
-    </Link>
+    <View style={staticStyles.headerButtons}>
+      <Link href="/qibla" accessibilityLabel="Qibla direction">
+        <Text style={staticStyles.headerIcon}>{"🧭"}</Text>
+      </Link>
+      <Link href="/settings" accessibilityLabel="Settings">
+        <Text style={staticStyles.headerIcon}>{"⚙️"}</Text>
+      </Link>
+    </View>
   );
 }
 
@@ -72,11 +77,12 @@ function ThemedNavigator() {
           name="index"
           options={{
             title: "Find a place to pray",
-            headerRight: () => <SettingsButton />,
+            headerRight: () => <HeaderButtons />,
           }}
         />
         <Stack.Screen name="place/[id]" options={{ title: "" }} />
         <Stack.Screen name="prayer" options={{ title: "Prayer times" }} />
+        <Stack.Screen name="qibla" options={{ title: "Qibla" }} />
         <Stack.Screen name="settings" options={{ title: "Settings" }} />
       </Stack>
     </>
@@ -96,7 +102,11 @@ export default function RootLayout() {
 }
 
 const staticStyles = StyleSheet.create({
-  settingsIcon: {
+  headerButtons: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  headerIcon: {
     fontSize: 18,
     // Generous padding = a comfortable ~44pt tap target in the header
     // (18pt glyph + 6pt padding was only ~30pt -- too easy to miss).
