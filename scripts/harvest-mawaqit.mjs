@@ -28,7 +28,12 @@
 // a community directory crediting them is plausibly something they'd
 // support, and an agreed feed beats scraping.
 
-import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  writeFileSync,
+} from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -48,8 +53,16 @@ const UA = {
     "MasjidLocatorBot/0.1 (UK masjid directory; crediting Mawaqit; low volume)",
   Accept: "application/json",
 };
-const THROTTLE_MS = 700;
+// Mawaqit rate-limits: a first run at 700 ms went fine for ~110 requests
+// and then returned HTTP 429 for everything after. So the harvest is
+// RESUMABLE — completed cells are checkpointed to disk and skipped next
+// time, and a 429 backs the pace off instead of burning through the run.
+// Several polite runs accumulate full coverage; one greedy run cannot.
+const THROTTLE_MS = 2500;
+const MAX_THROTTLE_MS = 30_000;
 const TIMEOUT_MS = 12_000;
+const MAX_RETRIES = 4;
+const CHECKPOINT_EVERY = 20;
 
 // Search queries are deduped onto a ~2 km grid: each call returns the
 // mosques nearest that point, so one call covers a neighbourhood.
@@ -163,7 +176,9 @@ function toHHMM(value) {
   return `${String(h).padStart(2, "0")}:${m[2]}`;
 }
 
-async function searchNear(lat, lng) {
+let throttleMs = THROTTLE_MS;
+
+async function requestOnce(lat, lng) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
   try {
@@ -171,6 +186,15 @@ async function searchNear(lat, lng) {
       headers: UA,
       signal: controller.signal,
     });
+    if (res.status === 429) {
+      const retryAfter = Number(res.headers.get("retry-after"));
+      return {
+        rateLimited: true,
+        waitMs: Number.isFinite(retryAfter) && retryAfter > 0
+          ? retryAfter * 1000
+          : null,
+      };
+    }
     if (!res.ok) return { error: `HTTP ${res.status}` };
     const json = await res.json();
     return { mosques: Array.isArray(json) ? json : [] };
@@ -179,6 +203,28 @@ async function searchNear(lat, lng) {
   } finally {
     clearTimeout(timer);
   }
+}
+
+/** Search with backoff. Returns { mosques } or { error } after retries. */
+async function searchNear(lat, lng) {
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    const result = await requestOnce(lat, lng);
+    if (!result.rateLimited) {
+      // Ease the pace back down after a clean run of successes.
+      if (result.mosques && throttleMs > THROTTLE_MS) {
+        throttleMs = Math.max(THROTTLE_MS, Math.round(throttleMs * 0.9));
+      }
+      return result;
+    }
+    // Rate limited: slow the whole harvest down, then wait it out.
+    throttleMs = Math.min(MAX_THROTTLE_MS, Math.round(throttleMs * 1.8));
+    const wait = result.waitMs ?? throttleMs * 2 ** attempt;
+    console.log(
+      `    rate limited — waiting ${Math.round(wait / 1000)}s (pace now ${throttleMs}ms)`,
+    );
+    await sleep(wait);
+  }
+  return { error: "HTTP 429 after retries" };
 }
 
 // --- gather -----------------------------------------------------------------
@@ -196,31 +242,82 @@ for (const p of places) {
     });
   }
 }
-const queries = [...cells.values()].slice(0, LIMIT);
+// Checkpoint: which cells have been queried, and every mosque seen so far.
+// Lives next to the reports so a run can be stopped and resumed freely.
+const checkpointPath = join(OUT_DIR, "mawaqit-checkpoint.json");
+const mosques = new Map(); // uuid -> mosque
+const doneCells = new Set();
+if (existsSync(checkpointPath)) {
+  try {
+    const saved = JSON.parse(readFileSync(checkpointPath, "utf8"));
+    for (const key of saved.doneCells ?? []) doneCells.add(key);
+    for (const m of saved.mosques ?? []) if (m?.uuid) mosques.set(m.uuid, m);
+    console.log(
+      `Resuming: ${doneCells.size} cells already queried, ${mosques.size} mosques known.`,
+    );
+  } catch {
+    console.log("Checkpoint unreadable — starting fresh.");
+  }
+}
+
+const saveCheckpoint = () => {
+  mkdirSync(OUT_DIR, { recursive: true });
+  writeFileSync(
+    checkpointPath,
+    JSON.stringify(
+      { doneCells: [...doneCells], mosques: [...mosques.values()] },
+      null,
+      1,
+    ),
+  );
+};
+
+const pending = [...cells.entries()]
+  .filter(([key]) => !doneCells.has(key))
+  .slice(0, LIMIT);
 console.log(
-  `${places.length} places -> ${cells.size} grid cells to query (${queries.length} this run).`,
+  `${places.length} places -> ${cells.size} grid cells total; ${pending.length} still to query this run.`,
 );
 
-const mosques = new Map(); // uuid -> mosque
 let failures = 0;
-for (const [i, cell] of queries.entries()) {
+let queried = 0;
+// Save progress even if the run is interrupted.
+process.on("SIGINT", () => {
+  saveCheckpoint();
+  console.log("\nInterrupted — checkpoint saved. Re-run to continue.");
+  process.exit(130);
+});
+
+for (const [key, cell] of pending) {
   const { mosques: found, error } = await searchNear(cell.lat, cell.lng);
+  queried++;
   if (error) {
     failures++;
-    if (failures <= 5) console.log(`  cell ${i}: ${error}`);
+    // Leave the cell unmarked so a later run retries it.
+    if (failures <= 5) console.log(`  cell ${key}: ${error}`);
   } else {
+    doneCells.add(key);
     for (const m of found) {
       if (m && m.uuid && !mosques.has(m.uuid)) mosques.set(m.uuid, m);
     }
   }
-  if ((i + 1) % 50 === 0) {
+  if (queried % CHECKPOINT_EVERY === 0) {
+    saveCheckpoint();
     console.log(
-      `  ${i + 1}/${queries.length} cells, ${mosques.size} unique mosques, ${failures} failures`,
+      `  ${queried}/${pending.length} this run · ${doneCells.size}/${cells.size} cells done · ${mosques.size} mosques · ${failures} failures`,
     );
   }
-  await sleep(THROTTLE_MS);
+  await sleep(throttleMs);
 }
-console.log(`\nCollected ${mosques.size} unique Mawaqit mosques.`);
+saveCheckpoint();
+console.log(
+  `\nCollected ${mosques.size} unique Mawaqit mosques (${doneCells.size}/${cells.size} cells done).`,
+);
+if (doneCells.size < cells.size) {
+  console.log(
+    `${cells.size - doneCells.size} cells still outstanding — run again to continue from the checkpoint.`,
+  );
+}
 
 // --- match ------------------------------------------------------------------
 const matches = [];
@@ -309,7 +406,8 @@ writeFileSync(
   join(OUT_DIR, "mawaqit-matches.json"),
   JSON.stringify(
     {
-      queriedCells: queries.length,
+      cellsDone: doneCells.size,
+      cellsTotal: cells.size,
       uniqueMosques: mosques.size,
       matches: [...byPlace.values()],
       duplicates,
@@ -335,7 +433,7 @@ and theirs, and whether the names agree, so a mismatch is visible.
 **Nothing is in the app until the SQL is run.** Mawaqit must be credited in
 the About screen for anything imported.
 
-- ${queries.length} grid cells queried, ${mosques.size} unique Mawaqit mosques found
+- ${doneCells.size} of ${cells.size} grid cells queried${doneCells.size < cells.size ? " (**incomplete** — re-run to continue from the checkpoint)" : ""}, ${mosques.size} unique Mawaqit mosques found
 - ${byPlace.size} matched to our places
 - **${newTimes.length} places would gain a Jumu'ah time** (we currently have ${places.filter((p) => p.jumuahTimes?.length).length} in total)
 - ${confident.length - newTimes.length} matched places already had times (cross-check these)
@@ -420,6 +518,6 @@ ${newTimes
 writeFileSync(join(OUT_DIR, "apply-mawaqit-jummah.sql"), sql);
 
 console.log(
-  `\nMatched ${byPlace.size} places; ${newTimes.length} would gain a Jumu'ah time.`,
+  `\nMatched ${byPlace.size} places; ${newTimes.length} would gain a Jumu'ah time (${needsReview.length} held for review).`,
 );
 console.log(`Reports written to ${OUT_DIR}`);
