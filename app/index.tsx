@@ -36,14 +36,12 @@ import {
 } from "@/lib/theme";
 
 // The list shows a handful of nearby, reasonable options -- not the whole
-// dataset. The map shows the nearest pins up to a cap: the dataset covers
-// the whole UK (2000+ places) and rendering every marker makes the map
-// stutter, while the 300 nearest cover any zoom level someone would
-// realistically browse at.
+// dataset. The map receives ALL filtered results and picks what to render
+// per viewport itself (see src/lib/mapPins.ts), so panning to another city
+// shows that city's pins.
 const MAX_LIST_RESULTS = 12;
 const MAX_LIST_DISTANCE_KM = 30;
 const MIN_LIST_RESULTS = 5;
-const MAX_MAP_PINS = 300;
 
 const LEGEND_ITEMS: { type: keyof typeof placeTypeColors; label: string }[] = [
   { type: "masjid", label: "Masjid" },
@@ -336,14 +334,6 @@ export default function HomeScreen() {
     return base.slice(0, MAX_LIST_RESULTS);
   }, [results, query]);
 
-  // Nearest pins only (see MAX_MAP_PINS comment). results is sorted
-  // nearest-first, so slicing keeps everything a user could pan to locally.
-  const mapResults = useMemo(
-    () =>
-      results.length > MAX_MAP_PINS ? results.slice(0, MAX_MAP_PINS) : results,
-    [results],
-  );
-
   // Stable callbacks keep React.memo'd rows from re-rendering needlessly.
   const openPlace = useCallback(
     (id: string) => router.push(`/place/${id}`),
@@ -538,7 +528,7 @@ export default function HomeScreen() {
           {/* Map-first: the map fills the screen; the list floats above it. */}
           <View style={StyleSheet.absoluteFill}>
             <PlacesMap
-              results={mapResults}
+              results={results}
               userLocation={location}
               focus={searchOrigin}
               recenterNonce={recenterNonce}

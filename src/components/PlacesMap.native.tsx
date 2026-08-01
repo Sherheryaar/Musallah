@@ -1,10 +1,11 @@
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { StyleSheet } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 
 import { PLACE_TYPE_LABELS, Place } from "@/data/places";
 import { useTheme } from "@/context/ThemeContext";
 import { formatDistance } from "@/lib/distance";
+import { selectPinsForRegion, type MapRegion } from "@/lib/mapPins";
 
 // Google Maps (Android) needs an explicit style array for dark mode; Apple
 // Maps (iOS) follows the userInterfaceStyle prop instead and ignores this.
@@ -83,6 +84,8 @@ export default function PlacesMap({
 }: Props) {
   const { scheme } = useTheme();
   const mapRef = useRef<MapView>(null);
+  // Wherever the user has panned/zoomed to; null until the first gesture.
+  const [region, setRegion] = useState<MapRegion | null>(null);
 
   const initialRegion = useMemo(() => {
     const centre = userLocation
@@ -159,16 +162,25 @@ export default function PlacesMap({
     }
   }, [focus]);
 
+  // Pins follow the VIEWPORT, not the user: panning to another city or
+  // zooming out must show that area's places (capped + grid-spread for
+  // performance — see src/lib/mapPins.ts).
+  const pins = useMemo(
+    () => selectPinsForRegion(results, region ?? initialRegion),
+    [results, region, initialRegion],
+  );
+
   return (
     <MapView
       ref={mapRef}
       style={styles.map}
       initialRegion={initialRegion}
+      onRegionChangeComplete={(r) => setRegion(r)}
       showsUserLocation={userLocation !== null}
       userInterfaceStyle={scheme}
       customMapStyle={scheme === "dark" ? DARK_MAP_STYLE : undefined}
     >
-      {results.map(({ place, km }) => (
+      {pins.map(({ place, km }) => (
         <Marker
           key={place.id}
           coordinate={{ latitude: place.lat, longitude: place.lng }}
