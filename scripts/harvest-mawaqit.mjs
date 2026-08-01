@@ -61,8 +61,13 @@ const UA = {
 const THROTTLE_MS = 2500;
 const MAX_THROTTLE_MS = 30_000;
 const TIMEOUT_MS = 12_000;
-const MAX_RETRIES = 4;
+const MAX_RETRIES = 2;
 const CHECKPOINT_EVERY = 20;
+// If the quota is simply spent, grinding through retries for hours is both
+// pointless and rude. Stop cleanly after this many consecutive rate-limited
+// cells; the checkpoint means a later run picks up exactly where this left
+// off. Reports are still written from whatever has been collected so far.
+const GIVE_UP_AFTER_CONSECUTIVE_LIMITS = 5;
 
 // Search queries are deduped onto a ~2 km grid: each call returns the
 // mosques nearest that point, so one call covers a neighbourhood.
@@ -205,7 +210,10 @@ async function requestOnce(lat, lng) {
   }
 }
 
-/** Search with backoff. Returns { mosques } or { error } after retries. */
+/**
+ * Search with backoff. Returns { mosques }, or { error }, or
+ * { rateLimited: true } when the quota looks spent.
+ */
 async function searchNear(lat, lng) {
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
     const result = await requestOnce(lat, lng);
@@ -218,13 +226,13 @@ async function searchNear(lat, lng) {
     }
     // Rate limited: slow the whole harvest down, then wait it out.
     throttleMs = Math.min(MAX_THROTTLE_MS, Math.round(throttleMs * 1.8));
-    const wait = result.waitMs ?? throttleMs * 2 ** attempt;
+    const wait = result.waitMs ?? throttleMs * (attempt + 1);
     console.log(
       `    rate limited — waiting ${Math.round(wait / 1000)}s (pace now ${throttleMs}ms)`,
     );
     await sleep(wait);
   }
-  return { error: "HTTP 429 after retries" };
+  return { rateLimited: true, error: "HTTP 429 after retries" };
 }
 
 // --- gather -----------------------------------------------------------------
@@ -288,14 +296,28 @@ process.on("SIGINT", () => {
   process.exit(130);
 });
 
+let consecutiveLimits = 0;
+let quotaSpent = false;
 for (const [key, cell] of pending) {
-  const { mosques: found, error } = await searchNear(cell.lat, cell.lng);
+  const { mosques: found, error, rateLimited } = await searchNear(
+    cell.lat,
+    cell.lng,
+  );
   queried++;
   if (error) {
     failures++;
     // Leave the cell unmarked so a later run retries it.
     if (failures <= 5) console.log(`  cell ${key}: ${error}`);
+    consecutiveLimits = rateLimited ? consecutiveLimits + 1 : 0;
+    if (consecutiveLimits >= GIVE_UP_AFTER_CONSECUTIVE_LIMITS) {
+      quotaSpent = true;
+      console.log(
+        `\nRate limit persists after ${consecutiveLimits} cells — stopping here.`,
+      );
+      break;
+    }
   } else {
+    consecutiveLimits = 0;
     doneCells.add(key);
     for (const m of found) {
       if (m && m.uuid && !mosques.has(m.uuid)) mosques.set(m.uuid, m);
@@ -315,7 +337,7 @@ console.log(
 );
 if (doneCells.size < cells.size) {
   console.log(
-    `${cells.size - doneCells.size} cells still outstanding — run again to continue from the checkpoint.`,
+    `${cells.size - doneCells.size} cells still outstanding — run again later to continue from the checkpoint${quotaSpent ? " (rate limit needs time to reset)" : ""}.`,
   );
 }
 
