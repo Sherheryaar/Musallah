@@ -61,7 +61,12 @@ const fixHour = (h: number) => h - 24 * Math.floor(h / 24);
 // Solar position (praytimes.org / Meeus simplified)
 // ---------------------------------------------------------------------------
 
-function julianDate(year: number, month: number, day: number): number {
+/**
+ * Julian date at 00:00 UT for a calendar date. Exported so the qibla
+ * screen can reuse this verified solar model for sun-based alignment
+ * instead of duplicating (and risking divergence from) the ephemeris math.
+ */
+export function julianDate(year: number, month: number, day: number): number {
   if (month <= 2) {
     year -= 1;
     month += 12;
@@ -78,7 +83,10 @@ function julianDate(year: number, month: number, day: number): number {
 }
 
 /** Sun declination (deg) and equation of time (hours) at a julian date. */
-function sunPosition(jd: number): { declination: number; equationOfTime: number } {
+export function sunPosition(jd: number): {
+  declination: number;
+  equationOfTime: number;
+} {
   const d = jd - 2451545.0;
   const g = fixAngle(357.529 + 0.98560028 * d); // mean anomaly
   const q = fixAngle(280.459 + 0.98564736 * d); // mean longitude

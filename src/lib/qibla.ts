@@ -5,6 +5,16 @@
 // map — which is why the qibla in Britain points east-south-east (~119°)
 // rather than the south-east you might expect from a Mercator projection.
 // Pure functions, no dependencies: same math on every platform, testable.
+//
+// A phone compass is the convenient way to find the qibla but not the
+// accurate one: magnetometers drift, phone cases and car mounts contain
+// magnets, and a tilted phone reads a skewed heading. The sun, by contrast,
+// can be located to a fraction of a degree from arithmetic alone. So this
+// module also computes solar azimuth (reusing the verified prayer-time
+// solar model) and the moment each day when the sun sits along the qibla
+// line — a compass-free cross-check anyone can perform with a shadow.
+
+import { julianDate, sunPosition } from "./prayerCalc";
 
 /** Kaaba, Masjid al-Haram. Same reference point the adhan library uses. */
 export const KAABA = { lat: 21.4225241, lng: 39.8261818 } as const;
@@ -99,4 +109,177 @@ export function qiblaGuidance(
     aligned: false,
     instruction: `Turn ${turn > 0 ? "right" : "left"} ${magnitude}°`,
   };
+}
+
+// ---------------------------------------------------------------------------
+// Sun-based alignment (no compass involved)
+// ---------------------------------------------------------------------------
+
+export type SunPosition = {
+  /** Degrees clockwise from true north. */
+  azimuth: number;
+  /** Degrees above the horizon; negative means the sun is down. */
+  altitude: number;
+};
+
+/**
+ * Where the sun is, for a location and instant. Uses the same solar model
+ * as the prayer times (praytimes.org / Meeus simplified), which is accurate
+ * to well under a degree — far better than any phone magnetometer.
+ */
+export function sunAzimuth(
+  lat: number,
+  lng: number,
+  when: Date,
+): SunPosition {
+  // Julian date of the instant, in UT.
+  const jd =
+    julianDate(when.getUTCFullYear(), when.getUTCMonth() + 1, when.getUTCDate()) +
+    (when.getUTCHours() +
+      when.getUTCMinutes() / 60 +
+      when.getUTCSeconds() / 3600) /
+      24;
+  const { declination, equationOfTime } = sunPosition(jd);
+
+  // Hour angle: how far the sun is past the local meridian, in degrees,
+  // positive in the afternoon. Solar time = UT + EqT + longitude/15.
+  const utHours =
+    when.getUTCHours() +
+    when.getUTCMinutes() / 60 +
+    when.getUTCSeconds() / 3600;
+  const solarHours = utHours + equationOfTime + lng / 15;
+  const hourAngle = (solarHours - 12) * 15;
+
+  const phi = toRad(lat);
+  const delta = toRad(declination);
+  const h = toRad(hourAngle);
+
+  const sinAlt =
+    Math.sin(phi) * Math.sin(delta) +
+    Math.cos(phi) * Math.cos(delta) * Math.cos(h);
+  const altitude = toDeg(Math.asin(Math.max(-1, Math.min(1, sinAlt))));
+
+  // Azimuth clockwise from north. atan2 form avoids the quadrant
+  // ambiguity a plain arccos would introduce near due south.
+  const y = Math.sin(h);
+  const x = Math.cos(h) * Math.sin(phi) - Math.tan(delta) * Math.cos(phi);
+  const azimuth = normalizeAngle(toDeg(Math.atan2(y, x)) + 180);
+
+  return { azimuth, altitude };
+}
+
+export type SunAlignment = {
+  /** The sun's current position. */
+  sun: SunPosition;
+  /**
+   * Where the qibla is relative to the sun, as a signed turn: stand facing
+   * the sun, then turn this many degrees to face the qibla. Positive =
+   * clockwise (to your right).
+   */
+  turnFromSun: number;
+  /** Plain instruction, e.g. "Face the sun, then turn 91° right". */
+  instruction: string;
+  /** False when the sun is below the horizon, so this method can't be used. */
+  sunUp: boolean;
+};
+
+/**
+ * Qibla direction expressed relative to the sun — usable with no compass at
+ * all, and immune to magnetic interference.
+ */
+export function qiblaFromSun(
+  lat: number,
+  lng: number,
+  when: Date,
+): SunAlignment {
+  const sun = sunAzimuth(lat, lng, when);
+  const bearing = qiblaBearing(lat, lng);
+  const turnFromSun = angleDelta(sun.azimuth, bearing);
+  const magnitude = Math.round(Math.abs(turnFromSun));
+  // Below about 5° the sun is too low and too refracted to sight reliably.
+  const sunUp = sun.altitude > 5;
+  let instruction: string;
+  if (!sunUp) {
+    instruction = "The sun is too low to use right now";
+  } else if (magnitude <= 2) {
+    instruction = "The qibla is straight towards the sun";
+  } else if (magnitude >= 178) {
+    instruction = "The qibla is directly away from the sun";
+  } else {
+    instruction = `Face the sun, then turn ${magnitude}° ${
+      turnFromSun > 0 ? "right" : "left"
+    }`;
+  }
+  return { sun, turnFromSun, instruction, sunUp };
+}
+
+/**
+ * The instants today when the sun crosses the qibla line, i.e. when a
+ * shadow points exactly along it. `towards` is when the sun sits in the
+ * qibla direction (so shadows point directly AWAY from the qibla), and
+ * `away` is the reverse (shadows point along it).
+ *
+ * This is the classic shadow method, and it is the most accurate qibla
+ * anyone can obtain without instruments. Either can be null: at UK
+ * latitudes the sun never reaches some azimuths, and one of the two
+ * crossings is usually at night.
+ *
+ * Solved by scanning the day in one-minute steps for a sign change in the
+ * sun-to-qibla offset, then bisecting — robust, and immune to the
+ * discontinuities that catch out closed-form attempts.
+ */
+export function qiblaSunCrossings(
+  lat: number,
+  lng: number,
+  day: Date,
+): { towards: Date | null; away: Date | null } {
+  const bearing = qiblaBearing(lat, lng);
+  const start = new Date(day);
+  start.setHours(0, 0, 0, 0);
+
+  const offsetAt = (t: Date) => {
+    const { azimuth, altitude } = sunAzimuth(lat, lng, t);
+    return { delta: angleDelta(azimuth, bearing), altitude };
+  };
+
+  const refine = (lo: Date, hi: Date): Date => {
+    let a = lo.getTime();
+    let b = hi.getTime();
+    for (let i = 0; i < 30; i++) {
+      const mid = (a + b) / 2;
+      const da = offsetAt(new Date(a)).delta;
+      const dm = offsetAt(new Date(mid)).delta;
+      if (Math.sign(da) === Math.sign(dm)) a = mid;
+      else b = mid;
+    }
+    return new Date(Math.round((a + b) / 2));
+  };
+
+  let towards: Date | null = null;
+  let away: Date | null = null;
+  let prev = offsetAt(start);
+  let prevTime = start;
+
+  for (let minute = 1; minute <= 24 * 60; minute++) {
+    const t = new Date(start.getTime() + minute * 60_000);
+    const curr = offsetAt(t);
+    // Sign change in the offset = the sun crossed the qibla azimuth.
+    // Skip jumps across the ±180° wrap, which are not crossings.
+    const crossed =
+      Math.sign(curr.delta) !== Math.sign(prev.delta) &&
+      Math.abs(curr.delta - prev.delta) < 180;
+    if (crossed && curr.altitude > 0 && prev.altitude > 0) {
+      towards ??= refine(prevTime, t);
+    }
+    // The opposite crossing: offset passes through ±180°.
+    const oppositeCrossed =
+      Math.sign(curr.delta) !== Math.sign(prev.delta) &&
+      Math.abs(curr.delta - prev.delta) >= 180;
+    if (oppositeCrossed && curr.altitude > 0 && prev.altitude > 0) {
+      away ??= new Date(prevTime.getTime() + 30_000);
+    }
+    prev = curr;
+    prevTime = t;
+  }
+  return { towards, away };
 }
