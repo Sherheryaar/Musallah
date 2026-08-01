@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo } from "react";
 import { Text, TouchableOpacity, View, StyleSheet } from "react-native";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
 import {
   FACILITY_KEYS,

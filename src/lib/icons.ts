@@ -6,7 +6,10 @@
 // The IconName type is checked against the real glyph map, so a typo'd
 // icon name is a compile error, not a "?" box at runtime.
 
-import type { MaterialCommunityIcons } from "@expo/vector-icons";
+// Deep import, not the "@expo/vector-icons" barrel: the barrel drags all
+// 21 icon families (and their fonts) into Metro's module graph; this pulls
+// exactly the one family the app uses.
+import type MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
 import type { FacilityKey, PlaceType } from "@/data/places";
 
