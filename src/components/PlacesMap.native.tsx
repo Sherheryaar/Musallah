@@ -5,7 +5,13 @@ import MapView, { Marker } from "react-native-maps";
 import { PLACE_TYPE_LABELS, Place } from "@/data/places";
 import { useTheme } from "@/context/ThemeContext";
 import { formatDistance } from "@/lib/distance";
-import { buildPinGroups, type MapRegion } from "@/lib/mapPins";
+import {
+  buildPinGroups,
+  MAX_MARKERS,
+  type MapRegion,
+  type PinCandidate,
+  type PinCluster,
+} from "@/lib/mapPins";
 
 // Google Maps (Android) needs an explicit style array for dark mode; Apple
 // Maps (iOS) follows the userInterfaceStyle prop instead and ignores this.
@@ -51,6 +57,16 @@ const FALLBACK_REGION = {
   latitudeDelta: 0.05,
   longitudeDelta: 0.05,
 };
+
+// Where unused pool markers park: a valid coordinate in the Gulf of Guinea,
+// far outside UK/Ireland coverage, rendered at opacity 0.
+const HIDDEN_COORDINATE = { latitude: 0, longitude: 0 };
+
+// One reusable marker slot: a pin, a cluster bubble, or empty (hidden).
+type Slot =
+  | { kind: "pin"; candidate: PinCandidate }
+  | { kind: "cluster"; cluster: PinCluster }
+  | null;
 
 // Small pre-rendered PNG dots, one colour per place type -- generated at
 // 1x/2x/3x by scripts/gen-pin-assets.js (colours mirror src/lib/theme.ts).
@@ -193,6 +209,23 @@ export default function PlacesMap({
     [results, region, initialRegion],
   );
 
+  // FIXED MARKER POOL. Exactly MAX_MARKERS Marker components mount once and
+  // are never added or removed afterwards — react-native-maps 1.20's marker
+  // add/remove path crashes iOS under the new architecture (expo/expo#40856,
+  // react-native-maps#5217, seen on an iPhone XR in Expo Go every time
+  // clustering swapped the marker set). Region changes only MOVE markers
+  // and swap their images; unused slots hide at opacity 0.
+  const slots = useMemo<Slot[]>(() => {
+    const arr: Slot[] = [];
+    for (const cluster of clusters) arr.push({ kind: "cluster", cluster });
+    for (const candidate of singles) arr.push({ kind: "pin", candidate });
+    // buildPinGroups guarantees the bound; slice is belt-and-braces so the
+    // pool can never grow (growth = marker insertion = the crash path).
+    const bounded = arr.slice(0, MAX_MARKERS);
+    while (bounded.length < MAX_MARKERS) bounded.push(null);
+    return bounded;
+  }, [singles, clusters]);
+
   return (
     <MapView
       ref={mapRef}
@@ -203,46 +236,65 @@ export default function PlacesMap({
       userInterfaceStyle={scheme}
       customMapStyle={scheme === "dark" ? DARK_MAP_STYLE : undefined}
     >
-      {clusters.map((cluster) => (
-        <Marker
-          key={cluster.key}
-          coordinate={{ latitude: cluster.lat, longitude: cluster.lng }}
-          anchor={{ x: 0.5, y: 0.5 }}
-          image={CLUSTER_IMAGES[cluster.bucket]}
-          // Static image marker: never re-rasterizes (see CLUSTER_IMAGES).
-          tracksViewChanges={false}
-          // Tap = zoom into the cluster's cell; the closer view either
-          // resolves it into pins or into smaller clusters.
-          onPress={() =>
-            mapRef.current?.animateToRegion(
-              {
-                latitude: cluster.lat,
-                longitude: cluster.lng,
-                latitudeDelta: cluster.latitudeDelta,
-                longitudeDelta: cluster.longitudeDelta,
-              },
-              350,
-            )
-          }
-          accessibilityLabel={`${cluster.count} places — tap to zoom in`}
-        />
-      ))}
-      {singles.map(({ place, km }) => (
-        <Marker
-          key={place.id}
-          coordinate={{ latitude: place.lat, longitude: place.lng }}
-          title={place.name}
-          // Type + distance in the callout, so "is it walkable?" is answered
-          // without leaving the map.
-          description={`${PLACE_TYPE_LABELS[place.type]} · ${formatDistance(km)}`}
-          onCalloutPress={() => onSelect(place.id)}
-          image={PIN_IMAGES[place.type]}
-          // Centre the dot on the coordinate (Android; iOS centres by default).
-          anchor={{ x: 0.5, y: 0.5 }}
-          // Static markers with no view children: never re-rasterize.
-          tracksViewChanges={false}
-        />
-      ))}
+      {slots.map((slot, index) => {
+        if (slot?.kind === "cluster") {
+          const { cluster } = slot;
+          return (
+            <Marker
+              key={`slot-${index}`}
+              coordinate={{ latitude: cluster.lat, longitude: cluster.lng }}
+              opacity={1}
+              anchor={{ x: 0.5, y: 0.5 }}
+              image={CLUSTER_IMAGES[cluster.bucket]}
+              tracksViewChanges={false}
+              // Tap = zoom into the cluster's cell; the closer view either
+              // resolves it into pins or into smaller clusters.
+              onPress={() =>
+                mapRef.current?.animateToRegion(
+                  {
+                    latitude: cluster.lat,
+                    longitude: cluster.lng,
+                    latitudeDelta: cluster.latitudeDelta,
+                    longitudeDelta: cluster.longitudeDelta,
+                  },
+                  350,
+                )
+              }
+              accessibilityLabel={`${cluster.count} places — tap to zoom in`}
+            />
+          );
+        }
+        if (slot) {
+          const { place, km } = slot.candidate;
+          return (
+            <Marker
+              key={`slot-${index}`}
+              coordinate={{ latitude: place.lat, longitude: place.lng }}
+              opacity={1}
+              title={place.name}
+              // Type + distance in the callout, so "is it walkable?" is
+              // answered without leaving the map.
+              description={`${PLACE_TYPE_LABELS[place.type]} · ${formatDistance(km)}`}
+              onCalloutPress={() => onSelect(place.id)}
+              image={PIN_IMAGES[place.type]}
+              // Centre the dot on the coordinate (Android; iOS centres by
+              // default).
+              anchor={{ x: 0.5, y: 0.5 }}
+              tracksViewChanges={false}
+            />
+          );
+        }
+        return (
+          <Marker
+            key={`slot-${index}`}
+            coordinate={HIDDEN_COORDINATE}
+            opacity={0}
+            anchor={{ x: 0.5, y: 0.5 }}
+            image={PIN_IMAGES.masjid}
+            tracksViewChanges={false}
+          />
+        );
+      })}
     </MapView>
   );
 }

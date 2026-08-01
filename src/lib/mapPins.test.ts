@@ -82,6 +82,22 @@ describe("buildPinGroups", () => {
     expect(represented).toBe(43);
   });
 
+  it("NEVER exceeds the marker budget, even for pathological spreads", () => {
+    // 2,000 places scattered so most grid cells hold exactly one place —
+    // the worst case for the singles count. The grid must coarsen itself.
+    const results = Array.from({ length: 2000 }, (_, i) =>
+      pin(`p-${i}`, 51.44 + (i % 45) * 0.0027, -0.16 + Math.floor(i / 45) * 0.0027),
+    );
+    const groups = buildPinGroups(results, LONDON, 50);
+    const total = groups.singles.length + groups.clusters.length;
+    expect(total).toBeLessThanOrEqual(50);
+    // Everything in view is still represented.
+    const represented =
+      groups.singles.length +
+      groups.clusters.reduce((n, c) => n + c.count, 0);
+    expect(represented).toBeGreaterThan(1000);
+  });
+
   it("keeps cluster identity while panning (world-anchored grid)", () => {
     const results = Array.from({ length: 400 }, (_, i) =>
       pin(`p-${i}`, 51.47 + (i % 20) * 0.0001, -0.13 + Math.floor(i / 20) * 0.0001),

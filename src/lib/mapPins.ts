@@ -41,11 +41,17 @@ export type PinGroups = {
   clusters: PinCluster[];
 };
 
-/** Render budget: ~300 image markers stay smooth on low-end phones. */
-export const MAX_PINS = 300;
+/**
+ * HARD upper bound on singles + clusters, guaranteed by buildPinGroups.
+ * PlacesMap mounts exactly this many Marker components once and reuses
+ * them forever (moving/hiding instead of adding/removing), because the
+ * add/remove path of react-native-maps 1.20 crashes iOS under the new
+ * architecture (expo/expo#40856, react-native-maps#5217).
+ */
+export const MAX_MARKERS = 280;
 
 // Target grid density: roughly this many cells across the viewport.
-const CELLS_ACROSS = 14;
+const CELLS_ACROSS = 12;
 
 // Never zoom deeper than this when tapping a cluster; below it the cell is
 // small enough that its places resolve to individual pins anyway.
@@ -68,40 +74,12 @@ function quantise(raw: number): number {
   return 2 ** Math.round(Math.log2(raw));
 }
 
-/**
- * Group the in-view places for rendering.
- *
- * - The region is padded so pins just off-screen don't pop during pans.
- * - Under budget: everything is an individual pin.
- * - Over budget: bucket by world-grid cell; lone places stay pins, shared
- *   cells become clusters centred on their members' mean position.
- *   `results` arrives sorted nearest-first, so singles stay nearest-first.
- */
-export function buildPinGroups(
-  results: readonly PinCandidate[],
-  region: MapRegion,
-  maxPins: number = MAX_PINS,
+/** One pass of world-grid grouping at a given cell size. */
+function groupIntoCells(
+  inView: readonly PinCandidate[],
+  cellLat: number,
+  cellLng: number,
 ): PinGroups {
-  const latPad = region.latitudeDelta * 0.6;
-  const lngPad = region.longitudeDelta * 0.6;
-  const minLat = region.latitude - latPad;
-  const maxLat = region.latitude + latPad;
-  const minLng = region.longitude - lngPad;
-  const maxLng = region.longitude + lngPad;
-
-  const inView = results.filter(
-    ({ place }) =>
-      place.lat >= minLat &&
-      place.lat <= maxLat &&
-      place.lng >= minLng &&
-      place.lng <= maxLng,
-  );
-  if (inView.length <= maxPins) return { singles: inView, clusters: [] };
-
-  // World-anchored cells: size depends only on (quantised) zoom, indices
-  // only on absolute coordinates — never on where the viewport sits.
-  const cellLat = quantise(region.latitudeDelta / CELLS_ACROSS);
-  const cellLng = quantise(region.longitudeDelta / CELLS_ACROSS);
   const cells = new Map<string, PinCandidate[]>();
   for (const candidate of inView) {
     const cy = Math.floor(candidate.place.lat / cellLat);
@@ -139,4 +117,55 @@ export function buildPinGroups(
     });
   }
   return { singles, clusters };
+}
+
+/**
+ * Group the in-view places for rendering. The result NEVER exceeds
+ * `maxMarkers` total markers (singles + clusters):
+ *
+ * - The region is padded so pins just off-screen don't pop during pans.
+ * - Under budget: everything is an individual pin.
+ * - Over budget: bucket by world-grid cell; lone places stay pins, shared
+ *   cells become clusters centred on their members' mean position. If the
+ *   grid still yields too many markers, cells double in size until it
+ *   fits — a hard guarantee, so the marker pool can be a fixed size.
+ *   `results` arrives sorted nearest-first, so singles stay nearest-first.
+ */
+export function buildPinGroups(
+  results: readonly PinCandidate[],
+  region: MapRegion,
+  maxMarkers: number = MAX_MARKERS,
+): PinGroups {
+  // iOS occasionally reports zero/negative deltas mid-gesture; clamp so the
+  // grid math can't divide by zero.
+  const latDelta = Math.max(region.latitudeDelta, 0.005);
+  const lngDelta = Math.max(region.longitudeDelta, 0.005);
+  const latPad = latDelta * 0.6;
+  const lngPad = lngDelta * 0.6;
+  const minLat = region.latitude - latPad;
+  const maxLat = region.latitude + latPad;
+  const minLng = region.longitude - lngPad;
+  const maxLng = region.longitude + lngPad;
+
+  const inView = results.filter(
+    ({ place }) =>
+      place.lat >= minLat &&
+      place.lat <= maxLat &&
+      place.lng >= minLng &&
+      place.lng <= maxLng,
+  );
+  if (inView.length <= maxMarkers) return { singles: inView, clusters: [] };
+
+  // World-anchored cells: size depends only on (quantised) zoom, indices
+  // only on absolute coordinates — never on where the viewport sits.
+  let cellLat = quantise(latDelta / CELLS_ACROSS);
+  let cellLng = quantise(lngDelta / CELLS_ACROSS);
+  for (;;) {
+    const groups = groupIntoCells(inView, cellLat, cellLng);
+    if (groups.singles.length + groups.clusters.length <= maxMarkers) {
+      return groups;
+    }
+    cellLat *= 2;
+    cellLng *= 2;
+  }
 }
