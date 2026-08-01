@@ -5,6 +5,7 @@ dist/
 web-build/
 *.log
 .DS_Store
+scripts/.overpass-cache.json
 app-example/
 expo-env.d.ts
 
