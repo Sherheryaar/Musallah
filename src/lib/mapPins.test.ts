@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { FACILITY_KEYS, type FacilityKey, type Place } from "@/data/places";
-import { buildPinGroups, type PinCandidate } from "./mapPins";
+import { buildPinGroups, clusterBucket, type PinCandidate } from "./mapPins";
 
 const facilities = Object.fromEntries(
   FACILITY_KEYS.map((k) => [k, false]),
@@ -82,6 +82,22 @@ describe("buildPinGroups", () => {
     expect(represented).toBe(43);
   });
 
+  it("keeps cluster identity while panning (world-anchored grid)", () => {
+    const results = Array.from({ length: 400 }, (_, i) =>
+      pin(`p-${i}`, 51.47 + (i % 20) * 0.0001, -0.13 + Math.floor(i / 20) * 0.0001),
+    );
+    const before = buildPinGroups(results, LONDON, 100);
+    // Pan the viewport a third of a screen — same zoom.
+    const panned = { ...LONDON, latitude: 51.53, longitude: -0.07 };
+    const after = buildPinGroups(results, panned, 100);
+    const beforeKeys = new Set(before.clusters.map((c) => c.key));
+    // Every cluster still in view keeps the exact same key.
+    for (const c of after.clusters) {
+      expect(beforeKeys.has(c.key)).toBe(true);
+    }
+    expect(after.clusters.length).toBeGreaterThan(0);
+  });
+
   it("centres a cluster on its members and gives it a tap-to-zoom region", () => {
     const results = [
       ...Array.from({ length: 200 }, (_, i) =>
@@ -102,5 +118,18 @@ describe("buildPinGroups", () => {
     const south = groups.clusters.find((c) => c.lat < 51.5);
     expect(south).toBeDefined();
     expect(south!.lat).toBeCloseTo(51.47, 3);
+  });
+});
+
+describe("clusterBucket", () => {
+  it("maps counts onto the pre-rendered image set", () => {
+    expect(clusterBucket(2)).toBe("2");
+    expect(clusterBucket(9)).toBe("9");
+    expect(clusterBucket(10)).toBe("10+");
+    expect(clusterBucket(19)).toBe("10+");
+    expect(clusterBucket(49)).toBe("30+");
+    expect(clusterBucket(99)).toBe("50+");
+    expect(clusterBucket(250)).toBe("200+");
+    expect(clusterBucket(2280)).toBe("500+");
   });
 });
