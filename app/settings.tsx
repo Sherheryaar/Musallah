@@ -259,6 +259,23 @@ export default function SettingsScreen() {
                     })}
                   </View>
                 </View>
+                {__DEV__ ? (
+                  // Development builds only: verify delivery without waiting
+                  // for the next prayer. Never shown in production.
+                  <TouchableOpacity
+                    style={[styles.switchRow, styles.rowDivider]}
+                    onPress={() => void notifications.sendTest()}
+                    accessibilityRole="button"
+                    accessibilityLabel="Send a test notification"
+                  >
+                    <Text style={styles.optionLabel}>
+                      Send test notification
+                    </Text>
+                    <Text style={styles.optionDetail}>
+                      fires in 5 s {"—"} lock the phone
+                    </Text>
+                  </TouchableOpacity>
+                ) : null}
               </>
             ) : null}
           </View>

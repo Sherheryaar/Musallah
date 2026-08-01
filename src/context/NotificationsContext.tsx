@@ -9,7 +9,6 @@ import React, {
 } from "react";
 import { AppState, Platform } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as Notifications from "expo-notifications";
 
 import { useSettings } from "./SettingsContext";
 import {
@@ -55,6 +54,8 @@ type NotificationsContextValue = {
   disable: () => void;
   /** Called by the home screen whenever a fresh location fix lands. */
   reportLocation: (lat: number, lng: number) => void;
+  /** Dev-only: fire a sample notification a few seconds from now. */
+  sendTest: () => Promise<void>;
 };
 
 const NotificationsContext = createContext<NotificationsContextValue>({
@@ -64,18 +65,37 @@ const NotificationsContext = createContext<NotificationsContextValue>({
   enable: async () => false,
   disable: () => {},
   reportLocation: () => {},
+  sendTest: async () => {},
 });
 
-// Show alerts even when the app is foregrounded — someone waiting for the
-// adhan with the app open still wants the banner.
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
-});
+// expo-notifications is loaded LAZILY, on the first actual use. Importing
+// it at module scope runs a push-token auto-registration side effect
+// (DevicePushTokenAutoRegistration.fx) which logs a red error in Expo Go on
+// Android — remote push was removed from Go in SDK 53. We only ever use
+// LOCAL notifications, so defer the import until the user touches the
+// feature; in Expo Go the note appears once at that point instead of on
+// every launch, and in dev/production builds it never appears at all.
+type NotificationsModule = typeof import("expo-notifications");
+let notifierPromise: Promise<NotificationsModule> | null = null;
+
+function getNotifier(): Promise<NotificationsModule> {
+  if (!notifierPromise) {
+    notifierPromise = import("expo-notifications").then((N) => {
+      // Show alerts even when the app is foregrounded — someone waiting
+      // for the adhan with the app open still wants the banner.
+      N.setNotificationHandler({
+        handleNotification: async () => ({
+          shouldPlaySound: true,
+          shouldSetBadge: false,
+          shouldShowBanner: true,
+          shouldShowList: true,
+        }),
+      });
+      return N;
+    });
+  }
+  return notifierPromise;
+}
 
 export function NotificationsProvider({
   children,
@@ -154,6 +174,12 @@ export function NotificationsProvider({
     async (reason: "change" | "topup") => {
       if (Platform.OS === "web") return; // no local notifications on web
       const run = async () => {
+        // A user who has NEVER enabled notifications must never cause the
+        // module to load (see getNotifier — the import itself is noisy in
+        // Expo Go on Android).
+        if (!prefs.enabled && scheduleState.current.lastScheduledAt === null) {
+          return;
+        }
         const coords = location.current;
         if (!coords) return;
         const fingerprint = prefsFingerprint(prefs, calcOptions);
@@ -170,9 +196,10 @@ export function NotificationsProvider({
           return;
         }
 
+        const N = await getNotifier();
         // Replace wholesale: cancelling and re-adding ~60 local
         // notifications is cheap and immune to drift/duplication.
-        await Notifications.cancelAllScheduledNotificationsAsync();
+        await N.cancelAllScheduledNotificationsAsync();
         if (prefs.enabled) {
           const plan = planNotifications(
             coords.lat,
@@ -182,7 +209,7 @@ export function NotificationsProvider({
             new Date(),
           );
           for (const item of plan) {
-            await Notifications.scheduleNotificationAsync({
+            await N.scheduleNotificationAsync({
               identifier: item.id,
               content: {
                 title: item.title,
@@ -190,7 +217,7 @@ export function NotificationsProvider({
                 sound: true,
               },
               trigger: {
-                type: Notifications.SchedulableTriggerInputTypes.DATE,
+                type: N.SchedulableTriggerInputTypes.DATE,
                 date: item.fireAt,
               },
             });
@@ -247,21 +274,22 @@ export function NotificationsProvider({
 
   const enable = useCallback(async (): Promise<boolean> => {
     if (Platform.OS === "web") return false;
-    const current = await Notifications.getPermissionsAsync();
+    const N = await getNotifier();
+    const current = await N.getPermissionsAsync();
     let granted =
       current.granted ||
-      current.ios?.status === Notifications.IosAuthorizationStatus.PROVISIONAL;
+      current.ios?.status === N.IosAuthorizationStatus.PROVISIONAL;
     if (!granted && current.canAskAgain) {
-      const asked = await Notifications.requestPermissionsAsync();
+      const asked = await N.requestPermissionsAsync();
       granted = asked.granted;
     }
     setPermissionGranted(granted);
     if (granted) {
       if (Platform.OS === "android") {
         // Android 8+ requires a channel; also gives the sound/importance.
-        await Notifications.setNotificationChannelAsync("prayer-times", {
+        await N.setNotificationChannelAsync("prayer-times", {
           name: "Prayer times",
-          importance: Notifications.AndroidImportance.HIGH,
+          importance: N.AndroidImportance.HIGH,
           sound: "default",
         });
       }
@@ -273,11 +301,29 @@ export function NotificationsProvider({
   const disable = useCallback(() => {
     updatePrefs({ enabled: false });
     if (Platform.OS !== "web") {
-      void Notifications.cancelAllScheduledNotificationsAsync().catch(
-        () => {},
-      );
+      void getNotifier()
+        .then((N) => N.cancelAllScheduledNotificationsAsync())
+        .catch(() => {});
     }
   }, [updatePrefs]);
+
+  // Dev-only verification: fire a sample a few seconds out, so delivery can
+  // be checked in Expo Go without waiting for the next prayer.
+  const sendTest = useCallback(async () => {
+    if (Platform.OS === "web") return;
+    const N = await getNotifier();
+    await N.scheduleNotificationAsync({
+      content: {
+        title: "Dhuhr time",
+        body: "This is how a prayer alert will look. (Test)",
+        sound: true,
+      },
+      trigger: {
+        type: N.SchedulableTriggerInputTypes.TIME_INTERVAL,
+        seconds: 5,
+      },
+    });
+  }, []);
 
   const reportLocation = useCallback(
     (lat: number, lng: number) => {
@@ -295,8 +341,17 @@ export function NotificationsProvider({
       enable,
       disable,
       reportLocation,
+      sendTest,
     }),
-    [prefs, permissionGranted, updatePrefs, enable, disable, reportLocation],
+    [
+      prefs,
+      permissionGranted,
+      updatePrefs,
+      enable,
+      disable,
+      reportLocation,
+      sendTest,
+    ],
   );
 
   return (
