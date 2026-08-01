@@ -4888,25 +4888,6 @@
 		"confidence": "community"
 	},
 	{
-		"id": "barter-memorial-chapel-1868-node-12954453270",
-		"name": "Barter Memorial Chapel 1868",
-		"type": "multi_faith_room",
-		"address": "Address not recorded yet",
-		"lat": 51.0617348,
-		"lng": -1.3286957,
-		"facilities": {
-			"sistersSpace": false,
-			"wudu": false,
-			"disabledAccess": false,
-			"parking": false,
-			"jumuah": false,
-			"janazah": false
-		},
-		"notes": "Data: OSM (node/12954453270)",
-		"source": "OpenStreetMap ((c) OpenStreetMap contributors)",
-		"confidence": "community"
-	},
-	{
 		"id": "basford-culture-centre-way-221529835",
 		"name": "Basford Culture Centre",
 		"type": "masjid",
@@ -5299,25 +5280,6 @@
 		"confidence": "verified"
 	},
 	{
-		"id": "beverley-queensgate-cemetery-way-251648063",
-		"name": "Beverley Queensgate Cemetery",
-		"type": "multi_faith_room",
-		"address": "Address not recorded yet",
-		"lat": 53.8312871,
-		"lng": -0.4379793,
-		"facilities": {
-			"sistersSpace": false,
-			"wudu": false,
-			"disabledAccess": false,
-			"parking": false,
-			"jumuah": false,
-			"janazah": false
-		},
-		"notes": "Data: OSM (way/251648063)",
-		"source": "OpenStreetMap ((c) OpenStreetMap contributors)",
-		"confidence": "unverified"
-	},
-	{
 		"id": "bexhill-masjid-and-islamic-centre-mib-1241",
 		"name": "Bexhill Masjid and Islamic Centre",
 		"type": "masjid",
@@ -5337,25 +5299,6 @@
 		"phone": "01424 211977",
 		"website": "http://bmic.org.uk/",
 		"confidence": "verified"
-	},
-	{
-		"id": "bilal-academy-mib-1792",
-		"name": "Bilal Academy",
-		"type": "musalla",
-		"address": "Unit 2, Rear of 226 Milton Street, Walsall, WS1 4LW",
-		"lat": 52.5715445,
-		"lng": -1.9903278,
-		"facilities": {
-			"sistersSpace": false,
-			"wudu": false,
-			"disabledAccess": false,
-			"parking": false,
-			"jumuah": false,
-			"janazah": false
-		},
-		"notes": "Capacity ~100 (MuslimsInBritain.org); Irregular / part-time venue per MIB; Data: MIB (mib-1792)",
-		"source": "MuslimsInBritain.org (with permission)",
-		"confidence": "unverified"
 	},
 	{
 		"id": "bilal-jamia-masjid-and-muslim-community-centre-mib-2404",
@@ -5892,25 +5835,6 @@
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 8983 1661",
 		"confidence": "community"
-	},
-	{
-		"id": "boys-brigade-hq-node-655438939",
-		"name": "Boys Brigade HQ",
-		"type": "multi_faith_room",
-		"address": "Address not recorded yet",
-		"lat": 51.7340044,
-		"lng": -0.5004995,
-		"facilities": {
-			"sistersSpace": false,
-			"wudu": false,
-			"disabledAccess": false,
-			"parking": false,
-			"jumuah": false,
-			"janazah": false
-		},
-		"notes": "Data: OSM (node/655438939)",
-		"source": "OpenStreetMap ((c) OpenStreetMap contributors)",
-		"confidence": "unverified"
 	},
 	{
 		"id": "bradford-dawah-centre-mib-1660",
@@ -6701,44 +6625,6 @@
 		"confidence": "unverified"
 	},
 	{
-		"id": "cemetery-chapel-way-210368104",
-		"name": "Cemetery Chapel",
-		"type": "multi_faith_room",
-		"address": "Address not recorded yet",
-		"lat": 52.1065149,
-		"lng": -2.0922462,
-		"facilities": {
-			"sistersSpace": false,
-			"wudu": false,
-			"disabledAccess": false,
-			"parking": false,
-			"jumuah": false,
-			"janazah": false
-		},
-		"notes": "Data: OSM (way/210368104)",
-		"source": "OpenStreetMap ((c) OpenStreetMap contributors)",
-		"confidence": "unverified"
-	},
-	{
-		"id": "cemetery-chapel-way-471117254",
-		"name": "Cemetery Chapel",
-		"type": "multi_faith_room",
-		"address": "Address not recorded yet",
-		"lat": 52.4094183,
-		"lng": 0.738256,
-		"facilities": {
-			"sistersSpace": false,
-			"wudu": false,
-			"disabledAccess": false,
-			"parking": false,
-			"jumuah": false,
-			"janazah": false
-		},
-		"notes": "Data: OSM (way/471117254)",
-		"source": "OpenStreetMap ((c) OpenStreetMap contributors)",
-		"confidence": "unverified"
-	},
-	{
 		"id": "cemetery-lodge-prayer-room-way-517328320",
 		"name": "Cemetery Lodge Prayer Room",
 		"type": "musalla",
@@ -7107,139 +6993,6 @@
 		"confidence": "unverified"
 	},
 	{
-		"id": "chapel-node-13112619639",
-		"name": "Chapel",
-		"type": "multi_faith_room",
-		"address": "Address not recorded yet",
-		"lat": 54.3066134,
-		"lng": -2.7327075,
-		"facilities": {
-			"sistersSpace": false,
-			"wudu": false,
-			"disabledAccess": false,
-			"parking": false,
-			"jumuah": false,
-			"janazah": false
-		},
-		"notes": "Data: OSM (node/13112619639)",
-		"source": "OpenStreetMap ((c) OpenStreetMap contributors)",
-		"confidence": "unverified"
-	},
-	{
-		"id": "chapel-node-2700948643",
-		"name": "Chapel",
-		"type": "multi_faith_room",
-		"address": "Address not recorded yet",
-		"lat": 51.8404072,
-		"lng": 1.0206433,
-		"facilities": {
-			"sistersSpace": false,
-			"wudu": false,
-			"disabledAccess": false,
-			"parking": false,
-			"jumuah": false,
-			"janazah": false
-		},
-		"notes": "Data: OSM (node/2700948643)",
-		"source": "OpenStreetMap ((c) OpenStreetMap contributors)",
-		"confidence": "unverified"
-	},
-	{
-		"id": "chapel-node-4266351251",
-		"name": "Chapel",
-		"type": "multi_faith_room",
-		"address": "Address not recorded yet",
-		"lat": 57.5391631,
-		"lng": -4.0639253,
-		"facilities": {
-			"sistersSpace": false,
-			"wudu": false,
-			"disabledAccess": false,
-			"parking": false,
-			"jumuah": false,
-			"janazah": false
-		},
-		"notes": "Data: OSM (node/4266351251)",
-		"source": "OpenStreetMap ((c) OpenStreetMap contributors)",
-		"confidence": "unverified"
-	},
-	{
-		"id": "chapel-node-7239057515",
-		"name": "Chapel",
-		"type": "multi_faith_room",
-		"address": "Address not recorded yet",
-		"lat": 51.8673727,
-		"lng": -4.2837782,
-		"facilities": {
-			"sistersSpace": false,
-			"wudu": false,
-			"disabledAccess": false,
-			"parking": false,
-			"jumuah": false,
-			"janazah": false
-		},
-		"notes": "Data: OSM (node/7239057515)",
-		"source": "OpenStreetMap ((c) OpenStreetMap contributors)",
-		"confidence": "unverified"
-	},
-	{
-		"id": "chapel-of-meditation-way-804718146",
-		"name": "Chapel of Meditation",
-		"type": "multi_faith_room",
-		"address": "Address not recorded yet",
-		"lat": 51.3314435,
-		"lng": 0.5106062,
-		"facilities": {
-			"sistersSpace": false,
-			"wudu": false,
-			"disabledAccess": false,
-			"parking": false,
-			"jumuah": false,
-			"janazah": false
-		},
-		"notes": "Data: OSM (way/804718146)",
-		"source": "OpenStreetMap ((c) OpenStreetMap contributors)",
-		"confidence": "unverified"
-	},
-	{
-		"id": "chapel-way-236009592",
-		"name": "Chapel",
-		"type": "multi_faith_room",
-		"address": "Address not recorded yet",
-		"lat": 52.8560678,
-		"lng": -3.0630526,
-		"facilities": {
-			"sistersSpace": false,
-			"wudu": false,
-			"disabledAccess": false,
-			"parking": false,
-			"jumuah": false,
-			"janazah": false
-		},
-		"notes": "Data: OSM (way/236009592)",
-		"source": "OpenStreetMap ((c) OpenStreetMap contributors)",
-		"confidence": "unverified"
-	},
-	{
-		"id": "chapel-way-657436855",
-		"name": "Chapel",
-		"type": "multi_faith_room",
-		"address": "Oxford Road",
-		"lat": 52.0540031,
-		"lng": -1.3367129,
-		"facilities": {
-			"sistersSpace": false,
-			"wudu": false,
-			"disabledAccess": true,
-			"parking": false,
-			"jumuah": false,
-			"janazah": false
-		},
-		"notes": "Data: OSM (way/657436855)",
-		"source": "OpenStreetMap ((c) OpenStreetMap contributors)",
-		"confidence": "community"
-	},
-	{
 		"id": "chaplaincy-centre-way-45046094",
 		"name": "Chaplaincy Centre",
 		"type": "multi_faith_room",
@@ -7391,25 +7144,6 @@
 		"notes": "Capacity ~230 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB (mib-1144)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"confidence": "unverified"
-	},
-	{
-		"id": "charter-chapel-way-1193551811",
-		"name": "Charter Chapel",
-		"type": "multi_faith_room",
-		"address": "Address not recorded yet",
-		"lat": 52.3891406,
-		"lng": -1.5503977,
-		"facilities": {
-			"sistersSpace": false,
-			"wudu": false,
-			"disabledAccess": false,
-			"parking": false,
-			"jumuah": false,
-			"janazah": false
-		},
-		"notes": "Denomination: nondenominational; Data: OSM (way/1193551811)",
-		"source": "OpenStreetMap ((c) OpenStreetMap contributors)",
-		"confidence": "community"
 	},
 	{
 		"id": "chashma-e-rahat-mosque-mib-218",
@@ -8041,25 +7775,6 @@
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "01293 553070",
 		"confidence": "verified"
-	},
-	{
-		"id": "crematorium-chapel-way-1259175444",
-		"name": "Crematorium Chapel",
-		"type": "multi_faith_room",
-		"address": "Address not recorded yet",
-		"lat": 53.0241326,
-		"lng": -3.0455592,
-		"facilities": {
-			"sistersSpace": false,
-			"wudu": false,
-			"disabledAccess": false,
-			"parking": false,
-			"jumuah": false,
-			"janazah": false
-		},
-		"notes": "Data: OSM (way/1259175444)",
-		"source": "OpenStreetMap ((c) OpenStreetMap contributors)",
-		"confidence": "unverified"
 	},
 	{
 		"id": "croydon-islamic-community-trust-mib-2768",
@@ -9693,44 +9408,6 @@
 		"confidence": "verified"
 	},
 	{
-		"id": "east-cemetery-chapel-way-102549685",
-		"name": "East Cemetery Chapel",
-		"type": "multi_faith_room",
-		"address": "Address not recorded yet",
-		"lat": 50.7329522,
-		"lng": -1.8303581,
-		"facilities": {
-			"sistersSpace": false,
-			"wudu": false,
-			"disabledAccess": false,
-			"parking": false,
-			"jumuah": false,
-			"janazah": false
-		},
-		"notes": "Data: OSM (way/102549685)",
-		"source": "OpenStreetMap ((c) OpenStreetMap contributors)",
-		"confidence": "unverified"
-	},
-	{
-		"id": "east-chapel-node-11725854167",
-		"name": "East Chapel",
-		"type": "multi_faith_room",
-		"address": "Address not recorded yet",
-		"lat": 51.5279664,
-		"lng": -0.2309622,
-		"facilities": {
-			"sistersSpace": false,
-			"wudu": false,
-			"disabledAccess": false,
-			"parking": false,
-			"jumuah": false,
-			"janazah": false
-		},
-		"notes": "Data: OSM (node/11725854167)",
-		"source": "OpenStreetMap ((c) OpenStreetMap contributors)",
-		"confidence": "community"
-	},
-	{
 		"id": "east-end-islamic-centre-mib-1295",
 		"name": "East End Islamic Centre",
 		"type": "masjid",
@@ -11234,25 +10911,6 @@
 		"confidence": "unverified"
 	},
 	{
-		"id": "fgh-chapel-node-4107990754",
-		"name": "FGH Chapel",
-		"type": "multi_faith_room",
-		"address": "Address not recorded yet",
-		"lat": 54.1363491,
-		"lng": -3.2079698,
-		"facilities": {
-			"sistersSpace": false,
-			"wudu": false,
-			"disabledAccess": false,
-			"parking": false,
-			"jumuah": false,
-			"janazah": false
-		},
-		"notes": "Data: OSM (node/4107990754)",
-		"source": "OpenStreetMap ((c) OpenStreetMap contributors)",
-		"confidence": "unverified"
-	},
-	{
 		"id": "fife-islamic-centre-mib-806",
 		"name": "Fife Islamic Centre",
 		"type": "masjid",
@@ -11841,25 +11499,6 @@
 		"phone": "01782 335606",
 		"website": "http://www.gnm.org.uk/",
 		"confidence": "verified"
-	},
-	{
-		"id": "gillingham-cemetery-chapel-node-2755159491",
-		"name": "Gillingham Cemetery Chapel",
-		"type": "multi_faith_room",
-		"address": "Address not recorded yet",
-		"lat": 51.0405318,
-		"lng": -2.2810131,
-		"facilities": {
-			"sistersSpace": false,
-			"wudu": false,
-			"disabledAccess": false,
-			"parking": false,
-			"jumuah": false,
-			"janazah": false
-		},
-		"notes": "Denomination: all; Data: OSM (node/2755159491)",
-		"source": "OpenStreetMap ((c) OpenStreetMap contributors)",
-		"confidence": "unverified"
 	},
 	{
 		"id": "gillingham-mosque-mib-774",
@@ -33881,25 +33520,6 @@
 		"confidence": "community"
 	},
 	{
-		"id": "mortonhall-chapel-way-33745877",
-		"name": "Mortonhall Chapel",
-		"type": "multi_faith_room",
-		"address": "Address not recorded yet",
-		"lat": 55.9022944,
-		"lng": -3.1703264,
-		"facilities": {
-			"sistersSpace": false,
-			"wudu": false,
-			"disabledAccess": false,
-			"parking": false,
-			"jumuah": false,
-			"janazah": false
-		},
-		"notes": "Data: OSM (way/33745877)",
-		"source": "OpenStreetMap ((c) OpenStreetMap contributors)",
-		"confidence": "community"
-	},
-	{
 		"id": "mosque-and-community-centre-mib-1984",
 		"name": "Mosque and Community Centre",
 		"type": "musalla",
@@ -36939,25 +36559,6 @@
 		"notes": "Data: OSM (way/636637393)",
 		"source": "OpenStreetMap ((c) OpenStreetMap contributors)",
 		"confidence": "unverified"
-	},
-	{
-		"id": "oak-chapel-node-11711808379",
-		"name": "Oak Chapel",
-		"type": "multi_faith_room",
-		"address": "Address not recorded yet",
-		"lat": 51.9064285,
-		"lng": -2.037461,
-		"facilities": {
-			"sistersSpace": false,
-			"wudu": false,
-			"disabledAccess": false,
-			"parking": false,
-			"jumuah": false,
-			"janazah": false
-		},
-		"notes": "Denomination: nondenominational; Data: OSM (node/11711808379)",
-		"source": "OpenStreetMap ((c) OpenStreetMap contributors)",
-		"confidence": "community"
 	},
 	{
 		"id": "oasis-faith-and-spirituality-centre-mib-1612",
@@ -40258,25 +39859,6 @@
 		"confidence": "community"
 	},
 	{
-		"id": "shah-jalal-latifia-madrasha-and-islamic-school-mib-336",
-		"name": "Shah Jalal Latifia Madrasha And Islamic School",
-		"type": "musalla",
-		"address": "75 Rookery Road, Handsworth,Birmingham, Perry Barr, B21 9QU",
-		"lat": 52.5078859,
-		"lng": -1.9410717,
-		"facilities": {
-			"sistersSpace": false,
-			"wudu": false,
-			"disabledAccess": false,
-			"parking": false,
-			"jumuah": false,
-			"janazah": false
-		},
-		"notes": "Capacity ~100 (MuslimsInBritain.org); Denomination: Sufi; Irregular / part-time venue per MIB; Data: MIB (mib-336)",
-		"source": "MuslimsInBritain.org (with permission)",
-		"confidence": "unverified"
-	},
-	{
 		"id": "shah-jalal-masjid-and-islamic-cultural-centre-mib-176",
 		"name": "Shah Jalal Masjid and Islamic Cultural Centre",
 		"type": "masjid",
@@ -41094,25 +40676,6 @@
 		"confidence": "verified"
 	},
 	{
-		"id": "ship-lane-cemetery-entrance-node-5271697499",
-		"name": "Ship Lane Cemetery Entrance",
-		"type": "multi_faith_room",
-		"address": "Address not recorded yet",
-		"lat": 51.3057905,
-		"lng": -0.7491802,
-		"facilities": {
-			"sistersSpace": false,
-			"wudu": false,
-			"disabledAccess": false,
-			"parking": false,
-			"jumuah": false,
-			"janazah": false
-		},
-		"notes": "Data: OSM (node/5271697499)",
-		"source": "OpenStreetMap ((c) OpenStreetMap contributors)",
-		"confidence": "unverified"
-	},
-	{
 		"id": "shipley-islamic-education-centre-mib-2759",
 		"name": "Shipley Islamic & Education Centre",
 		"type": "masjid",
@@ -41857,25 +41420,6 @@
 		"phone": "01727 836272",
 		"website": "https://icsta.org.uk/",
 		"confidence": "verified"
-	},
-	{
-		"id": "st-martin-s-chapel-node-977630491",
-		"name": "St. Martin's Chapel",
-		"type": "multi_faith_room",
-		"address": "Address not recorded yet",
-		"lat": 54.0402449,
-		"lng": -2.7877396,
-		"facilities": {
-			"sistersSpace": false,
-			"wudu": false,
-			"disabledAccess": false,
-			"parking": false,
-			"jumuah": false,
-			"janazah": false
-		},
-		"notes": "Data: OSM (node/977630491)",
-		"source": "OpenStreetMap ((c) OpenStreetMap contributors)",
-		"confidence": "unverified"
 	},
 	{
 		"id": "st-thomas-multifaith",
@@ -43371,25 +42915,6 @@
 		"confidence": "unverified"
 	},
 	{
-		"id": "the-vale-chapel-way-560424607",
-		"name": "The Vale Chapel",
-		"type": "multi_faith_room",
-		"address": "2 Butterfield Green Road, Luton, LU2 8DD",
-		"lat": 51.9078168,
-		"lng": -0.3918956,
-		"facilities": {
-			"sistersSpace": false,
-			"wudu": false,
-			"disabledAccess": false,
-			"parking": false,
-			"jumuah": false,
-			"janazah": false
-		},
-		"notes": "Data: OSM (way/560424607)",
-		"source": "OpenStreetMap ((c) OpenStreetMap contributors)",
-		"confidence": "unverified"
-	},
-	{
 		"id": "the-zawiya-mib-121",
 		"name": "The Zawiya",
 		"type": "musalla",
@@ -43534,25 +43059,6 @@
 		"confidence": "community"
 	},
 	{
-		"id": "tonbridge-cemetery-chapel-node-1110566195",
-		"name": "Tonbridge Cemetery Chapel",
-		"type": "multi_faith_room",
-		"address": "Address not recorded yet",
-		"lat": 51.2065159,
-		"lng": 0.276837,
-		"facilities": {
-			"sistersSpace": false,
-			"wudu": false,
-			"disabledAccess": false,
-			"parking": false,
-			"jumuah": false,
-			"janazah": false
-		},
-		"notes": "Data: OSM (node/1110566195)",
-		"source": "OpenStreetMap ((c) OpenStreetMap contributors)",
-		"confidence": "unverified"
-	},
-	{
 		"id": "tooting-islamic-centre-mib-1412",
 		"name": "Tooting Islamic Centre",
 		"type": "masjid",
@@ -43593,25 +43099,6 @@
 		"notes": "Capacity ~105 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-2322)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "01803 211818",
-		"confidence": "unverified"
-	},
-	{
-		"id": "tree-cathedral-node-1171134373",
-		"name": "Tree Cathedral",
-		"type": "multi_faith_room",
-		"address": "Address not recorded yet",
-		"lat": 51.8526906,
-		"lng": -0.5370346,
-		"facilities": {
-			"sistersSpace": false,
-			"wudu": false,
-			"disabledAccess": false,
-			"parking": false,
-			"jumuah": false,
-			"janazah": false
-		},
-		"notes": "Data: OSM (node/1171134373)",
-		"source": "OpenStreetMap ((c) OpenStreetMap contributors)",
 		"confidence": "unverified"
 	},
 	{
@@ -45048,25 +44535,6 @@
 		"notes": "Data: MIB (mib-2493)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"confidence": "unverified"
-	},
-	{
-		"id": "west-chapel-way-1460685281",
-		"name": "West Chapel",
-		"type": "multi_faith_room",
-		"address": "Address not recorded yet",
-		"lat": 52.9106325,
-		"lng": -1.1409849,
-		"facilities": {
-			"sistersSpace": false,
-			"wudu": false,
-			"disabledAccess": false,
-			"parking": false,
-			"jumuah": false,
-			"janazah": false
-		},
-		"notes": "Data: OSM (way/1460685281)",
-		"source": "OpenStreetMap ((c) OpenStreetMap contributors)",
-		"confidence": "community"
 	},
 	{
 		"id": "west-cumbria-muslim-society-mib-527",
