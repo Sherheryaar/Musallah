@@ -110,6 +110,15 @@ This fetches every row over the public read policy (anon key from `.env`), valid
 
 (`npm run build:places` still exists for the older CSV-export route: dashboard → export `places` as CSV → save as `data/places.csv` → run it.)
 
+### Automatic Jumu'ah time refresh (Mawaqit)
+
+Jumu'ah times for ~130 places come from [Mawaqit](https://mawaqit.net) (mosque-published, used with their permission, credited in the app). Because mosques shift Jumu'ah with the seasons, a scheduled GitHub Actions workflow (`.github/workflows/refresh-jummah.yml`) re-checks every linked mosque **weekly**, updates Supabase where the published time changed, re-runs `sync:places`, and commits the result (which redeploys the web app; native apps get the change live from Supabase).
+
+- The link table is `scripts/mawaqit-links.json` — only name-agreeing matches from the original harvest (`scripts/harvest-mawaqit.mjs`); regenerate with `scripts/gen-mawaqit-links.mjs` after a new harvest.
+- Identity is the Mawaqit uuid, never proximity. Closed or silent mosques are reported, not auto-cleared.
+- Dry-run locally (reads only, no service key needed): `npm run refresh:jummah`
+- The workflow needs four repository secrets: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` (writes — RLS blocks public writes by design; this key must exist **only** as a CI secret, never in the repo or the app), and `EXPO_PUBLIC_SUPABASE_URL` / `EXPO_PUBLIC_SUPABASE_ANON_KEY` for the sync step. It can also be run on demand from the Actions tab ("Run workflow").
+
 ## Shareable builds for testers (EAS)
 
 Builds run in Expo's cloud — no Android Studio, no Xcode, no Mac. One-time setup:

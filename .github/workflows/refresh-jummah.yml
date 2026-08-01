@@ -1,0 +1,72 @@
+# Weekly Jumu'ah time refresh from Mawaqit (mosque-published, used with
+# permission, credited in the app's About screen).
+#
+# What one run does:
+#   1. scripts/refresh-mawaqit-jummah.mjs — re-checks every linked mosque on
+#      mawaqit.net and PATCHes Supabase where the published time changed
+#      (UK mosques commonly shift Jumu'ah with the seasons).
+#   2. npm run sync:places — regenerates the bundled offline dataset from
+#      the now-current database.
+#   3. Commits src/data/places.json if it changed, which also triggers the
+#      Netlify web deploy. Native apps pick the change up straight from
+#      Supabase (realtime + refresh on foreground) with no new build.
+#
+# Required repository secrets (Settings -> Secrets and variables -> Actions):
+#   SUPABASE_URL                    project URL (same as EXPO_PUBLIC_SUPABASE_URL)
+#   SUPABASE_SERVICE_ROLE_KEY       service key — needed because RLS allows no
+#                                   public writes (by design). Lives ONLY here.
+#   EXPO_PUBLIC_SUPABASE_URL        for the sync step (public value)
+#   EXPO_PUBLIC_SUPABASE_ANON_KEY   for the sync step (public value)
+
+name: Refresh Jumu'ah times
+
+on:
+  schedule:
+    - cron: "37 2 * * 1" # Mondays 02:37 UTC — quiet hours, off the full-hour rush
+  workflow_dispatch:
+
+concurrency:
+  group: refresh-jummah
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    # Generous: the script honours Mawaqit's rate limits by slowing down,
+    # so a throttled week legitimately takes a while.
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # Both scripts are dependency-free (built-in fetch) — no npm ci needed.
+      - name: Refresh Jumu'ah times from Mawaqit
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.EXPO_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: node scripts/refresh-mawaqit-jummah.mjs
+
+      - name: Sync bundled dataset from Supabase
+        env:
+          EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.EXPO_PUBLIC_SUPABASE_URL }}
+          EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.EXPO_PUBLIC_SUPABASE_ANON_KEY }}
+        run: npm run sync:places
+
+      - name: Commit updated dataset
+        run: |
+          if git diff --quiet -- src/data/places.json; then
+            echo "No dataset changes this week."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/data/places.json
+          git commit -m "Refresh Jumu'ah times from Mawaqit (scheduled)"
+          git push

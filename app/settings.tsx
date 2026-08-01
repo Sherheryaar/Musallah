@@ -317,6 +317,10 @@ export default function SettingsScreen() {
             MuslimsInBritain.org (with permission)
           </Text>
         </View>
+        <View style={[styles.aboutRow, styles.rowDivider]}>
+          <Text style={styles.aboutLabel}>{"Jumu'ah times"}</Text>
+          <Text style={styles.aboutValue}>Mawaqit.net (with permission)</Text>
+        </View>
       </View>
     </ScrollView>
   );

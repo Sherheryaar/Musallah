@@ -11,6 +11,7 @@
     "build:places": "node scripts/csv-to-places.mjs",
     "sync:places": "node scripts/sync-places.mjs",
     "verify:places": "node scripts/verify-places.mjs",
+    "refresh:jummah": "node scripts/refresh-mawaqit-jummah.mjs --dry-run",
     "build:web": "expo export --platform web && node scripts/postbuild-web.mjs",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"

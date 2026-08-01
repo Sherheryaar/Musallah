@@ -19,14 +19,18 @@ import { fileURLToPath } from "node:url";
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const outPath = join(root, "src", "data", "places.json");
 
-// --- read .env (no dotenv dependency) --------------------------------------
+// --- read .env (no dotenv dependency; real env wins, for CI) ----------------
 const env = {};
-for (const line of readFileSync(join(root, ".env"), "utf8").split(/\r?\n/)) {
-  const m = line.match(/^([A-Z0-9_]+)=(.*)$/);
-  if (m) env[m[1]] = m[2].trim();
+try {
+  for (const line of readFileSync(join(root, ".env"), "utf8").split(/\r?\n/)) {
+    const m = line.match(/^([A-Z0-9_]+)=(.*)$/);
+    if (m) env[m[1]] = m[2].trim();
+  }
+} catch {
+  // No .env (e.g. CI) — environment variables must carry the values.
 }
-const URL_ = env.EXPO_PUBLIC_SUPABASE_URL;
-const KEY = env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
+const URL_ = process.env.EXPO_PUBLIC_SUPABASE_URL || env.EXPO_PUBLIC_SUPABASE_URL;
+const KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
 if (!URL_ || !KEY) {
   console.error("Missing EXPO_PUBLIC_SUPABASE_URL / EXPO_PUBLIC_SUPABASE_ANON_KEY in .env");
   process.exit(1);
