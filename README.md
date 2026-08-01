@@ -110,6 +110,29 @@ This fetches every row over the public read policy (anon key from `.env`), valid
 
 (`npm run build:places` still exists for the older CSV-export route: dashboard → export `places` as CSV → save as `data/places.csv` → run it.)
 
+## Shareable builds for testers (EAS)
+
+Builds run in Expo's cloud — no Android Studio, no Xcode, no Mac. One-time setup:
+
+1. Create a free account at [expo.dev](https://expo.dev).
+2. `npm install -g eas-cli`, then `eas login`.
+3. **Android map key** (without it the map is a grey box in standalone builds — Expo Go ships its own key, real builds don't): create a [Google Cloud](https://console.cloud.google.com) project, enable **Maps SDK for Android**, create an API key, then store it where builds can see it:
+
+       eas env:create --name GOOGLE_MAPS_ANDROID_API_KEY --value <the-key> --environment preview
+       eas env:create --name GOOGLE_MAPS_ANDROID_API_KEY --value <the-key> --environment production
+
+   (`app.config.js` injects it at build time; the key never lives in the repo.)
+
+**Android APK** — shareable with anyone:
+
+    eas build --platform android --profile preview
+
+First run asks to generate a keystore — say yes (EAS stores it). ~15 minutes later you get a download link; send it to testers, they open it on the phone and install (Android prompts to allow installs from the browser). That's it.
+
+**iOS** — Apple allows no APK equivalent. Installing on someone's iPhone requires the [Apple Developer Program](https://developer.apple.com/programs/) (£79/year), then either **TestFlight** (`eas build -p ios`, `eas submit -p ios`, invite testers by email — best experience) or ad-hoc builds registered to specific device UDIDs (`eas device:create`). Until then, iPhone testers can use Expo Go or the web app.
+
+The `preview` profile builds an installable APK; `production` builds the store formats (AAB / signed IPA) with auto-incrementing build numbers.
+
 ## Deploying the web app
 
 The web build is a single-page app, installable as a PWA (manifest + icons in `public/`; `scripts/postbuild-web.mjs` injects the head tags after export, because SPA output ignores `+html.tsx`).

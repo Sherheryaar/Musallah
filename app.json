@@ -27,6 +27,18 @@
         {
           "locationWhenInUsePermission": "We use your location only to show the nearest places to pray. It never leaves your device."
         }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/icon.png",
+          "imageWidth": 180,
+          "resizeMode": "contain",
+          "backgroundColor": "#F9F8F7",
+          "dark": {
+            "backgroundColor": "#141312"
+          }
+        }
       ]
     ]
   }
