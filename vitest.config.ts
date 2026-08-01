@@ -10,6 +10,8 @@ export default defineConfig({
     alias: { "@": resolve(root, "src") },
   },
   test: {
-    include: ["src/**/*.test.ts"],
+    // scripts/ is included because the data-pipeline parsers there decide
+    // what prayer times users see; they are unit-tested like app code.
+    include: ["src/**/*.test.ts", "scripts/**/*.test.mjs"],
   },
 });

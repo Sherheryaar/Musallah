@@ -110,14 +110,31 @@ This fetches every row over the public read policy (anon key from `.env`), valid
 
 (`npm run build:places` still exists for the older CSV-export route: dashboard → export `places` as CSV → save as `data/places.csv` → run it.)
 
-### Automatic Jumu'ah time refresh (Mawaqit)
+### Automatic prayer-time refresh (multi-source)
 
-Jumu'ah times for ~130 places come from [Mawaqit](https://mawaqit.net) (mosque-published, used with their permission, credited in the app). Because mosques shift Jumu'ah with the seasons, a scheduled GitHub Actions workflow (`.github/workflows/refresh-jummah.yml`) re-checks every linked mosque **weekly**, updates Supabase where the published time changed, re-runs `sync:places`, and commits the result (which redeploys the web app; native apps get the change live from Supabase).
+Jamaat and Jumu'ah times come from **each mosque's own published timetable**, refreshed **daily** by a scheduled GitHub Actions workflow (`.github/workflows/refresh-jummah.yml`). Daily rather than weekly because jamaat times track the sun — East London Mosque's Fajr jamā'ah moves about two minutes a day, so a weekly snapshot would be a quarter of an hour wrong by Sunday.
 
-- The link table is `scripts/mawaqit-links.json` — only name-agreeing matches from the original harvest (`scripts/harvest-mawaqit.mjs`); regenerate with `scripts/gen-mawaqit-links.mjs` after a new harvest.
-- Identity is the Mawaqit uuid, never proximity. Closed or silent mosques are reported, not auto-cleared.
-- Dry-run locally (reads only, no service key needed): `npm run refresh:jummah`
-- The workflow needs four repository secrets: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` (writes — RLS blocks public writes by design; this key must exist **only** as a CI secret, never in the repo or the app), and `EXPO_PUBLIC_SUPABASE_URL` / `EXPO_PUBLIC_SUPABASE_ANON_KEY` for the sync step. It can also be run on demand from the Actions tab ("Run workflow").
+**No provider is privileged.** [Mawaqit](https://mawaqit.net) covers 131 of the 2,244 places and *none* of London's largest mosques are on it, so each place is registered to whichever system its own mosque publishes through:
+
+| File | Role |
+|---|---|
+| `scripts/timetable-links.json` | the registry: which place uses which source |
+| `scripts/timetable-sources.mjs` | one entry per provider (Mawaqit API, East London Mosque's own page) |
+| `scripts/lib/timetable.mjs` | pure parsing/normalising helpers — unit-tested |
+| `scripts/refresh-times.mjs` | the orchestrator: fetch, diff, write |
+
+Adding a provider means adding a source entry plus registry rows; the orchestrator needs no changes. Every source must be credited in the app's About screen.
+
+Safety rules, each because the failure it prevents is worse than a stale time:
+
+- identity is the id/uuid captured at link time, never proximity;
+- a closed mosque, an unreadable page, or a changed layout is **reported**, never guessed at and never silently cleared (ELM's columns are located by header name, so a reordered table errors instead of putting Maghrib's time in Isha's slot);
+- a source that stops publishing keeps whatever we already had;
+- only rows whose times actually changed are written, and each carries its source name and the date recorded, which the app displays.
+
+Dry-run locally (reads only, no service key needed): `npm run refresh:times` — add `--source mawaqit` / `--source eastlondonmosque` and `--limit N` to narrow it.
+
+The workflow needs four repository secrets: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` (writes — RLS blocks public writes by design; this key must exist **only** as a CI secret, never in the repo or the app), and `EXPO_PUBLIC_SUPABASE_URL` / `EXPO_PUBLIC_SUPABASE_ANON_KEY` for the sync step. It can also be run on demand from the Actions tab ("Run workflow"). The bundled offline dataset is re-synced and committed on **Mondays** (and on manual runs) rather than daily — committing a 1 MB dataset every day would bury the history for no user benefit, since the app reads live from Supabase.
 
 ## Shareable builds for testers (EAS)
 

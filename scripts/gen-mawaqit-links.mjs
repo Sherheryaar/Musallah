@@ -1,6 +1,8 @@
 #!/usr/bin/env node
-// Builds scripts/mawaqit-links.json — the durable place<->Mawaqit link table
-// that scripts/refresh-mawaqit-jummah.mjs re-checks on a schedule.
+// Refreshes the MAWAQIT entries in scripts/timetable-links.json — the
+// registry scripts/refresh-times.mjs works from. Entries belonging to other
+// sources (a mosque's own website, say) are preserved untouched: Mawaqit is
+// one provider among several, not the registry's owner.
 //
 //   node scripts/gen-mawaqit-links.mjs <harvest-output-dir>
 //
@@ -12,7 +14,7 @@
 // Jumu'ah time ARE linked — if the mosque publishes one later, the weekly
 // refresh picks it up.
 
-import { readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -41,6 +43,7 @@ for (const m of matches) {
   }
   links.push({
     placeId: m.placeId,
+    source: "mawaqit",
     placeName: m.placeName,
     mawaqitUuid: mosque.uuid,
     mawaqitSlug: m.mawaqitSlug,
@@ -53,7 +56,15 @@ for (const m of matches) {
   });
 }
 
-links.sort((a, b) => a.placeId.localeCompare(b.placeId));
-const outPath = join(root, "scripts", "mawaqit-links.json");
-writeFileSync(outPath, JSON.stringify(links, null, 2) + "\n");
-console.log(`Wrote ${links.length} links to ${outPath}`);
+const outPath = join(root, "scripts", "timetable-links.json");
+const existing = existsSync(outPath)
+  ? JSON.parse(readFileSync(outPath, "utf8"))
+  : [];
+const others = existing.filter((l) => l.source !== "mawaqit");
+const merged = [...others, ...links].sort((a, b) =>
+  a.placeId.localeCompare(b.placeId),
+);
+writeFileSync(outPath, JSON.stringify(merged, null, 2) + "\n");
+console.log(
+  `Wrote ${merged.length} registry entries to ${outPath} (${links.length} mawaqit, ${others.length} from other sources kept).`,
+);
