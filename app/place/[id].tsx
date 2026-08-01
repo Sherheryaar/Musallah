@@ -14,12 +14,13 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   FACILITY_LABELS,
   FacilityKey,
+  isCorroborated,
   PLACE_TYPE_LABELS,
 } from "@/data/places";
 import { usePlaces } from "@/context/PlacesContext";
 import { useSettings } from "@/context/SettingsContext";
 import { useTheme } from "@/context/ThemeContext";
-import SuggestionForm from "@/components/SuggestionForm";
+import SuggestionSheet from "@/components/SuggestionSheet";
 import { submitEditSuggestion } from "@/lib/feedback";
 import { computePrayerTimes, PrayerTimes } from "@/lib/prayerTimes";
 import { spacing, radius, type ThemeColors } from "@/lib/theme";
@@ -49,11 +50,11 @@ function ukPhoneToTel(display: string): string {
 function confidenceLabel(confidence?: "verified" | "community" | "unverified"): string {
   switch (confidence) {
     case "verified":
-      return "\u2705 Verified";
+      return "Verified";
     case "community":
-      return "\uD83D\uDC65 Community-verified";
+      return "Community-verified";
     default:
-      return "\uD83E\uDD16 Unverified";
+      return "Unverified";
   }
 }
 
@@ -147,14 +148,23 @@ export default function PlaceDetailScreen() {
     });
   }
 
-  const verificationDetail =
-    (place.lastVerified
-      ? "Last verified " + place.lastVerified
-      : "Not yet verified") + (place.source ? " · " + place.source : "");
+  // One status, not a pile of verification phrases: the old line rendered
+  // "Unverified · Not yet verified · <source>", which read like a list of
+  // every possible status at once.
+  const verificationDetail = [
+    place.lastVerified ? "checked " + place.lastVerified : null,
+    place.source,
+  ]
+    .filter(Boolean)
+    .join(" · ");
 
   return (
+    // Root View, not bare ScrollView: the suggestion sheet overlays with
+    // absolute positioning, which must anchor to the screen — inside the
+    // ScrollView it would scroll away with the content.
+    <View style={styles.screen}>
     <ScrollView
-      style={styles.screen}
+      style={styles.scroll}
       contentContainerStyle={[
         styles.content,
         { paddingBottom: spacing.xxl + insets.bottom },
@@ -291,35 +301,42 @@ export default function PlaceDetailScreen() {
 
       <View style={styles.verification}>
         <Text style={styles.verificationText}>
-          {confidenceLabel(place.confidence)} · {verificationDetail}
+          {isCorroborated(place) ? (
+            <Text style={styles.verificationTick}>{"✓ "}</Text>
+          ) : null}
+          <Text style={styles.verificationStatus}>
+            {confidenceLabel(place.confidence)}
+          </Text>
+          {verificationDetail ? " · " + verificationDetail : ""}
         </Text>
       </View>
 
-      {showEditForm ? (
-        <SuggestionForm
-          placeholder="Tell us what's wrong or missing..."
-          topics={[
-            "Prayer times",
-            "Facilities",
-            "Address or location",
-            "Contact details",
-            "Closed or moved",
-          ]}
-          onSend={(message) => submitEditSuggestion(place, message)}
-        />
-      ) : (
-        <TouchableOpacity
-          style={styles.suggestEditButton}
-          onPress={() => setShowEditForm(true)}
-          accessibilityRole="button"
-          accessibilityLabel="Suggest an edit"
-        >
-          <Text style={styles.suggestEditLabel}>
-            Something wrong? Suggest an edit
-          </Text>
-        </TouchableOpacity>
-      )}
+      <TouchableOpacity
+        style={styles.suggestEditButton}
+        onPress={() => setShowEditForm(true)}
+        accessibilityRole="button"
+        accessibilityLabel="Suggest an edit"
+      >
+        <Text style={styles.suggestEditLabel}>
+          Something wrong? Suggest an edit
+        </Text>
+      </TouchableOpacity>
     </ScrollView>
+    <SuggestionSheet
+      visible={showEditForm}
+      title="Suggest an edit"
+      placeholder="Tell us what's wrong or missing..."
+      topics={[
+        "Prayer times",
+        "Facilities",
+        "Address or location",
+        "Contact details",
+        "Closed or moved",
+      ]}
+      onSend={(message) => submitEditSuggestion(place, message)}
+      onClose={() => setShowEditForm(false)}
+    />
+    </View>
   );
 }
 
@@ -328,6 +345,9 @@ const createStyles = (colors: ThemeColors) =>
   screen: {
     flex: 1,
     backgroundColor: colors.surface,
+  },
+  scroll: {
+    flex: 1,
   },
   content: {
     padding: spacing.l,
@@ -497,6 +517,14 @@ const createStyles = (colors: ThemeColors) =>
     fontSize: 14,
     color: colors.textSecondary,
     lineHeight: 20,
+  },
+  verificationTick: {
+    color: colors.positive,
+    fontWeight: "700",
+  },
+  verificationStatus: {
+    fontWeight: "600",
+    color: colors.text,
   },
   suggestEditButton: {
     alignItems: "center",

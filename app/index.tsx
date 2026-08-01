@@ -22,10 +22,14 @@ import BottomSheet from "@/components/BottomSheet";
 import FilterSheet from "@/components/FilterSheet";
 import PlaceCard from "@/components/PlaceCard";
 import PlacesMap from "@/components/PlacesMap";
-import SuggestionForm from "@/components/SuggestionForm";
+import SuggestionSheet from "@/components/SuggestionSheet";
 import { distanceKm, formatDistance } from "@/lib/distance";
 import { fuzzyMatches, tokenize } from "@/lib/fuzzy";
-import { FALLBACK_LOCATION, isInCoverage } from "@/lib/geo";
+import {
+  FALLBACK_LOCATION,
+  isInCoverage,
+  queryMatchesPlaceFields,
+} from "@/lib/geo";
 import { computePrayerTimes, PrayerTimes } from "@/lib/prayerTimes";
 import { submitNewPlaceSuggestion } from "@/lib/feedback";
 import { useTheme } from "@/context/ThemeContext";
@@ -50,7 +54,10 @@ const LEGEND_ITEMS: { type: keyof typeof placeTypeColors; label: string }[] = [
   { type: "multi_faith_room", label: "Multi-faith" },
 ];
 
-type Result = { place: Place; km: number };
+// km: distance from the active anchor (searched area or user) — used for
+// selection and ordering. kmFromUser: distance from the user's own location
+// — what the row LABEL shows, because that's the journey they'd make.
+type Result = { place: Place; km: number; kmFromUser: number };
 type SearchOrigin = { lat: number; lng: number; label: string };
 
 // Module-level so the reference is stable across renders (helps FlatList).
@@ -227,10 +234,41 @@ export default function HomeScreen() {
             : best,
         );
       };
+      // Geocoders resolve even gibberish to SOMEWHERE rather than fail, so
+      // a hit must also pass a sanity check: reverse-geocode it and require
+      // something the user typed to appear in what that place is actually
+      // called. Otherwise "asdf qwerty" quietly re-anchors to a random
+      // village. (If reverse geocoding itself fails, trust the hit.)
+      const looksRight = async (hit: {
+        latitude: number;
+        longitude: number;
+      }) => {
+        try {
+          const rev = await Location.reverseGeocodeAsync({
+            latitude: hit.latitude,
+            longitude: hit.longitude,
+          });
+          const fields = rev
+            .slice(0, 3)
+            .flatMap((a) => [
+              a.name,
+              a.street,
+              a.district,
+              a.city,
+              a.subregion,
+              a.region,
+              a.postalCode,
+            ]);
+          return queryMatchesPlaceFields(text, fields);
+        } catch {
+          return true;
+        }
+      };
       const hit = (await nearestHit(text)) ?? (await nearestHit(`${text}, UK`));
-      if (hit) {
+      if (hit && (await looksRight(hit))) {
+        // The query stays in the box \u2014 it IS the search state ("Near X"
+        // lives in the input, not a separate chip).
         setSearchOrigin({ lat: hit.latitude, lng: hit.longitude, label: text });
-        setQuery("");
       } else {
         setSearchNote(
           `Couldn't find "${text}" \u2014 showing name matches instead.`,
@@ -243,18 +281,18 @@ export default function HomeScreen() {
     }
   }, [query, gpsOrigin.lat, gpsOrigin.lng]);
 
-  const clearSearchOrigin = useCallback(() => {
+  const clearSearch = useCallback(() => {
+    setQuery("");
     setSearchOrigin(null);
     setSearchNote(null);
   }, []);
 
-  // "Back to my location": fly the map home and drop any area search, so
+  // "Back to my location": fly the map home and drop any search, so
   // distances re-anchor to the user at the same time as the view does.
   const recenter = useCallback(() => {
-    setSearchOrigin(null);
-    setSearchNote(null);
+    clearSearch();
     setRecenterNonce((n) => n + 1);
-  }, []);
+  }, [clearSearch]);
 
   // Distances come from the searched area when one is set; prayer times
   // always follow the user's real location.
@@ -282,15 +320,25 @@ export default function HomeScreen() {
 
   // Two-stage memo: distances/sorting only recompute when location or data
   // changes -- NOT on every filter toggle or keystroke.
+  // When an area search is active the two anchors differ: places are chosen
+  // and ordered around the searched area (km), but each row is labelled
+  // with the distance from the user (kmFromUser) — "the masjids in London,
+  // and how far each one is from me".
   const byDistance = useMemo<Result[]>(
     () =>
       places
         .map((place) => ({
           place,
           km: distanceKm(origin.lat, origin.lng, place.lat, place.lng),
+          kmFromUser: distanceKm(
+            gpsOrigin.lat,
+            gpsOrigin.lng,
+            place.lat,
+            place.lng,
+          ),
         }))
         .sort((a, b) => a.km - b.km),
-    [places, origin.lat, origin.lng],
+    [places, origin.lat, origin.lng, gpsOrigin.lat, gpsOrigin.lng],
   );
 
   // Pre-tokenised name+address per place, so typo-tolerant matching doesn't
@@ -303,6 +351,17 @@ export default function HomeScreen() {
     return map;
   }, [places]);
 
+  // The search box doubles as the area anchor and the live name filter.
+  // While its text is exactly the anchored area ("Stratford"), it's an
+  // AREA, not a name filter — filtering names by it too would hide every
+  // place not literally called Stratford. The moment the user edits the
+  // text, it's a name query again.
+  const effectiveQuery =
+    searchOrigin &&
+    query.trim().toLowerCase() === searchOrigin.label.trim().toLowerCase()
+      ? ""
+      : query.trim();
+
   // Filter (must have ALL selected facilities + match the typed query),
   // preserving nearest-first order. Jumu'ah-only venues are hidden by
   // default, but a typed query overrides that: searching a venue by name is
@@ -314,7 +373,7 @@ export default function HomeScreen() {
   // guesses. Distance order is preserved within each tier.
   const results = useMemo(() => {
     const selected = [...activeFilters]; // spread once, not once per place
-    const q = query.trim().toLowerCase();
+    const q = effectiveQuery.toLowerCase();
     const base = byDistance.filter(
       ({ place }) =>
         selected.every((key) => place.facilities[key]) &&
@@ -339,7 +398,7 @@ export default function HomeScreen() {
   }, [
     byDistance,
     activeFilters,
-    query,
+    effectiveQuery,
     searchTokens,
     settings.corroboratedOnly,
   ]);
@@ -347,14 +406,14 @@ export default function HomeScreen() {
   // The list only shows the nearest few reasonable options. When the user is
   // typing a name search, show matches regardless of distance.
   const listResults = useMemo(() => {
-    if (query.trim()) return results.slice(0, 25);
+    if (effectiveQuery) return results.slice(0, 25);
     const within = results.filter((r) => r.km <= MAX_LIST_DISTANCE_KM);
     const base =
       within.length >= MIN_LIST_RESULTS
         ? within
         : results.slice(0, MIN_LIST_RESULTS);
     return base.slice(0, MAX_LIST_RESULTS);
-  }, [results, query]);
+  }, [results, effectiveQuery]);
 
   // Stable callbacks keep React.memo'd rows from re-rendering needlessly.
   const openPlace = useCallback(
@@ -366,7 +425,7 @@ export default function HomeScreen() {
     ({ item }: { item: Result }) => (
       <PlaceCard
         place={item.place}
-        distanceLabel={formatDistance(item.km)}
+        distanceLabel={formatDistance(item.kmFromUser)}
         onPress={openPlace}
       />
     ),
@@ -377,22 +436,37 @@ export default function HomeScreen() {
 
   const searchRow = (
     <View style={styles.searchRow}>
-      <TextInput
-        style={styles.searchInput}
-        // Area search is native-only (no geocoder on web) -- don't promise it.
-        placeholder={
-          Platform.OS === "web"
-            ? "Search by name or address..."
-            : 'Try "Stratford" or a masjid name...'
-        }
-        placeholderTextColor={colors.textSecondary}
-        value={query}
-        onChangeText={setQuery}
-        onSubmitEditing={searchArea}
-        returnKeyType="search"
-        autoCorrect={false}
-        accessibilityLabel="Search for an area or place"
-      />
+      <View style={styles.searchInputWrap}>
+        <TextInput
+          style={styles.searchInput}
+          // Area search is native-only (no geocoder on web) -- don't promise it.
+          placeholder={
+            Platform.OS === "web"
+              ? "Search by name or address..."
+              : 'Try "Stratford" or a masjid name...'
+          }
+          placeholderTextColor={colors.textSecondary}
+          value={query}
+          onChangeText={setQuery}
+          onSubmitEditing={searchArea}
+          returnKeyType="search"
+          autoCorrect={false}
+          accessibilityLabel="Search for an area or place"
+        />
+        {query.length > 0 || searchOrigin ? (
+          // One search at a time: the box holds it, this clears it. (The
+          // old separate "Near X" pill read like stackable filter tags.)
+          <TouchableOpacity
+            style={styles.clearButton}
+            onPress={clearSearch}
+            accessibilityRole="button"
+            accessibilityLabel="Clear search"
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            <Text style={styles.clearGlyph}>{"✕"}</Text>
+          </TouchableOpacity>
+        ) : null}
+      </View>
       <TouchableOpacity
         style={[
           styles.filterButton,
@@ -414,24 +488,11 @@ export default function HomeScreen() {
     </View>
   );
 
-  const contextChips =
-    searchOrigin || searchNote ? (
-      <View style={styles.contextRow}>
-        {searchOrigin ? (
-          <TouchableOpacity
-            style={styles.nearChip}
-            onPress={clearSearchOrigin}
-            accessibilityRole="button"
-            accessibilityLabel={`Stop searching near ${searchOrigin.label}`}
-          >
-            <Text style={styles.nearChipLabel}>
-              {`Near "${searchOrigin.label}"  \u2715`}
-            </Text>
-          </TouchableOpacity>
-        ) : null}
-        {searchNote ? <Text style={styles.searchNote}>{searchNote}</Text> : null}
-      </View>
-    ) : null;
+  const searchNoteRow = searchNote ? (
+    <View style={styles.contextRow}>
+      <Text style={styles.searchNote}>{searchNote}</Text>
+    </View>
+  ) : null;
 
   // What each pin colour means. Sits under the search bar (the bottom of the
   // map is covered by the list sheet, so a bottom-corner key would be hidden
@@ -514,19 +575,13 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </View>
       }
-      // The form lives ONLY in the footer (which renders below the empty
-      // state too). A second copy in ListEmptyComponent used to remount --
-      // and wipe -- a half-typed draft whenever a keystroke toggled the list
-      // between empty and non-empty.
+      // The form itself lives in a top-anchored SuggestionSheet overlay
+      // (rendered at the screen root) — inline in the footer, the keyboard
+      // covered it as you typed.
       ListFooterComponent={
-        <View style={styles.listFooter}>
-          {showNewPlaceForm ? (
-            <SuggestionForm
-              placeholder="Name, address, type, facilities, and a link if you have one..."
-              onSend={submitNewPlaceSuggestion}
-            />
-          ) : listResults.length > 0 ? (
-            // The empty state has its own "Add a missing place" CTA.
+        listResults.length > 0 ? (
+          // The empty state has its own "Add a missing place" CTA.
+          <View style={styles.listFooter}>
             <View style={styles.listFooterRow}>
               <Text style={styles.listFooterText}>Missing a place? </Text>
               <TouchableOpacity
@@ -537,8 +592,8 @@ export default function HomeScreen() {
                 <Text style={styles.listFooterLink}>Suggest it</Text>
               </TouchableOpacity>
             </View>
-          ) : null}
-        </View>
+          </View>
+        ) : null
       }
     />
   );
@@ -559,7 +614,7 @@ export default function HomeScreen() {
           </View>
           <View style={styles.overlayTop} pointerEvents="box-none">
             {searchRow}
-            {contextChips}
+            {searchNoteRow}
             {mapLegend}
             {usingFallback ? (
               <Text style={styles.fallbackNote}>
@@ -607,6 +662,13 @@ export default function HomeScreen() {
         onClear={clearFilters}
         onClose={() => setShowFilters(false)}
       />
+      <SuggestionSheet
+        visible={showNewPlaceForm}
+        title="Add a missing place"
+        placeholder="Name, address, type, facilities, and a link if you have one..."
+        onSend={submitNewPlaceSuggestion}
+        onClose={() => setShowNewPlaceForm(false)}
+      />
     </View>
   );
 }
@@ -647,14 +709,18 @@ const createStyles = (colors: ThemeColors) =>
       web: { padding: spacing.m },
     }),
   },
-  searchInput: {
+  searchInputWrap: {
     flex: 1,
+    justifyContent: "center",
+  },
+  searchInput: {
     minHeight: 44,
     backgroundColor: colors.canvas,
     borderRadius: radius.l,
     borderWidth: 1,
     borderColor: colors.border,
-    paddingHorizontal: spacing.l,
+    paddingLeft: spacing.l,
+    paddingRight: spacing.xl + spacing.m, // room for the ✕ so text never runs under it
     fontSize: 15,
     color: colors.text,
     shadowColor: "#000",
@@ -662,6 +728,21 @@ const createStyles = (colors: ThemeColors) =>
     shadowRadius: 6,
     shadowOffset: { width: 0, height: 2 },
     elevation: 3,
+  },
+  clearButton: {
+    position: "absolute",
+    right: spacing.m,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colors.surfaceSecondary,
+  },
+  clearGlyph: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: colors.textSecondary,
   },
   filterButton: {
     minHeight: 44,
@@ -694,17 +775,6 @@ const createStyles = (colors: ThemeColors) =>
     alignItems: "center",
     flexWrap: "wrap",
     gap: spacing.s,
-  },
-  nearChip: {
-    backgroundColor: colors.accent,
-    borderRadius: 999,
-    paddingHorizontal: spacing.m,
-    paddingVertical: spacing.s,
-  },
-  nearChipLabel: {
-    color: "#FFFFFF",
-    fontSize: 13,
-    fontWeight: "600",
   },
   searchNote: {
     flexShrink: 1,

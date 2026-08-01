@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { FALLBACK_LOCATION, isInCoverage } from "./geo";
+import {
+  FALLBACK_LOCATION,
+  isInCoverage,
+  queryMatchesPlaceFields,
+} from "./geo";
 
 describe("isInCoverage", () => {
   it("accepts places across the UK and Ireland", () => {
@@ -20,6 +24,68 @@ describe("isInCoverage", () => {
 
   it("fallback location is inside coverage", () => {
     expect(isInCoverage(FALLBACK_LOCATION.lat, FALLBACK_LOCATION.lng)).toBe(
+      true,
+    );
+  });
+});
+
+describe("queryMatchesPlaceFields", () => {
+  const stratford = [
+    "Stratford",
+    "Stratford and New Town",
+    "London",
+    "Greater London",
+    "E15 2JE",
+    "England",
+  ];
+
+  it("accepts a query naming the geocoded place", () => {
+    expect(queryMatchesPlaceFields("Stratford", stratford)).toBe(true);
+    expect(queryMatchesPlaceFields("stratford london", stratford)).toBe(true);
+  });
+
+  it("accepts postcode searches", () => {
+    expect(queryMatchesPlaceFields("E15", stratford)).toBe(true);
+  });
+
+  it("tolerates a single typo in a longer token", () => {
+    expect(queryMatchesPlaceFields("Stratfrod", stratford)).toBe(true);
+    expect(
+      queryMatchesPlaceFields("Birmingam", ["Birmingham", "West Midlands"]),
+    ).toBe(true);
+  });
+
+  it("rejects gibberish the geocoder guessed a location for", () => {
+    // The real failure mode: device geocoders resolve random words to some
+    // arbitrary village rather than returning nothing.
+    expect(
+      queryMatchesPlaceFields("asdf qwerty zxc", [
+        "Little Snoring",
+        "Fakenham",
+        "Norfolk",
+        "NR21 0AL",
+        "England",
+      ]),
+    ).toBe(false);
+  });
+
+  it("rejects a query with no usable tokens or no fields", () => {
+    expect(queryMatchesPlaceFields("!!", ["London"])).toBe(false);
+    expect(queryMatchesPlaceFields("London", [null, undefined, ""])).toBe(
+      false,
+    );
+  });
+
+  it("does not let a short token match on a typo", () => {
+    // 2-4 letter tokens must appear verbatim — with an edit budget,
+    // everything matches everything.
+    expect(queryMatchesPlaceFields("brum", ["Bramhall", "Stockport"])).toBe(
+      false,
+    );
+  });
+
+  it("handles accents", () => {
+    expect(queryMatchesPlaceFields("Câmii", ["Valide Sultan Camii"])).toBe(
       true,
     );
   });

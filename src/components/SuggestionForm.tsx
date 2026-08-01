@@ -8,9 +8,17 @@ import {
   StyleSheet,
 } from "react-native";
 
-import { MAX_MESSAGE_LENGTH, type SubmissionResult } from "@/lib/feedback";
+import { type SubmissionResult } from "@/lib/feedback";
 import { useTheme } from "@/context/ThemeContext";
 import { spacing, radius, type ThemeColors } from "@/lib/theme";
+
+// Visible cap, well under the database's 2000-char hard limit: suggestions
+// are triaged by a human, and a screenful is the most anyone reads.
+const MAX_INPUT_LENGTH = 600;
+// A send needs enough text to be actionable — "wrong" tells us nothing.
+const MIN_INPUT_LENGTH = 10;
+// Only nag about the remaining budget once it's actually running out.
+const SHOW_COUNTER_FROM = MAX_INPUT_LENGTH - 100;
 
 type Props = {
   placeholder: string;
@@ -23,6 +31,8 @@ type Props = {
    * it is.
    */
   topics?: string[];
+  /** Focus the input (and raise the keyboard) as soon as the form shows. */
+  autoFocus?: boolean;
   onSend: (message: string) => Promise<SubmissionResult>;
   onSent?: () => void;
 };
@@ -31,6 +41,7 @@ export default function SuggestionForm({
   placeholder,
   sendLabel = "Send",
   topics,
+  autoFocus,
   onSend,
   onSent,
 }: Props) {
@@ -51,8 +62,10 @@ export default function SuggestionForm({
   };
 
   // A topic selection alone is not enough to send — the message must say
-  // something. But topics still count toward what gets submitted.
-  const canSend = message.trim().length > 0;
+  // something actionable. But topics still count toward what gets submitted.
+  const trimmedLength = message.trim().length;
+  const canSend = trimmedLength >= MIN_INPUT_LENGTH;
+  const tooShort = trimmedLength > 0 && !canSend;
 
   const handleSend = async () => {
     if (sending || sent || !canSend) return;
@@ -133,11 +146,19 @@ export default function SuggestionForm({
         placeholder={placeholder}
         placeholderTextColor={colors.textSecondary}
         multiline
-        maxLength={MAX_MESSAGE_LENGTH}
+        maxLength={MAX_INPUT_LENGTH}
         textAlignVertical="top"
         editable={!sending}
+        autoFocus={autoFocus}
         accessibilityLabel={placeholder}
       />
+      {tooShort || message.length >= SHOW_COUNTER_FROM ? (
+        <Text style={styles.inputMeta}>
+          {tooShort
+            ? "A few more words helps us act on it."
+            : `${message.length}/${MAX_INPUT_LENGTH}`}
+        </Text>
+      ) : null}
       <TouchableOpacity
         style={[styles.sendButton, sending && styles.sendButtonDisabled]}
         onPress={handleSend}
@@ -203,6 +224,12 @@ const createStyles = (colors: ThemeColors) =>
       borderRadius: radius.m,
       borderWidth: 1,
       borderColor: colors.border,
+    },
+    inputMeta: {
+      fontSize: 12,
+      color: colors.textSecondary,
+      textAlign: "right",
+      marginTop: -spacing.s,
     },
     sendButton: {
       backgroundColor: colors.accent,

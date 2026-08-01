@@ -128,8 +128,10 @@ const POSTCODE_RE = /^[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}$/i;
  * like "Capacity ~700 (MuslimsInBritain.org); Denomination: Deobandi;
  * Data: MIB+OSM (mib-2203)" — the data-source tags mean nothing to users
  * (provenance already lives in the `source` field) and capacity figures
- * are subjective. Denomination is kept (genuinely useful when choosing a
- * masjid) and "irregular venue" flags become a plain-English warning.
+ * are subjective. Denomination stays in the DATA (it's real information)
+ * but is not displayed: sectarian labels on a place people pray at are
+ * divisive in a way a locator app has no business amplifying. "Irregular
+ * venue" flags become a plain-English warning.
  */
 export function cleanNotes(notes: string): string | undefined {
   const parts = notes
@@ -139,6 +141,7 @@ export function cleanNotes(notes: string): string | undefined {
     .map((part) => {
       if (/^data\s*:/i.test(part)) return null;
       if (/^capacity\b/i.test(part)) return null;
+      if (/^denominations?\s*:/i.test(part)) return null;
       if (/irregular|part-?time/i.test(part)) {
         return "May be an irregular or part-time venue — check before travelling";
       }

@@ -99,12 +99,20 @@ describe("applyFacilityDefaults", () => {
 });
 
 describe("cleanNotes", () => {
-  it("strips data-source tags and capacity, keeps denomination", () => {
+  it("strips data-source tags, capacity, and denomination", () => {
+    // Denomination stays in the data but is never displayed — sectarian
+    // labels upset people and help nobody find a place to pray.
     expect(
       cleanNotes(
         "Capacity ~700 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-2203)",
       ),
-    ).toBe("Denomination: Deobandi");
+    ).toBeUndefined();
+  });
+
+  it("keeps other segments while stripping denomination", () => {
+    expect(
+      cleanNotes("Denomination: Barelvi; Entrance on the side street"),
+    ).toBe("Entrance on the side street");
   });
 
   it("rewrites irregular-venue flags in plain English", () => {
