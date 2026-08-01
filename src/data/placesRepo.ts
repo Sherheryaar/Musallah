@@ -12,8 +12,18 @@ import {
 } from "@/data/places";
 import { supabase } from "@/lib/supabase";
 
-const CACHE_KEY = "places:v1";
+// v2: v1 caches can hold a silently TRUNCATED dataset (the fetch used to
+// stop at PostgREST's default 1000-row limit — see fetchPlaces), and a
+// truncated cache beats the full bundled data in PlacesContext. Bumping the
+// key discards them; readCache sweeps the old entry.
+const CACHE_KEY = "places:v2";
+const LEGACY_CACHE_KEY = "places:v1";
 const FETCH_TIMEOUT_MS = 8000;
+// PostgREST caps any single response at 1000 rows (its default max), so the
+// full table must be read in pages. The page count backstop only exists to
+// bound the loop if the table grows wildly.
+const PAGE_SIZE = 1000;
+const MAX_PAGES = 20;
 
 const PLACE_TYPES: readonly PlaceType[] = [
   "masjid",
@@ -211,6 +221,9 @@ function mapRowToPlace(row: PlacesRow): Place | null {
 }
 
 async function readCache(): Promise<Place[] | null> {
+  // Sweep the pre-pagination cache; it may be silently truncated (see
+  // CACHE_KEY comment) and must never be served again.
+  void AsyncStorage.removeItem(LEGACY_CACHE_KEY).catch(() => {});
   try {
     const raw = await AsyncStorage.getItem(CACHE_KEY);
     if (!raw) return null;
@@ -262,16 +275,28 @@ export async function fetchPlaces(): Promise<Place[] | null> {
   const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
 
   try {
-    const { data, error } = await supabase
-      .from("places")
-      .select("*")
-      .abortSignal(controller.signal);
+    // Page through the whole table. A bare select("*") silently stops at
+    // PostgREST's 1000-row cap, which once shipped an app that lost more
+    // than half the dataset whenever the network fetch succeeded. Ordered
+    // by id so pages can't skip or duplicate rows between requests.
+    const rows: PlacesRow[] = [];
+    for (let page = 0; page < MAX_PAGES; page++) {
+      const from = page * PAGE_SIZE;
+      const { data, error } = await supabase
+        .from("places")
+        .select("*")
+        .order("id")
+        .range(from, from + PAGE_SIZE - 1)
+        .abortSignal(controller.signal);
 
-    if (error || !data || data.length === 0) {
-      return null;
+      if (error) return null;
+      if (!data || data.length === 0) break;
+      rows.push(...(data as PlacesRow[]));
+      if (data.length < PAGE_SIZE) break;
     }
+    if (rows.length === 0) return null;
 
-    const places = (data as PlacesRow[])
+    const places = rows
       .map(mapRowToPlace)
       .filter((place): place is Place => place !== null);
     if (places.length === 0) return null;

@@ -22,6 +22,21 @@ const places = JSON.parse(
 );
 const reportPath = process.argv[2] ?? join(root, "coord-report.md");
 
+// Places manually verified 2026-08-01 as CORRECTLY pinned despite sitting
+// far from their postcode centroid — huge sites (university campuses,
+// airports) where one postcode covers the whole estate. Evidence: OSM
+// nodes/ways at the pin, venue websites, Google Maps place lookups.
+const VERIFIED_FAR = new Set([
+  "48-chaplaincy-centre-node-4751291621", // OSM node = the chaplaincy, RG6 6AH is campus-wide
+  "chaplaincy-mib-773", // Gatwick Airport estate
+  "chaplaincy-mib-2824", // Manchester Airport Terminal 2
+  "madinatul-uloom-al-islamiyah-mib-898", // large rural darul-uloom site
+  "warwick-university-chaplaincy-mib-2668", // CV4 7AL covers the whole campus
+  "jumu-ah-salaah-mib-370", // pin is 15 m from the OSM community centre
+  "cranfield-islamic-society-mib-69", // MK43 0AL covers the whole campus
+  "university-of-york-islamic-society-mib-2743", // pin on Wentworth College
+]);
+
 const POSTCODE_RE = /\b([A-Z]{1,2}\d[A-Z\d]?)\s*(\d[A-Z]{2})\b/gi;
 
 function extractPostcode(address) {
@@ -96,9 +111,11 @@ for (const { place, postcode } of withPostcode) {
 }
 rows.sort((a, b) => b.km - a.km);
 
-const red = rows.filter((r) => r.km > 2);
-const amber = rows.filter((r) => r.km > 0.5 && r.km <= 2);
-const ok = rows.filter((r) => r.km <= 0.5);
+const red = rows.filter((r) => r.km > 2 && !VERIFIED_FAR.has(r.place.id));
+const amber = rows.filter(
+  (r) => r.km > 0.5 && r.km <= 2 && !VERIFIED_FAR.has(r.place.id),
+);
+const ok = rows.filter((r) => r.km <= 0.5 || VERIFIED_FAR.has(r.place.id));
 
 const line = (r) =>
   `| ${r.place.name.slice(0, 48)} | \`${r.place.id.slice(0, 40)}\` | ${r.postcode} | ${r.km.toFixed(2)} km | ${r.place.lat.toFixed(5)}, ${r.place.lng.toFixed(5)} | ${r.centroid.lat.toFixed(5)}, ${r.centroid.lng.toFixed(5)} |`;

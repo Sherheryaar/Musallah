@@ -7975,8 +7975,8 @@
 		"name": "Croydon Mosque & Islamic Centre",
 		"type": "masjid",
 		"address": "525 London Rd, Thornton Heath CR7 6AR",
-		"lat": 51.3937,
-		"lng": -0.1049,
+		"lat": 51.389534,
+		"lng": -0.1124819,
 		"facilities": {
 			"sistersSpace": true,
 			"wudu": true,
@@ -10351,8 +10351,8 @@
 		"name": "Faizan-e-Islam Educational & Cultural Organisation",
 		"type": "masjid",
 		"address": "229 Ayres Road, Old Trafford,Trafford, M16 0NL",
-		"lat": 53.4578789,
-		"lng": -2.2707528,
+		"lat": 53.45608,
+		"lng": -2.28261,
 		"facilities": {
 			"sistersSpace": true,
 			"wudu": false,
@@ -13245,7 +13245,7 @@
 		"id": "hockwell-ring-masjid-mib-944",
 		"name": "Hockwell Ring Masjid",
 		"type": "masjid",
-		"address": "13-17 Barley Lane, Leagrave,Luton, LU4 8JL",
+		"address": "13-17 Barley Lane, Leagrave,Luton, LU4 9HT",
 		"lat": 51.9060537,
 		"lng": -0.4687442,
 		"facilities": {
@@ -13907,8 +13907,8 @@
 		"name": "InSpiration multi-faith worship and prayer area",
 		"type": "multi_faith_room",
 		"address": "Westfield Stratford City shopping centre, Stratford,Newham, E20 1EJ",
-		"lat": 51.5414839,
-		"lng": 0.0006859,
+		"lat": 51.54306,
+		"lng": -0.00642,
 		"facilities": {
 			"sistersSpace": true,
 			"wudu": false,
@@ -17591,7 +17591,7 @@
 		"id": "jamia-masjid-e-bilal-mib-964",
 		"name": "Jamia Masjid-e-Bilal",
 		"type": "masjid",
-		"address": "62 Evington Valley Road and 81 Chesterfield Road, City of Leicester, LE5 6LG",
+		"address": "62 Evington Valley Road and 81 Chesterfield Road, City of Leicester, LE5 5LJ",
 		"lat": 52.6271533,
 		"lng": -1.1012614,
 		"facilities": {
@@ -24640,8 +24640,8 @@
 		"name": "Madina Mosque",
 		"type": "masjid",
 		"address": "13 Lucas Street, Caerdydd - Cardiff, CF24 4NZ",
-		"lat": 51.5170753,
-		"lng": -3.1644514,
+		"lat": 51.49597,
+		"lng": -3.17573,
 		"facilities": {
 			"sistersSpace": false,
 			"wudu": false,
@@ -33508,7 +33508,7 @@
 		"id": "moray-house-prayer-room-mib-2016042905",
 		"name": "Moray House Prayer Room",
 		"type": "multi_faith_room",
-		"address": "Moray House School of Education, Paterson's Land, Holyrood R, University of Edinburgh,City of Edinburgh, EH9 3DW",
+		"address": "Moray House School of Education, Paterson's Land, Holyrood R, University of Edinburgh,City of Edinburgh, EH8 8AQ",
 		"lat": 55.9498952,
 		"lng": -3.1796005,
 		"facilities": {
@@ -34152,7 +34152,7 @@
 		"id": "multifaith-room-mib-1705",
 		"name": "Multifaith Room",
 		"type": "multi_faith_room",
-		"address": "Baldock Services, A1(M) and A1 at Junction 10, Stevenage North,North Hertfordshire, PE7 3UQ",
+		"address": "Baldock Services, A1(M) and A1 at Junction 10, Stevenage North,North Hertfordshire, SG7 5TR",
 		"lat": 52.0145812,
 		"lng": -0.2024833,
 		"facilities": {
@@ -38827,7 +38827,7 @@
 		"id": "rabbaniah-islamic-cultural-centre-mib-634",
 		"name": "Rabbaniah Islamic Cultural Centre",
 		"type": "masjid",
-		"address": "31-33 Clare Road, Riverside,Caerdydd - Cardiff, CF14 6HZ",
+		"address": "27-31 Clare Road, Grangetown,Caerdydd - Cardiff, CF11 6QP",
 		"lat": 51.4747075,
 		"lng": -3.1870168,
 		"facilities": {
@@ -41269,7 +41269,7 @@
 		"id": "southampton-umar-al-farooq-islamic-centre-mib-2249",
 		"name": "Southampton Umar al Farooq Islamic Centre",
 		"type": "masjid",
-		"address": "169-193 Derby Road, City of Southampton, SO14 6BD",
+		"address": "169-193 Derby Road, City of Southampton, SO14 0DZ",
 		"lat": 50.913989,
 		"lng": -1.3932842,
 		"facilities": {
@@ -44732,8 +44732,8 @@
 		"name": "West Wales Islamic Cultural Association",
 		"type": "masjid",
 		"address": "131 Priory Street, Sir Gaerfyrddin - Carmarthenshire, SA31 1LR",
-		"lat": 51.8683333,
-		"lng": -4.29088,
+		"lat": 51.8590654,
+		"lng": -4.3010923,
 		"facilities": {
 			"sistersSpace": false,
 			"wudu": false,
