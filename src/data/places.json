@@ -2527,31 +2527,6 @@
 		"confidence": "verified"
 	},
 	{
-		"id": "al-manaar",
-		"name": "Al-Manaar (Muslim Cultural Heritage Centre)",
-		"type": "masjid",
-		"address": "244 Acklam Rd, London W10 5YG",
-		"lat": 51.5208,
-		"lng": -0.2049,
-		"facilities": {
-			"sistersSpace": true,
-			"wudu": true,
-			"disabledAccess": true,
-			"parking": false,
-			"jumuah": true,
-			"janazah": true
-		},
-		"jumuahTimes": [
-			"13:30"
-		],
-		"lastVerified": "2026-04-02",
-		"source": "Sample data",
-		"website": "https://www.almanaar.org.uk",
-		"facebook": "https://www.facebook.com/almanaarmchc",
-		"instagram": "https://www.instagram.com/almanaarmchc/",
-		"confidence": "community"
-	},
-	{
 		"id": "al-manar-centre-mib-576",
 		"name": "Al-Manar Centre",
 		"type": "masjid",
@@ -5896,31 +5871,6 @@
 		"confidence": "verified"
 	},
 	{
-		"id": "brick-lane-jamme-masjid",
-		"name": "Brick Lane Jamme Masjid",
-		"type": "masjid",
-		"address": "59 Brick Ln, London E1 6QL",
-		"lat": 51.5195,
-		"lng": -0.0717,
-		"facilities": {
-			"sistersSpace": false,
-			"wudu": true,
-			"disabledAccess": false,
-			"parking": false,
-			"jumuah": true,
-			"janazah": false
-		},
-		"jumuahTimes": [
-			"13:30"
-		],
-		"lastVerified": "2026-05-14",
-		"source": "Sample data",
-		"website": "https://www.bricklanejammemasjid.org.uk",
-		"facebook": "https://www.facebook.com/BrickLaneMosque",
-		"instagram": "https://www.instagram.com/bricklanejammemasjid",
-		"confidence": "verified"
-	},
-	{
 		"id": "bridgwater-jamme-masjid-mib-15041602",
 		"name": "Bridgwater Jamme Masjid",
 		"type": "masjid",
@@ -6411,7 +6361,7 @@
 		"facilities": {
 			"sistersSpace": true,
 			"wudu": true,
-			"disabledAccess": true,
+			"disabledAccess": false,
 			"parking": false,
 			"jumuah": true,
 			"janazah": false
@@ -6420,7 +6370,7 @@
 			"13:10"
 		],
 		"lastVerified": "2026-05-22",
-		"source": "Sample data",
+		"source": "Initial dataset — details unconfirmed",
 		"confidence": "unverified"
 	},
 	{
@@ -7817,30 +7767,6 @@
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 8684 8200",
 		"website": "https://www.croydonmosque.com",
-		"facebook": "https://www.facebook.com/croydonmasjid",
-		"confidence": "verified"
-	},
-	{
-		"id": "croydon-mosque",
-		"name": "Croydon Mosque & Islamic Centre",
-		"type": "masjid",
-		"address": "525 London Rd, Thornton Heath CR7 6AR",
-		"lat": 51.389534,
-		"lng": -0.1124819,
-		"facilities": {
-			"sistersSpace": true,
-			"wudu": true,
-			"disabledAccess": true,
-			"parking": true,
-			"jumuah": true,
-			"janazah": true
-		},
-		"jumuahTimes": [
-			"13:30"
-		],
-		"lastVerified": "2026-02-27",
-		"source": "Sample data",
-		"website": "https://www.croydonmosque.com/",
 		"facebook": "https://www.facebook.com/croydonmasjid",
 		"confidence": "verified"
 	},
@@ -9488,41 +9414,6 @@
 		"confidence": "verified"
 	},
 	{
-		"id": "east-london-mosque",
-		"name": "East London Mosque & London Muslim Centre",
-		"type": "masjid",
-		"address": "82-92 Whitechapel Rd, London E1 1JQ",
-		"lat": 51.5169,
-		"lng": -0.0655,
-		"facilities": {
-			"sistersSpace": true,
-			"wudu": true,
-			"disabledAccess": true,
-			"parking": true,
-			"jumuah": true,
-			"janazah": true
-		},
-		"jumuahTimes": [
-			"13:15",
-			"14:15"
-		],
-		"jamaat": {
-			"source": "Sample data — replace with real timetable",
-			"recordedOn": "2026-07-23",
-			"fajr": "05:15",
-			"dhuhr": "13:15",
-			"asr": "17:45",
-			"maghrib": "21:10",
-			"isha": "22:30"
-		},
-		"notes": "One of the largest mosques in the UK. Sisters' entrance via the London Muslim Centre.",
-		"lastVerified": "2026-07-01",
-		"source": "Sample data — verify via eastlondonmosque.org.uk",
-		"phone": "020 7650 3000",
-		"website": "https://www.eastlondonmosque.org.uk/",
-		"confidence": "verified"
-	},
-	{
 		"id": "east-london-mosque-london-muslim-centre-mib-1378",
 		"name": "East London Mosque & London Muslim Centre",
 		"type": "masjid",
@@ -9537,7 +9428,11 @@
 			"jumuah": true,
 			"janazah": false
 		},
-		"notes": "Capacity ~5000 (MuslimsInBritain.org); Denomination: Maududi / Jamaat-e-Islami; Data: MIB+OSM (mib-1378)",
+		"jumuahTimes": [
+			"13:45"
+		],
+		"notes": "Capacity ~5000 (MuslimsInBritain.org); Denomination: Maududi / Jamaat-e-Islami; Data: MIB+OSM (mib-1378); One of the largest mosques in the UK. Sisters' entrance via the London Muslim Centre.",
+		"lastVerified": "2026-08-01",
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "020 7650 3000",
 		"website": "https://eastlondonmosque.org.uk/",
@@ -10971,31 +10866,6 @@
 		"confidence": "unverified"
 	},
 	{
-		"id": "finsbury-park-mosque",
-		"name": "Finsbury Park Mosque",
-		"type": "masjid",
-		"address": "7-11 St Thomas's Rd, London N4 2QH",
-		"lat": 51.5645,
-		"lng": -0.1069,
-		"facilities": {
-			"sistersSpace": true,
-			"wudu": true,
-			"disabledAccess": true,
-			"parking": false,
-			"jumuah": true,
-			"janazah": false
-		},
-		"jumuahTimes": [
-			"13:15"
-		],
-		"lastVerified": "2026-03-19",
-		"source": "Sample data",
-		"website": "https://www.finsburyparkmosque.org",
-		"facebook": "https://www.facebook.com/FinsburyParkMosque",
-		"instagram": "https://www.instagram.com/finsburyparkmosque/",
-		"confidence": "verified"
-	},
-	{
 		"id": "finsbury-park-mosque-mib-1226",
 		"name": "Finsbury Park Mosque",
 		"type": "masjid",
@@ -12152,7 +12022,7 @@
 		"facilities": {
 			"sistersSpace": false,
 			"wudu": true,
-			"disabledAccess": true,
+			"disabledAccess": false,
 			"parking": false,
 			"jumuah": true,
 			"janazah": false
@@ -12162,7 +12032,7 @@
 		],
 		"notes": "Open to patients, visitors and staff. Ask at main reception for directions.",
 		"lastVerified": "2026-07-05",
-		"source": "Sample data — verify with GSTT chaplaincy",
+		"source": "Initial dataset — details unconfirmed",
 		"confidence": "unverified"
 	},
 	{
@@ -13764,7 +13634,7 @@
 			"jumuah": false,
 			"janazah": false
 		},
-		"notes": "Capacity ~60 (MuslimsInBritain.org); Data: MIB (mib-537)",
+		"notes": "Capacity ~60 (MuslimsInBritain.org); Data: MIB (mib-537); Located near the Chestnut Plaza entrance. Ask guest services if unsure.",
 		"source": "MuslimsInBritain.org (with permission)",
 		"confidence": "unverified"
 	},
@@ -23146,41 +23016,6 @@
 		"confidence": "unverified"
 	},
 	{
-		"id": "lewisham-islamic-centre",
-		"name": "Lewisham Islamic Centre",
-		"type": "masjid",
-		"address": "363-365 Lewisham High St, London SE13 6NZ",
-		"lat": 51.4507,
-		"lng": -0.0163,
-		"facilities": {
-			"sistersSpace": true,
-			"wudu": true,
-			"disabledAccess": true,
-			"parking": true,
-			"jumuah": true,
-			"janazah": true
-		},
-		"jumuahTimes": [
-			"13:05",
-			"14:00"
-		],
-		"jamaat": {
-			"source": "Sample data — replace with real timetable",
-			"recordedOn": "2026-07-23",
-			"fajr": "05:10",
-			"dhuhr": "13:05",
-			"asr": "17:40",
-			"maghrib": "21:08",
-			"isha": "22:25"
-		},
-		"lastVerified": "2026-06-11",
-		"source": "Sample data",
-		"website": "https://lewishamislamiccentre.com/",
-		"facebook": "https://www.facebook.com/Lewishamislamiccentre",
-		"instagram": "https://www.instagram.com/lewishammosque/",
-		"confidence": "verified"
-	},
-	{
 		"id": "lewisham-islamic-centre-mib-1256",
 		"name": "Lewisham Islamic Centre",
 		"type": "masjid",
@@ -23462,30 +23297,6 @@
 		"notes": "Capacity ~100 (MuslimsInBritain.org); Data: MIB+OSM (mib-17080306)",
 		"source": "MuslimsInBritain.org (with permission)",
 		"website": "https://www.towerhamletsmosques.co.uk/locksleymasjid/",
-		"confidence": "verified"
-	},
-	{
-		"id": "london-central-mosque",
-		"name": "London Central Mosque (Regent's Park)",
-		"type": "masjid",
-		"address": "146 Park Rd, London NW8 7RG",
-		"lat": 51.5289,
-		"lng": -0.1647,
-		"facilities": {
-			"sistersSpace": true,
-			"wudu": true,
-			"disabledAccess": true,
-			"parking": true,
-			"jumuah": true,
-			"janazah": true
-		},
-		"jumuahTimes": [
-			"13:30"
-		],
-		"lastVerified": "2026-06-20",
-		"source": "Sample data — verify via iccuk.org",
-		"phone": "020 7724 3363",
-		"website": "https://www.iccuk.org/",
 		"confidence": "verified"
 	},
 	{
@@ -41422,26 +41233,6 @@
 		"confidence": "verified"
 	},
 	{
-		"id": "st-thomas-multifaith",
-		"name": "St Thomas' Hospital Multi-faith Room",
-		"type": "multi_faith_room",
-		"address": "Westminster Bridge Rd, London SE1 7EH",
-		"lat": 51.4986,
-		"lng": -0.1177,
-		"facilities": {
-			"sistersSpace": false,
-			"wudu": true,
-			"disabledAccess": true,
-			"parking": false,
-			"jumuah": false,
-			"janazah": false
-		},
-		"notes": "Quiet room available 24/7. Wudu facilities nearby.",
-		"lastVerified": "2026-07-05",
-		"source": "Sample data — verify with GSTT chaplaincy",
-		"confidence": "unverified"
-	},
-	{
 		"id": "stafford-muslim-prayer-hall-committee-ltd-mib-2267",
 		"name": "Stafford Muslim Prayer Hall Committee Ltd",
 		"type": "masjid",
@@ -43216,7 +43007,7 @@
 		"facilities": {
 			"sistersSpace": true,
 			"wudu": true,
-			"disabledAccess": true,
+			"disabledAccess": false,
 			"parking": false,
 			"jumuah": true,
 			"janazah": false
@@ -43226,7 +43017,7 @@
 		],
 		"notes": "Term-time access may require a student card. Jumu'ah run by the ISoc.",
 		"lastVerified": "2026-01-30",
-		"source": "Sample data — verify with UCL ISoc",
+		"source": "Initial dataset — details unconfirmed",
 		"confidence": "unverified"
 	},
 	{
@@ -44681,26 +44472,6 @@
 		"source": "MuslimsInBritain.org (with permission)",
 		"phone": "07825 373325",
 		"confidence": "community"
-	},
-	{
-		"id": "westfield-stratford-prayer-room",
-		"name": "Westfield Stratford City Prayer Room",
-		"type": "musalla",
-		"address": "Montfichet Rd, London E20 1EJ",
-		"lat": 51.5423,
-		"lng": -0.0064,
-		"facilities": {
-			"sistersSpace": true,
-			"wudu": true,
-			"disabledAccess": true,
-			"parking": true,
-			"jumuah": false,
-			"janazah": false
-		},
-		"notes": "Located near the Chestnut Plaza entrance. Ask guest services if unsure.",
-		"lastVerified": "2025-12-10",
-		"source": "Sample data",
-		"confidence": "unverified"
 	},
 	{
 		"id": "westminster-islamic-centre-mib-1427",
