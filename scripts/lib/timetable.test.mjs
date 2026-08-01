@@ -4,7 +4,9 @@ import {
   addMinutes,
   htmlTableRows,
   iqamaToJamaat,
+  masjidboxJamaat,
   parseDatedJamaatTable,
+  prayerKeyFromLabel,
   sameJamaat,
   to24Hour,
   toDMY,
@@ -215,6 +217,58 @@ describe("htmlTableRows + parseDatedJamaatTable", () => {
       dhuhr: "13:30",
       isha: "22:15",
     });
+  });
+});
+
+describe("prayerKeyFromLabel", () => {
+  it("maps the spellings UK mosques actually print", () => {
+    expect(prayerKeyFromLabel("Fajr Jamā'ah")).toBe("fajr");
+    expect(prayerKeyFromLabel("Zuhr")).toBe("dhuhr");
+    expect(prayerKeyFromLabel("DHUHR")).toBe("dhuhr");
+    expect(prayerKeyFromLabel("Asr Mithl 2")).toBe("asr");
+    expect(prayerKeyFromLabel("Magrib")).toBe("maghrib");
+    expect(prayerKeyFromLabel("Ishā")).toBe("isha");
+  });
+
+  it("refuses things that are not prayers", () => {
+    expect(prayerKeyFromLabel("Shuruq")).toBeNull();
+    expect(prayerKeyFromLabel("Sunrise")).toBeNull();
+    expect(prayerKeyFromLabel("")).toBeNull();
+  });
+});
+
+describe("masjidboxJamaat", () => {
+  it("takes the Iqamah (second) time per prayer", () => {
+    // Al Furqan Education Trust's real grid, 1 August 2026.
+    const columns = [
+      { title: "Fajr", times: ["3:39", "4:15"] },
+      { title: "Shuruq", times: ["5:21"] },
+      { title: "Dhuhr", times: ["13:12", "13:30"] },
+      { title: "Asr", times: ["17:17", "17:30"] },
+      { title: "Maghrib", times: ["20:52", "20:57"] },
+      { title: "Isha", times: ["21:56", "22:15"] },
+    ];
+    expect(masjidboxJamaat(columns)).toEqual({
+      fajr: "04:15",
+      dhuhr: "13:30",
+      asr: "17:30",
+      maghrib: "20:57",
+      isha: "22:15",
+    });
+  });
+
+  it("skips a prayer with only one time (athan or iqamah? unknowable)", () => {
+    expect(
+      masjidboxJamaat([
+        { title: "Fajr", times: ["4:15"] },
+        { title: "Dhuhr", times: ["13:12", "13:30"] },
+      ]),
+    ).toEqual({ dhuhr: "13:30" });
+  });
+
+  it("returns null when nothing usable is present", () => {
+    expect(masjidboxJamaat([{ title: "Shuruq", times: ["5:21"] }])).toBeNull();
+    expect(masjidboxJamaat([])).toBeNull();
   });
 });
 

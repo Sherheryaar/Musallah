@@ -185,9 +185,11 @@ for (const link of links) {
   const summary = [];
 
   if (got.jamaat) {
+    // Generic sources (a mosque's own dated table) carry their credit on the
+    // registry row, since it names that mosque's site.
     const next = {
       ...got.jamaat,
-      source: SOURCES[link.source].credit,
+      source: link.credit ?? SOURCES[link.source].credit,
       recordedOn: today,
     };
     // Compare only the times: source/recordedOn always differ by date.

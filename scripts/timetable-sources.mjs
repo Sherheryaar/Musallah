@@ -17,11 +17,16 @@
 // rate limits, and be credited in the app's About screen.
 
 import {
+  cellText,
   htmlTableRows,
   iqamaToJamaat,
+  masjidboxJamaat,
   parseDatedJamaatTable,
   toHHMM,
 } from "./lib/timetable.mjs";
+
+const BROWSERISH_UA =
+  "Mozilla/5.0 (compatible; MasjidLocatorBot/0.1; UK masjid directory; +https://github.com/Sherheryaar/Musallah)";
 
 const TIMEOUT_MS = 15_000;
 
@@ -126,25 +131,75 @@ const mawaqit = {
   },
 };
 
-// --- East London Mosque -----------------------------------------------------
-// Not on Mawaqit (nor are Brick Lane, Croydon, Lewisham or London Central) —
-// which is exactly why this pipeline is provider-agnostic. ELM publishes a
-// FULL YEAR of Begins/Jamā'ah rows on its own site, keyed by Gregorian date
-// and preceded by a header row naming each column; we read today's row. One
-// request per run against one mosque's own public page.
+// --- Masjidbox --------------------------------------------------------------
+// masjidbox.net/<slug> server-renders today's grid: one block per prayer,
+// holding the prayer name then its Athan and Iqamah times. Iqamah is the
+// jamaat time. Widely used by UK mosques (Al Furqan Hounslow among them),
+// and each mosque enters its own times.
 
-const eastlondonmosque = {
-  id: "eastlondonmosque",
-  label: "East London Mosque",
-  credit: "eastlondonmosque.org.uk (published timetable)",
-  throttleMs: 1000,
-  headers: {
-    // Their server 403s an unknown agent; identify as a normal browser but
-    // keep the bot's contact intent honest in the string.
-    "User-Agent":
-      "Mozilla/5.0 (compatible; MasjidLocatorBot/0.1; UK masjid directory; +https://github.com/Sherheryaar/Musallah)",
-    Accept: "text/html",
+const masjidbox = {
+  id: "masjidbox",
+  label: "Masjidbox",
+  credit: "Masjidbox (mosque-published timetable)",
+  throttleMs: 1500,
+  headers: { "User-Agent": BROWSERISH_UA, Accept: "text/html" },
+
+  plan(links) {
+    return links.map((link) => ({
+      key: link.placeId,
+      links: [link],
+      run: () => this.fetchOne(link),
+    }));
   },
+
+  async fetchOne(link) {
+    const url = link.url ?? `https://masjidbox.net/${link.slug}`;
+    const { text, error, rateLimited } = await getText(url, this.headers);
+    if (error || rateLimited) return { error, rateLimited };
+
+    // Class names are semantic, not hashed: a prayer column carries a title
+    // element and time elements. If the markup changes this yields nothing
+    // and the run reports it — better than guessing a time.
+    const columns = [];
+    const blocks = text.split(/header-prayer-times-prayers-column/g).slice(1);
+    for (const block of blocks) {
+      const titleMatch = block.match(
+        /header-prayer-times-prayers-title[^>]*>([\s\S]*?)<\/div>/i,
+      );
+      const times = [...block.matchAll(/shared-atoms-time[^>]*>([\s\S]*?)<\/div>/gi)]
+        .map((m) => cellText(m[1]))
+        .filter(Boolean);
+      if (titleMatch && times.length > 0) {
+        columns.push({ title: cellText(titleMatch[1]), times });
+      }
+    }
+    const jamaat = masjidboxJamaat(columns);
+    if (!jamaat) {
+      return { error: "no prayer grid found (layout changed?)" };
+    }
+    const results = new Map();
+    results.set(link.placeId, { jamaat, skipped: [] });
+    return { results };
+  },
+};
+
+// --- Generic dated timetable -------------------------------------------------
+// Many mosques publish their own yearly or monthly calendar as a plain HTML
+// table: one row per date, columns named per prayer. That is exactly the
+// shape parseDatedJamaatTable reads — so ONE parser serves all of them, and
+// registering a new mosque is a registry row with a url, not new code.
+// East London Mosque (a full year of rows, no third-party platform) is
+// simply the first entry of this kind, not a special case.
+//
+// scripts/discover-timetables.mjs finds candidates and checks that today's
+// row parses before anything is registered here.
+
+const datedTable = {
+  id: "dated-table",
+  label: "Mosque website (dated timetable)",
+  credit: null, // per-place: the mosque's own site (see link.credit)
+  throttleMs: 1500,
+  headers: { "User-Agent": BROWSERISH_UA, Accept: "text/html" },
 
   plan(links) {
     return links.map((link) => ({
@@ -160,21 +215,12 @@ const eastlondonmosque = {
     const isoDate = new Date().toISOString().slice(0, 10);
     const jamaat = parseDatedJamaatTable(htmlTableRows(text), isoDate);
     if (!jamaat) {
-      // No row for today, or no named header columns: the page changed.
-      // Report it — a plausible-looking wrong prayer time is worse than
-      // yesterday's value plus a visible problem in the run log.
       return { error: `no usable row for ${isoDate} (layout changed?)` };
     }
     const results = new Map();
-    results.set(link.placeId, {
-      jamaat,
-      // Their page states the Friday Zuhr Jama'ah IS the Jumu'ah prayer, so
-      // Jumu'ah is only trustworthy from a Friday row — left to the
-      // dedicated Jumu'ah data rather than inferred here.
-      skipped: [],
-    });
+    results.set(link.placeId, { jamaat, skipped: [] });
     return { results };
   },
 };
 
-export const SOURCES = { mawaqit, eastlondonmosque };
+export const SOURCES = { mawaqit, masjidbox, "dated-table": datedTable };

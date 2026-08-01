@@ -119,11 +119,22 @@ Jamaat and Jumu'ah times come from **each mosque's own published timetable**, re
 | File | Role |
 |---|---|
 | `scripts/timetable-links.json` | the registry: which place uses which source |
-| `scripts/timetable-sources.mjs` | one entry per provider (Mawaqit API, East London Mosque's own page) |
+| `scripts/timetable-sources.mjs` | one entry per provider |
 | `scripts/lib/timetable.mjs` | pure parsing/normalising helpers — unit-tested |
 | `scripts/refresh-times.mjs` | the orchestrator: fetch, diff, write |
+| `scripts/discover-timetables.mjs` | sweeps mosque websites for timetables we can already read |
+
+Providers currently supported:
+
+- **`mawaqit`** — Mawaqit's public search API. Reads each mosque's `iqama` entries, which are either clock times or `+N` offsets from the adhan (resolved against that mosque's own times).
+- **`masjidbox`** — a `masjidbox.net/<slug>` page, whose grid gives Athan and Iqamah per prayer.
+- **`dated-table`** — the generic one: *any* mosque publishing a yearly or monthly HTML calendar (one row per date, columns named per prayer). East London Mosque is the first entry of this kind, not a special case. Registering another mosque is a registry row with a URL — **no new code**.
+
+`scripts/discover-timetables.mjs` finds candidates for those last two automatically: it probes each place's own website, fingerprints known platforms, and — for dated tables — actually parses today's row, reporting only what really yields times. It writes ready-to-paste registry entries for a human to approve; nothing is auto-registered, because a mis-registered source would show another mosque's prayer times.
 
 Adding a provider means adding a source entry plus registry rows; the orchestrator needs no changes. Every source must be credited in the app's About screen.
+
+**App size is unaffected by any of this.** The pipeline lives in `scripts/`, which Metro never bundles — only the resulting times reach the app, at ~160 bytes per place. Measured: if *all* 2,244 places carried jamaat times, the bundled dataset would grow from 171 KB to 182 KB gzipped (+11 KB, because the times compress well).
 
 Safety rules, each because the failure it prevents is worse than a stale time:
 

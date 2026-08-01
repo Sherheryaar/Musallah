@@ -12,6 +12,7 @@
     "sync:places": "node scripts/sync-places.mjs",
     "verify:places": "node scripts/verify-places.mjs",
     "refresh:times": "node scripts/refresh-times.mjs --dry-run",
+    "discover:timetables": "node scripts/discover-timetables.mjs",
     "build:web": "expo export --platform web && node scripts/postbuild-web.mjs",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"

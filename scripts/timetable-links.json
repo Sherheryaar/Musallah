@@ -88,6 +88,12 @@
     "matchedDistanceM": 25
   },
   {
+    "placeId": "al-furqan-education-trust-hounslow",
+    "source": "masjidbox",
+    "placeName": "Al Furqan Education Trust",
+    "url": "https://masjidbox.net/al-furqan-education-trust"
+  },
+  {
     "placeId": "al-furqan-islamic-centre-mib-783",
     "source": "mawaqit",
     "placeName": "Al Furqan Islamic Centre",
@@ -364,9 +370,10 @@
   },
   {
     "placeId": "east-london-mosque-london-muslim-centre-mib-1378",
-    "source": "eastlondonmosque",
+    "source": "dated-table",
     "placeName": "East London Mosque & London Muslim Centre",
-    "url": "https://www.eastlondonmosque.org.uk/prayer-times"
+    "url": "https://www.eastlondonmosque.org.uk/prayer-times",
+    "credit": "eastlondonmosque.org.uk (published timetable)"
   },
   {
     "placeId": "elland-mosque-association-mib-819",

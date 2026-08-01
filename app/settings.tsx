@@ -318,8 +318,12 @@ export default function SettingsScreen() {
           </Text>
         </View>
         <View style={[styles.aboutRow, styles.rowDivider]}>
-          <Text style={styles.aboutLabel}>{"Jumu'ah times"}</Text>
-          <Text style={styles.aboutValue}>Mawaqit.net (with permission)</Text>
+          <Text style={styles.aboutLabel}>Jamaat times</Text>
+          <Text style={styles.aboutValue}>
+            {
+              "Each masjid's own published timetable, via Mawaqit.net (with permission), Masjidbox, and mosque websites"
+            }
+          </Text>
         </View>
       </View>
     </ScrollView>

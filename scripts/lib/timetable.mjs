@@ -184,6 +184,40 @@ export function htmlTableRows(html) {
   return rows;
 }
 
+/** Maps a heading like "Zuhr Jamā'ah" or "ISHA" onto our jamaat key. */
+export function prayerKeyFromLabel(label) {
+  const s = label.toLowerCase();
+  if (/\bfajr\b|\bfajar\b/.test(s)) return "fajr";
+  if (/\bzuhr\b|\bdhuhr\b|\bduhr\b|\bzohar\b/.test(s)) return "dhuhr";
+  if (/\basr\b/.test(s)) return "asr";
+  if (/\bmaghrib\b|\bmagrib\b/.test(s)) return "maghrib";
+  if (/\bish/.test(s)) return "isha";
+  return null;
+}
+
+/**
+ * Masjidbox (masjidbox.net/<slug>) server-renders today's grid as one block
+ * per prayer: a title, then the Athan time, then the Iqamah time. Iqamah is
+ * the jamaat time we want.
+ *
+ * `columns` is [{ title, times: [...] }] — the caller pulls those out of the
+ * markup, keeping this pure.
+ *
+ * A column with only ONE time is skipped: that single value could be the
+ * athan or the iqamah, and a prayer time is not something to guess at.
+ */
+export function masjidboxJamaat(columns) {
+  const jamaat = {};
+  for (const { title, times } of columns) {
+    const key = prayerKeyFromLabel(title ?? "");
+    if (!key || times.length < 2) continue;
+    // [athan, iqamah] — iqamah is last.
+    const iqamah = toHHMM(times[times.length - 1]);
+    if (iqamah) jamaat[key] = iqamah;
+  }
+  return Object.keys(jamaat).length > 0 ? jamaat : null;
+}
+
 /** Do two jamaat objects hold the same times? (Avoids pointless writes.) */
 export function sameJamaat(a, b) {
   if (!a || !b) return false;
