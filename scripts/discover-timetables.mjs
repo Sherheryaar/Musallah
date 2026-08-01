@@ -33,6 +33,8 @@ import { fileURLToPath } from "node:url";
 
 import {
   htmlTableRows,
+  masjidboxSlugs,
+  mawaqitSlugs,
   parseDatedJamaatTable,
 } from "./lib/timetable.mjs";
 
@@ -125,29 +127,26 @@ function timetableLinks(html, baseUrl) {
   return [...urls].slice(0, 3);
 }
 
-// Asset/CDN path segments that appear after the host but are never a mosque
-// slug. Without this the first regex hit on a page can be
-// "cdn.masjidbox.com/content/..." — which would silently lose the real slug.
-const NOT_A_SLUG =
-  /^(content|public|assets|static|images|img|css|js|fonts|embed|api|widget|prayer-times|en|ar)$/i;
-
 function fingerprint(html) {
   const platforms = [];
-  const masjidboxSlugs = [
-    ...html.matchAll(/masjidbox\.(?:net|com)\/([a-z0-9][a-z0-9-]{2,79})/gi),
-  ]
-    .map((m) => m[1])
-    .filter((slug) => !NOT_A_SLUG.test(slug));
-  if (masjidboxSlugs.length) {
-    platforms.push({ platform: "masjidbox", slug: masjidboxSlugs[0] });
+  const mb = masjidboxSlugs(html);
+  // More than one slug on a page means we cannot tell which mosque this
+  // site belongs to (aggregators, "our other centres" links) — record them
+  // all so a human decides, rather than picking one at random.
+  if (mb.length) {
+    platforms.push({
+      platform: "masjidbox",
+      slug: mb[0],
+      ...(mb.length > 1 ? { ambiguous: mb } : {}),
+    });
   }
-  const mawaqitSlugs = [
-    ...html.matchAll(/mawaqit\.net\/(?:[a-z]{2}\/)?([a-z0-9][a-z0-9-]{2,79})/gi),
-  ]
-    .map((m) => m[1])
-    .filter((slug) => !NOT_A_SLUG.test(slug));
-  if (mawaqitSlugs.length) {
-    platforms.push({ platform: "mawaqit-embed", slug: mawaqitSlugs[0] });
+  const mw = mawaqitSlugs(html);
+  if (mw.length) {
+    platforms.push({
+      platform: "mawaqit-embed",
+      slug: mw[0],
+      ...(mw.length > 1 ? { ambiguous: mw } : {}),
+    });
   }
   return platforms;
 }

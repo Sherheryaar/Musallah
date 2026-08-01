@@ -184,6 +184,51 @@ export function htmlTableRows(html) {
   return rows;
 }
 
+// ---------------------------------------------------------------------------
+// Platform fingerprints
+//
+// Path segments that follow the host but are never a mosque slug: CDN asset
+// folders and the platform's own pages. Without this, "first match after the
+// host" yields `widgets`, `donations` or `content` on most real sites — a
+// mistake that produced 34 confident-looking but entirely junk candidates
+// before it was caught.
+// ---------------------------------------------------------------------------
+
+const NOT_A_SLUG =
+  /^(content|public|assets|static|images|img|css|js|fonts|embed|embeds|api|widget|widgets|loader|applications|donations|awqat-salat|prayer-times|prayertimes|en|ar|fr)$/i;
+
+/**
+ * Masjidbox mosque identifiers, in the two shapes it actually publishes:
+ *   https://masjidbox.com/prayer-times/<slug>   (embed / share link)
+ *   https://masjidbox.net/<slug>                (standalone page)
+ * cdn.masjidbox.com serves images only and must never be read as a slug.
+ */
+export function masjidboxSlugs(html) {
+  const slugs = [];
+  for (const [, slug] of html.matchAll(
+    /masjidbox\.com\/prayer-times\/([a-z0-9][a-z0-9-]{2,79})/gi,
+  )) {
+    slugs.push(slug);
+  }
+  for (const [, slug] of html.matchAll(
+    /(?<!cdn\.)masjidbox\.net\/([a-z0-9][a-z0-9-]{2,79})/gi,
+  )) {
+    slugs.push(slug);
+  }
+  return [...new Set(slugs)].filter((s) => !NOT_A_SLUG.test(s));
+}
+
+/** Mawaqit slugs from an embedded widget or link. */
+export function mawaqitSlugs(html) {
+  const slugs = [];
+  for (const [, slug] of html.matchAll(
+    /mawaqit\.net\/(?:[a-z]{2}\/)?([a-z0-9][a-z0-9-]{2,79})/gi,
+  )) {
+    slugs.push(slug);
+  }
+  return [...new Set(slugs)].filter((s) => !NOT_A_SLUG.test(s));
+}
+
 /** Maps a heading like "Zuhr Jamā'ah" or "ISHA" onto our jamaat key. */
 export function prayerKeyFromLabel(label) {
   const s = label.toLowerCase();
@@ -197,22 +242,27 @@ export function prayerKeyFromLabel(label) {
 
 /**
  * Masjidbox (masjidbox.net/<slug>) server-renders today's grid as one block
- * per prayer: a title, then the Athan time, then the Iqamah time. Iqamah is
+ * per prayer: a title, then exactly two times — Athan then Iqamah. Iqamah is
  * the jamaat time we want.
  *
  * `columns` is [{ title, times: [...] }] — the caller pulls those out of the
  * markup, keeping this pure.
  *
- * A column with only ONE time is skipped: that single value could be the
- * athan or the iqamah, and a prayer time is not something to guess at.
+ * ALWAYS index 1, never "the last time": the final column's block runs to the
+ * end of the document, so it also picks up the whole month table and the
+ * Jumu'ah section. Reading the last value there gave Isha 21:15 for one
+ * mosque and 14:15 (a Jumu'ah time) for another — both wrong, both
+ * plausible-looking. Extra times beyond the first two are bleed and ignored.
+ *
+ * A column with only ONE time is skipped: that value could be the athan or
+ * the iqamah, and a prayer time is not something to guess at.
  */
 export function masjidboxJamaat(columns) {
   const jamaat = {};
   for (const { title, times } of columns) {
     const key = prayerKeyFromLabel(title ?? "");
-    if (!key || times.length < 2) continue;
-    // [athan, iqamah] — iqamah is last.
-    const iqamah = toHHMM(times[times.length - 1]);
+    if (!key || !Array.isArray(times) || times.length < 2) continue;
+    const iqamah = toHHMM(times[1]);
     if (iqamah) jamaat[key] = iqamah;
   }
   return Object.keys(jamaat).length > 0 ? jamaat : null;

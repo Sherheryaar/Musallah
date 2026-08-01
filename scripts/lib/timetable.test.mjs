@@ -5,6 +5,8 @@ import {
   htmlTableRows,
   iqamaToJamaat,
   masjidboxJamaat,
+  masjidboxSlugs,
+  mawaqitSlugs,
   parseDatedJamaatTable,
   prayerKeyFromLabel,
   sameJamaat,
@@ -220,6 +222,54 @@ describe("htmlTableRows + parseDatedJamaatTable", () => {
   });
 });
 
+describe("masjidboxSlugs", () => {
+  it("reads the embed/share form", () => {
+    // Real markup from baitulazizmosque.org.uk.
+    const html = `<script src="https://masjidbox.com/widgets/loader.js"></script>
+      <a href="https://masjidbox.com/prayer-times/baitulaziz-icc">Times</a>`;
+    expect(masjidboxSlugs(html)).toEqual(["baitulaziz-icc"]);
+  });
+
+  it("reads the standalone page form", () => {
+    expect(
+      masjidboxSlugs(`<a href="https://masjidbox.net/al-furqan-education-trust">x</a>`),
+    ).toEqual(["al-furqan-education-trust"]);
+  });
+
+  it("never mistakes CDN assets or platform pages for a mosque", () => {
+    // This is the exact failure that produced 34 junk candidates: pages
+    // whose only masjidbox URLs are images, loaders, or donation links.
+    const html = `
+      <img src="https://cdn.masjidbox.com/content/pictures/abc.webp">
+      <script src="https://masjidbox.com/widgets/loader.js"></script>
+      <a href="https://masjidbox.com/donations">Donate</a>
+      <a href="https://masjidbox.com/applications">Apply</a>`;
+    expect(masjidboxSlugs(html)).toEqual([]);
+  });
+
+  it("reports every slug when a page names more than one mosque", () => {
+    const html = `
+      <a href="https://masjidbox.com/prayer-times/mosque-one">One</a>
+      <a href="https://masjidbox.com/prayer-times/mosque-two">Two</a>`;
+    expect(masjidboxSlugs(html)).toEqual(["mosque-one", "mosque-two"]);
+  });
+});
+
+describe("mawaqitSlugs", () => {
+  it("reads slugs with and without a language prefix", () => {
+    expect(
+      mawaqitSlugs(`<iframe src="https://mawaqit.net/en/finsbury-park-mosque">`),
+    ).toEqual(["finsbury-park-mosque"]);
+    expect(mawaqitSlugs(`<a href="https://mawaqit.net/some-masjid">`)).toEqual([
+      "some-masjid",
+    ]);
+  });
+
+  it("ignores language-only and asset paths", () => {
+    expect(mawaqitSlugs(`<a href="https://mawaqit.net/en/">`)).toEqual([]);
+  });
+});
+
 describe("prayerKeyFromLabel", () => {
   it("maps the spellings UK mosques actually print", () => {
     expect(prayerKeyFromLabel("Fajr Jamā'ah")).toBe("fajr");
@@ -255,6 +305,37 @@ describe("masjidboxJamaat", () => {
       maghrib: "20:57",
       isha: "22:15",
     });
+  });
+
+  it("ignores the trailing bleed in the last column", () => {
+    // The final column's markup block runs to the end of the page, so it
+    // also captures the month table and the Jumu'ah times. Reading "the
+    // last time" here produced Isha 21:15 for Al Furqan and 14:15 (a
+    // Jumu'ah time) for Romford — both wrong. Only index 1 is the iqamah.
+    const columns = [
+      { title: "Maghrib", times: ["20:52", "20:57"] },
+      {
+        title: "Isha",
+        times: [
+          "21:56",
+          "22:15",
+          "3:39",
+          "4:15",
+          "13:12",
+          "13:30",
+          "21:02",
+          "21:15",
+        ],
+      },
+    ];
+    expect(masjidboxJamaat(columns)).toEqual({
+      maghrib: "20:57",
+      isha: "22:15",
+    });
+  });
+
+  it("skips Shuruq, which has a placeholder second value", () => {
+    expect(masjidboxJamaat([{ title: "Shuruq", times: ["5:21", "--"] }])).toBeNull();
   });
 
   it("skips a prayer with only one time (athan or iqamah? unknowable)", () => {
