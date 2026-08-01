@@ -8,6 +8,7 @@ import {
   View,
   useColorScheme,
 } from "react-native";
+import { NotificationsProvider } from "../src/context/NotificationsContext";
 import { PlacesProvider } from "../src/context/PlacesContext";
 import { SettingsProvider } from "../src/context/SettingsContext";
 import { ThemeProvider, useTheme } from "../src/context/ThemeContext";
@@ -93,9 +94,11 @@ export default function RootLayout() {
   return (
     <ThemeProvider>
       <SettingsProvider>
-        <PlacesProvider>
-          <ThemedNavigator />
-        </PlacesProvider>
+        <NotificationsProvider>
+          <PlacesProvider>
+            <ThemedNavigator />
+          </PlacesProvider>
+        </NotificationsProvider>
       </SettingsProvider>
     </ThemeProvider>
   );

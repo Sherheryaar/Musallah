@@ -1,10 +1,20 @@
 import React, { useMemo } from "react";
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Constants from "expo-constants";
 
+import { useNotifications } from "@/context/NotificationsContext";
 import { useSettings } from "@/context/SettingsContext";
 import { useTheme } from "@/context/ThemeContext";
+import { PRAYER_KEYS, PRAYER_LABELS } from "@/lib/notificationPlan";
 import { radius, spacing, type ThemeColors } from "@/lib/theme";
 
 function useStyles() {
@@ -19,7 +29,7 @@ const PRIVACY_POINTS: { title: string; body: string }[] = [
   },
   {
     title: "Prayer times are calculated on-device",
-    body: "No prayer-time service is contacted, so nothing about where or when you pray is sent anywhere. Times also work fully offline.",
+    body: "No prayer-time service is contacted, so nothing about where or when you pray is sent anywhere. Times also work fully offline, and prayer notifications are scheduled locally on your phone the same way.",
   },
   {
     title: "No account, no tracking",
@@ -68,10 +78,21 @@ function OptionRow({
   );
 }
 
+const REMINDER_OPTIONS = [0, 10, 20] as const;
+
 export default function SettingsScreen() {
   const styles = useStyles();
   const insets = useSafeAreaInsets();
   const { settings, updateSettings } = useSettings();
+  const notifications = useNotifications();
+
+  const toggleNotifications = async (on: boolean) => {
+    if (!on) {
+      notifications.disable();
+      return;
+    }
+    await notifications.enable();
+  };
 
   return (
     <ScrollView
@@ -157,6 +178,89 @@ export default function SettingsScreen() {
               divider
               onPress={() => updateSettings({ shafaq: "abyad" })}
             />
+          </View>
+        </>
+      ) : null}
+
+      {Platform.OS !== "web" ? (
+        <>
+          <Text style={styles.sectionTitle}>Prayer notifications</Text>
+          <Text style={styles.sectionIntro}>
+            Reminders are scheduled on your phone from your location {"—"} no
+            server is involved and nothing leaves your device. Open the app
+            every week or so to keep the schedule topped up.
+          </Text>
+          <View style={styles.card}>
+            <View style={styles.switchRow}>
+              <Text style={styles.optionLabel}>Notify me at prayer times</Text>
+              <Switch
+                value={notifications.prefs.enabled}
+                onValueChange={toggleNotifications}
+                accessibilityLabel="Prayer time notifications"
+              />
+            </View>
+            {notifications.permissionGranted === false ? (
+              <View style={[styles.rowDivider, styles.permissionNote]}>
+                <Text style={styles.permissionNoteText}>
+                  Notifications are blocked at the system level {"—"} allow
+                  them for this app in your phone&apos;s Settings, then try
+                  again.
+                </Text>
+              </View>
+            ) : null}
+            {notifications.prefs.enabled ? (
+              <>
+                {PRAYER_KEYS.map((key) => (
+                  <View key={key} style={[styles.switchRow, styles.rowDivider]}>
+                    <Text style={styles.optionLabel}>{PRAYER_LABELS[key]}</Text>
+                    <Switch
+                      value={notifications.prefs.prayers[key]}
+                      onValueChange={(on) =>
+                        notifications.updatePrefs({
+                          prayers: {
+                            ...notifications.prefs.prayers,
+                            [key]: on,
+                          },
+                        })
+                      }
+                      accessibilityLabel={`Notify for ${PRAYER_LABELS[key]}`}
+                    />
+                  </View>
+                ))}
+                <View style={[styles.reminderRow, styles.rowDivider]}>
+                  <Text style={styles.optionLabel}>Remind me</Text>
+                  <View style={styles.reminderChips}>
+                    {REMINDER_OPTIONS.map((mins) => {
+                      const selected =
+                        notifications.prefs.minutesBefore === mins;
+                      return (
+                        <TouchableOpacity
+                          key={mins}
+                          style={[
+                            styles.reminderChip,
+                            selected && styles.reminderChipActive,
+                          ]}
+                          onPress={() =>
+                            notifications.updatePrefs({ minutesBefore: mins })
+                          }
+                          accessibilityRole="radio"
+                          accessibilityState={{ selected }}
+                        >
+                          <Text
+                            style={[
+                              styles.reminderChipLabel,
+                              selected && styles.reminderChipLabelActive,
+                            ]}
+                          >
+                            {mins === 0 ? "On time" : `${mins} min early`}
+                          </Text>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </View>
+                </View>
+              </>
+            ) : null}
           </View>
         </>
       ) : null}
@@ -279,6 +383,53 @@ const createStyles = (colors: ThemeColors) =>
     height: 10,
     borderRadius: 5,
     backgroundColor: colors.accent,
+  },
+  switchRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: spacing.l,
+    paddingVertical: spacing.m,
+    minHeight: 52,
+  },
+  permissionNote: {
+    paddingHorizontal: spacing.l,
+    paddingVertical: spacing.m,
+  },
+  permissionNoteText: {
+    fontSize: 13,
+    color: colors.attention,
+    lineHeight: 18,
+  },
+  reminderRow: {
+    paddingHorizontal: spacing.l,
+    paddingVertical: spacing.m,
+    gap: spacing.s,
+  },
+  reminderChips: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.s,
+  },
+  reminderChip: {
+    paddingHorizontal: spacing.m,
+    paddingVertical: spacing.s,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+  },
+  reminderChipActive: {
+    backgroundColor: colors.accentSoft,
+    borderColor: colors.accent,
+  },
+  reminderChipLabel: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: colors.textSecondary,
+  },
+  reminderChipLabelActive: {
+    color: colors.accent,
   },
   privacyPoint: {
     padding: spacing.l,

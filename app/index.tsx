@@ -15,6 +15,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Location from "expo-location";
 
 import { FacilityKey, isCorroborated, Place } from "@/data/places";
+import { useNotifications } from "@/context/NotificationsContext";
 import { usePlaces } from "@/context/PlacesContext";
 import { useSettings } from "@/context/SettingsContext";
 import BottomSheet from "@/components/BottomSheet";
@@ -75,6 +76,7 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const { places } = usePlaces();
   const { settings, updateSettings } = useSettings();
+  const { reportLocation } = useNotifications();
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(
     null,
   );
@@ -192,6 +194,14 @@ export default function HomeScreen() {
   );
 
   const gpsOrigin = location ?? FALLBACK_LOCATION;
+
+  // Feed fixes to the notification scheduler so its prayer times track the
+  // user's real location (it tops up its rolling window from here).
+  useEffect(() => {
+    if (location && !usingFallback) {
+      reportLocation(location.lat, location.lng);
+    }
+  }, [location, usingFallback, reportLocation]);
 
   // "I'm going here" -- geocode the query and measure distances from there.
   // Hits outside the UK & Ireland are rejected ("Paris" must not re-anchor
