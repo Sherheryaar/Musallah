@@ -240,7 +240,180 @@ export function prayerKeyFromLabel(label) {
   return null;
 }
 
+// ---------------------------------------------------------------------------
+// Masjidbox
+//
+// PREFERRED PATH: every masjidbox.net page — both the server-rendered theme
+// and the client-rendered one — embeds `window.REDUX_STATE`, a percent-encoded
+// JSON blob holding a month of timetable rows. Each row names its own times:
+//
+//   { date, fajr, sunrise, dhuhr, asr, maghrib, isha,   <- adhan
+//     iqamah: { fajr, ..., isha, jumuah: [...] } }      <- JAMAAT, labelled
+//
+// That is strictly better than reading the rendered grid: the jamaat times are
+// labelled rather than positional, the values are ISO datetimes so there is no
+// 12-hour ambiguity, and the row carries the date it belongs to. It also works
+// on the client-rendered theme, whose HTML contains no times at all.
+// ---------------------------------------------------------------------------
+
 /**
+ * The REDUX_STATE blob mixes %XX escapes with literal UTF-8 (Arabic month
+ * names), which decodeURIComponent rejects outright. Decode to bytes first,
+ * then read those bytes as UTF-8.
+ */
+export function decodePercentMixed(encoded) {
+  const bytes = [];
+  for (let i = 0; i < encoded.length; i++) {
+    const c = encoded[i];
+    if (c === "%" && /^[0-9A-Fa-f]{2}$/.test(encoded.slice(i + 1, i + 3))) {
+      bytes.push(parseInt(encoded.slice(i + 1, i + 3), 16));
+      i += 2;
+    } else {
+      for (const b of Buffer.from(c, "utf8")) bytes.push(b);
+    }
+  }
+  return Buffer.from(bytes).toString("utf8");
+}
+
+/** The parsed REDUX_STATE from a Masjidbox page, or null. */
+export function masjidboxState(html) {
+  const m = html.match(/window\.REDUX_STATE\s*=\s*'([^']*)'/);
+  if (!m) return null;
+  try {
+    return JSON.parse(decodePercentMixed(m[1]));
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * "2026-08-02T04:01:00+01:00" -> "04:01".
+ *
+ * Read the wall-clock time STRAIGHT OUT OF THE STRING. Never via `new Date`:
+ * the offset in these values is the mosque's local time, and the refresh runs
+ * on a UTC CI runner, so parsing to a Date and formatting would publish 03:01
+ * for a 04:01 jamā'ah every British Summer Time.
+ */
+export function hhmmFromIso(iso) {
+  const m = typeof iso === "string" ? iso.match(/T(\d{2}):(\d{2})/) : null;
+  return m ? `${m[1]}:${m[2]}` : null;
+}
+
+/** Today's date in a named timezone, as "YYYY-MM-DD". */
+export function todayInZone(timeZone, now = new Date()) {
+  try {
+    return new Intl.DateTimeFormat("en-CA", {
+      timeZone,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(now);
+  } catch {
+    return now.toISOString().slice(0, 10);
+  }
+}
+
+/**
+ * Is this iqamah earlier than the adhan it belongs to? Both are full ISO
+ * datetimes carrying their own offset, so comparing the parsed instants is
+ * safe (and correct across midnight) — it is only *formatting* a time in the
+ * runner's timezone that would be wrong. Unknown or unparseable adhan means
+ * no opinion: keep the time.
+ */
+function isBeforeAdhan(iqamahIso, adhanIso) {
+  if (typeof iqamahIso !== "string" || typeof adhanIso !== "string") return false;
+  const iqamah = Date.parse(iqamahIso);
+  const adhan = Date.parse(adhanIso);
+  if (Number.isNaN(iqamah) || Number.isNaN(adhan)) return false;
+  return iqamah < adhan;
+}
+
+/**
+ * Masjidbox serves two different pages, with the SAME row shape under
+ * different keys:
+ *
+ *   masjidbox.net/<slug>              -> azan.masjidAzan.item        (a month)
+ *   masjidbox.com/prayer-times/<slug> -> masjidbox.masjidboxAthany   (a week)
+ *
+ * The .com page is the one every mosque has; the .net page only exists for
+ * mosques that also bought the website product. Reading both means one source
+ * covers every Masjidbox masjid instead of the minority with a website.
+ */
+function masjidboxAthany(state) {
+  const net = state?.azan?.masjidAzan?.item;
+  if (Array.isArray(net?.timetable)) {
+    return { timetable: net.timetable, timezone: net.timezone, name: state?.core?.account?.item?.name };
+  }
+  const com = state?.masjidbox?.masjidboxAthany;
+  if (Array.isArray(com?.timetable)) {
+    return {
+      timetable: com.timetable,
+      timezone: com.settings?.timezone,
+      name: com.name,
+      closed: com.athany?.closed === true,
+    };
+  }
+  return null;
+}
+
+/**
+ * Pulls one day's jamā'ah (and Jumu'ah) out of a Masjidbox REDUX_STATE.
+ *
+ * The row is found by its own `date`, so a stale or short timetable yields
+ * nothing rather than yesterday's times.
+ *
+ * ONLY `iqamah` is read. The row's top-level prayer fields are the adhan, and
+ * so is `row.jumuah` — Ilford Islamic Centre calls the Friday adhan at 13:10
+ * and holds the prayer at 13:30, and those are separate fields. Falling back
+ * from `iqamah.jumuah` to `jumuah` would quietly publish the adhan as the
+ * jamā'ah, sending people 20 minutes early.
+ */
+export function masjidboxDay(state, isoDate) {
+  const src = masjidboxAthany(state);
+  if (!src || src.closed || src.timetable.length === 0) return null;
+  const row = src.timetable.find(
+    (r) => typeof r?.date === "string" && r.date.startsWith(isoDate),
+  );
+  if (!row?.iqamah) return null;
+
+  const jamaat = {};
+  for (const key of JAMAAT_KEYS) {
+    const time = hhmmFromIso(row.iqamah[key]);
+    // A jamā'ah cannot be called before the prayer's time enters. Where the
+    // row gives us the adhan, use it: two mosques publish a Fajr jamā'ah of
+    // 02:00 and 03:30 against adhans of 03:40-odd, which is a typo in their
+    // own dashboard, not a very early congregation. Compare the instants
+    // (not the clock faces) so an Isha that runs past midnight survives.
+    if (time && isBeforeAdhan(row.iqamah[key], row[key])) continue;
+    if (time) jamaat[key] = time;
+  }
+  // Jumu'ah only exists on Friday rows, and a mosque may hold several.
+  const jumuah = [...new Set((row.iqamah.jumuah ?? []).map(hhmmFromIso))]
+    .filter(Boolean)
+    .sort();
+
+  if (Object.keys(jamaat).length === 0 && jumuah.length === 0) return null;
+  return {
+    jamaat: Object.keys(jamaat).length > 0 ? jamaat : undefined,
+    jumuah: jumuah.length > 0 ? jumuah : undefined,
+  };
+}
+
+/** The mosque's own timezone, so "today" means today where the masjid is. */
+export function masjidboxTimezone(state) {
+  const tz = masjidboxAthany(state)?.timezone;
+  return typeof tz === "string" && tz.includes("/") ? tz : null;
+}
+
+/** How the mosque names itself — used to check a slug is the right masjid. */
+export function masjidboxName(state) {
+  const name = masjidboxAthany(state)?.name;
+  return typeof name === "string" && name.trim() ? name.trim() : null;
+}
+
+/**
+ * FALLBACK for a page with no REDUX_STATE.
+ *
  * Masjidbox (masjidbox.net/<slug>) server-renders today's grid as one block
  * per prayer: a title, then exactly two times — Athan then Iqamah. Iqamah is
  * the jamaat time we want.

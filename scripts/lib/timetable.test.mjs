@@ -2,10 +2,15 @@ import { describe, expect, it } from "vitest";
 
 import {
   addMinutes,
+  decodePercentMixed,
+  hhmmFromIso,
   htmlTableRows,
   iqamaToJamaat,
+  masjidboxDay,
   masjidboxJamaat,
   masjidboxSlugs,
+  masjidboxState,
+  masjidboxTimezone,
   mawaqitSlugs,
   parseDatedJamaatTable,
   prayerKeyFromLabel,
@@ -13,6 +18,7 @@ import {
   to24Hour,
   toDMY,
   toHHMM,
+  todayInZone,
 } from "./timetable.mjs";
 
 describe("toHHMM", () => {
@@ -350,6 +356,220 @@ describe("masjidboxJamaat", () => {
   it("returns null when nothing usable is present", () => {
     expect(masjidboxJamaat([{ title: "Shuruq", times: ["5:21"] }])).toBeNull();
     expect(masjidboxJamaat([])).toBeNull();
+  });
+});
+
+describe("hhmmFromIso", () => {
+  it("reads the mosque's own wall clock, not the runner's", () => {
+    // The refresh runs on a UTC CI box. Going via `new Date` would turn a
+    // 04:01 BST jamā'ah into 03:01 for the whole summer.
+    expect(hhmmFromIso("2026-08-02T04:01:00+01:00")).toBe("04:01");
+    expect(hhmmFromIso("2026-01-02T17:30:00+00:00")).toBe("17:30");
+    expect(hhmmFromIso("2026-08-02T22:15:00+05:30")).toBe("22:15");
+  });
+
+  it("returns null for anything that is not a datetime", () => {
+    expect(hhmmFromIso("")).toBeNull();
+    expect(hhmmFromIso("13:30")).toBeNull();
+    expect(hhmmFromIso(null)).toBeNull();
+    expect(hhmmFromIso(undefined)).toBeNull();
+  });
+});
+
+describe("todayInZone", () => {
+  it("gives the date where the masjid is, not where the runner is", () => {
+    // 23:30 UTC on 1 Aug is already 00:30 on 2 Aug in London.
+    const nearMidnight = new Date("2026-08-01T23:30:00Z");
+    expect(todayInZone("Europe/London", nearMidnight)).toBe("2026-08-02");
+    expect(todayInZone("UTC", nearMidnight)).toBe("2026-08-01");
+  });
+
+  it("falls back to the UTC date for an unknown zone", () => {
+    expect(todayInZone("Not/AZone", new Date("2026-08-02T12:00:00Z"))).toBe(
+      "2026-08-02",
+    );
+  });
+});
+
+describe("decodePercentMixed", () => {
+  it("decodes escapes sitting alongside literal UTF-8", () => {
+    // decodeURIComponent throws on this; Masjidbox ships exactly this mix.
+    expect(decodePercentMixed("%7B%22a%22%3A%22صفر%22%7D")).toBe('{"a":"صفر"}');
+    expect(decodePercentMixed("100%")).toBe("100%");
+    expect(decodePercentMixed("a%2Gb")).toBe("a%2Gb");
+  });
+});
+
+describe("masjidboxState", () => {
+  it("pulls the embedded state out of the page", () => {
+    const payload = encodeURIComponent(JSON.stringify({ azan: { ok: true } }));
+    const html = `<script>window.REDUX_STATE = '${payload}';</script>`;
+    expect(masjidboxState(html)).toEqual({ azan: { ok: true } });
+  });
+
+  it("returns null rather than throwing on a page without it", () => {
+    expect(masjidboxState("<html>no state here</html>")).toBeNull();
+    expect(masjidboxState("<script>window.REDUX_STATE = '%ZZnot json';</script>")).toBeNull();
+  });
+});
+
+describe("masjidboxDay", () => {
+  // Holborn Mosque's real shape, 2 Aug 2026.
+  const state = (rows) => ({ azan: { masjidAzan: { item: { timetable: rows } } } });
+  /** The .com prayer-times page's shape — same rows, different keys. */
+  const comState = (rows, extra = {}) => ({
+    masjidbox: { masjidboxAthany: { timetable: rows, ...extra } },
+  });
+  const day = {
+    date: "2026-08-02T00:00:00+01:00",
+    fajr: "2026-08-02T03:41:00+01:00",
+    sunrise: "2026-08-02T05:23:00+01:00",
+    dhuhr: "2026-08-02T13:12:00+01:00",
+    asr: "2026-08-02T18:23:00+01:00",
+    maghrib: "2026-08-02T20:50:00+01:00",
+    isha: "2026-08-02T21:54:00+01:00",
+    iqamah: {
+      fajr: "2026-08-02T04:01:00+01:00",
+      dhuhr: "2026-08-02T13:30:00+01:00",
+      asr: "2026-08-02T18:45:00+01:00",
+      maghrib: "2026-08-02T20:55:00+01:00",
+      isha: "2026-08-02T22:15:00+01:00",
+    },
+  };
+
+  it("takes the iqamah, never the adhan", () => {
+    // 03:41 is when the adhan is called; 04:01 is when the jamā'ah stands.
+    expect(masjidboxDay(state([day]), "2026-08-02")).toEqual({
+      jamaat: {
+        fajr: "04:01",
+        dhuhr: "13:30",
+        asr: "18:45",
+        maghrib: "20:55",
+        isha: "22:15",
+      },
+      jumuah: undefined,
+    });
+  });
+
+  it("finds the right day in a month of rows", () => {
+    const other = {
+      ...day,
+      date: "2026-08-03T00:00:00+01:00",
+      iqamah: { ...day.iqamah, fajr: "2026-08-03T04:05:00+01:00" },
+    };
+    expect(masjidboxDay(state([day, other]), "2026-08-03").jamaat.fajr).toBe("04:05");
+  });
+
+  it("returns null when today is not in the timetable", () => {
+    // A timetable that has run out must read as "no data", never as the
+    // nearest row — that would show a user last month's times.
+    expect(masjidboxDay(state([day]), "2026-09-14")).toBeNull();
+    expect(masjidboxDay(state([]), "2026-08-02")).toBeNull();
+    expect(masjidboxDay({}, "2026-08-02")).toBeNull();
+  });
+
+  it("collects every Jumu'ah the mosque holds", () => {
+    const friday = {
+      ...day,
+      date: "2026-08-07T00:00:00+01:00",
+      iqamah: {
+        ...day.iqamah,
+        jumuah: [
+          "2026-08-07T14:35:00+01:00",
+          "2026-08-07T13:20:00+01:00",
+          "2026-08-07T14:00:00+01:00",
+        ],
+      },
+    };
+    expect(masjidboxDay(state([friday]), "2026-08-07").jumuah).toEqual([
+      "13:20",
+      "14:00",
+      "14:35",
+    ]);
+  });
+
+  it("never reports the Friday adhan as the Jumu'ah jamā'ah", () => {
+    // Ilford Islamic Centre: adhan 13:10, prayer 13:30 and 14:15. Falling
+    // back from iqamah.jumuah to jumuah would send people 20 minutes early.
+    const friday = {
+      ...day,
+      date: "2026-08-07T00:00:00+01:00",
+      jumuah: ["2026-08-07T13:10:00+01:00", "2026-08-07T13:10:00+01:00"],
+      iqamah: {
+        ...day.iqamah,
+        jumuah: ["2026-08-07T13:30:00+01:00", "2026-08-07T14:15:00+01:00"],
+      },
+    };
+    expect(masjidboxDay(state([friday]), "2026-08-07").jumuah).toEqual([
+      "13:30",
+      "14:15",
+    ]);
+
+    // And with no iqamah.jumuah, report nothing rather than the adhan.
+    const adhanOnly = { ...friday, iqamah: day.iqamah };
+    expect(masjidboxDay(state([adhanOnly]), "2026-08-07").jumuah).toBeUndefined();
+  });
+
+  it("drops a jamā'ah that falls before its own adhan", () => {
+    // Madinatul Ilm publishes Fajr jamā'ah 02:00 against a 03:41 adhan, and
+    // Cambridge ISOC 03:30 against 03:35. Both are dashboard typos; a user
+    // sent out at 2am is worse than a user shown nothing.
+    const typo = {
+      ...day,
+      iqamah: { ...day.iqamah, fajr: "2026-08-02T02:00:00+01:00" },
+    };
+    const out = masjidboxDay(state([typo]), "2026-08-02");
+    expect(out.jamaat.fajr).toBeUndefined();
+    expect(out.jamaat.dhuhr).toBe("13:30"); // the rest of the row survives
+  });
+
+  it("keeps a jamā'ah at the same minute as the adhan", () => {
+    // Romford Mosque genuinely publishes Fajr adhan and iqamah both at 04:45.
+    const together = {
+      ...day,
+      fajr: "2026-08-02T04:45:00+01:00",
+      iqamah: { ...day.iqamah, fajr: "2026-08-02T04:45:00+01:00" },
+    };
+    expect(masjidboxDay(state([together]), "2026-08-02").jamaat.fajr).toBe("04:45");
+  });
+
+  it("keeps an Isha jamā'ah that runs past midnight", () => {
+    // Comparing clock faces would read 00:15 as "before" 23:50 and bin it.
+    const late = {
+      ...day,
+      isha: "2026-08-02T23:50:00+01:00",
+      iqamah: { ...day.iqamah, isha: "2026-08-03T00:15:00+01:00" },
+    };
+    expect(masjidboxDay(state([late]), "2026-08-02").jamaat.isha).toBe("00:15");
+  });
+
+  it("reads the .com prayer-times page's shape too", () => {
+    // Same rows, different keys — the .com page is the one every mosque has.
+    expect(masjidboxDay(comState([day]), "2026-08-02").jamaat.fajr).toBe("04:01");
+  });
+
+  it("publishes nothing for a masjid marked closed", () => {
+    expect(masjidboxDay(comState([day], { athany: { closed: true } }), "2026-08-02")).toBeNull();
+  });
+
+  it("skips a prayer the mosque left blank instead of inventing one", () => {
+    const partial = { ...day, iqamah: { fajr: day.iqamah.fajr, dhuhr: null } };
+    expect(masjidboxDay(state([partial]), "2026-08-02").jamaat).toEqual({
+      fajr: "04:01",
+    });
+  });
+});
+
+describe("masjidboxTimezone", () => {
+  it("reads the mosque's zone from either page shape, ignoring junk", () => {
+    const net = (v) => ({ azan: { masjidAzan: { item: { timetable: [], timezone: v } } } });
+    const com = (v) => ({
+      masjidbox: { masjidboxAthany: { timetable: [], settings: { timezone: v } } },
+    });
+    expect(masjidboxTimezone(net("Europe/London"))).toBe("Europe/London");
+    expect(masjidboxTimezone(com("Europe/London"))).toBe("Europe/London");
+    expect(masjidboxTimezone(net("BST"))).toBeNull();
+    expect(masjidboxTimezone({})).toBeNull();
   });
 });
 

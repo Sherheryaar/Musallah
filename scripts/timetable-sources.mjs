@@ -20,15 +20,21 @@ import {
   cellText,
   htmlTableRows,
   iqamaToJamaat,
+  masjidboxDay,
   masjidboxJamaat,
+  masjidboxState,
+  masjidboxTimezone,
   parseDatedJamaatTable,
   toHHMM,
+  todayInZone,
 } from "./lib/timetable.mjs";
 
 const BROWSERISH_UA =
   "Mozilla/5.0 (compatible; MasjidLocatorBot/0.1; UK masjid directory; +https://github.com/Sherheryaar/Musallah)";
 
 const TIMEOUT_MS = 15_000;
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 async function getText(url, headers) {
   const controller = new AbortController();
@@ -132,10 +138,14 @@ const mawaqit = {
 };
 
 // --- Masjidbox --------------------------------------------------------------
-// masjidbox.net/<slug> server-renders today's grid: one block per prayer,
-// holding the prayer name then its Athan and Iqamah times. Iqamah is the
-// jamaat time. Widely used by UK mosques (Al Furqan Hounslow among them),
-// and each mosque enters its own times.
+// masjidbox.net/<slug> embeds `window.REDUX_STATE`: a month of timetable rows,
+// each carrying the adhan times AND a separate, explicitly-labelled `iqamah`
+// object. That is what we read — labelled beats positional, and it is the only
+// path that works on Masjidbox's client-rendered theme, whose HTML contains no
+// times at all. Scraping the rendered grid remains as a fallback.
+//
+// Widely used by UK mosques (Al Furqan Hounslow among them), and each mosque
+// enters its own times.
 
 const masjidbox = {
   id: "masjidbox",
@@ -152,11 +162,56 @@ const masjidbox = {
     }));
   },
 
-  async fetchOne(link) {
-    const url = link.url ?? `https://masjidbox.net/${link.slug}`;
-    const { text, error, rateLimited } = await getText(url, this.headers);
-    if (error || rateLimited) return { error, rateLimited };
+  /**
+   * A mosque's timetable lives on ONE of two hosts and there is no way to tell
+   * which from the outside: masjidbox.com/prayer-times/<slug> serves it for
+   * most, masjidbox.net/<slug> for those on the website product (Al Furqan,
+   * Romford and Tauheedul Islam among them), and the other host returns an
+   * empty shell rather than a redirect. So try both before reporting nothing.
+   */
+  urlsFor(link) {
+    const slug = link.slug ?? link.url?.split("/").filter(Boolean).pop();
+    if (!slug) return link.url ? [link.url] : [];
+    return [
+      `https://masjidbox.com/prayer-times/${slug}`,
+      `https://masjidbox.net/${slug}`,
+    ];
+  },
 
+  async fetchOne(link) {
+    let lastError = null;
+    for (const url of this.urlsFor(link)) {
+      const { text, error, rateLimited } = await getText(url, this.headers);
+      if (rateLimited) return { rateLimited };
+      if (error) {
+        lastError = error;
+        continue;
+      }
+      const day = this.readDay(text);
+      if (day) {
+        const results = new Map();
+        results.set(link.placeId, { ...day, skipped: [] });
+        return { results };
+      }
+      await sleep(this.throttleMs);
+    }
+    return {
+      error:
+        lastError ?? "no timetable row for today (mosque has not published it)",
+    };
+  },
+
+  /** Today's jamā'ah out of one page, or null if this page hasn't got it. */
+  readDay(text) {
+    // Preferred: the embedded state, where jamā'ah times are labelled.
+    const state = masjidboxState(text);
+    if (state) {
+      const zone = masjidboxTimezone(state) ?? "Europe/London";
+      const day = masjidboxDay(state, todayInZone(zone));
+      if (day) return day;
+    }
+
+    // Fallback for a page with no usable state: scrape the rendered grid.
     // Class names are semantic, not hashed: a prayer column carries a title
     // element and time elements. If the markup changes this yields nothing
     // and the run reports it — better than guessing a time.
@@ -174,12 +229,7 @@ const masjidbox = {
       }
     }
     const jamaat = masjidboxJamaat(columns);
-    if (!jamaat) {
-      return { error: "no prayer grid found (layout changed?)" };
-    }
-    const results = new Map();
-    results.set(link.placeId, { jamaat, skipped: [] });
-    return { results };
+    return jamaat ? { jamaat } : null;
   },
 };
 

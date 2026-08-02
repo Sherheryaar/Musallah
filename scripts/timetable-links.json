@@ -91,7 +91,8 @@
     "placeId": "al-furqan-education-trust-hounslow",
     "source": "masjidbox",
     "placeName": "Al Furqan Education Trust",
-    "url": "https://masjidbox.net/al-furqan-education-trust"
+    "url": "https://masjidbox.com/prayer-times/al-furqan-education-trust",
+    "slug": "al-furqan-education-trust"
   },
   {
     "placeId": "al-furqan-islamic-centre-mib-783",
@@ -160,6 +161,22 @@
     "matchedDistanceM": 9
   },
   {
+    "placeId": "anjuman-e-islamia-jamia-mosque-mib-1287",
+    "source": "masjidbox",
+    "placeName": "Anjuman-e-Islamia Jamia Mosque",
+    "url": "https://masjidbox.com/prayer-times/markazi-jamia-masjid-newham",
+    "masjidboxName": "ANJUMAN-E-ISLAMIA NEWHAM",
+    "slug": "markazi-jamia-masjid-newham"
+  },
+  {
+    "placeId": "anjuman-hidaya-heathrow-masjid-mib-1749",
+    "source": "masjidbox",
+    "placeName": "Anjuman Hidaya Heathrow Masjid",
+    "url": "https://masjidbox.com/prayer-times/heathrow-jamia-masjid",
+    "masjidboxName": "HEATHROW JAMIA MASJID",
+    "slug": "heathrow-jamia-masjid"
+  },
+  {
     "placeId": "ashton-jame-mosque-islamic-centre-mib-2719",
     "source": "mawaqit",
     "placeName": "Ashton Jame' Mosque & Islamic Centre",
@@ -180,6 +197,14 @@
     "lat": 53.5814843,
     "lng": -2.4600135,
     "matchedDistanceM": 12
+  },
+  {
+    "placeId": "bait-ul-aziz-islamic-cultural-centre-mib-1322",
+    "source": "masjidbox",
+    "placeName": "Bait-ul-Aziz Islamic Cultural Centre",
+    "url": "https://masjidbox.com/prayer-times/baitulaziz-icc",
+    "masjidboxName": "BAITUL AZIZ ISLAMIC CULTURAL CENTRE",
+    "slug": "baitulaziz-icc"
   },
   {
     "placeId": "bath-islamic-centre-and-mosque-mib-44",
@@ -268,6 +293,14 @@
     "lat": 51.481,
     "lng": -2.589,
     "matchedDistanceM": 44
+  },
+  {
+    "placeId": "cambridge-university-islamic-society-mib-567",
+    "source": "masjidbox",
+    "placeName": "Cambridge University Islamic Society",
+    "url": "https://masjidbox.com/prayer-times/cambridge-university-islamic-society-prayer-room",
+    "masjidboxName": "Cambridge University Islamic Society Prayer Room",
+    "slug": "cambridge-university-islamic-society-prayer-room"
   },
   {
     "placeId": "cavan-islamic-society-mib-600",
@@ -385,6 +418,14 @@
     "lat": 53.6827273,
     "lng": -1.8383437,
     "matchedDistanceM": 3
+  },
+  {
+    "placeId": "epsom-islamic-centre-mib-2622",
+    "source": "masjidbox",
+    "placeName": "Epsom Islamic Centre",
+    "url": "https://masjidbox.com/prayer-times/epsom-and-ewell-islamic-centre",
+    "masjidboxName": "Epsom and Ewell Islamic Centre",
+    "slug": "epsom-and-ewell-islamic-centre"
   },
   {
     "placeId": "faizan-e-islam-mib-1479",
@@ -519,6 +560,14 @@
     "matchedDistanceM": 4
   },
   {
+    "placeId": "goldington-islamic-centre-way-925372524",
+    "source": "masjidbox",
+    "placeName": "Goldington Islamic Centre",
+    "url": "https://masjidbox.com/prayer-times/goldington-islamic-centre",
+    "masjidboxName": "Goldington Islamic Centre",
+    "slug": "goldington-islamic-centre"
+  },
+  {
     "placeId": "hadayat-ul-muslimeen-mosque-mib-1853",
     "source": "mawaqit",
     "placeName": "Hadayat ul Muslimeen Mosque",
@@ -563,6 +612,14 @@
     "matchedDistanceM": 13
   },
   {
+    "placeId": "holborn-muslim-community-association-mib-1090",
+    "source": "masjidbox",
+    "placeName": "Holborn Muslim Community Association",
+    "url": "https://masjidbox.com/prayer-times/holborn-mosque",
+    "masjidboxName": "Holborn Mosque",
+    "slug": "holborn-mosque"
+  },
+  {
     "placeId": "huda-community-centre-mib-2830",
     "source": "mawaqit",
     "placeName": "Huda Community Centre",
@@ -572,6 +629,14 @@
     "lat": 52.4916923,
     "lng": -1.9056951,
     "matchedDistanceM": 8
+  },
+  {
+    "placeId": "ilford-islamic-centre-mib-1307",
+    "source": "masjidbox",
+    "placeName": "Ilford Islamic Centre",
+    "url": "https://masjidbox.com/prayer-times/ilfordmosque",
+    "masjidboxName": "Ilford Islamic Centre",
+    "slug": "ilfordmosque"
   },
   {
     "placeId": "iqraa-ethiopian-muslim-centre-node-12169889359",
@@ -640,6 +705,14 @@
     "matchedDistanceM": 56
   },
   {
+    "placeId": "jamia-islamia-central-mosque-mib-1856",
+    "source": "masjidbox",
+    "placeName": "Jamia Islamia & Central Mosque",
+    "url": "https://masjidbox.com/prayer-times/city-jamia-masjid",
+    "masjidboxName": "City Jamia Masjid",
+    "slug": "city-jamia-masjid"
+  },
+  {
     "placeId": "jamia-masjid-bilal-mib-587",
     "source": "mawaqit",
     "placeName": "Jamia Masjid Bilal",
@@ -649,6 +722,14 @@
     "lat": 51.4836385,
     "lng": -3.200401,
     "matchedDistanceM": 24
+  },
+  {
+    "placeId": "jamia-masjid-ghosia-mib-1392",
+    "source": "masjidbox",
+    "placeName": "Jamia Masjid Ghosia",
+    "url": "https://masjidbox.com/prayer-times/wfialondon",
+    "masjidboxName": "Waltham Forest Islamic Association",
+    "slug": "wfialondon"
   },
   {
     "placeId": "jamia-mosque-sultania-education-centre-mib-2864",
@@ -682,6 +763,14 @@
     "lat": 53.7825494,
     "lng": -1.7355987,
     "matchedDistanceM": 6
+  },
+  {
+    "placeId": "khanqah-naqshbandia-mujaddidia-mib-1839",
+    "source": "masjidbox",
+    "placeName": "Khanqah Naqshbandia Mujaddidia",
+    "url": "https://masjidbox.com/prayer-times/khanqah-naqshbandia",
+    "masjidboxName": "Khanqah Naqshbandia",
+    "slug": "khanqah-naqshbandia"
   },
   {
     "placeId": "kings-cross-mosque-and-islamic-cultural-centre-mib-1091",
@@ -726,6 +815,14 @@
     "lat": 51.8866343,
     "lng": -0.4285811,
     "matchedDistanceM": 7
+  },
+  {
+    "placeId": "madinatul-ilm-way-1413120285",
+    "source": "masjidbox",
+    "placeName": "Madinatul Ilm",
+    "url": "https://masjidbox.com/prayer-times/madinatul-ilm",
+    "masjidboxName": "Madinatul Ilm",
+    "slug": "madinatul-ilm"
   },
   {
     "placeId": "madni-masjid-and-muslims-education-centre-mib-1972",
@@ -803,6 +900,14 @@
     "lat": 52.6285706,
     "lng": -1.1187947,
     "matchedDistanceM": 7
+  },
+  {
+    "placeId": "markazi-jame-masjid-riza-and-islamic-centre-mib-868",
+    "source": "masjidbox",
+    "placeName": "Markazi Jame Masjid Riza and Islamic Centre",
+    "url": "https://masjidbox.com/prayer-times/masjidriza",
+    "masjidboxName": "Markazi Jamia Masjid Riza & Islamic Centre",
+    "slug": "masjidriza"
   },
   {
     "placeId": "markazi-jamia-masjid-ghausia-mib-873",
@@ -893,6 +998,14 @@
     "matchedDistanceM": 91
   },
   {
+    "placeId": "masjid-as-sunnah-an-nabawiyyah-mib-109",
+    "source": "masjidbox",
+    "placeName": "Masjid As-Sunnah An-Nabawiyyah",
+    "url": "https://masjidbox.com/prayer-times/astonmasjid",
+    "masjidboxName": "Masjidus Sunnah An Nabawiyyah",
+    "slug": "astonmasjid"
+  },
+  {
     "placeId": "masjid-at-taqwa-mib-1938",
     "source": "mawaqit",
     "placeName": "Masjid at-Taqwa",
@@ -902,6 +1015,14 @@
     "lat": 51.5749096,
     "lng": -2.9884931,
     "matchedDistanceM": 5
+  },
+  {
+    "placeId": "masjid-at-tauwheed-mib-814",
+    "source": "masjidbox",
+    "placeName": "Masjid-at-Tauwheed",
+    "url": "https://masjidbox.com/prayer-times/masjid-at-tauwheed",
+    "masjidboxName": "Masjid At'Tauwheed",
+    "slug": "masjid-at-tauwheed"
   },
   {
     "placeId": "masjid-at-tawheed-mib-1720",
@@ -970,6 +1091,22 @@
     "matchedDistanceM": 45
   },
   {
+    "placeId": "masjid-ibrahim-mib-1273",
+    "source": "masjidbox",
+    "placeName": "Masjid Ibrahim",
+    "url": "https://masjidbox.com/prayer-times/ukim-masjid-ibrahim",
+    "masjidboxName": "UKIM Masjid Ibrahim & Islamic Centre",
+    "slug": "ukim-masjid-ibrahim"
+  },
+  {
+    "placeId": "masjid-khadijah-and-islamic-centre-mib-2062",
+    "source": "masjidbox",
+    "placeName": "Masjid Khadijah and Islamic Centre",
+    "url": "https://masjidbox.com/prayer-times/khadijah",
+    "masjidboxName": "UKIM Masjid Khadijah & Islamic Centre",
+    "slug": "khadijah"
+  },
+  {
     "placeId": "masjid-mu-adh-ibn-jabal-mib-631",
     "source": "mawaqit",
     "placeName": "Masjid Mu'adh ibn Jabal",
@@ -990,6 +1127,22 @@
     "lat": 51.5509809,
     "lng": -0.0740086,
     "matchedDistanceM": 15
+  },
+  {
+    "placeId": "masjid-tauheedul-islam-mib-317",
+    "source": "masjidbox",
+    "placeName": "Masjid Tauheedul Islam",
+    "url": "https://masjidbox.com/prayer-times/masjid-e-tauheedul-islam",
+    "slug": "masjid-e-tauheedul-islam",
+    "masjidboxName": "Masjid e Tauheedul Islam"
+  },
+  {
+    "placeId": "masjid-ur-rahmah-mib-2248",
+    "source": "masjidbox",
+    "placeName": "Masjid ur Rahmah",
+    "url": "https://masjidbox.com/prayer-times/masjid-ar-rahmah-1735569516980",
+    "masjidboxName": "Masjid Ar-Rahmah",
+    "slug": "masjid-ar-rahmah-1735569516980"
   },
   {
     "placeId": "masjid-usman-mib-1031",
@@ -1034,6 +1187,14 @@
     "lat": 51.5557341,
     "lng": -0.216654,
     "matchedDistanceM": 6
+  },
+  {
+    "placeId": "muslim-community-trust-jamia-masjid-mib-1389",
+    "source": "masjidbox",
+    "placeName": "Muslim Community Trust (Jamia Masjid)",
+    "url": "https://masjidbox.com/prayer-times/mctleyton",
+    "masjidboxName": "MCT Leyton Jamia Masjid",
+    "slug": "mctleyton"
   },
   {
     "placeId": "muslim-cultural-centre-wollaton-way-356861004",
@@ -1102,6 +1263,14 @@
     "matchedDistanceM": 11
   },
   {
+    "placeId": "norwich-and-norfolk-muslim-association-mib-267",
+    "source": "masjidbox",
+    "placeName": "Norwich and Norfolk Muslim Association",
+    "url": "https://masjidbox.com/prayer-times/nnma",
+    "masjidboxName": "NNMA",
+    "slug": "nnma"
+  },
+  {
     "placeId": "peacehaven-mosque-way-1287258792",
     "source": "mawaqit",
     "placeName": "Peacehaven Mosque",
@@ -1122,6 +1291,14 @@
     "lat": 50.376910036718,
     "lng": -4.1412634038981,
     "matchedDistanceM": 7
+  },
+  {
+    "placeId": "purley-masjid-mib-374",
+    "source": "masjidbox",
+    "placeName": "Purley Masjid",
+    "url": "https://masjidbox.com/prayer-times/purley-masjid",
+    "masjidboxName": "Purley Masjid",
+    "slug": "purley-masjid"
   },
   {
     "placeId": "rabbaniah-islamic-cultural-centre-mib-634",
@@ -1146,6 +1323,22 @@
     "matchedDistanceM": 85
   },
   {
+    "placeId": "romford-mosque-mib-1192",
+    "source": "masjidbox",
+    "placeName": "Romford Mosque",
+    "url": "https://masjidbox.com/prayer-times/romford-mosque",
+    "slug": "romford-mosque",
+    "masjidboxName": "Romford Mosque"
+  },
+  {
+    "placeId": "shadwell-jamme-masjid-mib-1373",
+    "source": "masjidbox",
+    "placeName": "Shadwell Jamme Masjid",
+    "url": "https://masjidbox.com/prayer-times/shadwell-jame-masjid",
+    "masjidboxName": "Shadwell Jame Masjid",
+    "slug": "shadwell-jame-masjid"
+  },
+  {
     "placeId": "shah-jalal-mosque-and-islamic-cultural-centre-mib-573",
     "source": "mawaqit",
     "placeName": "Shah Jalal Mosque and Islamic Cultural Centre",
@@ -1166,6 +1359,14 @@
     "lat": 51.5909457,
     "lng": -2.9835106,
     "matchedDistanceM": 15
+  },
+  {
+    "placeId": "shah-poran-masjid-and-islamic-centre-trust-mib-1153",
+    "source": "masjidbox",
+    "placeName": "Shah Poran Masjid And Islamic Centre Trust",
+    "url": "https://masjidbox.com/prayer-times/shahporan",
+    "masjidboxName": "Shahporan Masjid",
+    "slug": "shahporan"
   },
   {
     "placeId": "sheffield-islamic-centre-and-madina-masjid-mib-2222",
@@ -1199,6 +1400,14 @@
     "lat": 51.6160588,
     "lng": -3.990131,
     "matchedDistanceM": 186
+  },
+  {
+    "placeId": "south-essex-islamic-community-centre-way-616755825",
+    "source": "masjidbox",
+    "placeName": "South Essex Islamic Community Centre",
+    "url": "https://masjidbox.com/prayer-times/south-essex-islamic-trust",
+    "masjidboxName": "South Essex Islamic trust",
+    "slug": "south-essex-islamic-trust"
   },
   {
     "placeId": "south-wales-islamic-centre-mib-570",
@@ -1366,6 +1575,14 @@
     "matchedDistanceM": 3
   },
   {
+    "placeId": "ukim-jamie-darul-isra-mosque-mib-594",
+    "source": "masjidbox",
+    "placeName": "UKIM - Jamie Darul Isra' Mosque",
+    "url": "https://masjidbox.com/prayer-times/dar-ul-isra",
+    "masjidboxName": "Dar Ul Isra",
+    "slug": "dar-ul-isra"
+  },
+  {
     "placeId": "valide-sultan-c-acirc-mii-mib-1148",
     "source": "mawaqit",
     "placeName": "Valide Sultan Câmii",
@@ -1375,6 +1592,14 @@
     "lat": 51.5572222,
     "lng": -0.0838785,
     "matchedDistanceM": 14
+  },
+  {
+    "placeId": "wapping-noorani-masjid-cultural-centre-mib-17080304",
+    "source": "masjidbox",
+    "placeName": "Wapping Noorani Masjid & Cultural Centre",
+    "url": "https://masjidbox.com/prayer-times/wapping-noorani-masjid-and-cultural-centre",
+    "masjidboxName": "Wapping Noorani Masjid & Cultural Centre",
+    "slug": "wapping-noorani-masjid-and-cultural-centre"
   },
   {
     "placeId": "waterford-musalla-mib-2365",
@@ -1388,6 +1613,14 @@
     "matchedDistanceM": 4
   },
   {
+    "placeId": "west-norwood-mosque-mib-1444",
+    "source": "masjidbox",
+    "placeName": "West Norwood Mosque",
+    "url": "https://masjidbox.com/prayer-times/west-norwood-mosque",
+    "masjidboxName": "West Norwood Mosque",
+    "slug": "west-norwood-mosque"
+  },
+  {
     "placeId": "wimbledon-mosque-mib-1260",
     "source": "mawaqit",
     "placeName": "Wimbledon Mosque",
@@ -1397,6 +1630,14 @@
     "lat": 51.4359221,
     "lng": -0.1969466,
     "matchedDistanceM": 68
+  },
+  {
+    "placeId": "winchester-islamic-centre-way-227651356",
+    "source": "masjidbox",
+    "placeName": "Winchester Islamic Centre",
+    "url": "https://masjidbox.com/prayer-times/wmca",
+    "masjidboxName": "Winchester Muslim Cultural Association",
+    "slug": "wmca"
   },
   {
     "placeId": "woodfarm-education-centre-mib-805",
