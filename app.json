@@ -40,6 +40,13 @@
           }
         }
       ]
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "56355049-a6df-42d8-ac99-d5bfd0bbc2ad"
+      }
+    },
+    "owner": "shezzi"
   }
 }
