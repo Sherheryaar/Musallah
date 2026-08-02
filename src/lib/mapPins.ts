@@ -119,6 +119,71 @@ function groupIntoCells(
   return { singles, clusters };
 }
 
+/** One marker slot's occupant: a pin, a cluster bubble, or nothing. */
+export type Slot =
+  | { kind: "pin"; candidate: PinCandidate }
+  | { kind: "cluster"; cluster: PinCluster }
+  | null;
+
+/** Stable identity for a slot occupant, across region changes. */
+function slotKey(slot: NonNullable<Slot>): string {
+  return slot.kind === "pin" ? `p:${slot.candidate.place.id}` : `c:${slot.cluster.key}`;
+}
+
+/**
+ * Decide WHICH marker slot each pin/cluster occupies, keeping a place in the
+ * same slot for as long as it stays on screen.
+ *
+ * WHY THIS EXISTS: the marker pool is fixed (see MAX_MARKERS) and every slot
+ * is a long-lived native marker keyed by its index. Filling slots in list
+ * order looked fine but meant one place entering or leaving the viewport
+ * shifted every later place down a slot. Tapping a marker nudges the map to
+ * fit the callout, which fires a region change, which re-filled the slots —
+ * so the callout you had just opened kept its position but silently re-
+ * labelled itself with a neighbouring masjid's name, and its tap target
+ * became that neighbour too.
+ *
+ * Assignment is idempotent: feeding the returned map back in with the same
+ * groups reproduces the same slots exactly.
+ */
+export function assignSlots(
+  groups: PinGroups,
+  previous: ReadonlyMap<string, number> = new Map(),
+  maxMarkers: number = MAX_MARKERS,
+): { slots: Slot[]; assignment: Map<string, number> } {
+  const wanted: NonNullable<Slot>[] = [
+    ...groups.clusters.map((cluster) => ({ kind: "cluster" as const, cluster })),
+    ...groups.singles.map((candidate) => ({ kind: "pin" as const, candidate })),
+  ].slice(0, maxMarkers);
+
+  const slots: Slot[] = new Array(maxMarkers).fill(null);
+  const assignment = new Map<string, number>();
+
+  // Keep whatever was already on screen exactly where it was...
+  const unplaced: NonNullable<Slot>[] = [];
+  for (const slot of wanted) {
+    const key = slotKey(slot);
+    const index = previous.get(key);
+    if (index !== undefined && index < maxMarkers && slots[index] === null) {
+      slots[index] = slot;
+      assignment.set(key, index);
+    } else {
+      unplaced.push(slot);
+    }
+  }
+
+  // ...then drop newcomers into whatever slots that left free.
+  let next = 0;
+  for (const slot of unplaced) {
+    while (next < maxMarkers && slots[next] !== null) next++;
+    if (next >= maxMarkers) break;
+    slots[next] = slot;
+    assignment.set(slotKey(slot), next);
+  }
+
+  return { slots, assignment };
+}
+
 /**
  * Group the in-view places for rendering. The result NEVER exceeds
  * `maxMarkers` total markers (singles + clusters):

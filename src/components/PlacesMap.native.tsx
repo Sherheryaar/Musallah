@@ -6,11 +6,12 @@ import { PLACE_TYPE_LABELS, Place } from "@/data/places";
 import { useTheme } from "@/context/ThemeContext";
 import { formatDistance } from "@/lib/distance";
 import {
+  assignSlots,
   buildPinGroups,
-  MAX_MARKERS,
   type MapRegion,
   type PinCandidate,
   type PinCluster,
+  type Slot,
 } from "@/lib/mapPins";
 
 // Google Maps (Android) needs an explicit style array for dark mode; Apple
@@ -61,12 +62,6 @@ const FALLBACK_REGION = {
 // Where unused pool markers park: a valid coordinate in the Gulf of Guinea,
 // far outside UK/Ireland coverage, rendered at opacity 0.
 const HIDDEN_COORDINATE = { latitude: 0, longitude: 0 };
-
-// One reusable marker slot: a pin, a cluster bubble, or empty (hidden).
-type Slot =
-  | { kind: "pin"; candidate: PinCandidate }
-  | { kind: "cluster"; cluster: PinCluster }
-  | null;
 
 // Small pre-rendered PNG dots, one colour per place type -- generated at
 // 1x/2x/3x by scripts/gen-pin-assets.js (colours mirror src/lib/theme.ts).
@@ -215,15 +210,18 @@ export default function PlacesMap({
   // react-native-maps#5217, seen on an iPhone XR in Expo Go every time
   // clustering swapped the marker set). Region changes only MOVE markers
   // and swap their images; unused slots hide at opacity 0.
+  //
+  // WHICH slot each place lands in is remembered between renders (see
+  // assignSlots). Filling them in list order meant one place leaving the
+  // viewport shifted every later place down a slot — and since tapping a
+  // marker nudges the map to fit its callout, which fires a region change,
+  // the callout you had just opened would re-label itself with a nearby
+  // masjid's name while staying anchored over the dot you tapped.
+  const assignment = useRef<Map<string, number>>(new Map());
   const slots = useMemo<Slot[]>(() => {
-    const arr: Slot[] = [];
-    for (const cluster of clusters) arr.push({ kind: "cluster", cluster });
-    for (const candidate of singles) arr.push({ kind: "pin", candidate });
-    // buildPinGroups guarantees the bound; slice is belt-and-braces so the
-    // pool can never grow (growth = marker insertion = the crash path).
-    const bounded = arr.slice(0, MAX_MARKERS);
-    while (bounded.length < MAX_MARKERS) bounded.push(null);
-    return bounded;
+    const next = assignSlots({ singles, clusters }, assignment.current);
+    assignment.current = next.assignment;
+    return next.slots;
   }, [singles, clusters]);
 
   return (

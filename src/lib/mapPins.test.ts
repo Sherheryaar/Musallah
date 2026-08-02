@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
 
 import { FACILITY_KEYS, type FacilityKey, type Place } from "@/data/places";
-import { buildPinGroups, clusterBucket, type PinCandidate } from "./mapPins";
+import {
+  assignSlots,
+  buildPinGroups,
+  clusterBucket,
+  type PinCandidate,
+} from "./mapPins";
 
 const facilities = Object.fromEntries(
   FACILITY_KEYS.map((k) => [k, false]),
@@ -147,5 +152,89 @@ describe("clusterBucket", () => {
     expect(clusterBucket(99)).toBe("50+");
     expect(clusterBucket(250)).toBe("200+");
     expect(clusterBucket(2280)).toBe("500+");
+  });
+});
+
+describe("assignSlots", () => {
+  // The reported bug: tap a dot, the callout shows the right name for a
+  // moment and then re-labels itself with a nearby place's name, while
+  // staying anchored over the dot you tapped. Opening a callout nudges the
+  // map to fit it, that fires a region change, and the pin list is rebuilt —
+  // so a place entering or leaving the edge of the viewport used to shift
+  // every later place into a different marker slot.
+  const region = (lat: number) => ({
+    latitude: lat,
+    longitude: 0,
+    latitudeDelta: 0.05,
+    longitudeDelta: 0.05,
+  });
+
+  // Five places in a north-south line. A small pan drops the northernmost
+  // out of view, exactly as tapping a southern pin would.
+  const places = [
+    pin("a", 0.02, 0),
+    pin("b", 0.01, 0),
+    pin("c", 0.0, 0),
+    pin("d", -0.01, 0),
+    pin("e", -0.02, 0),
+  ];
+
+  const idAt = (slots: ReturnType<typeof assignSlots>["slots"], i: number) => {
+    const slot = slots[i];
+    return slot?.kind === "pin" ? slot.candidate.place.id : null;
+  };
+
+  it("keeps a place in its slot when the viewport shifts", () => {
+    const before = buildPinGroups(places, region(0), 10);
+    const first = assignSlots(before, new Map(), 10);
+
+    // Pan south far enough to drop "a" and "b" out of view.
+    const after = buildPinGroups(places, region(-0.025), 10);
+    const second = assignSlots(after, first.assignment, 10);
+
+    // Every place still on screen must be in the SAME slot as before.
+    for (const id of ["c", "d", "e"]) {
+      const was = first.assignment.get(`p:${id}`);
+      expect(second.assignment.get(`p:${id}`)).toBe(was);
+      expect(idAt(second.slots, was!)).toBe(id);
+    }
+    // ...and a departed place's slot is empty, not silently reused.
+    expect(idAt(second.slots, first.assignment.get("p:a")!)).toBeNull();
+    expect(idAt(second.slots, first.assignment.get("p:b")!)).toBeNull();
+  });
+
+  it("would have re-labelled markers without stable assignment", () => {
+    // Proves the old behaviour was genuinely broken: filling slots in list
+    // order puts a different place in slot 0 once "a" scrolls out of view.
+    const before = buildPinGroups(places, region(0), 10);
+    const after = buildPinGroups(places, region(-0.025), 10);
+    expect(before.singles[0].place.id).toBe("a");
+    expect(after.singles[0].place.id).not.toBe("a");
+  });
+
+  it("gives a departed place's slot to a newcomer", () => {
+    const first = assignSlots(buildPinGroups(places, region(0), 10), new Map(), 10);
+    const freed = first.assignment.get("p:a")!;
+    const withNew = [...places.slice(1), pin("f", -0.03, 0)];
+    const second = assignSlots(
+      buildPinGroups(withNew, region(-0.025), 10),
+      first.assignment,
+      10,
+    );
+    expect(idAt(second.slots, freed)).toBe("f");
+  });
+
+  it("is idempotent, so a re-render cannot reshuffle anything", () => {
+    const groups = buildPinGroups(places, region(0), 10);
+    const once = assignSlots(groups, new Map(), 10);
+    const twice = assignSlots(groups, once.assignment, 10);
+    expect(twice.slots).toEqual(once.slots);
+  });
+
+  it("never exceeds the fixed pool, and pads with empty slots", () => {
+    const groups = buildPinGroups(places, region(0), 10);
+    const { slots } = assignSlots(groups, new Map(), 10);
+    expect(slots).toHaveLength(10);
+    expect(slots.filter(Boolean)).toHaveLength(5);
   });
 });
