@@ -36,8 +36,7 @@ export default function OfflineScreen({ onRetry }: Props) {
       <Text style={styles.title}>You're offline</Text>
       <Text style={styles.body}>
         Musallah needs an internet connection to find mosques and prayer
-        spaces near you — the list isn't stored on your phone. Prayer times
-        and the Qibla direction don't need one and still work.
+        spaces near you.
       </Text>
       <TouchableOpacity
         style={[styles.retryButton, retrying && styles.retryButtonBusy]}
