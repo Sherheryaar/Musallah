@@ -1,17 +1,22 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
+  Animated,
   BackHandler,
+  ScrollView,
   StyleSheet,
   Text,
-  TouchableOpacity,
   View,
 } from "react-native";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import Touchable from "./Touchable";
 import { FACILITY_KEYS, FACILITY_LABELS, FacilityKey } from "@/data/places";
 import { useTheme } from "@/context/ThemeContext";
+import { elevation } from "@/lib/elevation";
 import { radius, spacing, type ThemeColors } from "@/lib/theme";
+import { useReducedMotion } from "@/lib/useReducedMotion";
+import { useSheetAnimation } from "@/lib/useSheetAnimation";
 
 type Props = {
   visible: boolean;
@@ -40,9 +45,15 @@ export default function FilterSheet({
   onClear,
   onClose,
 }: Props) {
-  const { colors } = useTheme();
-  const styles = useMemo(() => createStyles(colors), [colors]);
+  const { colors, scheme } = useTheme();
+  const styles = useMemo(() => createStyles(colors, scheme), [colors, scheme]);
   const insets = useSafeAreaInsets();
+  const reduceMotion = useReducedMotion();
+  const { mounted, progress } = useSheetAnimation(visible, reduceMotion);
+  // Cached in a ref, with a sensible fallback: measuring is only possible
+  // AFTER the first layout, and without the fallback the very first open
+  // would slide from 0 and appear not to move at all.
+  const cardHeight = useRef(420);
 
   // Android hardware/gesture back closes the sheet instead of the screen.
   useEffect(() => {
@@ -54,32 +65,78 @@ export default function FilterSheet({
     return () => sub.remove();
   }, [visible, onClose]);
 
-  if (!visible) return null;
+  if (!mounted) return null;
 
   const totalActive = active.size + (corroboratedOnly ? 1 : 0);
 
   return (
-    <View style={styles.backdrop}>
-      <TouchableOpacity
+    // accessibilityViewIsModal goes on the BACKDROP, not the card: it makes
+    // VoiceOver ignore this view's SIBLINGS, and the siblings that need
+    // ignoring are the map, the search box and the list underneath. Without
+    // it the reader swiped straight through the scrim into the screen below.
+    //
+    // onAccessibilityEscape is the iOS counterpart to the Android
+    // BackHandler above — the two-finger-Z gesture — not a duplicate of it.
+    <Animated.View
+      style={[styles.backdrop, { opacity: progress }]}
+      // Without this the fading-out scrim keeps eating taps for the whole
+      // 180ms exit.
+      pointerEvents={visible ? "auto" : "none"}
+      accessibilityViewIsModal
+      onAccessibilityEscape={onClose}
+    >
+      <Touchable
         style={styles.backdropTouch}
         onPress={onClose}
         accessibilityRole="button"
         accessibilityLabel="Close filters"
+        // The scrim is a big empty target that reads as noise in the
+        // rotor; the header's own close affordances cover this action.
+        accessibilityElementsHidden
+        importantForAccessibility="no-hide-descendants"
       />
-      <View
+      <Animated.View
+        onLayout={(e) => {
+          cardHeight.current = e.nativeEvent.layout.height;
+        }}
         style={[
           styles.card,
           { paddingBottom: spacing.xl + Math.max(insets.bottom, spacing.s) },
+          {
+            transform: [
+              {
+                translateY: progress.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [cardHeight.current, 0],
+                }),
+              },
+            ],
+          },
         ]}
       >
         <View style={styles.headerRow}>
           <Text style={styles.title}>Filters</Text>
           {active.size > 0 || corroboratedOnly ? (
-            <TouchableOpacity onPress={onClear} accessibilityRole="button">
+            <Touchable
+              onPress={onClear}
+              accessibilityRole="button"
+              accessibilityLabel="Clear all filters"
+              // The destructive action in this sheet, and it was the
+              // smallest target in it.
+              hitSlop={{ top: 14, bottom: 14, left: 16, right: 16 }}
+            >
               <Text style={styles.clear}>Clear all</Text>
-            </TouchableOpacity>
+            </Touchable>
           ) : null}
         </View>
+        {/* Scrolls so the sheet stays usable at large system font sizes.
+            At 200% the card previously overflowed off the TOP of the screen
+            and the title, "Clear all" and the first filters became
+            unreachable, with nothing to scroll. */}
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={styles.scrollContent}
+        >
         <Text style={styles.subtitle}>
           Only show places with everything you tick. Your choices are saved
           for next time.
@@ -87,7 +144,7 @@ export default function FilterSheet({
         {FACILITY_KEYS.map((key) => {
           const isActive = active.has(key);
           return (
-            <TouchableOpacity
+            <Touchable
               key={key}
               style={styles.row}
               onPress={() => onToggle(key)}
@@ -105,11 +162,11 @@ export default function FilterSheet({
                   />
                 ) : null}
               </View>
-            </TouchableOpacity>
+            </Touchable>
           );
         })}
         <Text style={styles.sectionTitle}>Data quality</Text>
-        <TouchableOpacity
+        <Touchable
           style={styles.row}
           onPress={onToggleCorroborated}
           accessibilityRole="checkbox"
@@ -132,9 +189,10 @@ export default function FilterSheet({
               />
             ) : null}
           </View>
-        </TouchableOpacity>
+        </Touchable>
+        </ScrollView>
 
-        <TouchableOpacity
+        <Touchable
           style={styles.doneButton}
           onPress={onClose}
           accessibilityRole="button"
@@ -146,13 +204,13 @@ export default function FilterSheet({
                 } on`
               : "Done"}
           </Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+        </Touchable>
+      </Animated.View>
+    </Animated.View>
   );
 }
 
-const createStyles = (colors: ThemeColors) =>
+const createStyles = (colors: ThemeColors, scheme: "light" | "dark") =>
   StyleSheet.create({
   backdrop: {
     ...StyleSheet.absoluteFillObject,
@@ -169,6 +227,24 @@ const createStyles = (colors: ThemeColors) =>
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: spacing.xl,
+    gap: spacing.s,
+    // Never taller than most of the screen, so the sheet cannot grow off
+    // the top when the system font is scaled up.
+    maxHeight: "85%",
+    // Android draws elevation shadows in black, which is invisible against
+    // the dark theme's near-black backdrop — the border is what gives the
+    // sheet an edge there.
+    borderTopWidth: 1,
+    borderColor: colors.border,
+    ...elevation(scheme, "sheet"),
+  },
+  scroll: {
+    // flexShrink, NOT flex: 1 — flex would make the scroll region claim the
+    // whole 85% card even when there are only six short rows, stranding the
+    // Done button at the bottom of a mostly empty sheet.
+    flexShrink: 1,
+  },
+  scrollContent: {
     gap: spacing.s,
   },
   headerRow: {
@@ -240,6 +316,8 @@ const createStyles = (colors: ThemeColors) =>
     backgroundColor: colors.accent,
     alignItems: "center",
     justifyContent: "center",
+    // Clips the Android ripple to the rounded corners.
+    overflow: "hidden",
   },
   // canvas, not literal white: the dark theme's accent is a LIGHT green,
   // where white text fails contrast — canvas flips to near-black there.

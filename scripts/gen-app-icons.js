@@ -6,11 +6,24 @@
  * Run with: node scripts/gen-app-icons.js
  *
  * Outputs:
- *   assets/icon.png       1024×1024  app icon (app.json "icon"; iOS requires
- *                                    a full-bleed opaque square — the OS
- *                                    rounds the corners itself)
- *   public/icon-512.png    512×512   PWA manifest icon
- *   public/icon-192.png    192×192   PWA manifest icon + favicon/apple-touch
+ *   assets/icon.png                 1024×1024  app icon (app.json "icon"; iOS
+ *                                              requires a full-bleed opaque
+ *                                              square — the OS rounds the
+ *                                              corners itself)
+ *   public/icon-512.png              512×512   PWA manifest icon
+ *   public/icon-192.png              192×192   PWA manifest icon + favicon
+ *   assets/adaptive-icon.png        1024×1024  Android adaptive foreground
+ *                                              (transparent; composited over
+ *                                              adaptiveIcon.backgroundColor)
+ *   assets/adaptive-icon-mono.png   1024×1024  Android 13+ themed icon
+ *   assets/notification-icon.png       96×96   Android notification small
+ *                                              icon (alpha-only stencil)
+ *
+ * The three transparent assets exist because Android does not treat a
+ * plain square icon the way iOS does: without an adaptive icon it badges
+ * the legacy square, and without a dedicated notification icon it falls
+ * back to the launcher icon and renders it as a SOLID WHITE BLOCK in the
+ * status bar for every prayer reminder.
  */
 const fs = require("fs");
 const path = require("path");
@@ -44,10 +57,37 @@ function inGlyph(x, y) {
   );
 }
 
-/** Render at `size` px, 4×4 supersampled, fully opaque (iOS forbids alpha). */
-function makeIcon(size) {
-  const [br, bg, bb] = hexToRgb(BACKGROUND);
+// The glyph's own bounding box in unit space: x spans the two minarets,
+// y runs from the minaret caps to the base of the hall. Its centre sits
+// BELOW the canvas centre, which is why re-centring is not a no-op.
+const GLYPH_BOX = { x1: 0.13, y1: 0.355, x2: 0.87, y2: 0.74 };
+const GLYPH_CX = (GLYPH_BOX.x1 + GLYPH_BOX.x2) / 2;
+const GLYPH_CY = (GLYPH_BOX.y1 + GLYPH_BOX.y2) / 2;
+const GLYPH_W = GLYPH_BOX.x2 - GLYPH_BOX.x1;
+
+/**
+ * Render at `size` px, 4×4 supersampled.
+ *
+ * `background: null` writes a transparent canvas and puts the glyph in the
+ * alpha channel — required for Android's adaptive foreground (the OS
+ * composites it over its own background layer and masks the result to
+ * whatever shape the launcher wants) and for the notification icon (where
+ * Android DISCARDS all colour and uses alpha alone as a stencil, so an
+ * opaque square renders as a solid white block in the status bar).
+ *
+ * `fit` scales the glyph to occupy that fraction of the canvas width AND
+ * re-centres it (its bounding box sits slightly below centre as drawn).
+ * Adaptive foregrounds must keep their art inside the central 66% safe
+ * zone, since everything outside can be cropped by the launcher's mask.
+ *
+ * Omitting `fit` leaves the geometry EXACTLY as originally authored —
+ * icon.png and the PWA icons already ship, and re-centring them would move
+ * the mark for no reason.
+ */
+function makeIcon(size, { background = BACKGROUND, fit = null } = {}) {
   const [gr, gg, gb] = hexToRgb(GLYPH);
+  const [br, bg, bb] = background ? hexToRgb(background) : [0, 0, 0];
+  const scale = fit === null ? null : fit / GLYPH_W;
   const SS = 4;
   const rgba = Buffer.alloc(size * size * 4);
 
@@ -58,15 +98,28 @@ function makeIcon(size) {
         for (let sx = 0; sx < SS; sx++) {
           const ux = (x + (sx + 0.5) / SS) / size;
           const uy = (y + (sy + 0.5) / SS) / size;
-          if (inGlyph(ux, uy)) hits++;
+          // Map the canvas point back into glyph space, so the glyph is
+          // scaled about its own centre and lands on the canvas centre.
+          const gx = scale === null ? ux : GLYPH_CX + (ux - 0.5) / scale;
+          const gy = scale === null ? uy : GLYPH_CY + (uy - 0.5) / scale;
+          if (inGlyph(gx, gy)) hits++;
         }
       }
       const t = hits / (SS * SS);
       const i = (y * size + x) * 4;
-      rgba[i] = Math.round(br + (gr - br) * t);
-      rgba[i + 1] = Math.round(bg + (gg - bg) * t);
-      rgba[i + 2] = Math.round(bb + (gb - bb) * t);
-      rgba[i + 3] = 255;
+      if (background) {
+        rgba[i] = Math.round(br + (gr - br) * t);
+        rgba[i + 1] = Math.round(bg + (gg - bg) * t);
+        rgba[i + 2] = Math.round(bb + (gb - bb) * t);
+        rgba[i + 3] = 255;
+      } else {
+        // Premultiplied-safe: keep the glyph colour flat and vary alpha, so
+        // antialiased edges don't fringe against an unknown backdrop.
+        rgba[i] = gr;
+        rgba[i + 1] = gg;
+        rgba[i + 2] = gb;
+        rgba[i + 3] = Math.round(255 * t);
+      }
     }
   }
   return encodePng(size, size, rgba);
@@ -74,13 +127,25 @@ function makeIcon(size) {
 
 const root = path.join(__dirname, "..");
 const outputs = [
-  [path.join(root, "assets", "icon.png"), 1024],
-  [path.join(root, "public", "icon-512.png"), 512],
-  [path.join(root, "public", "icon-192.png"), 192],
+  // iOS + the legacy Android icon: full-bleed, opaque (iOS forbids alpha).
+  [path.join(root, "assets", "icon.png"), 1024, {}],
+  [path.join(root, "public", "icon-512.png"), 512, {}],
+  [path.join(root, "public", "icon-192.png"), 192, {}],
+  // Android adaptive foreground. Transparent, glyph inside the safe zone;
+  // app.json pairs it with backgroundColor #2E7D57 so the composited result
+  // matches icon.png. Without this Android 8+ shrinks the legacy square
+  // into a system-drawn badge.
+  [path.join(root, "assets", "adaptive-icon.png"), 1024, { background: null, fit: 0.6 }],
+  // Android 13+ themed icons: the launcher tints the alpha with the user's
+  // wallpaper palette, so colour here is irrelevant. Drawn slightly smaller
+  // — themed icons are rendered inside a tighter mask than adaptive ones.
+  [path.join(root, "assets", "adaptive-icon-mono.png"), 1024, { background: null, fit: 0.54 }],
+  // Notification small icon. Android renders alpha only, at ~24dp.
+  [path.join(root, "assets", "notification-icon.png"), 96, { background: null, fit: 0.82 }],
 ];
 
-for (const [file, size] of outputs) {
+for (const [file, size, options] of outputs) {
   fs.mkdirSync(path.dirname(file), { recursive: true });
-  fs.writeFileSync(file, makeIcon(size));
+  fs.writeFileSync(file, makeIcon(size, options));
   console.log("wrote", path.relative(root, file), `(${size}x${size})`);
 }

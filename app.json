@@ -14,7 +14,12 @@
     },
     "android": {
       "edgeToEdgeEnabled": true,
-      "package": "com.sheheryaarbaber.masjidlocator"
+      "package": "com.sheheryaarbaber.masjidlocator",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "monochromeImage": "./assets/adaptive-icon-mono.png",
+        "backgroundColor": "#2E7D57"
+      }
     },
     "web": {
       "output": "single",
@@ -23,6 +28,13 @@
     "plugins": [
       "expo-router",
       "expo-font",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#2E7D57"
+        }
+      ],
       [
         "expo-location",
         {

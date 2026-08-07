@@ -2,12 +2,17 @@ import { Link, Stack, type ErrorBoundaryProps } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React, { useMemo } from "react";
 import {
+  I18nManager,
   Text,
   StyleSheet,
   TouchableOpacity,
   View,
   useColorScheme,
 } from "react-native";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import Touchable from "../src/components/Touchable";
+import { useReducedMotion } from "../src/lib/useReducedMotion";
+import { FavouritesProvider } from "../src/context/FavouritesContext";
 import { NotificationsProvider } from "../src/context/NotificationsContext";
 import { PlacesProvider } from "../src/context/PlacesContext";
 import { SettingsProvider } from "../src/context/SettingsContext";
@@ -19,6 +24,22 @@ import {
   spacing,
   type ThemeColors,
 } from "../src/lib/theme";
+
+// Pin the layout direction left-to-right, at MODULE scope so it runs before
+// anything renders (inside a component or an effect is too late, and it
+// must not be conditional).
+//
+// The app's UI is English-only with no translation layer, but Android's
+// `supportsRtl` defaults to true while app.json declares no iOS `locales`.
+// So a user whose system language is Arabic or Urdu — a meaningful slice of
+// this audience — got a HALF-flipped layout on Android and none of it on
+// iOS: `flexDirection: "row"` flips under I18nManager, but `left`/`right`,
+// `paddingRight` and `textAlign: "right"` do not. That asymmetry is the one
+// genuinely bad option, and this removes it.
+//
+// If translations are ever added, take the other branch instead: allow RTL
+// and sweep the layouts onto start/end properties.
+I18nManager.allowRTL(false);
 
 /**
  * Root error boundary (picked up by expo-router). Without it, any uncaught
@@ -32,6 +53,11 @@ export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
     <View style={styles.errorScreen}>
       <Text style={styles.errorTitle}>Something went wrong</Text>
       <Text style={styles.errorBody}>{error.message}</Text>
+      {/* The one TouchableOpacity left in the app, deliberately: Touchable
+          calls useTheme(), and this boundary can render OUTSIDE the
+          ThemeProvider — where it would silently fall back to the light
+          ripple. A last-resort screen should depend on as little as
+          possible. */}
       <TouchableOpacity
         style={styles.errorButton}
         onPress={retry}
@@ -44,15 +70,39 @@ export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
   );
 }
 
+/**
+ * The two global nav actions. Vector icons rather than 🧭 and ⚙️: emoji
+ * ignore `color`, so they were the only chrome in the app that couldn't
+ * follow the theme or the header tint, they render at visibly different
+ * weights and baselines on iOS vs Android, and ⚙️ (U+2699 U+FE0F) can fall
+ * back to a monochrome text glyph on some Android builds.
+ */
+const NAV_ACTIONS = [
+  { href: "/qibla", icon: "compass-outline", label: "Qibla direction" },
+  { href: "/settings", icon: "cog-outline", label: "Settings" },
+] as const;
+
 function HeaderButtons() {
+  const { colors } = useTheme();
   return (
     <View style={staticStyles.headerButtons}>
-      <Link href="/qibla" accessibilityLabel="Qibla direction">
-        <Text style={staticStyles.headerIcon}>{"🧭"}</Text>
-      </Link>
-      <Link href="/settings" accessibilityLabel="Settings">
-        <Text style={staticStyles.headerIcon}>{"⚙️"}</Text>
-      </Link>
+      {NAV_ACTIONS.map(({ href, icon, label }) => (
+        // asChild: expo-router's Link wraps its children in a <Text>, so
+        // without it there is no Touchable in the tree at all and tapping
+        // these produced no feedback on either platform.
+        <Link key={href} href={href} asChild>
+          <Touchable
+            accessibilityRole="button"
+            accessibilityLabel={label}
+            style={staticStyles.headerButton}
+            borderless
+            rippleRadius={21}
+            scaleTo={0.9}
+          >
+            <MaterialCommunityIcons name={icon} size={20} color={colors.text} />
+          </Touchable>
+        </Link>
+      ))}
     </View>
   );
 }
@@ -60,6 +110,7 @@ function HeaderButtons() {
 /** Inside ThemeProvider, so the navigation chrome follows the theme too. */
 function ThemedNavigator() {
   const { scheme, colors } = useTheme();
+  const reduceMotion = useReducedMotion();
   return (
     <>
       <StatusBar style={scheme === "dark" ? "light" : "dark"} />
@@ -71,6 +122,12 @@ function ThemedNavigator() {
           headerTitleStyle: { fontWeight: "600" },
           // Android left-aligns header titles by default; center to match iOS.
           headerTitleAlign: "center",
+          // Unset, every push inherited react-native-screens' platform
+          // default — so the same tap slid on iOS and cross-faded on
+          // Android, two different navigation metaphors for one action.
+          // A 150ms fade is the reduced-motion target rather than "none",
+          // which is jarring enough to read as a bug.
+          animation: reduceMotion ? "fade" : "slide_from_right",
           contentStyle: { backgroundColor: colors.surface },
         }}
       >
@@ -96,7 +153,9 @@ export default function RootLayout() {
       <SettingsProvider>
         <NotificationsProvider>
           <PlacesProvider>
-            <ThemedNavigator />
+            <FavouritesProvider>
+              <ThemedNavigator />
+            </FavouritesProvider>
           </PlacesProvider>
         </NotificationsProvider>
       </SettingsProvider>
@@ -109,11 +168,13 @@ const staticStyles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
   },
-  headerIcon: {
-    fontSize: 18,
-    // Generous padding = a comfortable ~44pt tap target in the header
-    // (18pt glyph + 6pt padding was only ~30pt -- too easy to miss).
+  headerButton: {
+    // 20pt glyph + 12pt padding = ~44pt, the minimum comfortable target.
+    // Padding belongs here rather than on the icon, where it would fight
+    // the `size` prop.
     padding: 12,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
 
@@ -148,7 +209,9 @@ const createStyles = (colors: ThemeColors) =>
       justifyContent: "center",
     },
     errorButtonLabel: {
-      color: "#FFFFFF",
+      // Not "#FFFFFF": on the lightened dark-mode accent that measures
+      // 2.07:1. colors.canvas tracks the theme and clears AA in both.
+      color: colors.canvas,
       fontSize: 15,
       fontWeight: "600",
     },

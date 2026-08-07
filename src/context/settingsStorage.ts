@@ -31,6 +31,13 @@ export type PrayerSettings = {
    * places that are probably real, and most of the dataset is corroborated.
    */
   corroboratedOnly: boolean;
+  /**
+   * Vibration feedback — currently the Qibla compass's lock-on and its
+   * every-15° turn ticks. On by default because a compass you must WATCH to
+   * use is a poor compass, but it must be switchable: a phone that buzzes in
+   * a masjid is exactly the wrong thing to ship without an off switch.
+   */
+  hapticFeedback: boolean;
 };
 
 export const DEFAULT_SETTINGS: PrayerSettings = {
@@ -42,6 +49,7 @@ export const DEFAULT_SETTINGS: PrayerSettings = {
   shafaq: "general",
   facilityFilters: [],
   corroboratedOnly: false,
+  hapticFeedback: true,
 };
 
 // The defaults as they stood for the whole life of settings:v1. Because v1
@@ -81,6 +89,9 @@ export function sanitizeSettings(parsed: unknown): Partial<PrayerSettings> {
     ...(typeof raw.corroboratedOnly === "boolean"
       ? { corroboratedOnly: raw.corroboratedOnly }
       : null),
+    ...(typeof raw.hapticFeedback === "boolean"
+      ? { hapticFeedback: raw.hapticFeedback }
+      : null),
   };
 }
 
@@ -100,7 +111,8 @@ export function migrateV1Settings(parsed: unknown): Partial<PrayerSettings> {
   if (clean.facilityFilters && clean.facilityFilters.length > 0) {
     kept.facilityFilters = clean.facilityFilters;
   }
-  // corroboratedOnly postdates v1, so a v1 blob can never carry a
-  // deliberate choice for it — always let the current default apply.
+  // corroboratedOnly and hapticFeedback both postdate v1, so a v1 blob can
+  // never carry a deliberate choice for either — always let the current
+  // default apply.
   return kept;
 }

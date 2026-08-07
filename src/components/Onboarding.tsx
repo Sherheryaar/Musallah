@@ -1,0 +1,306 @@
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Platform, StyleSheet, Text, View } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import * as Location from "expo-location";
+
+import Touchable from "./Touchable";
+import { useSettings } from "@/context/SettingsContext";
+import { useTheme } from "@/context/ThemeContext";
+import { elevation } from "@/lib/elevation";
+import { radius, spacing, type ThemeColors } from "@/lib/theme";
+
+// First run, before anything asks for anything.
+//
+// Two problems this exists to solve:
+//
+// 1. The location permission was requested cold on mount, with no
+//    explanation. iOS grants exactly ONE prompt — deny it and the dialog
+//    never returns — after which every distance and every prayer time
+//    silently falls back to central London, with no visible cause. A
+//    sentence of context before the prompt is the difference between a
+//    working app and a permanently degraded one.
+//
+// 2. Asr is shipped on 2 mithl (Hanafi) by default and the explanation of
+//    that choice is behind the gear icon. A Shafi'i user therefore gets a
+//    systematically late Asr on every screen and is never told there is a
+//    choice — so it is offered here, once, in the same words Settings uses.
+
+const STORAGE_KEY = "onboarding:v1";
+
+type Props = {
+  /** Called once the user has finished — the caller then reads location. */
+  onDone: () => void;
+};
+
+export default function Onboarding({ onDone }: Props) {
+  const { colors, scheme } = useTheme();
+  const styles = useMemo(() => createStyles(colors, scheme), [colors, scheme]);
+  const { settings, updateSettings } = useSettings();
+  // `null` = storage not read yet. Gating on "has hydrated" rather than on
+  // "the flag is absent" is what stops first-run users seeing a flash of
+  // the map before this appears.
+  const [seen, setSeen] = useState<boolean | null>(null);
+  const [busy, setBusy] = useState(false);
+  // Held in a ref so the resolution effect below never re-runs just because
+  // the caller re-created its callback.
+  const onDoneRef = useRef(onDone);
+  onDoneRef.current = onDone;
+
+  useEffect(() => {
+    let cancelled = false;
+    AsyncStorage.getItem(STORAGE_KEY)
+      .then(async (flag) => {
+        if (cancelled) return;
+        if (flag) {
+          setSeen(true);
+          onDoneRef.current();
+          return;
+        }
+        // Already granted (a reinstall, or the flag was cleared)? Then
+        // there is nothing to explain — don't re-interrupt.
+        // getForegroundPermissionsAsync only READS; it never prompts.
+        const current = await Location.getForegroundPermissionsAsync().catch(
+          () => null,
+        );
+        if (cancelled) return;
+        const granted = current?.status === "granted";
+        setSeen(granted);
+        if (granted) onDoneRef.current();
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setSeen(true);
+        onDoneRef.current();
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const finish = async () => {
+    await AsyncStorage.setItem(STORAGE_KEY, "1").catch(() => {});
+    setSeen(true);
+    onDone();
+  };
+
+  const allow = async () => {
+    if (busy) return;
+    setBusy(true);
+    // The one prompt, fired from a button the user pressed knowing why.
+    await Location.requestForegroundPermissionsAsync().catch(() => {});
+    setBusy(false);
+    void finish();
+  };
+
+  if (seen !== false) return null;
+
+  return (
+    <View style={styles.backdrop} accessibilityViewIsModal>
+      <View style={styles.card}>
+        <MaterialCommunityIcons
+          name="map-marker-radius-outline"
+          size={34}
+          color={colors.accent}
+        />
+        <Text style={styles.title}>Find your nearest place to pray</Text>
+        <Text style={styles.body}>
+          Your location is used on your phone to sort places by distance and
+          to work out prayer times. It never leaves your device {"—"}
+          there is no account, no tracking, and nothing is uploaded.
+        </Text>
+
+        <View style={styles.divider} />
+
+        <Text style={styles.question}>When does Asr begin for you?</Text>
+        <Text style={styles.hint}>
+          Timetables often print both. You can change this any time in
+          Settings.
+        </Text>
+        <View style={styles.choices}>
+          {(
+            [
+              { key: "shafi", label: "1 mithl", sub: "Shafi'i, Maliki, Hanbali" },
+              { key: "hanafi", label: "2 mithl", sub: "Hanafi" },
+            ] as const
+          ).map(({ key, label, sub }) => {
+            const selected = settings.madhab === key;
+            return (
+              <Touchable
+                key={key}
+                style={[styles.choice, selected && styles.choiceSelected]}
+                // Written through updateSettings so it is recorded as a
+                // DELIBERATE choice, not left on the shipped default.
+                onPress={() => updateSettings({ madhab: key })}
+                accessibilityRole="radio"
+                accessibilityState={{ selected }}
+                accessibilityLabel={`Asr at ${label}, ${sub}`}
+              >
+                <Text
+                  style={[
+                    styles.choiceLabel,
+                    selected && styles.choiceLabelSelected,
+                  ]}
+                >
+                  {label}
+                </Text>
+                <Text style={styles.choiceSub}>{sub}</Text>
+              </Touchable>
+            );
+          })}
+        </View>
+
+        <View style={styles.divider} />
+
+        <Text style={styles.body}>
+          Prayer times and the Qibla compass are calculated on your phone, so
+          they keep working with no signal at all.
+        </Text>
+
+        {Platform.OS === "web" ? (
+          <Touchable
+            style={styles.primary}
+            onPress={finish}
+            accessibilityRole="button"
+            accessibilityLabel="Continue"
+          >
+            <Text style={styles.primaryLabel}>Continue</Text>
+          </Touchable>
+        ) : (
+          <>
+            <Touchable
+              style={styles.primary}
+              onPress={allow}
+              disabled={busy}
+              accessibilityRole="button"
+              accessibilityLabel="Allow location access"
+            >
+              <Text style={styles.primaryLabel}>Allow location</Text>
+            </Touchable>
+            <Touchable
+              style={styles.secondary}
+              onPress={finish}
+              accessibilityRole="button"
+              accessibilityLabel="Continue without location"
+            >
+              <Text style={styles.secondaryLabel}>Not now</Text>
+            </Touchable>
+          </>
+        )}
+      </View>
+    </View>
+  );
+}
+
+const createStyles = (colors: ThemeColors, scheme: "light" | "dark") =>
+  StyleSheet.create({
+    backdrop: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: scheme === "dark" ? "rgba(0,0,0,0.6)" : "rgba(0,0,0,0.45)",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: spacing.l,
+      zIndex: 80,
+      elevation: 80,
+    },
+    card: {
+      width: "100%",
+      maxWidth: 460,
+      backgroundColor: colors.canvas,
+      borderRadius: radius.l,
+      borderWidth: 1,
+      borderColor: colors.border,
+      padding: spacing.xl,
+      gap: spacing.m,
+      alignItems: "flex-start",
+      ...elevation(scheme, "floating"),
+    },
+    title: {
+      fontSize: 20,
+      lineHeight: 26,
+      fontWeight: "700",
+      color: colors.text,
+    },
+    body: {
+      fontSize: 14,
+      lineHeight: 20,
+      color: colors.textSecondary,
+    },
+    divider: {
+      height: 1,
+      alignSelf: "stretch",
+      backgroundColor: colors.border,
+      marginVertical: spacing.xs,
+    },
+    question: {
+      fontSize: 15,
+      fontWeight: "700",
+      color: colors.text,
+    },
+    hint: {
+      fontSize: 13,
+      lineHeight: 18,
+      color: colors.textSecondary,
+    },
+    choices: {
+      flexDirection: "row",
+      gap: spacing.s,
+      alignSelf: "stretch",
+    },
+    choice: {
+      flex: 1,
+      minHeight: 44,
+      justifyContent: "center",
+      paddingVertical: spacing.s,
+      paddingHorizontal: spacing.m,
+      borderRadius: radius.m,
+      borderWidth: 1,
+      borderColor: colors.border,
+      backgroundColor: colors.surface,
+      overflow: "hidden",
+    },
+    choiceSelected: {
+      borderColor: colors.accent,
+      backgroundColor: colors.accentSoft,
+    },
+    choiceLabel: {
+      fontSize: 15,
+      fontWeight: "700",
+      color: colors.text,
+    },
+    choiceLabelSelected: {
+      color: colors.accent,
+    },
+    choiceSub: {
+      fontSize: 12,
+      color: colors.textSecondary,
+    },
+    primary: {
+      alignSelf: "stretch",
+      minHeight: 48,
+      alignItems: "center",
+      justifyContent: "center",
+      borderRadius: radius.l,
+      backgroundColor: colors.accent,
+      overflow: "hidden",
+    },
+    primaryLabel: {
+      fontSize: 16,
+      fontWeight: "700",
+      // canvas, not white: the dark accent is light enough that white fails.
+      color: colors.canvas,
+    },
+    secondary: {
+      alignSelf: "stretch",
+      minHeight: 44,
+      alignItems: "center",
+      justifyContent: "center",
+      borderRadius: radius.l,
+      overflow: "hidden",
+    },
+    secondaryLabel: {
+      fontSize: 15,
+      fontWeight: "600",
+      color: colors.textSecondary,
+    },
+  });

@@ -1,14 +1,15 @@
 import React, { useEffect, useMemo, useState } from "react";
 import {
+  AppState,
   ScrollView,
   StyleSheet,
   Text,
-  TouchableOpacity,
   View,
 } from "react-native";
 import { Link } from "expo-router";
 import * as Location from "expo-location";
 
+import Touchable from "@/components/Touchable";
 import { useSettings } from "@/context/SettingsContext";
 import { useTheme } from "@/context/ThemeContext";
 import { FALLBACK_LOCATION } from "@/lib/geo";
@@ -102,10 +103,25 @@ export default function PrayerScreen() {
   const [dayOffset, setDayOffset] = useState(0);
   const [now, setNow] = useState(() => new Date());
 
-  // Tick every 30 s so the countdown stays honest while the screen is open.
+  // Tick on each minute BOUNDARY so the countdown stays honest, and
+  // resync on foreground: a fixed interval is frozen while the app is
+  // backgrounded, so this screen's countdown was silently stale — often by
+  // hours — for anyone returning to an already-open prayer screen.
   useEffect(() => {
-    const id = setInterval(() => setNow(new Date()), 30_000);
-    return () => clearInterval(id);
+    let id: ReturnType<typeof setTimeout>;
+    const schedule = () =>
+      setTimeout(() => {
+        setNow(new Date());
+        id = schedule();
+      }, 60_000 - (Date.now() % 60_000));
+    id = schedule();
+    const sub = AppState.addEventListener("change", (state) => {
+      if (state === "active") setNow(new Date());
+    });
+    return () => {
+      clearTimeout(id);
+      sub.remove();
+    };
   }, []);
 
   // Silent location read -- the home screen owns the permission prompt, so
@@ -207,35 +223,38 @@ export default function PrayerScreen() {
       ) : null}
 
       <View style={styles.dateNav}>
-        <TouchableOpacity
+        <Touchable
           style={styles.chevronButton}
           onPress={() => setDayOffset((o) => o - 1)}
           accessibilityRole="button"
           accessibilityLabel="Previous day"
         >
           <Text style={styles.chevron}>{"\u2039"}</Text>
-        </TouchableOpacity>
+        </Touchable>
         <View style={styles.dateCenter}>
           <Text style={styles.dateTitle}>{dateTitle}</Text>
           <Text style={styles.hijriDate}>{formatHijri(selectedDate)}</Text>
           {dayOffset !== 0 ? (
-            <TouchableOpacity
+            <Touchable
               onPress={() => setDayOffset(0)}
               accessibilityRole="button"
               accessibilityLabel="Back to today"
+              // A 12pt label is a ~15pt target. hitSlop rather than
+              // minHeight: the height belongs to the row it sits in.
+              hitSlop={{ top: 14, bottom: 14, left: 16, right: 16 }}
             >
               <Text style={styles.todayChip}>Back to today</Text>
-            </TouchableOpacity>
+            </Touchable>
           ) : null}
         </View>
-        <TouchableOpacity
+        <Touchable
           style={styles.chevronButton}
           onPress={() => setDayOffset((o) => o + 1)}
           accessibilityRole="button"
           accessibilityLabel="Next day"
         >
           <Text style={styles.chevron}>{"\u203A"}</Text>
-        </TouchableOpacity>
+        </Touchable>
       </View>
 
       {schedule ? (
@@ -341,6 +360,8 @@ const createStyles = (colors: ThemeColors) =>
     borderColor: colors.border,
     alignItems: "center",
     justifyContent: "center",
+    // Clips the Android ripple to the rounded corners.
+    overflow: "hidden",
   },
   chevron: {
     fontSize: 24,

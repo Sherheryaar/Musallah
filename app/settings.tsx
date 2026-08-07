@@ -3,14 +3,14 @@ import {
   Platform,
   ScrollView,
   StyleSheet,
-  Switch,
   Text,
-  TouchableOpacity,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Constants from "expo-constants";
 
+import Touchable from "@/components/Touchable";
+import ThemedSwitch from "@/components/ThemedSwitch";
 import { useNotifications } from "@/context/NotificationsContext";
 import { useSettings } from "@/context/SettingsContext";
 import { useTheme } from "@/context/ThemeContext";
@@ -56,7 +56,7 @@ function OptionRow({
 }) {
   const styles = useStyles();
   return (
-    <TouchableOpacity
+    <Touchable
       style={[
         styles.optionRow,
         divider && styles.rowDivider,
@@ -65,7 +65,11 @@ function OptionRow({
       onPress={onPress}
       accessibilityRole="radio"
       accessibilityState={{ selected }}
-      accessibilityLabel={label}
+      // `detail` is not decoration — it is the entire explanation of what
+      // the option means ("Asr begins when an object's shadow equals its
+      // length"). Dropping it left the reader with two near-identical
+      // labels and no way to tell them apart.
+      accessibilityLabel={`${label}. ${detail}`}
     >
       <View style={styles.optionTextWrap}>
         <Text style={styles.optionLabel}>{label}</Text>
@@ -74,7 +78,7 @@ function OptionRow({
       <View style={[styles.radioOuter, selected && styles.radioOuterSelected]}>
         {selected ? <View style={styles.radioInner} /> : null}
       </View>
-    </TouchableOpacity>
+    </Touchable>
   );
 }
 
@@ -184,6 +188,27 @@ export default function SettingsScreen() {
 
       {Platform.OS !== "web" ? (
         <>
+          <Text style={styles.sectionTitle}>Feedback</Text>
+          <Text style={styles.sectionIntro}>
+            The Qibla compass buzzes once when you face the qibla, and ticks
+            lightly every 15° as you turn {"—"} so you can follow it without
+            watching the screen.
+          </Text>
+          <View style={styles.card}>
+            <View style={styles.switchRow}>
+              <Text style={styles.optionLabel}>Vibration</Text>
+              <ThemedSwitch
+                value={settings.hapticFeedback}
+                onValueChange={(on) => updateSettings({ hapticFeedback: on })}
+                accessibilityLabel="Vibration feedback"
+              />
+            </View>
+          </View>
+        </>
+      ) : null}
+
+      {Platform.OS !== "web" ? (
+        <>
           <Text style={styles.sectionTitle}>Prayer notifications</Text>
           <Text style={styles.sectionIntro}>
             Reminders are scheduled on your phone from your location {"—"} no
@@ -193,7 +218,7 @@ export default function SettingsScreen() {
           <View style={styles.card}>
             <View style={styles.switchRow}>
               <Text style={styles.optionLabel}>Notify me at prayer times</Text>
-              <Switch
+              <ThemedSwitch
                 value={notifications.prefs.enabled}
                 onValueChange={toggleNotifications}
                 accessibilityLabel="Prayer time notifications"
@@ -213,7 +238,7 @@ export default function SettingsScreen() {
                 {PRAYER_KEYS.map((key) => (
                   <View key={key} style={[styles.switchRow, styles.rowDivider]}>
                     <Text style={styles.optionLabel}>{PRAYER_LABELS[key]}</Text>
-                    <Switch
+                    <ThemedSwitch
                       value={notifications.prefs.prayers[key]}
                       onValueChange={(on) =>
                         notifications.updatePrefs({
@@ -234,7 +259,7 @@ export default function SettingsScreen() {
                       const selected =
                         notifications.prefs.minutesBefore === mins;
                       return (
-                        <TouchableOpacity
+                        <Touchable
                           key={mins}
                           style={[
                             styles.reminderChip,
@@ -254,7 +279,7 @@ export default function SettingsScreen() {
                           >
                             {mins === 0 ? "On time" : `${mins} min early`}
                           </Text>
-                        </TouchableOpacity>
+                        </Touchable>
                       );
                     })}
                   </View>
@@ -262,7 +287,7 @@ export default function SettingsScreen() {
                 {__DEV__ ? (
                   // Development builds only: verify delivery without waiting
                   // for the next prayer. Never shown in production.
-                  <TouchableOpacity
+                  <Touchable
                     style={[styles.switchRow, styles.rowDivider]}
                     onPress={() => void notifications.sendTest()}
                     accessibilityRole="button"
@@ -274,7 +299,7 @@ export default function SettingsScreen() {
                     <Text style={styles.optionDetail}>
                       fires in 5 s {"—"} lock the phone
                     </Text>
-                  </TouchableOpacity>
+                  </Touchable>
                 ) : null}
               </>
             ) : null}
@@ -443,6 +468,8 @@ const createStyles = (colors: ThemeColors) =>
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.surface,
+    // Clips the Android ripple to the rounded corners.
+    overflow: "hidden",
   },
   reminderChipActive: {
     backgroundColor: colors.accentSoft,

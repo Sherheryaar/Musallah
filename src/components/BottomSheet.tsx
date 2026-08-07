@@ -1,6 +1,7 @@
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Animated,
+  BackHandler,
   PanResponder,
   StyleSheet,
   View,
@@ -9,7 +10,9 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useTheme } from "@/context/ThemeContext";
+import { elevation } from "@/lib/elevation";
 import { spacing, type ThemeColors } from "@/lib/theme";
+import { useReducedMotion } from "@/lib/useReducedMotion";
 
 // Dependency-free bottom sheet: plain Animated + PanResponder, no gesture
 // library needed. Three snap points -- peek (mostly hidden, map visible),
@@ -19,6 +22,16 @@ import { spacing, type ThemeColors } from "@/lib/theme";
 
 // Vertical room reserved for `aboveSheet` controls (button + breathing room).
 const ABOVE_SHEET_HEIGHT = 64;
+
+/**
+ * What must stay on screen at the `peek` snap: the drag handle (16pt
+ * padding either side of a 5pt bar = 37) plus the times bar (12 + 42 + 12
+ * gap + 4 progress track + 1 border ~= 83), plus a little breathing room.
+ *
+ * This is measured against the sheet's OWN container, not the window --
+ * see the onLayout below for why that distinction is the whole bug.
+ */
+const PEEK_CONTENT_HEIGHT = 128;
 
 type Props = {
   children: React.ReactNode;
@@ -32,23 +45,42 @@ type Props = {
 };
 
 export default function BottomSheet({ children, aboveSheet }: Props) {
-  const { colors } = useTheme();
-  const styles = useMemo(() => createStyles(colors), [colors]);
+  const { colors, scheme } = useTheme();
+  const styles = useMemo(() => createStyles(colors, scheme), [colors, scheme]);
   const { height: windowHeight } = useWindowDimensions();
   const insets = useSafeAreaInsets();
+  const reduceMotion = useReducedMotion();
 
-  // Positions measured as "distance from the top of the screen".
+  // The sheet is absolutely positioned inside the screen's content view,
+  // which the native stack lays out BELOW the status bar and header -- so
+  // its coordinate space is shorter than the window by
+  // `insets.top + headerHeight`, and by a different amount on each
+  // platform. Deriving the snaps from useWindowDimensions() therefore put
+  // every one of them too low and clipped the times bar at `peek`: ~36pt of
+  // usable content on a notched iPhone against ~59dp on a typical Android.
+  //
+  // Measuring the container is the only reliable fix. (useHeaderHeight()
+  // is NOT the answer -- it already includes the status bar, so subtracting
+  // both double-counts it and makes things worse.)
+  const [measuredHeight, setMeasuredHeight] = useState<number | null>(null);
+  const height = measuredHeight ?? windowHeight;
+
+  // Positions measured as "distance from the top of the container".
   const snaps = useMemo(
     () => ({
-      full: Math.max(windowHeight * 0.08, 56),
-      half: windowHeight * 0.5,
-      // Keep the collapsed sheet (and its drag handle) well clear of the
-      // system gesture area at the bottom of modern gesture-nav phones, so
-      // grabbing the handle never triggers "swipe up to close the app".
-      peek: windowHeight - (insets.bottom + 168),
+      full: Math.max(height * 0.08, 56),
+      half: height * 0.5,
+      // `insets.bottom` is added back because styles.body already pads by
+      // it, so without this the peek content loses the home-indicator strip
+      // twice. This also keeps the drag handle clear of the system gesture
+      // area, so grabbing it never triggers "swipe up to close the app".
+      peek: height - (PEEK_CONTENT_HEIGHT + insets.bottom),
     }),
-    [windowHeight, insets.bottom],
+    [height, insets.bottom],
   );
+  // Read by the back handler, which must not re-subscribe on every frame.
+  const snapsRef = useRef(snaps);
+  snapsRef.current = snaps;
 
   const top = useRef(new Animated.Value(snaps.half)).current;
   const topValue = useRef(snaps.half);
@@ -59,6 +91,50 @@ export default function BottomSheet({ children, aboveSheet }: Props) {
     });
     return () => top.removeListener(id);
   }, [top]);
+
+  const springTo = useCallback(
+    (target: number, velocity?: number) => {
+      if (reduceMotion) {
+        // The sheet must still MOVE -- it just stops sweeping there.
+        Animated.timing(top, {
+          toValue: target,
+          duration: 0,
+          useNativeDriver: false,
+        }).start();
+        return;
+      }
+      Animated.spring(top, {
+        toValue: target,
+        useNativeDriver: false,
+        bounciness: 3,
+        // PanResponder reports px/ms and spring configs want units/sec.
+        // Without the handoff a fast flick decelerates to a dead stop under
+        // the fingertip and then re-accelerates, which reads as a stutter.
+        ...(velocity === undefined ? null : { velocity: velocity * 1000 }),
+      }).start();
+    },
+    [top, reduceMotion],
+  );
+
+  // Android: collapse before the OS pops the screen. Dragged to `full` the
+  // sheet covers the whole map, and home is the root route -- so back there
+  // exited the app outright. No Platform guard: BackHandler is a documented
+  // no-op on iOS and web, and the app's other two sheets register it
+  // unguarded, so branching here would just make the three inconsistent.
+  useEffect(() => {
+    const onBack = () => {
+      const { full, half } = snapsRef.current;
+      if (
+        Math.abs(topValue.current - full) < Math.abs(topValue.current - half)
+      ) {
+        springTo(half);
+        return true;
+      }
+      return false;
+    };
+    const sub = BackHandler.addEventListener("hardwareBackPress", onBack);
+    return () => sub.remove();
+  }, [springTo]);
 
   const panResponder = useMemo(() => {
     // Only the rendered `clampedTop` is clamped -- the raw Animated value can
@@ -80,11 +156,7 @@ export default function BottomSheet({ children, aboveSheet }: Props) {
       const target = [snaps.full, snaps.half, snaps.peek].reduce((a, b) =>
         Math.abs(b - projected) < Math.abs(a - projected) ? b : a,
       );
-      Animated.spring(top, {
-        toValue: target,
-        useNativeDriver: false,
-        bounciness: 3,
-      }).start();
+      springTo(target, vy);
     };
     return PanResponder.create({
         onStartShouldSetPanResponder: () => true,
@@ -109,7 +181,7 @@ export default function BottomSheet({ children, aboveSheet }: Props) {
         // gesture happens to fix it.
         onPanResponderTerminate: (_e, g) => settle(g.vy),
       });
-  }, [snaps, top]);
+  }, [snaps, top, springTo]);
 
   const clampedTop = top.interpolate({
     inputRange: [snaps.full, snaps.peek],
@@ -129,11 +201,9 @@ export default function BottomSheet({ children, aboveSheet }: Props) {
       order[
         Math.min(Math.max(order.indexOf(current) - direction, 0), order.length - 1)
       ];
-    Animated.spring(top, {
-      toValue: target,
-      useNativeDriver: false,
-      bounciness: 3,
-    }).start();
+    // No velocity handoff: this is the accessibility action, with no
+    // gesture behind it to inherit momentum from.
+    springTo(target);
   };
 
   // Rides the sheet's top edge, but never above the half position: past
@@ -150,6 +220,17 @@ export default function BottomSheet({ children, aboveSheet }: Props) {
 
   return (
     <>
+      {/* Measures the sheet's actual coordinate space. Non-interactive and
+          invisible; it exists purely so the snap points are computed
+          against the container the sheet lives in rather than the window. */}
+      <View
+        style={StyleSheet.absoluteFill}
+        pointerEvents="none"
+        onLayout={(e) => {
+          const next = e.nativeEvent.layout.height;
+          if (next > 0) setMeasuredHeight(next);
+        }}
+      />
       {aboveSheet ? (
         <Animated.View
           pointerEvents="box-none"
@@ -161,6 +242,7 @@ export default function BottomSheet({ children, aboveSheet }: Props) {
       <Animated.View style={[styles.sheet, { top: clampedTop }]}>
       <View
         style={styles.handleArea}
+        hitSlop={{ top: 6, bottom: 6, left: 0, right: 0 }}
         {...panResponder.panHandlers}
         accessible
         accessibilityRole="adjustable"
@@ -184,7 +266,7 @@ export default function BottomSheet({ children, aboveSheet }: Props) {
   );
 }
 
-const createStyles = (colors: ThemeColors) =>
+const createStyles = (colors: ThemeColors, scheme: "light" | "dark") =>
   StyleSheet.create({
   aboveSheet: {
     position: "absolute",
@@ -202,25 +284,29 @@ const createStyles = (colors: ThemeColors) =>
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: colors.surface,
+    // canvas, not surface: in dark mode `surface` is DARKER than the map
+    // tiles behind it, so the sheet read as a hole rather than a panel.
+    backgroundColor: colors.canvas,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    // Soft lift so the sheet reads as floating above the map.
-    shadowColor: "#000",
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: -4 },
-    elevation: 12,
+    // A black shadow is invisible on a dark backdrop, so dark mode gets a
+    // hairline instead — that edge is what separates sheet from map there.
+    borderTopWidth: 1,
+    borderColor: colors.border,
+    ...elevation(scheme, "sheet"),
     overflow: "hidden",
   },
   handleArea: {
     alignItems: "center",
-    paddingVertical: spacing.m,
+    // 16 + 5 + 16 = 37pt, up from 29. Both platforms' guidelines want
+    // 44/48 for a drag target; the hitSlop on the view below makes up the
+    // rest without spending more of the peek budget.
+    paddingVertical: spacing.l,
   },
   handle: {
     width: 44,
     height: 5,
-    borderRadius: 3,
+    borderRadius: 2.5,
     backgroundColor: colors.border,
   },
   body: {

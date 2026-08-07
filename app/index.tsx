@@ -13,7 +13,6 @@ import {
   StyleSheet,
   Text,
   TextInput,
-  TouchableOpacity,
   View,
 } from "react-native";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
@@ -21,15 +20,19 @@ import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Location from "expo-location";
 
+import Touchable from "@/components/Touchable";
 import { FacilityKey, isCorroborated, Place } from "@/data/places";
+import { useFavourites } from "@/context/FavouritesContext";
 import { useNotifications } from "@/context/NotificationsContext";
 import { usePlaces } from "@/context/PlacesContext";
 import { useSettings } from "@/context/SettingsContext";
 import BottomSheet from "@/components/BottomSheet";
 import FilterSheet from "@/components/FilterSheet";
 import OfflineScreen from "@/components/OfflineScreen";
+import Onboarding from "@/components/Onboarding";
 import PlaceCard from "@/components/PlaceCard";
 import PlacesMap from "@/components/PlacesMap";
+import PlacesSkeleton from "@/components/PlacesSkeleton";
 import SuggestionSheet from "@/components/SuggestionSheet";
 import { distanceKm, formatDistance } from "@/lib/distance";
 import { fuzzyMatches, tokenize } from "@/lib/fuzzy";
@@ -42,6 +45,7 @@ import { CalcOptions, computePrayerSchedule } from "@/lib/prayerTimes";
 import { submitNewPlaceSuggestion } from "@/lib/feedback";
 import { useTheme } from "@/context/ThemeContext";
 import {
+  numeric,
   placeTypeColors,
   radius,
   spacing,
@@ -98,14 +102,23 @@ const NextPrayerBar = React.memo(function NextPrayerBar({
   const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
-    const id = setInterval(() => setNow(Date.now()), 30_000);
-    // Refresh immediately on foreground — the interval may have been
-    // frozen for hours in the background.
+    // A fixed 30s interval ticks at an arbitrary phase, so the displayed
+    // minute changed up to 30s late — "1 min" could sit on screen while the
+    // prayer time actually passed. Sleeping to the next minute BOUNDARY and
+    // rescheduling keeps the label honest and halves the wake-ups.
+    let id: ReturnType<typeof setTimeout>;
+    const tick = () => {
+      setNow(Date.now());
+      id = setTimeout(tick, 60_000 - (Date.now() % 60_000));
+    };
+    id = setTimeout(tick, 60_000 - (Date.now() % 60_000));
+    // Refresh immediately on foreground — the timer may have been frozen
+    // for hours in the background.
     const sub = AppState.addEventListener("change", (state) => {
       if (state === "active") setNow(Date.now());
     });
     return () => {
-      clearInterval(id);
+      clearTimeout(id);
       sub.remove();
     };
   }, []);
@@ -152,12 +165,11 @@ const NextPrayerBar = React.memo(function NextPrayerBar({
       : `${info.minutes} min`;
 
   return (
-    <TouchableOpacity
+    <Touchable
       style={styles.timesBar}
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={`Next prayer: ${info.next.label} at ${info.next.display}, in ${countdown}. Open prayer times.`}
-      activeOpacity={0.7}
     >
       <View style={styles.timesTopRow}>
         <View style={styles.nextBlock}>
@@ -181,14 +193,14 @@ const NextPrayerBar = React.memo(function NextPrayerBar({
         </View>
       </View>
       <View style={styles.progressTrack}>
+        {/* scaleX rather than a percentage width: width is a LAYOUT prop,
+            so every tick re-laid-out the fill inside its clipping track.
+            A transform costs nothing and is the same pixels. */}
         <View
-          style={[
-            styles.progressFill,
-            { width: `${Math.round(info.progress * 100)}%` },
-          ]}
+          style={[styles.progressFill, { transform: [{ scaleX: info.progress }] }]}
         />
       </View>
-    </TouchableOpacity>
+    </Touchable>
   );
 });
 
@@ -203,11 +215,23 @@ export default function HomeScreen() {
     usePlaces();
   const { settings, updateSettings } = useSettings();
   const { reportLocation } = useNotifications();
+  const { ids: favouriteIds } = useFavourites();
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(
     null,
   );
   const [usingFallback, setUsingFallback] = useState(false);
   const [showNewPlaceForm, setShowNewPlaceForm] = useState(false);
+  const [fridayNoticeDismissed, setFridayNoticeDismissed] = useState(false);
+  // Re-checked when the app is foregrounded rather than on a timer: the
+  // realistic case is the app being reopened on Friday, not left running
+  // across midnight into it.
+  const [isFriday, setIsFriday] = useState(() => new Date().getDay() === 5);
+  useEffect(() => {
+    const sub = AppState.addEventListener("change", (state) => {
+      if (state === "active") setIsFriday(new Date().getDay() === 5);
+    });
+    return () => sub.remove();
+  }, []);
   const [showFilters, setShowFilters] = useState(false);
   const [query, setQuery] = useState("");
   const [searchOrigin, setSearchOrigin] = useState<SearchOrigin | null>(null);
@@ -216,11 +240,17 @@ export default function HomeScreen() {
   // response can tell it's been superseded and skip applying its result.
   const searchGeneration = useRef(0);
   const [recenterNonce, setRecenterNonce] = useState(0);
+  // The location read waits for onboarding to resolve. iOS allows exactly
+  // one permission prompt, so it must not fire before the user has been
+  // told what it is for.
+  const [locationAllowed, setLocationAllowed] = useState(false);
+  const allowLocationRead = useCallback(() => setLocationAllowed(true), []);
 
   // Get location once at launch, then keep it updated as the user moves
   // (re-sorts distances after every ~250 m). No account, no tracking --
   // everything is processed on-device.
   useEffect(() => {
+    if (!locationAllowed) return;
     let cancelled = false;
     let watcher: Location.LocationSubscription | null = null;
     (async () => {
@@ -270,7 +300,7 @@ export default function HomeScreen() {
       cancelled = true;
       watcher?.remove();
     };
-  }, []);
+  }, [locationAllowed]);
 
   // Facility filters live in Settings storage, so a choice like "sisters'
   // space" made on first launch is remembered on every later launch.
@@ -490,7 +520,14 @@ export default function HomeScreen() {
       ({ place }) =>
         selected.every((key) => place.facilities[key]) &&
         (!settings.corroboratedOnly || isCorroborated(place)) &&
-        (!place.jumuahOnly || activeFilters.has("jumuah") || q.length > 0),
+        (!place.jumuahOnly ||
+          activeFilters.has("jumuah") ||
+          q.length > 0 ||
+          // Friday: the one day these venues ARE the answer. Hired halls
+          // and university rooms hold jumu'ah and nothing else, so the
+          // default suppression hid exactly what the user came for, at the
+          // highest-intent moment of the week.
+          isFriday),
     );
     if (!q) return base;
     const exact: Result[] = [];
@@ -513,6 +550,7 @@ export default function HomeScreen() {
     effectiveQuery,
     searchTokens,
     settings.corroboratedOnly,
+    isFriday,
   ]);
 
   // The list only shows the nearest few reasonable options. When the user is
@@ -524,8 +562,34 @@ export default function HomeScreen() {
       within.length >= MIN_LIST_RESULTS
         ? within
         : results.slice(0, MIN_LIST_RESULTS);
-    return base.slice(0, MAX_LIST_RESULTS);
-  }, [results, effectiveQuery]);
+    const savedIds = new Set(favouriteIds);
+    const capped = base
+      .filter((r) => !savedIds.has(r.place.id))
+      .slice(0, MAX_LIST_RESULTS);
+    if (!isFriday) return capped;
+    // Promotion, not re-sorting: keep the nearest-first order and simply
+    // float the places that PUBLISH a jumu'ah time above those that don't.
+    // Deliberately not "sort by jumu'ah time" — only 136 of 2,244 rows
+    // carry one, so that would collapse to the ordinary distance list while
+    // looking like it did something.
+    const withTime = capped.filter((r) => r.place.jumuahTimes?.length);
+    const withoutTime = capped.filter((r) => !r.place.jumuahTimes?.length);
+    return withTime.concat(withoutTime);
+  }, [results, effectiveQuery, isFriday, favouriteIds]);
+
+  // Saved places, resolved from ids against the live dataset. Excluded
+  // from the nearby list below so the same row never appears twice.
+  const favourites = useMemo(() => {
+    if (favouriteIds.length === 0) return [];
+    const wanted = new Set(favouriteIds);
+    const found = new Map(
+      byDistance.filter((r) => wanted.has(r.place.id)).map((r) => [r.place.id, r]),
+    );
+    // Keep the user's own order, not distance order.
+    return favouriteIds
+      .map((id) => found.get(id))
+      .filter((r): r is Result => r !== undefined);
+  }, [favouriteIds, byDistance]);
 
   // Stable callbacks keep React.memo'd rows from re-rendering needlessly.
   const openPlace = useCallback(
@@ -568,7 +632,7 @@ export default function HomeScreen() {
         {query.length > 0 || searchOrigin ? (
           // One search at a time: the box holds it, this clears it. (The
           // old separate "Near X" pill read like stackable filter tags.)
-          <TouchableOpacity
+          <Touchable
             style={styles.clearButton}
             onPress={clearSearch}
             accessibilityRole="button"
@@ -580,17 +644,22 @@ export default function HomeScreen() {
               size={14}
               color={colors.textSecondary}
             />
-          </TouchableOpacity>
+          </Touchable>
         ) : null}
       </View>
-      <TouchableOpacity
+      <Touchable
         style={[
           styles.filterButton,
           filterCount > 0 && styles.filterButtonActive,
         ]}
         onPress={() => setShowFilters(true)}
         accessibilityRole="button"
-        accessibilityLabel="Open filters"
+        accessibilityLabel={
+          filterCount > 0
+            ? `Filters, ${filterCount} on`
+            : "Filters"
+        }
+        accessibilityState={{ expanded: showFilters }}
       >
         <Text
           style={[
@@ -600,7 +669,7 @@ export default function HomeScreen() {
         >
           {filterCount > 0 ? `Filters (${filterCount})` : "Filters"}
         </Text>
-      </TouchableOpacity>
+      </Touchable>
     </View>
   );
 
@@ -616,6 +685,13 @@ export default function HomeScreen() {
   const mapLegend = (
     <View
       style={styles.legend}
+      // Without `accessible`, iOS ignores a container's accessibilityLabel
+      // entirely and reads the three loose words instead — so the one place
+      // the pin colours are explained in WORDS never reached the people who
+      // can only use words. Grouping costs one long focus stop; that is the
+      // right trade here.
+      accessible
+      importantForAccessibility="no-hide-descendants"
       accessibilityLabel="Map key: green is a masjid, amber is a prayer room, purple is a multi-faith room. The blue dot is your location. A numbered circle groups several places — tap it to zoom in."
     >
       {LEGEND_ITEMS.map(({ type, label }) => (
@@ -643,6 +719,33 @@ export default function HomeScreen() {
     />
   );
 
+  const fridayBanner =
+isFriday && !fridayNoticeDismissed && listResults.length > 0 ? (
+      <View style={styles.fridayBanner}>
+        <MaterialCommunityIcons
+          name="calendar-star"
+          size={18}
+          color={colors.accent}
+        />
+        <Text style={styles.fridayBannerText}>
+          It&apos;s Friday {"—"} places with a published Jumu&apos;ah
+          time are shown first, and Jumu&apos;ah-only venues are included.
+        </Text>
+        <Touchable
+          onPress={() => setFridayNoticeDismissed(true)}
+          accessibilityRole="button"
+          accessibilityLabel="Dismiss Friday notice"
+          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+        >
+          <MaterialCommunityIcons
+            name="close"
+            size={16}
+            color={colors.textSecondary}
+          />
+        </Touchable>
+      </View>
+    ) : null;
+
   const list = (
     <FlatList
       style={styles.listContainer}
@@ -659,22 +762,50 @@ export default function HomeScreen() {
         { paddingBottom: spacing.xxl + insets.bottom },
       ]}
       renderItem={renderItem}
+      ListHeaderComponent={
+        <>
+          {favourites.length > 0 && !effectiveQuery ? (
+            <View style={styles.savedSection}>
+              <Text style={styles.savedTitle}>Saved</Text>
+              {favourites.map((item) => (
+                <PlaceCard
+                  key={item.place.id}
+                  place={item.place}
+                  distanceLabel={formatDistance(item.kmFromUser)}
+                  onPress={openPlace}
+                />
+              ))}
+            </View>
+          ) : null}
+          {fridayBanner}
+        </>
+      }
+      // "Nothing here" and "nothing YET" are different states and must not
+      // share a component. Places load live on every launch (never bundled,
+      // never cached \u2014 see src/data/places.ts), so during the first fetch
+      // `listResults` is legitimately empty and the empty state used to fire
+      // on 100% of cold starts, inviting the user to report the entire
+      // dataset as a gap.
       ListEmptyComponent={
-        <View style={styles.empty}>
-          <Text style={styles.emptyTitle}>No places match</Text>
-          <Text style={styles.emptyText}>
-            Try removing a filter {"\u2014"} or this is a gap in the data
-            worth fixing.
-          </Text>
-          <TouchableOpacity
-            style={styles.emptyButton}
-            onPress={() => setShowNewPlaceForm(true)}
-            accessibilityRole="button"
-            accessibilityLabel="Add a missing place"
-          >
-            <Text style={styles.emptyButtonLabel}>Add a missing place</Text>
-          </TouchableOpacity>
-        </View>
+        placesStatus === "loading" ? (
+          <PlacesSkeleton />
+        ) : (
+          <View style={styles.empty}>
+            <Text style={styles.emptyTitle}>No places match</Text>
+            <Text style={styles.emptyText}>
+              Try removing a filter {"\u2014"} or this is a gap in the data
+              worth fixing.
+            </Text>
+            <Touchable
+              style={styles.emptyButton}
+              onPress={() => setShowNewPlaceForm(true)}
+              accessibilityRole="button"
+              accessibilityLabel="Add a missing place"
+            >
+              <Text style={styles.emptyButtonLabel}>Add a missing place</Text>
+            </Touchable>
+          </View>
+        )
       }
       // The form itself lives in a top-anchored SuggestionSheet overlay
       // (rendered at the screen root) — inline in the footer, the keyboard
@@ -685,13 +816,14 @@ export default function HomeScreen() {
           <View style={styles.listFooter}>
             <View style={styles.listFooterRow}>
               <Text style={styles.listFooterText}>Missing a place? </Text>
-              <TouchableOpacity
+              <Touchable
                 onPress={() => setShowNewPlaceForm(true)}
                 accessibilityRole="button"
                 accessibilityLabel="Suggest a missing place"
+                hitSlop={{ top: 14, bottom: 14, left: 16, right: 16 }}
               >
                 <Text style={styles.listFooterLink}>Suggest it</Text>
-              </TouchableOpacity>
+              </Touchable>
             </View>
           </View>
         ) : null
@@ -734,11 +866,17 @@ export default function HomeScreen() {
           </View>
           <BottomSheet
             aboveSheet={
-              <TouchableOpacity
+              <Touchable
                 style={styles.recenterButton}
                 onPress={recenter}
                 accessibilityRole="button"
                 accessibilityLabel="Back to my location"
+                // Circular FAB: a borderless ripple is the Material idiom
+                // here, and it avoids clipping the view — which on Android
+                // would take the elevation shadow with it.
+                borderless
+                rippleRadius={24}
+                scaleTo={0.92}
               >
                 {/* Blue on purpose — it points at the blue you-are-here dot. */}
                 <MaterialCommunityIcons
@@ -746,7 +884,7 @@ export default function HomeScreen() {
                   size={24}
                   color={colors.youAreHere}
                 />
-              </TouchableOpacity>
+              </Touchable>
             }
           >
             {timesBar}
@@ -775,6 +913,7 @@ export default function HomeScreen() {
         onClear={clearFilters}
         onClose={() => setShowFilters(false)}
       />
+      <Onboarding onDone={allowLocationRead} />
       <SuggestionSheet
         visible={showNewPlaceForm}
         title="Add a missing place"
@@ -851,6 +990,8 @@ const createStyles = (colors: ThemeColors) =>
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: colors.surfaceSecondary,
+    // Clips the Android ripple to the rounded corners.
+    overflow: "hidden",
   },
   filterButton: {
     minHeight: 44,
@@ -967,11 +1108,13 @@ const createStyles = (colors: ThemeColors) =>
   nextLabel: {
     fontSize: 11,
     color: colors.textSecondary,
+    ...numeric,
   },
   nextTime: {
     fontSize: 20,
     fontWeight: "700",
     color: colors.accent,
+    ...numeric,
   },
   upcomingRow: {
     flexDirection: "row",
@@ -990,6 +1133,7 @@ const createStyles = (colors: ThemeColors) =>
     fontSize: 14,
     fontWeight: "600",
     color: colors.text,
+    ...numeric,
   },
   progressTrack: {
     height: 4,
@@ -999,8 +1143,14 @@ const createStyles = (colors: ThemeColors) =>
   },
   progressFill: {
     height: 4,
-    borderRadius: 2,
+    width: "100%",
     backgroundColor: colors.accent,
+    // Grow from the left edge, not the centre. The ARRAY form, not
+    // "left center": react-native-web passes the string straight through as
+    // a `transform-origin` DOM attribute, which React rejects.
+    transformOrigin: ["0%", "50%"],
+    // No borderRadius: scaling X squashes it to a sub-pixel smear at low
+    // progress. The track's own radius + overflow does the rounding.
   },
   recenterButton: {
     width: 48,
@@ -1068,6 +1218,34 @@ const createStyles = (colors: ThemeColors) =>
   listFooterText: {
     fontSize: 14,
     color: colors.textSecondary,
+  },
+  savedSection: {
+    gap: spacing.m,
+    marginBottom: spacing.l,
+  },
+  savedTitle: {
+    fontSize: 12,
+    fontWeight: "700",
+    letterSpacing: 0.8,
+    textTransform: "uppercase",
+    color: colors.textSecondary,
+  },
+  fridayBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.s,
+    backgroundColor: colors.accentSoft,
+    borderRadius: radius.l,
+    borderWidth: 1,
+    borderColor: colors.accent,
+    padding: spacing.m,
+    marginBottom: spacing.m,
+  },
+  fridayBannerText: {
+    flex: 1,
+    fontSize: 13,
+    lineHeight: 18,
+    color: colors.text,
   },
   listFooterLink: {
     fontSize: 14,

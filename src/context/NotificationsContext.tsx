@@ -89,9 +89,21 @@ function isGranted(
   );
 }
 
+/**
+ * Android channel every prayer alert is posted to. Referenced by
+ * `channelId` on each trigger below — creating a channel is not enough,
+ * and a notification that names no channel goes to expo's generic fallback
+ * instead. That fallback is created at HIGH importance with vibration, so
+ * alerts were never silently broken; the damage was that Android's
+ * per-app settings listed a "Miscellaneous" channel carrying the real
+ * alerts next to an inert "Prayer times" channel the user could toggle to
+ * no effect.
+ */
+const ANDROID_CHANNEL_ID = "prayer-times";
+
 function getNotifier(): Promise<NotificationsModule> {
   if (!notifierPromise) {
-    notifierPromise = import("expo-notifications").then((N) => {
+    notifierPromise = import("expo-notifications").then(async (N) => {
       // Show alerts even when the app is foregrounded — someone waiting
       // for the adhan with the app open still wants the banner.
       N.setNotificationHandler({
@@ -102,6 +114,18 @@ function getNotifier(): Promise<NotificationsModule> {
           shouldShowList: true,
         }),
       });
+      // Asserted here rather than in enable(), and AWAITED: if the channel
+      // doesn't exist at the moment a notification is posted, Android logs
+      // an error and silently falls back. Re-asserting is safe but note
+      // it will NOT raise importance on an existing channel — Android
+      // freezes that at creation time.
+      if (Platform.OS === "android") {
+        await N.setNotificationChannelAsync(ANDROID_CHANNEL_ID, {
+          name: "Prayer times",
+          importance: N.AndroidImportance.HIGH,
+          sound: "default",
+        }).catch(() => {});
+      }
       return N;
     });
   }
@@ -230,6 +254,9 @@ export function NotificationsProvider({
               trigger: {
                 type: N.SchedulableTriggerInputTypes.DATE,
                 date: item.fireAt,
+                // Ignored on iOS; on Android this is what routes the alert
+                // to the app's own channel instead of "Miscellaneous".
+                channelId: ANDROID_CHANNEL_ID,
               },
             });
           }
@@ -308,14 +335,9 @@ export function NotificationsProvider({
     }
     setPermissionGranted(granted);
     if (granted) {
-      if (Platform.OS === "android") {
-        // Android 8+ requires a channel; also gives the sound/importance.
-        await N.setNotificationChannelAsync("prayer-times", {
-          name: "Prayer times",
-          importance: N.AndroidImportance.HIGH,
-          sound: "default",
-        });
-      }
+      // The channel is created in getNotifier(), which has already run by
+      // the time `N` exists here — it has to be asserted before any post,
+      // not only on the path where the user turns alerts on.
       updatePrefs({ enabled: true });
     }
     return granted;
@@ -344,6 +366,7 @@ export function NotificationsProvider({
       trigger: {
         type: N.SchedulableTriggerInputTypes.TIME_INTERVAL,
         seconds: 5,
+        channelId: ANDROID_CHANNEL_ID,
       },
     });
   }, []);

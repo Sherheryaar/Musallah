@@ -1,13 +1,21 @@
 import React, { useMemo, useState } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import { useRouter } from "expo-router";
 
+import Touchable from "./Touchable";
 import { useTheme } from "@/context/ThemeContext";
 import { radius, spacing, type ThemeColors } from "@/lib/theme";
 
 type Props = {
   onRetry: () => Promise<void>;
 };
+
+/** The screens that are pure on-device computation and need no network. */
+const OFFLINE_ROUTES = [
+  { href: "/prayer", icon: "clock-outline", label: "Prayer times" },
+  { href: "/qibla", icon: "compass-outline", label: "Qibla" },
+] as const;
 
 /**
  * Shown instead of the map/list/place page when there is no live connection
@@ -19,6 +27,7 @@ export default function OfflineScreen({ onRetry }: Props) {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const [retrying, setRetrying] = useState(false);
+  const router = useRouter();
 
   const handleRetry = () => {
     if (retrying) return;
@@ -35,10 +44,10 @@ export default function OfflineScreen({ onRetry }: Props) {
       />
       <Text style={styles.title}>You're offline</Text>
       <Text style={styles.body}>
-        Musallah needs an internet connection to find mosques and prayer
-        spaces near you.
+        Finding mosques and prayer spaces needs a connection. Prayer times
+        and Qibla work offline {"—"} they're calculated on your phone.
       </Text>
-      <TouchableOpacity
+      <Touchable
         style={[styles.retryButton, retrying && styles.retryButtonBusy]}
         onPress={handleRetry}
         disabled={retrying}
@@ -48,7 +57,29 @@ export default function OfflineScreen({ onRetry }: Props) {
         <Text style={styles.retryLabel}>
           {retrying ? "Checking…" : "Try again"}
         </Text>
-      </TouchableOpacity>
+      </Touchable>
+
+      {/* This screen replaces the whole app when the first fetch fails, so
+          without these it also blocks the two features that need no
+          network at all. */}
+      <View style={styles.links}>
+        {OFFLINE_ROUTES.map(({ href, icon, label }) => (
+          <Touchable
+            key={href}
+            style={styles.link}
+            onPress={() => router.push(href)}
+            accessibilityRole="button"
+            accessibilityLabel={label}
+          >
+            <MaterialCommunityIcons
+              name={icon}
+              size={18}
+              color={colors.accent}
+            />
+            <Text style={styles.linkLabel}>{label}</Text>
+          </Touchable>
+        ))}
+      </View>
     </View>
   );
 }
@@ -93,5 +124,27 @@ const createStyles = (colors: ThemeColors) =>
       color: colors.canvas,
       fontSize: 16,
       fontWeight: "600",
+    },
+    links: {
+      flexDirection: "row",
+      gap: spacing.s,
+      marginTop: spacing.l,
+    },
+    link: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: spacing.s,
+      minHeight: 44,
+      paddingHorizontal: spacing.l,
+      borderRadius: radius.l,
+      borderWidth: 1,
+      borderColor: colors.border,
+      backgroundColor: colors.canvas,
+      overflow: "hidden",
+    },
+    linkLabel: {
+      fontSize: 15,
+      fontWeight: "600",
+      color: colors.accent,
     },
   });

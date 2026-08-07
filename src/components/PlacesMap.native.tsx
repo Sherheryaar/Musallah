@@ -237,6 +237,21 @@ export default function PlacesMap({
       showsUserLocation={userLocation !== null}
       userInterfaceStyle={scheme}
       customMapStyle={scheme === "dark" ? DARK_MAP_STYLE : undefined}
+      // Google Maps ships its own chrome, and all of it fought the app's --
+      // on Android only, which is exactly the sort of divergence that goes
+      // unnoticed when testing on an iPhone. All three are inert on Apple
+      // Maps, so no Platform branch is needed.
+      //
+      // toolbarEnabled: pops two Google buttons over the bottom sheet on
+      //   every pin tap.
+      // showsMyLocationButton: a second "my location" FAB that lands under
+      //   the search row and duplicates the app's own recenter control.
+      // moveOnMarkerPress: nudges the camera on every pin tap, which fires
+      //   onRegionChangeComplete and re-runs the pin grouping -- the exact
+      //   callout churn the fixed slot pool above exists to avoid.
+      toolbarEnabled={false}
+      showsMyLocationButton={false}
+      moveOnMarkerPress={false}
     >
       {slots.map((slot, index) => {
         if (slot?.kind === "cluster") {
@@ -294,6 +309,14 @@ export default function PlacesMap({
             anchor={{ x: 0.5, y: 0.5 }}
             image={PIN_IMAGES.masjid}
             tracksViewChanges={false}
+            // opacity: 0 removes a view from SIGHT, not from the
+            // accessibility tree. Apple Maps annotation views are
+            // accessibility elements by default, so in a sparse viewport
+            // VoiceOver had up to 278 unlabelled parked pins to swipe past
+            // before reaching anything real. `accessible` is the prop that
+            // does the work; importantForAccessibility is the Android twin.
+            accessible={false}
+            importantForAccessibility="no"
           />
         );
       })}

@@ -3,11 +3,11 @@ import {
   ActivityIndicator,
   Text,
   TextInput,
-  TouchableOpacity,
   View,
   StyleSheet,
 } from "react-native";
 
+import Touchable from "./Touchable";
 import { type SubmissionResult } from "@/lib/feedback";
 import { useTheme } from "@/context/ThemeContext";
 import { spacing, radius, type ThemeColors } from "@/lib/theme";
@@ -128,7 +128,7 @@ export default function SuggestionForm({
           {topics.map((topic) => {
             const active = selectedTopics.includes(topic);
             return (
-              <TouchableOpacity
+              <Touchable
                 key={topic}
                 style={[styles.topicChip, active && styles.topicChipActive]}
                 onPress={() => toggleTopic(topic)}
@@ -144,7 +144,7 @@ export default function SuggestionForm({
                 >
                   {topic}
                 </Text>
-              </TouchableOpacity>
+              </Touchable>
             );
           })}
         </View>
@@ -169,7 +169,7 @@ export default function SuggestionForm({
             : `${message.length}/${MAX_INPUT_LENGTH}`}
         </Text>
       ) : null}
-      <TouchableOpacity
+      <Touchable
         style={[styles.sendButton, sending && styles.sendButtonDisabled]}
         onPress={handleSend}
         disabled={sending || !canSend}
@@ -181,7 +181,7 @@ export default function SuggestionForm({
         ) : (
           <Text style={styles.sendLabel}>{sendLabel}</Text>
         )}
-      </TouchableOpacity>
+      </Touchable>
       {note ? <Text style={styles.noteText}>{note}</Text> : null}
     </View>
   );
@@ -203,7 +203,9 @@ const createStyles = (colors: ThemeColors) =>
       gap: spacing.s,
     },
     topicChip: {
-      minHeight: 32,
+      // 44pt: both platforms' guidelines want 44/48 for a tap target,
+      // and these chips were 32.
+      minHeight: 44,
       justifyContent: "center",
       paddingHorizontal: spacing.m,
       paddingVertical: spacing.xs,

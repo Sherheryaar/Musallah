@@ -1,6 +1,8 @@
 import React, { useCallback, useMemo } from "react";
-import { Text, TouchableOpacity, View, StyleSheet } from "react-native";
+import { Text, View, StyleSheet } from "react-native";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+
+import Touchable from "./Touchable";
 
 import {
   FACILITY_KEYS,
@@ -11,6 +13,7 @@ import {
 import { FACILITY_ICONS, PLACE_TYPE_ICONS } from "@/lib/icons";
 import { useTheme } from "@/context/ThemeContext";
 import {
+  numeric,
   placeTypeColors,
   spacing,
   radius,
@@ -48,7 +51,7 @@ function PlaceCard({ place, distanceLabel, onPress }: Props) {
       : "";
 
   return (
-    <TouchableOpacity
+    <Touchable
       style={styles.card}
       onPress={handlePress}
       accessibilityRole="button"
@@ -111,7 +114,7 @@ function PlaceCard({ place, distanceLabel, onPress }: Props) {
           </View>
         ) : null}
       </View>
-    </TouchableOpacity>
+    </Touchable>
   );
 }
 
@@ -129,6 +132,8 @@ const createStyles = (colors: ThemeColors) =>
     borderWidth: 1,
     borderColor: colors.border,
     padding: spacing.l,
+    // Keeps Android's ripple inside the card's rounded corners.
+    overflow: "hidden",
   },
   typeTile: {
     width: 42,
@@ -167,6 +172,7 @@ const createStyles = (colors: ThemeColors) =>
     paddingVertical: 3,
     overflow: "hidden",
     alignSelf: "flex-start",
+    ...numeric,
   },
   metaRow: {
     flexDirection: "row",

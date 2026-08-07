@@ -1,11 +1,11 @@
 import React, { useMemo, useState } from "react";
 import {
+  ActivityIndicator,
   Linking,
   Platform,
   ScrollView,
   Share,
   Text,
-  TouchableOpacity,
   View,
   StyleSheet,
 } from "react-native";
@@ -20,6 +20,8 @@ import {
   Place,
   PLACE_TYPE_LABELS,
 } from "@/data/places";
+import Touchable from "@/components/Touchable";
+import { useFavourites } from "@/context/FavouritesContext";
 import { usePlaces } from "@/context/PlacesContext";
 import { useSettings } from "@/context/SettingsContext";
 import { useTheme } from "@/context/ThemeContext";
@@ -30,6 +32,7 @@ import { FACILITY_ICONS, PLACE_TYPE_ICONS, type IconName } from "@/lib/icons";
 import { isLikelyIreland } from "@/lib/geo";
 import { computePrayerTimes, PrayerTimes } from "@/lib/prayerTimes";
 import {
+  numeric,
   placeTypeColors,
   spacing,
   radius,
@@ -118,6 +121,7 @@ export default function PlaceDetailScreen() {
   // and a linear scan per render is wasted work as the dataset grows.
   const place = useMemo(() => places.find((p) => p.id === id), [places, id]);
   const { settings } = useSettings();
+  const { isFavourite, toggle: toggleFavourite } = useFavourites();
   const [showEditForm, setShowEditForm] = useState(false);
 
   // Computed on-device for this place's exact coordinates -- instant,
@@ -142,12 +146,25 @@ export default function PlaceDetailScreen() {
     if (placesStatus === "offline") {
       return <OfflineScreen onRetry={refreshPlaces} />;
     }
+    // ...and neither of those is "the first fetch is still in flight".
+    // Places are never bundled or cached, so a deep link from a
+    // notification or a shared URL arrives before any data exists and would
+    // otherwise report a perfectly good link as a dead one.
+    if (placesStatus === "loading") {
+      return (
+        <View style={styles.missing}>
+          <ActivityIndicator color={colors.accent} />
+        </View>
+      );
+    }
     return (
       <View style={styles.missing}>
         <Text style={styles.missingText}>Place not found.</Text>
       </View>
     );
   }
+
+  const saved = isFavourite(place.id);
 
   const openDirections = () => {
     const query = encodeURIComponent(place.name + ", " + place.address);
@@ -263,7 +280,7 @@ export default function PlaceDetailScreen() {
       </View>
 
       <View style={styles.actionRow}>
-        <TouchableOpacity
+        <Touchable
           style={styles.directionsButton}
           onPress={openDirections}
           accessibilityRole="button"
@@ -275,9 +292,9 @@ export default function PlaceDetailScreen() {
             color={colors.canvas}
           />
           <Text style={styles.directionsLabel}>Directions</Text>
-        </TouchableOpacity>
+        </Touchable>
         {place.phone ? (
-          <TouchableOpacity
+          <Touchable
             style={styles.quickAction}
             onPress={() => {
               Linking.openURL(phoneToTel(place.phone!, place)).catch(() => {});
@@ -290,10 +307,10 @@ export default function PlaceDetailScreen() {
               size={19}
               color={colors.accent}
             />
-          </TouchableOpacity>
+          </Touchable>
         ) : null}
         {place.website ? (
-          <TouchableOpacity
+          <Touchable
             style={styles.quickAction}
             onPress={() => {
               Linking.openURL(place.website!).catch(() => {});
@@ -306,9 +323,25 @@ export default function PlaceDetailScreen() {
               size={19}
               color={colors.accent}
             />
-          </TouchableOpacity>
+          </Touchable>
         ) : null}
-        <TouchableOpacity
+        {/* Saving is the highest-frequency action a regular attendee has —
+            jamaat times are a daily lookup — so it sits with the other
+            first-class actions, not buried in a menu. */}
+        <Touchable
+          style={styles.quickAction}
+          onPress={() => toggleFavourite(place.id)}
+          accessibilityRole="button"
+          accessibilityState={{ selected: saved }}
+          accessibilityLabel={saved ? "Remove from saved" : "Save this place"}
+        >
+          <MaterialCommunityIcons
+            name={saved ? "heart" : "heart-outline"}
+            size={19}
+            color={saved ? colors.accent : colors.accent}
+          />
+        </Touchable>
+        <Touchable
           style={styles.quickAction}
           onPress={sharePlace}
           accessibilityRole="button"
@@ -319,7 +352,7 @@ export default function PlaceDetailScreen() {
             size={19}
             color={colors.accent}
           />
-        </TouchableOpacity>
+        </Touchable>
       </View>
 
       {contactRows.length > 0 ? (
@@ -327,7 +360,7 @@ export default function PlaceDetailScreen() {
           <Text style={styles.sectionTitle}>Contact</Text>
           <View style={styles.contactList}>
             {contactRows.map((row) => (
-              <TouchableOpacity
+              <Touchable
                 key={row.label}
                 style={styles.contactRow}
                 onPress={() => {
@@ -347,7 +380,7 @@ export default function PlaceDetailScreen() {
                 <Text style={styles.contactValue} numberOfLines={1}>
                   {row.label === "Phone" ? place.phone : row.url}
                 </Text>
-              </TouchableOpacity>
+              </Touchable>
             ))}
           </View>
         </View>
@@ -468,7 +501,7 @@ export default function PlaceDetailScreen() {
         </Text>
       </View>
 
-      <TouchableOpacity
+      <Touchable
         style={styles.suggestEditButton}
         onPress={() => setShowEditForm(true)}
         accessibilityRole="button"
@@ -477,7 +510,7 @@ export default function PlaceDetailScreen() {
         <Text style={styles.suggestEditLabel}>
           Something wrong? Suggest an edit
         </Text>
-      </TouchableOpacity>
+      </Touchable>
     </ScrollView>
     <SuggestionSheet
       visible={showEditForm}
@@ -568,6 +601,8 @@ const createStyles = (colors: ThemeColors) =>
     alignItems: "center",
     minHeight: 48,
     justifyContent: "center",
+    // Clips the Android ripple to the rounded corners.
+    overflow: "hidden",
   },
   // canvas, not white: the dark theme's accent is light green.
   directionsLabel: {
@@ -582,6 +617,8 @@ const createStyles = (colors: ThemeColors) =>
     backgroundColor: colors.accentSoft,
     alignItems: "center",
     justifyContent: "center",
+    // Clips the Android ripple to the rounded corners.
+    overflow: "hidden",
   },
   section: {
     backgroundColor: colors.canvas,
@@ -621,7 +658,10 @@ const createStyles = (colors: ThemeColors) =>
     color: colors.text,
   },
   prayerTimeCell: {
-    width: 64,
+    // minWidth, not width: at a large system font size a fixed 64pt box
+    // clips the time. flexShrink: 0 keeps the columns aligned.
+    minWidth: 64,
+    flexShrink: 0,
     fontSize: 14,
     textAlign: "center",
   },
@@ -633,17 +673,21 @@ const createStyles = (colors: ThemeColors) =>
     letterSpacing: 0.5,
   },
   prayerJamaatCell: {
-    width: 64,
+    minWidth: 64,
+    flexShrink: 0,
     fontSize: 16,
     fontWeight: "700",
     color: colors.text,
     textAlign: "center",
+    ...numeric,
   },
   prayerCalculatedCell: {
-    width: 64,
+    minWidth: 64,
+    flexShrink: 0,
     fontSize: 16,
     color: colors.textSecondary,
     textAlign: "center",
+    ...numeric,
   },
   jamaatSource: {
     fontSize: 14,
