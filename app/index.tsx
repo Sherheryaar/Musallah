@@ -323,7 +323,12 @@ export default function HomeScreen() {
   );
 
   const clearFilters = useCallback(
-    () => updateSettings({ facilityFilters: [], corroboratedOnly: false }),
+    () =>
+      updateSettings({
+        facilityFilters: [],
+        corroboratedOnly: false,
+        savedOnly: false,
+      }),
     [updateSettings],
   );
 
@@ -513,6 +518,8 @@ export default function HomeScreen() {
   // typo-tolerant matches ("birmingam", "masjed", "mosque"→masjid) — so a
   // spelling mistake still finds the place, but exact hits always outrank
   // guesses. Distance order is preserved within each tier.
+  const savedIdSet = useMemo(() => new Set(favouriteIds), [favouriteIds]);
+
   const results = useMemo(() => {
     const selected = [...activeFilters]; // spread once, not once per place
     const q = effectiveQuery.toLowerCase();
@@ -520,9 +527,14 @@ export default function HomeScreen() {
       ({ place }) =>
         selected.every((key) => place.facilities[key]) &&
         (!settings.corroboratedOnly || isCorroborated(place)) &&
+        (!settings.savedOnly || savedIdSet.has(place.id)) &&
         (!place.jumuahOnly ||
           activeFilters.has("jumuah") ||
           q.length > 0 ||
+          // Everything passing the saved-only filter was saved on purpose —
+          // suppressing a deliberately saved jumu'ah-only venue would make
+          // the filter look like it lost a place.
+          settings.savedOnly ||
           // Friday: the one day these venues ARE the answer. Hired halls
           // and university rooms hold jumu'ah and nothing else, so the
           // default suppression hid exactly what the user came for, at the
@@ -550,6 +562,8 @@ export default function HomeScreen() {
     effectiveQuery,
     searchTokens,
     settings.corroboratedOnly,
+    settings.savedOnly,
+    savedIdSet,
     isFriday,
   ]);
 
@@ -562,9 +576,10 @@ export default function HomeScreen() {
       within.length >= MIN_LIST_RESULTS
         ? within
         : results.slice(0, MIN_LIST_RESULTS);
-    const savedIds = new Set(favouriteIds);
     const capped = base
-      .filter((r) => !savedIds.has(r.place.id))
+      // With the saved-only filter on, saved places ARE the list — the
+      // usual "already shown in the Saved section" exclusion would empty it.
+      .filter((r) => settings.savedOnly || !savedIdSet.has(r.place.id))
       .slice(0, MAX_LIST_RESULTS);
     if (!isFriday) return capped;
     // Promotion, not re-sorting: keep the nearest-first order and simply
@@ -575,7 +590,7 @@ export default function HomeScreen() {
     const withTime = capped.filter((r) => r.place.jumuahTimes?.length);
     const withoutTime = capped.filter((r) => !r.place.jumuahTimes?.length);
     return withTime.concat(withoutTime);
-  }, [results, effectiveQuery, isFriday, favouriteIds]);
+  }, [results, effectiveQuery, isFriday, savedIdSet, settings.savedOnly]);
 
   // Saved places, resolved from ids against the live dataset. Excluded
   // from the nearby list below so the same row never appears twice.
@@ -608,7 +623,10 @@ export default function HomeScreen() {
     [openPlace],
   );
 
-  const filterCount = activeFilters.size + (settings.corroboratedOnly ? 1 : 0);
+  const filterCount =
+    activeFilters.size +
+    (settings.corroboratedOnly ? 1 : 0) +
+    (settings.savedOnly ? 1 : 0);
 
   const searchRow = (
     <View style={styles.searchRow}>
@@ -764,7 +782,9 @@ isFriday && !fridayNoticeDismissed && listResults.length > 0 ? (
       renderItem={renderItem}
       ListHeaderComponent={
         <>
-          {favourites.length > 0 && !effectiveQuery ? (
+          {/* Hidden while the saved-only filter is on: the main list IS the
+              saved places then, and this header would duplicate every row. */}
+          {favourites.length > 0 && !effectiveQuery && !settings.savedOnly ? (
             <View style={styles.savedSection}>
               <Text style={styles.savedTitle}>Saved</Text>
               {favourites.map((item) => (
@@ -791,10 +811,15 @@ isFriday && !fridayNoticeDismissed && listResults.length > 0 ? (
           <PlacesSkeleton />
         ) : (
           <View style={styles.empty}>
-            <Text style={styles.emptyTitle}>No places match</Text>
+            <Text style={styles.emptyTitle}>
+              {settings.savedOnly ? "No saved places" : "No places match"}
+            </Text>
             <Text style={styles.emptyText}>
-              Try removing a filter {"\u2014"} or this is a gap in the data
-              worth fixing.
+              {settings.savedOnly
+                ? "Tap the heart on a place to save it \u2014 or turn off " +
+                  "the saved-places filter."
+                : "Try removing a filter \u2014 or this is a gap in the " +
+                  "data worth fixing."}
             </Text>
             <Touchable
               style={styles.emptyButton}
@@ -906,6 +931,8 @@ isFriday && !fridayNoticeDismissed && listResults.length > 0 ? (
       )}
       <FilterSheet
         visible={showFilters}
+        savedOnly={settings.savedOnly}
+        onToggleSaved={() => updateSettings({ savedOnly: !settings.savedOnly })}
         active={activeFilters}
         corroboratedOnly={settings.corroboratedOnly}
         onToggle={toggleFilter}
@@ -1006,6 +1033,11 @@ const createStyles = (colors: ThemeColors) =>
     shadowRadius: 6,
     shadowOffset: { width: 0, height: 2 },
     elevation: 3,
+    // Android only: clip the press ripple to the rounded corners — without
+    // this it flashes as a full rectangle behind them. The elevation shadow
+    // survives clipping (it draws from the outline); iOS must NOT clip, or
+    // clipsToBounds would erase the shadow* props above.
+    ...Platform.select({ android: { overflow: "hidden" as const } }),
   },
   filterButtonActive: {
     backgroundColor: colors.accentSoft,

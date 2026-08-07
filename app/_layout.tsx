@@ -149,8 +149,11 @@ function ThemedNavigator() {
 
 export default function RootLayout() {
   return (
-    <ThemeProvider>
-      <SettingsProvider>
+    // Settings OUTSIDE theme: the theme setting (system/light/dark) lives in
+    // settings, so ThemeProvider must be able to read it. SettingsProvider
+    // renders no themed UI of its own, so the flip costs nothing.
+    <SettingsProvider>
+      <ThemeProvider>
         <NotificationsProvider>
           <PlacesProvider>
             <FavouritesProvider>
@@ -158,8 +161,8 @@ export default function RootLayout() {
             </FavouritesProvider>
           </PlacesProvider>
         </NotificationsProvider>
-      </SettingsProvider>
-    </ThemeProvider>
+      </ThemeProvider>
+    </SettingsProvider>
   );
 }
 

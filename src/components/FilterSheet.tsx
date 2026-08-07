@@ -22,8 +22,10 @@ type Props = {
   visible: boolean;
   active: Set<FacilityKey>;
   corroboratedOnly: boolean;
+  savedOnly: boolean;
   onToggle: (key: FacilityKey) => void;
   onToggleCorroborated: () => void;
+  onToggleSaved: () => void;
   onClear: () => void;
   onClose: () => void;
 };
@@ -40,8 +42,10 @@ export default function FilterSheet({
   visible,
   active,
   corroboratedOnly,
+  savedOnly,
   onToggle,
   onToggleCorroborated,
+  onToggleSaved,
   onClear,
   onClose,
 }: Props) {
@@ -67,7 +71,8 @@ export default function FilterSheet({
 
   if (!mounted) return null;
 
-  const totalActive = active.size + (corroboratedOnly ? 1 : 0);
+  const totalActive =
+    active.size + (corroboratedOnly ? 1 : 0) + (savedOnly ? 1 : 0);
 
   return (
     // accessibilityViewIsModal goes on the BACKDROP, not the card: it makes
@@ -116,7 +121,7 @@ export default function FilterSheet({
       >
         <View style={styles.headerRow}>
           <Text style={styles.title}>Filters</Text>
-          {active.size > 0 || corroboratedOnly ? (
+          {totalActive > 0 ? (
             <Touchable
               onPress={onClear}
               accessibilityRole="button"
@@ -165,6 +170,31 @@ export default function FilterSheet({
             </Touchable>
           );
         })}
+        <Text style={styles.sectionTitle}>Your places</Text>
+        <Touchable
+          style={styles.row}
+          onPress={onToggleSaved}
+          accessibilityRole="checkbox"
+          accessibilityState={{ checked: savedOnly }}
+          accessibilityLabel="Filter: saved places only"
+        >
+          <View style={styles.rowTextWrap}>
+            <Text style={styles.rowLabel}>Saved places only</Text>
+            <Text style={styles.rowHint}>
+              Only show places you&apos;ve saved with the heart button — on
+              the map and in the list.
+            </Text>
+          </View>
+          <View style={[styles.box, savedOnly && styles.boxActive]}>
+            {savedOnly ? (
+              <MaterialCommunityIcons
+                name="check-bold"
+                size={15}
+                color={colors.canvas}
+              />
+            ) : null}
+          </View>
+        </Touchable>
         <Text style={styles.sectionTitle}>Data quality</Text>
         <Touchable
           style={styles.row}

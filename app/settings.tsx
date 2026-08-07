@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
 import {
+  Linking,
   Platform,
   ScrollView,
   StyleSheet,
@@ -8,6 +9,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Constants from "expo-constants";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
 import Touchable from "@/components/Touchable";
 import ThemedSwitch from "@/components/ThemedSwitch";
@@ -16,6 +18,8 @@ import { useSettings } from "@/context/SettingsContext";
 import { useTheme } from "@/context/ThemeContext";
 import { PRAYER_KEYS, PRAYER_LABELS } from "@/lib/notificationPlan";
 import { radius, spacing, type ThemeColors } from "@/lib/theme";
+
+type IconName = React.ComponentProps<typeof MaterialCommunityIcons>["name"];
 
 function useStyles() {
   const { colors } = useTheme();
@@ -40,6 +44,69 @@ const PRIVACY_POINTS: { title: string; body: string }[] = [
     body: "When you suggest a new place or an edit, only the text you type is sent to our database so we can review it. Please don't include personal details you wouldn't want stored.",
   },
 ];
+
+// The attribution that used to sit at the bottom of every place page, in
+// one deliberate home. Each row opens the project's own site.
+const CREDITS: { name: string; role: string; url: string }[] = [
+  {
+    name: "MuslimsInBritain.org",
+    role: "The UK mosque directory our place data is built from — used with permission.",
+    url: "https://www.muslimsinbritain.org",
+  },
+  {
+    name: "Mawaqit",
+    role: "Jamaat timetables for masjids that publish there — used with permission.",
+    url: "https://mawaqit.net",
+  },
+  {
+    name: "Masjidbox",
+    role: "Jamaat timetables for masjids that publish there.",
+    url: "https://masjidbox.com",
+  },
+  {
+    name: "Sirat",
+    role: "Mosque directory used where a masjid publishes nowhere else we can read (ODC-By 1.0).",
+    url: "https://sirat.uk",
+  },
+  {
+    name: "Moonsighting Committee",
+    role: "The seasonal Fajr & Isha calculation method recommended for the UK.",
+    url: "https://www.moonsighting.com",
+  },
+];
+
+const THEME_OPTIONS: {
+  key: "system" | "light" | "dark";
+  label: string;
+  icon: IconName;
+}[] = [
+  { key: "system", label: "System", icon: "theme-light-dark" },
+  { key: "light", label: "Light", icon: "white-balance-sunny" },
+  { key: "dark", label: "Dark", icon: "weather-night" },
+];
+
+function SectionHeader({
+  icon,
+  title,
+  first,
+}: {
+  icon: IconName;
+  title: string;
+  first?: boolean;
+}) {
+  const styles = useStyles();
+  const { colors } = useTheme();
+  return (
+    <View style={[styles.sectionHeader, first && styles.firstSectionHeader]}>
+      <MaterialCommunityIcons
+        name={icon}
+        size={16}
+        color={colors.textSecondary}
+      />
+      <Text style={styles.sectionTitle}>{title}</Text>
+    </View>
+  );
+}
 
 function OptionRow({
   label,
@@ -86,6 +153,7 @@ const REMINDER_OPTIONS = [0, 10, 20] as const;
 
 export default function SettingsScreen() {
   const styles = useStyles();
+  const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const { settings, updateSettings } = useSettings();
   const notifications = useNotifications();
@@ -106,13 +174,57 @@ export default function SettingsScreen() {
         { paddingBottom: spacing.xxl + insets.bottom },
       ]}
     >
-      <Text style={[styles.sectionTitle, styles.firstSectionTitle]}>
-        Asr time (mithl)
-      </Text>
+      {/* ------------------------------------------------------------------
+          APPEARANCE
+          ------------------------------------------------------------------ */}
+      <SectionHeader icon="palette-outline" title="Appearance" first />
+      <View style={styles.card}>
+        <View style={styles.themeRow}>
+          {THEME_OPTIONS.map(({ key, label, icon }) => {
+            const selected = settings.theme === key;
+            return (
+              <Touchable
+                key={key}
+                style={[styles.themeChip, selected && styles.themeChipActive]}
+                onPress={() => updateSettings({ theme: key })}
+                accessibilityRole="radio"
+                accessibilityState={{ selected }}
+                accessibilityLabel={
+                  key === "system" ? "Follow the system theme" : `${label} theme`
+                }
+              >
+                <MaterialCommunityIcons
+                  name={icon}
+                  size={18}
+                  color={selected ? colors.accent : colors.textSecondary}
+                />
+                <Text
+                  style={[
+                    styles.themeChipLabel,
+                    selected && styles.themeChipLabelActive,
+                  ]}
+                >
+                  {label}
+                </Text>
+              </Touchable>
+            );
+          })}
+        </View>
+        {settings.theme === "system" ? (
+          <Text style={styles.themeHint}>
+            Follows your phone&apos;s light/dark setting.
+          </Text>
+        ) : null}
+      </View>
+
+      {/* ------------------------------------------------------------------
+          PRAYER TIME CALCULATION
+          ------------------------------------------------------------------ */}
+      <SectionHeader icon="clock-outline" title="Asr time (mithl)" />
       <Text style={styles.sectionIntro}>
         Schools of thought differ on when Asr begins, which is why timetables
-        often print two timings — 1 mithl and 2 mithl. Choose the one you
-        follow; it applies everywhere in the app.
+        often print two timings. Choose the one you follow; it applies
+        everywhere in the app.
       </Text>
       <View style={styles.card}>
         <OptionRow
@@ -130,7 +242,7 @@ export default function SettingsScreen() {
         />
       </View>
 
-      <Text style={styles.sectionTitle}>Fajr &amp; Isha calculation</Text>
+      <SectionHeader icon="weather-sunset" title="Fajr & Isha calculation" />
       <Text style={styles.sectionIntro}>
         How dawn and nightfall are worked out. Moonsighting Committee is
         recommended for the UK — fixed-angle methods stop working at British
@@ -156,7 +268,7 @@ export default function SettingsScreen() {
         // Shafaq only affects the Moonsighting Committee Isha rule, so it is
         // hidden when MWL is selected rather than shown doing nothing.
         <>
-          <Text style={styles.sectionTitle}>Isha twilight (Shafaq)</Text>
+          <SectionHeader icon="weather-night" title="Isha twilight (Shafaq)" />
           <Text style={styles.sectionIntro}>
             Which evening twilight marks Isha under the Moonsighting Committee
             method. General is the recommended blend for the UK.
@@ -186,9 +298,12 @@ export default function SettingsScreen() {
         </>
       ) : null}
 
+      {/* ------------------------------------------------------------------
+          FEEDBACK & NOTIFICATIONS (native only)
+          ------------------------------------------------------------------ */}
       {Platform.OS !== "web" ? (
         <>
-          <Text style={styles.sectionTitle}>Feedback</Text>
+          <SectionHeader icon="vibrate" title="Vibration" />
           <Text style={styles.sectionIntro}>
             The Qibla compass buzzes once when you face the qibla, and ticks
             lightly every 15° as you turn {"—"} so you can follow it without
@@ -209,7 +324,7 @@ export default function SettingsScreen() {
 
       {Platform.OS !== "web" ? (
         <>
-          <Text style={styles.sectionTitle}>Prayer notifications</Text>
+          <SectionHeader icon="bell-outline" title="Prayer notifications" />
           <Text style={styles.sectionIntro}>
             Reminders are scheduled on your phone from your location {"—"} no
             server is involved and nothing leaves your device. Open the app
@@ -307,7 +422,10 @@ export default function SettingsScreen() {
         </>
       ) : null}
 
-      <Text style={styles.sectionTitle}>Privacy Centre</Text>
+      {/* ------------------------------------------------------------------
+          PRIVACY
+          ------------------------------------------------------------------ */}
+      <SectionHeader icon="shield-check-outline" title="Privacy" />
       <View style={styles.card}>
         {PRIVACY_POINTS.map((point, i) => (
           <View
@@ -324,7 +442,43 @@ export default function SettingsScreen() {
         on the home screen.
       </Text>
 
-      <Text style={styles.sectionTitle}>About</Text>
+      {/* ------------------------------------------------------------------
+          THANKS — the attributions that used to sit on every place page.
+          ------------------------------------------------------------------ */}
+      <SectionHeader icon="hand-heart-outline" title="With thanks to" />
+      <Text style={styles.sectionIntro}>
+        The projects this app is built on. Place details and jamaat times come
+        from the sources below {"—"} spotted a mistake? Use &quot;Suggest an
+        edit&quot; on the place itself.
+      </Text>
+      <View style={styles.card}>
+        {CREDITS.map((credit, i) => (
+          <Touchable
+            key={credit.name}
+            style={[styles.creditRow, i > 0 && styles.rowDivider]}
+            onPress={() => {
+              Linking.openURL(credit.url).catch(() => {});
+            }}
+            accessibilityRole="link"
+            accessibilityLabel={`Open ${credit.name}`}
+          >
+            <View style={styles.creditTextWrap}>
+              <Text style={styles.creditName}>{credit.name}</Text>
+              <Text style={styles.creditRole}>{credit.role}</Text>
+            </View>
+            <MaterialCommunityIcons
+              name="open-in-new"
+              size={16}
+              color={colors.textSecondary}
+            />
+          </Touchable>
+        ))}
+      </View>
+
+      {/* ------------------------------------------------------------------
+          ABOUT
+          ------------------------------------------------------------------ */}
+      <SectionHeader icon="information-outline" title="About" />
       <View style={styles.card}>
         <View style={styles.aboutRow}>
           <Text style={styles.aboutLabel}>Version</Text>
@@ -335,20 +489,6 @@ export default function SettingsScreen() {
         <View style={[styles.aboutRow, styles.rowDivider]}>
           <Text style={styles.aboutLabel}>Prayer times</Text>
           <Text style={styles.aboutValue}>Calculated on-device</Text>
-        </View>
-        <View style={[styles.aboutRow, styles.rowDivider]}>
-          <Text style={styles.aboutLabel}>Place data</Text>
-          <Text style={styles.aboutValue}>
-            MuslimsInBritain.org (with permission)
-          </Text>
-        </View>
-        <View style={[styles.aboutRow, styles.rowDivider]}>
-          <Text style={styles.aboutLabel}>Jamaat times</Text>
-          <Text style={styles.aboutValue}>
-            {
-              "Each masjid's own published timetable, via Mawaqit.net (with permission), Masjidbox, and mosque websites — plus the Sirat.uk mosque directory (ODC-By 1.0) where a masjid publishes nowhere else we can read"
-            }
-          </Text>
         </View>
       </View>
     </ScrollView>
@@ -363,6 +503,21 @@ const createStyles = (colors: ThemeColors) =>
   },
   content: {
     padding: spacing.l,
+    // Centered, phone-width column on desktop browsers — matches the
+    // place-detail screen.
+    width: "100%",
+    maxWidth: 680,
+    alignSelf: "center",
+  },
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.s - 2,
+    marginTop: spacing.xl,
+    marginBottom: spacing.s,
+  },
+  firstSectionHeader: {
+    marginTop: 0,
   },
   sectionTitle: {
     fontSize: 13,
@@ -370,11 +525,6 @@ const createStyles = (colors: ThemeColors) =>
     color: colors.textSecondary,
     textTransform: "uppercase",
     letterSpacing: 0.6,
-    marginTop: spacing.xl,
-    marginBottom: spacing.s,
-  },
-  firstSectionTitle: {
-    marginTop: 0,
   },
   sectionIntro: {
     fontSize: 13,
@@ -392,6 +542,43 @@ const createStyles = (colors: ThemeColors) =>
   rowDivider: {
     borderTopWidth: 1,
     borderTopColor: colors.border,
+  },
+  themeRow: {
+    flexDirection: "row",
+    gap: spacing.s,
+    padding: spacing.m,
+  },
+  themeChip: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: spacing.s - 2,
+    minHeight: 44,
+    borderRadius: radius.m,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+    // Clips the Android ripple to the rounded corners.
+    overflow: "hidden",
+  },
+  themeChipActive: {
+    borderColor: colors.accent,
+    backgroundColor: colors.accentSoft,
+  },
+  themeChipLabel: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: colors.textSecondary,
+  },
+  themeChipLabelActive: {
+    color: colors.accent,
+  },
+  themeHint: {
+    fontSize: 12,
+    color: colors.textSecondary,
+    paddingHorizontal: spacing.m,
+    paddingBottom: spacing.m,
   },
   optionRow: {
     flexDirection: "row",
@@ -501,6 +688,27 @@ const createStyles = (colors: ThemeColors) =>
     fontSize: 12,
     color: colors.textSecondary,
     marginTop: spacing.s,
+  },
+  creditRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.m,
+    padding: spacing.l,
+    minHeight: 44,
+  },
+  creditTextWrap: {
+    flex: 1,
+  },
+  creditName: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: colors.text,
+  },
+  creditRole: {
+    fontSize: 12,
+    color: colors.textSecondary,
+    lineHeight: 16,
+    marginTop: 2,
   },
   aboutRow: {
     flexDirection: "row",

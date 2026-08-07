@@ -231,13 +231,12 @@ export default function PlaceDetailScreen() {
 
   // One status, not a pile of verification phrases: the old line rendered
   // "Unverified · Not yet verified · <source>", which read like a list of
-  // every possible status at once.
-  const verificationDetail = [
-    place.lastVerified ? "checked " + place.lastVerified : null,
-    place.source,
-  ]
-    .filter(Boolean)
-    .join(" · ");
+  // every possible status at once. The SOURCE is deliberately not shown
+  // here — where the data comes from is acknowledged once, in the settings
+  // screen's thanks section, not stamped on every place.
+  const verificationDetail = place.lastVerified
+    ? "checked " + place.lastVerified
+    : "";
 
   return (
     // Root View, not bare ScrollView: the suggestion sheet overlays with

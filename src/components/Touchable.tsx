@@ -4,6 +4,7 @@ import {
   Easing,
   Platform,
   Pressable,
+  StyleSheet,
   type PressableProps,
   type StyleProp,
   type ViewStyle,
@@ -23,9 +24,68 @@ import { useReducedMotion } from "@/lib/useReducedMotion";
 //   - the SCALE lives on an outer Animated.View, because an Animated.Value
 //     cannot be returned from Pressable's ({pressed}) style callback, and
 //     createAnimatedComponent(Pressable) does not accept the callback form;
-//   - the caller's `style` lives on the INNER Pressable, so the Android
-//     ripple is clipped by the same border radius the caller drew, rather
-//     than spilling outside it.
+//   - the caller's VISUAL styles live on the INNER Pressable, so the
+//     Android ripple is clipped by the same border radius the caller drew,
+//     rather than spilling outside it;
+//   - the caller's LAYOUT styles are hoisted onto the outer wrapper. The
+//     parent lays out the wrapper, not the Pressable, so flex, alignSelf
+//     and friends are inert on the inner element — `flex: 1` buttons
+//     collapse to their label and `flex: 1` scrims collapse to nothing.
+
+/**
+ * Style properties that position/size this component WITHIN ITS PARENT.
+ * These must live on the wrapper the parent actually lays out. Everything
+ * else (colour, padding, border, overflow) stays on the Pressable.
+ */
+const LAYOUT_KEYS = new Set([
+  "flex",
+  "flexGrow",
+  "flexShrink",
+  "flexBasis",
+  "alignSelf",
+  "display",
+  "width",
+  "minWidth",
+  "maxWidth",
+  "height",
+  "minHeight",
+  "maxHeight",
+  "margin",
+  "marginTop",
+  "marginBottom",
+  "marginLeft",
+  "marginRight",
+  "marginHorizontal",
+  "marginVertical",
+  "marginStart",
+  "marginEnd",
+  "position",
+  "top",
+  "bottom",
+  "left",
+  "right",
+  "start",
+  "end",
+  "zIndex",
+]);
+
+function splitStyle(style: StyleProp<ViewStyle>): {
+  layout: ViewStyle | null;
+  visual: ViewStyle | null;
+} {
+  const flat = StyleSheet.flatten(style);
+  if (!flat) return { layout: null, visual: null };
+  let layout: ViewStyle | null = null;
+  let visual: ViewStyle | null = null;
+  for (const key of Object.keys(flat) as (keyof ViewStyle)[]) {
+    if (LAYOUT_KEYS.has(key)) {
+      (layout ??= {})[key] = flat[key] as never;
+    } else {
+      (visual ??= {})[key] = flat[key] as never;
+    }
+  }
+  return { layout, visual };
+}
 
 type Props = Omit<PressableProps, "style" | "android_ripple"> & {
   style?: StyleProp<ViewStyle>;
@@ -86,8 +146,10 @@ export default function Touchable({
     [scheme, borderless, rippleRadius],
   );
 
+  const { layout, visual } = useMemo(() => splitStyle(style), [style]);
+
   return (
-    <Animated.View style={{ transform: [{ scale }] }}>
+    <Animated.View style={[layout, { transform: [{ scale }] }]}>
       <Pressable
         {...rest}
         disabled={disabled}
@@ -101,7 +163,15 @@ export default function Touchable({
           rest.onPressOut?.(e);
         }}
         style={({ pressed }) => [
-          style,
+          // flexGrow with its default auto basis: in a content-sized wrapper
+          // the Pressable keeps its content height, but when the hoisted
+          // layout gives the wrapper its size from OUTSIDE (a stretched
+          // button, a flex: 1 scrim) the Pressable grows to cover it — a
+          // scrim whose tappable area didn't fill the wrapper would be the
+          // old bug back under a new name. flex: 1 would be wrong here: its
+          // basis of 0 collapses content-sized buttons instead.
+          styles.fill,
+          visual,
           // 0.85, not TouchableOpacity's 0.2 — a press should acknowledge
           // the touch, not blank the control out. Android gets the ripple
           // instead and needs no opacity change.
@@ -114,3 +184,9 @@ export default function Touchable({
     </Animated.View>
   );
 }
+
+const styles = StyleSheet.create({
+  fill: {
+    flexGrow: 1,
+  },
+});

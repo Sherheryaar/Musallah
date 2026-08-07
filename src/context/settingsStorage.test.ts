@@ -23,6 +23,22 @@ describe("sanitizeSettings", () => {
     expect(sanitizeSettings("not an object")).toEqual({});
     expect(sanitizeSettings(42)).toEqual({});
   });
+
+  it("keeps the boolean filter flags, including false", () => {
+    // `false` is a real stored choice, not an absent one: the user who turns
+    // a filter OFF must not have it silently re-enabled by a later default.
+    expect(
+      sanitizeSettings({ savedOnly: false, corroboratedOnly: true }),
+    ).toEqual({ savedOnly: false, corroboratedOnly: true });
+  });
+
+  it("accepts the three theme values and rejects anything else", () => {
+    expect(sanitizeSettings({ theme: "dark" })).toEqual({ theme: "dark" });
+    expect(sanitizeSettings({ theme: "light" })).toEqual({ theme: "light" });
+    expect(sanitizeSettings({ theme: "system" })).toEqual({ theme: "system" });
+    expect(sanitizeSettings({ theme: "midnight" })).toEqual({});
+    expect(sanitizeSettings({ savedOnly: "yes" })).toEqual({});
+  });
 });
 
 describe("migrateV1Settings", () => {
@@ -52,5 +68,19 @@ describe("migrateV1Settings", () => {
         facilityFilters: [],
       }),
     ).toEqual({ method: "mwl", madhab: "hanafi", shafaq: "abyad" });
+  });
+
+  it("never carries post-v1 fields out of a v1 blob", () => {
+    // savedOnly, theme, corroboratedOnly and hapticFeedback all postdate v1,
+    // so anything claiming to hold one is not a v1 choice — the current
+    // default must win instead.
+    const migrated = migrateV1Settings({
+      madhab: "hanafi",
+      savedOnly: true,
+      theme: "dark",
+      corroboratedOnly: true,
+      hapticFeedback: false,
+    });
+    expect(migrated).toEqual({ madhab: "hanafi" });
   });
 });

@@ -32,6 +32,15 @@ export type PrayerSettings = {
    */
   corroboratedOnly: boolean;
   /**
+   * Show only places the user has saved with the heart button. Persisted
+   * like the facility filters — the sheet promises "saved for next time".
+   */
+  savedOnly: boolean;
+  /**
+   * Colour scheme. "system" follows the OS setting live; light/dark pin it.
+   */
+  theme: "system" | "light" | "dark";
+  /**
    * Vibration feedback — currently the Qibla compass's lock-on and its
    * every-15° turn ticks. On by default because a compass you must WATCH to
    * use is a poor compass, but it must be switchable: a phone that buzzes in
@@ -49,6 +58,8 @@ export const DEFAULT_SETTINGS: PrayerSettings = {
   shafaq: "general",
   facilityFilters: [],
   corroboratedOnly: false,
+  savedOnly: false,
+  theme: "system",
   hapticFeedback: true,
 };
 
@@ -89,6 +100,12 @@ export function sanitizeSettings(parsed: unknown): Partial<PrayerSettings> {
     ...(typeof raw.corroboratedOnly === "boolean"
       ? { corroboratedOnly: raw.corroboratedOnly }
       : null),
+    ...(typeof raw.savedOnly === "boolean"
+      ? { savedOnly: raw.savedOnly }
+      : null),
+    ...(raw.theme === "system" || raw.theme === "light" || raw.theme === "dark"
+      ? { theme: raw.theme }
+      : null),
     ...(typeof raw.hapticFeedback === "boolean"
       ? { hapticFeedback: raw.hapticFeedback }
       : null),
@@ -111,8 +128,8 @@ export function migrateV1Settings(parsed: unknown): Partial<PrayerSettings> {
   if (clean.facilityFilters && clean.facilityFilters.length > 0) {
     kept.facilityFilters = clean.facilityFilters;
   }
-  // corroboratedOnly and hapticFeedback both postdate v1, so a v1 blob can
-  // never carry a deliberate choice for either — always let the current
-  // default apply.
+  // corroboratedOnly, savedOnly, theme and hapticFeedback all postdate v1,
+  // so a v1 blob can never carry a deliberate choice for any of them —
+  // always let the current default apply.
   return kept;
 }
