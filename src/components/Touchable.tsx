@@ -174,14 +174,27 @@ export default function Touchable({
           rest.onPressOut?.(e);
         }}
         style={({ pressed }) => [
-          // flexGrow with its default auto basis: in a content-sized wrapper
-          // the Pressable keeps its content height, but when the hoisted
-          // layout gives the wrapper its size from OUTSIDE (a stretched
-          // button, a flex: 1 scrim) the Pressable grows to cover it — a
-          // scrim whose tappable area didn't fill the wrapper would be the
-          // old bug back under a new name. flex: 1 would be wrong here: its
-          // basis of 0 collapses content-sized buttons instead.
-          styles.fill,
+          // The fill is applied ONLY when the caller's style hoisted layout
+          // onto the wrapper — i.e. when the wrapper gets its size from
+          // OUTSIDE (a stretched button, a flex: 1 scrim) and the Pressable
+          // must grow to cover it; a scrim whose tappable area didn't fill
+          // the wrapper would be the old bug back under a new name.
+          //
+          // It must NOT be unconditional, and that is Android evidence, not
+          // theory: a style-less Touchable (the prayer screen's "Back to
+          // today" chip) has no hoisted layout, so its wrapper is purely
+          // content-sized — yet inside a ScrollView, Android's renderer
+          // measures the Pressable with the scroll viewport's remaining
+          // height on offer, and an unconditional flexGrow absorbed all of
+          // it. The chip's row grew ~500dp and shoved the prayer table off
+          // the bottom of the screen. Web never showed it (CSS gives a grow
+          // item in an auto-height column nothing to grow into), which is
+          // why this shipped. With no hoisted layout there is nothing the
+          // Pressable could legitimately be filling, so it gets no fill.
+          //
+          // flex: 1 would be wrong in the fill: its basis of 0 collapses
+          // content-sized buttons instead.
+          layout ? styles.fill : null,
           visual,
           // 0.85, not TouchableOpacity's 0.2 — a press should acknowledge
           // the touch, not blank the control out. Android gets the ripple
