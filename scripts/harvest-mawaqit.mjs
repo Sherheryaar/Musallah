@@ -32,6 +32,7 @@ import {
   existsSync,
   mkdirSync,
   readFileSync,
+  renameSync,
   writeFileSync,
 } from "node:fs";
 import { dirname, join } from "node:path";
@@ -270,14 +271,21 @@ if (existsSync(checkpointPath)) {
 
 const saveCheckpoint = () => {
   mkdirSync(OUT_DIR, { recursive: true });
+  // Write-then-rename, not a direct write: this runs after every cell (see
+  // callers below), and a process kill mid-write would otherwise truncate
+  // the checkpoint file, silently erasing every cell already collected --
+  // exactly the "costs one cell, not the whole run" guarantee this file
+  // documents. rename() replaces the destination atomically.
+  const tmpPath = `${checkpointPath}.tmp`;
   writeFileSync(
-    checkpointPath,
+    tmpPath,
     JSON.stringify(
       { doneCells: [...doneCells], mosques: [...mosques.values()] },
       null,
       1,
     ),
   );
+  renameSync(tmpPath, checkpointPath);
 };
 
 const pending = [...cells.entries()]
@@ -519,6 +527,16 @@ ${unmatchedMosques
 `;
 writeFileSync(join(OUT_DIR, "mawaqit-jummah-report.md"), report);
 
+/**
+ * Safe to place after `-- ` on one line of the generated SQL: Mawaqit's
+ * `name` is untrusted, and a literal newline in it would close the `--`
+ * comment early, turning the `update ...;` that follows into LIVE SQL the
+ * moment a human runs this file per the documented workflow.
+ */
+const sqlComment = (text) => text.replace(/[\r\n]+/g, " ");
+/** Safe inside a single-quoted SQL string literal. */
+const sqlLiteral = (text) => text.replace(/'/g, "''");
+
 const today = new Date().toISOString().slice(0, 10);
 const sql = `-- Jumu'ah times from Mawaqit (mosque-published), harvested ${today}
 -- by scripts/harvest-mawaqit.mjs.
@@ -533,7 +551,7 @@ const sql = `-- Jumu'ah times from Mawaqit (mosque-published), harvested ${today
 ${newTimes
   .map(
     (m) =>
-      `-- ${m.placeName} <- "${m.mawaqitName}" (${m.distanceM} m, names agree)\nupdate public.places set jumuah_times = '${JSON.stringify(m.jumuahTimes)}'::jsonb where id = '${m.placeId}';`,
+      `-- ${sqlComment(m.placeName)} <- "${sqlComment(m.mawaqitName)}" (${m.distanceM} m, names agree)\nupdate public.places set jumuah_times = '${JSON.stringify(m.jumuahTimes)}'::jsonb where id = '${sqlLiteral(m.placeId)}';`,
   )
   .join("\n")}
 `;

@@ -84,7 +84,7 @@ function groupIntoCells(
   for (const candidate of inView) {
     const cy = Math.floor(candidate.place.lat / cellLat);
     const cx = Math.floor(candidate.place.lng / cellLng);
-    const key = `${cellLat}:${cy}:${cx}`;
+    const key = `${cellLat}:${cellLng}:${cy}:${cx}`;
     const bucket = cells.get(key);
     if (bucket) {
       bucket.push(candidate);

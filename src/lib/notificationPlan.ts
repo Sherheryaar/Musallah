@@ -84,7 +84,18 @@ export function planNotifications(
   const offsetMs = Math.max(0, prefs.minutesBefore) * 60_000;
 
   for (let dayOffset = 0; dayOffset <= WINDOW_DAYS; dayOffset++) {
-    const day = new Date(now.getTime() + dayOffset * 24 * 60 * 60 * 1000);
+    // Advance the CALENDAR DATE, not a fixed 24h in milliseconds: on the UK
+    // clock-change nights (a 23h or 25h civil day), adding literal
+    // milliseconds can land on the wrong day or skip one entirely. The Date
+    // constructor resolves an overflowed day field in local time correctly.
+    const day = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate() + dayOffset,
+      now.getHours(),
+      now.getMinutes(),
+      now.getSeconds(),
+    );
     const schedule = computePrayerSchedule(lat, lng, options, day);
     if (!schedule) continue; // polar edge case: skip the day
     const dateKey = `${day.getFullYear()}-${String(day.getMonth() + 1).padStart(2, "0")}-${String(day.getDate()).padStart(2, "0")}`;

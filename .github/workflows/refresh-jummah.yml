@@ -58,8 +58,12 @@ jobs:
       # The pipeline scripts are dependency-free (built-in fetch) — no npm ci.
       - name: Refresh jamaat and Jumu'ah times
         env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_ANON_KEY: ${{ secrets.EXPO_PUBLIC_SUPABASE_ANON_KEY }}
+          # Either secret name works (the bare one and the EXPO_PUBLIC_
+          # one used everywhere else are the same values) -- a maintainer
+          # who only set up the EXPO_PUBLIC_ names must not silently halt
+          # every scheduled run.
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL || secrets.EXPO_PUBLIC_SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY || secrets.EXPO_PUBLIC_SUPABASE_ANON_KEY }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: node scripts/refresh-times.mjs
 

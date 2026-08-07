@@ -56,6 +56,36 @@ create policy "public insert submissions"
   to anon, authenticated
   with check (true);
 
+-- Abuse guard: the anon key ships in the app bundle by design, so the
+-- insert-only policy above has no limit on its own for how many rows one
+-- caller can write with it. Per-caller (e.g. per-IP) throttling needs
+-- infrastructure a plain RLS policy doesn't have access to, but a global
+-- rate cap needs nothing extra and is enough to stop a naive flood script
+-- from filling the table. security definer is required: RLS gives this
+-- role no SELECT on submissions (by design, above), so the count would
+-- otherwise always read zero rows.
+create or replace function public.limit_submission_rate()
+returns trigger
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+begin
+  if (
+    select count(*) from public.submissions
+    where created_at > now() - interval '1 minute'
+  ) >= 20 then
+    raise exception 'Too many submissions right now — please try again in a minute.';
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists submissions_rate_limit on public.submissions;
+create trigger submissions_rate_limit
+  before insert on public.submissions
+  for each row execute function public.limit_submission_rate();
+
 -- Live updates in the app (PlacesContext subscribes to postgres_changes)
 -- require the table in the realtime publication. Errors harmlessly if the
 -- table was already added.

@@ -78,6 +78,17 @@ const NotificationsContext = createContext<NotificationsContextValue>({
 type NotificationsModule = typeof import("expo-notifications");
 let notifierPromise: Promise<NotificationsModule> | null = null;
 
+/** Does this permissions response count as "on" for our purposes? */
+function isGranted(
+  N: NotificationsModule,
+  status: { granted: boolean; ios?: { status?: number } },
+): boolean {
+  return (
+    status.granted ||
+    status.ios?.status === N.IosAuthorizationStatus.PROVISIONAL
+  );
+}
+
 function getNotifier(): Promise<NotificationsModule> {
   if (!notifierPromise) {
     notifierPromise = import("expo-notifications").then((N) => {
@@ -249,10 +260,24 @@ export function NotificationsProvider({
     if (!hydrated.current) return;
     void reschedule("topup");
     const sub = AppState.addEventListener("change", (state) => {
-      if (state === "active") void reschedule("topup");
+      if (state !== "active") return;
+      void reschedule("topup");
+      // The OS permission can be revoked from the device Settings app while
+      // Musallah is backgrounded. Without this, `permissionGranted` keeps
+      // whatever value `enable()` last set and the Settings screen keeps
+      // showing notifications as on even after the OS silently turned them
+      // off. Only re-check once we've actually asked before (permission
+      // starts `null`), so a user who's never touched the feature still
+      // never triggers the expo-notifications import on every foreground.
+      if (permissionGranted !== null && Platform.OS !== "web") {
+        void getNotifier()
+          .then((N) => N.getPermissionsAsync().then((status) => [N, status] as const))
+          .then(([N, status]) => setPermissionGranted(isGranted(N, status)))
+          .catch(() => {});
+      }
     });
     return () => sub.remove();
-  }, [reschedule]);
+  }, [reschedule, permissionGranted]);
 
   const updatePrefs = useCallback(
     (patch: Partial<NotificationPrefs>) => {
@@ -276,9 +301,7 @@ export function NotificationsProvider({
     if (Platform.OS === "web") return false;
     const N = await getNotifier();
     const current = await N.getPermissionsAsync();
-    let granted =
-      current.granted ||
-      current.ios?.status === N.IosAuthorizationStatus.PROVISIONAL;
+    let granted = isGranted(N, current);
     if (!granted && current.canAskAgain) {
       const asked = await N.requestPermissionsAsync();
       granted = asked.granted;

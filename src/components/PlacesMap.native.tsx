@@ -168,8 +168,12 @@ export default function PlacesMap({
   useEffect(() => {
     const nonce = recenterNonce ?? 0;
     if (nonce === lastRecenter.current) return;
-    lastRecenter.current = nonce;
+    // Only mark this nonce handled once there's a location to animate to —
+    // a tap that arrives before the first GPS fix must still fire the
+    // animation once userLocation lands and this effect re-runs, rather
+    // than being marked "done" here and silently dropped.
     if (!userLocation) return;
+    lastRecenter.current = nonce;
     mapRef.current?.animateToRegion(
       {
         latitude: userLocation.lat,

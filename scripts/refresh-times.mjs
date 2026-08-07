@@ -36,7 +36,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { sameJamaat } from "./lib/timetable.mjs";
+import { JAMAAT_KEYS, sameJamaat } from "./lib/timetable.mjs";
 import { SOURCES } from "./timetable-sources.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -58,9 +58,16 @@ if (existsSync(envPath)) {
     if (m) dotenv[m[1]] = m[2].trim();
   }
 }
-const SUPABASE_URL = process.env.SUPABASE_URL || dotenv.EXPO_PUBLIC_SUPABASE_URL;
+const SUPABASE_URL =
+  process.env.SUPABASE_URL ||
+  process.env.EXPO_PUBLIC_SUPABASE_URL ||
+  dotenv.SUPABASE_URL ||
+  dotenv.EXPO_PUBLIC_SUPABASE_URL;
 const ANON_KEY =
-  process.env.SUPABASE_ANON_KEY || dotenv.EXPO_PUBLIC_SUPABASE_ANON_KEY;
+  process.env.SUPABASE_ANON_KEY ||
+  process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ||
+  dotenv.SUPABASE_ANON_KEY ||
+  dotenv.EXPO_PUBLIC_SUPABASE_ANON_KEY;
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!SUPABASE_URL || !ANON_KEY) {
@@ -185,15 +192,26 @@ for (const link of links) {
   const summary = [];
 
   if (got.jamaat) {
+    // A source that returns SOME but not all prayers today (one time
+    // failed to parse, `skipped` above) must not erase the others: the
+    // write below replaces the whole jsonb column, so start from what we
+    // already had and only override the keys the source actually gave us.
+    // This is what "a source going quiet on a prayer keeps the old value"
+    // (see file header) actually requires -- comparing against `got.jamaat`
+    // alone was letting a partial fetch delete previously-good times.
+    const merged = {};
+    for (const key of JAMAAT_KEYS) {
+      merged[key] = got.jamaat[key] ?? have.jamaat?.[key];
+    }
     // Generic sources (a mosque's own dated table) carry their credit on the
     // registry row, since it names that mosque's site.
     const next = {
-      ...got.jamaat,
+      ...merged,
       source: link.credit ?? SOURCES[link.source].credit,
       recordedOn: today,
     };
     // Compare only the times: source/recordedOn always differ by date.
-    if (!sameJamaat(have.jamaat, got.jamaat)) {
+    if (!sameJamaat(have.jamaat, merged)) {
       patch.jamaat = next;
       summary.push("jamaat");
     } else if (have.jamaat?.recordedOn !== today) {

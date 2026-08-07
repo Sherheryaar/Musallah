@@ -27,7 +27,13 @@
 // refusals by simply recording the failure and moving on. Results are
 // checkpointed, so the sweep can be stopped and resumed.
 
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  renameSync,
+  writeFileSync,
+} from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -89,10 +95,15 @@ if (!FRESH && existsSync(checkpointPath)) {
 
 const saveCheckpoint = () => {
   mkdirSync(OUT_DIR, { recursive: true });
+  // Write-then-rename: this fires after every site (see call sites below),
+  // and a kill mid-write would truncate the file, so a parse failure on
+  // resume would discard every site already probed instead of costing one.
+  const tmpPath = `${checkpointPath}.tmp`;
   writeFileSync(
-    checkpointPath,
+    tmpPath,
     JSON.stringify({ probedOn: isoDate, findings: [...findings.values()] }, null, 1),
   );
+  renameSync(tmpPath, checkpointPath);
 };
 
 async function getText(url) {
@@ -286,8 +297,11 @@ ${
 ${
   masjidboxHits
     .map((f) => {
-      const slug = f.platforms.find((p) => p.platform === "masjidbox").slug;
-      return `### ${f.placeName}\n- \`${f.placeId}\` — slug \`${slug}\`\n\n\`\`\`json\n${entry(f, "masjidbox", { url: `https://masjidbox.net/${slug}` })}\n\`\`\``;
+      const platform = f.platforms.find((p) => p.platform === "masjidbox");
+      const ambiguousNote = platform.ambiguous
+        ? `\n- ⚠️ page also named ${platform.ambiguous.length - 1} other masjidbox slug(s): ${platform.ambiguous.filter((s) => s !== platform.slug).map((s) => `\`${s}\``).join(", ")} — confirm which mosque this page is actually for before registering`
+        : "";
+      return `### ${f.placeName}\n- \`${f.placeId}\` — slug \`${platform.slug}\`${ambiguousNote}\n\n\`\`\`json\n${entry(f, "masjidbox", { url: `https://masjidbox.net/${platform.slug}` })}\n\`\`\``;
     })
     .join("\n\n") || "_none_"
 }
@@ -299,10 +313,13 @@ worth adding to the Mawaqit registry entries by hand.
 
 ${
   mawaqitHits
-    .map(
-      (f) =>
-        `- ${f.placeName} (\`${f.placeId}\`) — slug \`${f.platforms.find((p) => p.platform === "mawaqit-embed").slug}\``,
-    )
+    .map((f) => {
+      const platform = f.platforms.find((p) => p.platform === "mawaqit-embed");
+      const ambiguousNote = platform.ambiguous
+        ? ` — ⚠️ page also named ${platform.ambiguous.length - 1} other slug(s): ${platform.ambiguous.filter((s) => s !== platform.slug).map((s) => `\`${s}\``).join(", ")}`
+        : "";
+      return `- ${f.placeName} (\`${f.placeId}\`) — slug \`${platform.slug}\`${ambiguousNote}`;
+    })
     .join("\n") || "_none_"
 }
 

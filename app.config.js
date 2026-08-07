@@ -5,7 +5,15 @@
 //
 //   eas env:create --name GOOGLE_MAPS_ANDROID_API_KEY --value <key> \
 //     --environment production --visibility secret
-//   (repeat for --environment preview / development)
+//   (repeat for --environment preview)
+//
+// eas.json's "development" build profile deliberately points its
+// `environment` at "preview" rather than a "development" environment of
+// its own — creating a third copy of the same key for a profile that's
+// only ever used for local dev-client testing isn't worth the upkeep, and
+// without SOME environment set here, a dev-client build would silently
+// skip this injection and hit the exact blank-grey-map failure described
+// below.
 //
 // Why it's needed at all: react-native-maps on Android talks to the Google
 // Maps SDK, which needs an API key in standalone builds. Expo Go ships its

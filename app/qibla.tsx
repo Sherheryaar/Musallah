@@ -128,7 +128,7 @@ export default function QiblaScreen() {
       }
 
       try {
-        sub = await Location.watchHeadingAsync((data) => {
+        const newSub = await Location.watchHeadingAsync((data) => {
           if (cancelled) return;
           // trueHeading is corrected for magnetic declination by the OS and
           // is what the qibla bearing must be compared against. It reports
@@ -157,6 +157,15 @@ export default function QiblaScreen() {
             return { kind: "live", heading: next, accuracy };
           });
         });
+        // The effect may have been cleaned up while this await was in
+        // flight (cleanup ran when `sub` was still null, so its
+        // `sub?.remove()` was a no-op) -- remove it now instead of leaking
+        // a live compass listener for the rest of the session.
+        if (cancelled) {
+          newSub.remove();
+        } else {
+          sub = newSub;
+        }
       } catch {
         setHeading({
           kind: "static",

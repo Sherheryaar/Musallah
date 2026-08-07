@@ -67,6 +67,25 @@ export default function BottomSheet({ children, aboveSheet }: Props) {
     // finger "caught up", so clamp whenever the raw value is read back.
     const clamp = (value: number) =>
       Math.min(Math.max(value, snaps.full), snaps.peek);
+    // Shared by a normal release AND a forced termination (another
+    // component/system gesture claiming the touch mid-drag): either way the
+    // sheet must flatten its offset and settle on a snap point, not freeze
+    // wherever the finger happened to be.
+    const settle = (vy: number) => {
+      top.flattenOffset();
+      // Project the gesture forward by its velocity, then settle on the
+      // nearest snap point -- a quick flick moves a full level even if
+      // the finger only travelled a short distance.
+      const projected = clamp(topValue.current + vy * 160);
+      const target = [snaps.full, snaps.half, snaps.peek].reduce((a, b) =>
+        Math.abs(b - projected) < Math.abs(a - projected) ? b : a,
+      );
+      Animated.spring(top, {
+        toValue: target,
+        useNativeDriver: false,
+        bounciness: 3,
+      }).start();
+    };
     return PanResponder.create({
         onStartShouldSetPanResponder: () => true,
         onMoveShouldSetPanResponder: (_e, g) => Math.abs(g.dy) > 4,
@@ -80,21 +99,15 @@ export default function BottomSheet({ children, aboveSheet }: Props) {
         onPanResponderMove: Animated.event([null, { dy: top }], {
           useNativeDriver: false,
         }),
-        onPanResponderRelease: (_e, g) => {
-          top.flattenOffset();
-          // Project the gesture forward by its velocity, then settle on the
-          // nearest snap point -- a quick flick moves a full level even if
-          // the finger only travelled a short distance.
-          const projected = clamp(topValue.current + g.vy * 160);
-          const target = [snaps.full, snaps.half, snaps.peek].reduce((a, b) =>
-            Math.abs(b - projected) < Math.abs(a - projected) ? b : a,
-          );
-          Animated.spring(top, {
-            toValue: target,
-            useNativeDriver: false,
-            bounciness: 3,
-          }).start();
-        },
+        onPanResponderRelease: (_e, g) => settle(g.vy),
+        // Once dragging has started, keep the gesture rather than letting a
+        // parent/sibling claim it -- a half-finished drag with no snap is a
+        // worse outcome than a sheet that "wins" the touch.
+        onPanResponderTerminationRequest: () => false,
+        // If the OS still forces termination anyway, settle exactly like a
+        // release instead of leaving `top` stranded mid-drag until the next
+        // gesture happens to fix it.
+        onPanResponderTerminate: (_e, g) => settle(g.vy),
       });
   }, [snaps, top]);
 

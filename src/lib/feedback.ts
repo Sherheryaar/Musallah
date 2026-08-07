@@ -23,6 +23,22 @@ export const MAX_MESSAGE_LENGTH = 2000;
  */
 export type SubmissionResult = "stored" | "email" | "failed";
 
+/**
+ * A hung request (flaky network, captive portal) must not leave the send
+ * button stuck on its spinner forever — this is what actually bounds
+ * `storeSubmission`, so a caller's `finally` always runs within this long.
+ */
+const SUBMIT_TIMEOUT_MS = 8000;
+
+/**
+ * `.trim()` strips whitespace but not zero-width FORMAT characters (Unicode
+ * Cf, e.g. U+200B) — without this, a message made only of those reads as
+ * non-empty here even though it's visually blank, and gets submitted.
+ */
+function cleanMessage(message: string): string {
+  return message.replace(/\p{Cf}/gu, "").trim();
+}
+
 async function openFeedbackEmail(
   subject: string,
   body: string,
@@ -49,15 +65,22 @@ async function storeSubmission(
   message: string,
 ): Promise<boolean> {
   if (!supabase) return false;
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), SUBMIT_TIMEOUT_MS);
   try {
-    const { error } = await supabase.from("submissions").insert({
-      kind,
-      place_id: placeId,
-      message,
-    });
+    const { error } = await supabase
+      .from("submissions")
+      .insert({
+        kind,
+        place_id: placeId,
+        message,
+      })
+      .abortSignal(controller.signal);
     return !error;
   } catch {
     return false;
+  } finally {
+    clearTimeout(timeoutId);
   }
 }
 
@@ -65,7 +88,7 @@ export async function submitEditSuggestion(
   place: Place,
   message: string,
 ): Promise<SubmissionResult> {
-  const trimmed = message.trim().slice(0, MAX_MESSAGE_LENGTH);
+  const trimmed = cleanMessage(message).slice(0, MAX_MESSAGE_LENGTH);
   if (!trimmed) return "failed";
 
   if (await storeSubmission("edit", place.id, trimmed)) return "stored";
@@ -88,7 +111,7 @@ export async function submitEditSuggestion(
 export async function submitNewPlaceSuggestion(
   message: string,
 ): Promise<SubmissionResult> {
-  const trimmed = message.trim().slice(0, MAX_MESSAGE_LENGTH);
+  const trimmed = cleanMessage(message).slice(0, MAX_MESSAGE_LENGTH);
   if (!trimmed) return "failed";
 
   if (await storeSubmission("new_place", null, trimmed)) return "stored";

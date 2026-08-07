@@ -117,7 +117,12 @@ const FACILITY_KEYS = [
 const JAMAAT_PRAYER_KEYS = ["fajr", "dhuhr", "asr", "maghrib", "isha"];
 const CONFIDENCE_VALUES = new Set(["verified", "community", "unverified"]);
 const URL_COLUMNS = new Set(["website", "facebook", "instagram"]);
-const TIME_RE = /^\d{1,2}:\d{2}$/;
+/** "5:15" with hour 0-23, minute 0-59 -- a shape-only regex would also let "25:99" through. */
+function isValidHHMM(value) {
+  const m = value.trim().match(/^(\d{1,2}):(\d{2})$/);
+  if (!m) return false;
+  return Number(m[1]) <= 23 && Number(m[2]) <= 59;
+}
 
 /**
  * The app trusts places.json via a plain type cast (src/data/places.ts), so
@@ -153,7 +158,7 @@ function validateJamaat(value, id) {
   for (const key of JAMAAT_PRAYER_KEYS) {
     const t = value[key];
     if (t === undefined) continue;
-    if (typeof t !== "string" || !TIME_RE.test(t.trim())) {
+    if (typeof t !== "string" || !isValidHHMM(t)) {
       throw new Error(`Row "${id}": jamaat.${key} must be "HH:MM", got ${JSON.stringify(t)}`);
     }
     jamaat[key] = t.trim();

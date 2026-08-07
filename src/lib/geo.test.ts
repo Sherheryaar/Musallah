@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   FALLBACK_LOCATION,
   isInCoverage,
+  isLikelyIreland,
   queryMatchesPlaceFields,
 } from "./geo";
 
@@ -26,6 +27,22 @@ describe("isInCoverage", () => {
     expect(isInCoverage(FALLBACK_LOCATION.lat, FALLBACK_LOCATION.lng)).toBe(
       true,
     );
+  });
+});
+
+describe("isLikelyIreland", () => {
+  it("accepts places in Northern Ireland and the Republic of Ireland", () => {
+    expect(isLikelyIreland(53.3498, -6.2603)).toBe(true); // Dublin
+    expect(isLikelyIreland(51.8985, -8.4756)).toBe(true); // Cork
+    expect(isLikelyIreland(53.2707, -9.0568)).toBe(true); // Galway
+    expect(isLikelyIreland(54.5973, -5.9301)).toBe(true); // Belfast
+  });
+
+  it("rejects Great Britain, even its westernmost points", () => {
+    expect(isLikelyIreland(51.5074, -0.1278)).toBe(false); // London
+    expect(isLikelyIreland(55.8642, -4.2518)).toBe(false); // Glasgow
+    expect(isLikelyIreland(50.0657, -5.7132)).toBe(false); // Land's End, Cornwall
+    expect(isLikelyIreland(53.2707, -4.2)).toBe(false); // Anglesey-ish, Wales
   });
 });
 

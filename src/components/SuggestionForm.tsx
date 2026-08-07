@@ -20,6 +20,16 @@ const MIN_INPUT_LENGTH = 10;
 // Only nag about the remaining budget once it's actually running out.
 const SHOW_COUNTER_FROM = MAX_INPUT_LENGTH - 100;
 
+/**
+ * `.trim()` only strips whitespace (Unicode Zs), not zero-width FORMAT
+ * characters like U+200B — so a message made entirely of those reads as
+ * non-empty and long enough to send, but is visually blank. Strip them
+ * before measuring so the minimum-length check means what it looks like.
+ */
+function visibleLength(text: string): number {
+  return text.replace(/\p{Cf}/gu, "").trim().length;
+}
+
 type Props = {
   placeholder: string;
   sendLabel?: string;
@@ -63,7 +73,7 @@ export default function SuggestionForm({
 
   // A topic selection alone is not enough to send — the message must say
   // something actionable. But topics still count toward what gets submitted.
-  const trimmedLength = message.trim().length;
+  const trimmedLength = visibleLength(message);
   const canSend = trimmedLength >= MIN_INPUT_LENGTH;
   const tooShort = trimmedLength > 0 && !canSend;
 

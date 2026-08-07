@@ -41,7 +41,13 @@ const PLACE_TYPES = new Set(["masjid", "musalla", "multi_faith_room"]);
 const FACILITY_KEYS = ["sistersSpace", "wudu", "disabledAccess", "parking", "jumuah", "janazah"];
 const JAMAAT_PRAYER_KEYS = ["fajr", "dhuhr", "asr", "maghrib", "isha"];
 const CONFIDENCE_VALUES = new Set(["verified", "community", "unverified"]);
-const TIME_RE = /^\d{1,2}:\d{2}$/;
+
+/** "5:15" with hour 0-23, minute 0-59 -- a shape-only regex would also let "25:99" through. */
+function isValidHHMM(value) {
+  const m = value.trim().match(/^(\d{1,2}):(\d{2})$/);
+  if (!m) return false;
+  return Number(m[1]) <= 23 && Number(m[2]) <= 59;
+}
 
 const str = (v) => (typeof v === "string" && v !== "" ? v : undefined);
 const url = (v) => {
@@ -71,9 +77,9 @@ function mapRow(row, problems) {
   if (
     Array.isArray(row.jumuah_times) &&
     row.jumuah_times.length > 0 &&
-    row.jumuah_times.every((t) => typeof t === "string")
+    row.jumuah_times.every((t) => typeof t === "string" && isValidHHMM(t))
   ) {
-    place.jumuahTimes = row.jumuah_times;
+    place.jumuahTimes = row.jumuah_times.map((t) => t.trim());
   }
   if (row.jamaat && typeof row.jamaat === "object") {
     const source = str(row.jamaat.source);
@@ -83,7 +89,7 @@ function mapRow(row, problems) {
       let hasTime = false;
       for (const k of JAMAAT_PRAYER_KEYS) {
         const t = row.jamaat[k];
-        if (typeof t === "string" && TIME_RE.test(t.trim())) {
+        if (typeof t === "string" && isValidHHMM(t)) {
           jamaat[k] = t.trim();
           hasTime = true;
         }
@@ -114,10 +120,17 @@ function mapRow(row, problems) {
 }
 
 // --- fetch all rows (paginated -- PostgREST caps at 1000/request) ----------
+// Paged by a KEYSET (id > lastSeenId), not offset: an offset re-runs "skip
+// N rows" on every request, so a row written elsewhere between two page
+// requests shifts every later row's position and the next page silently
+// skips or repeats one. Ordering by id makes id > lastSeenId a stable
+// cursor regardless of concurrent writes.
 const rows = [];
-for (let offset = 0; ; offset += 1000) {
+let lastSeenId = null;
+for (;;) {
+  const filter = lastSeenId ? `&id=gt.${encodeURIComponent(lastSeenId)}` : "";
   const res = await fetch(
-    `${URL_}/rest/v1/places?select=*&order=id.asc&limit=1000&offset=${offset}`,
+    `${URL_}/rest/v1/places?select=*&order=id.asc&limit=1000${filter}`,
     { headers: { apikey: KEY, Authorization: `Bearer ${KEY}` } },
   );
   if (!res.ok) {
@@ -125,7 +138,9 @@ for (let offset = 0; ; offset += 1000) {
     process.exit(1);
   }
   const page = await res.json();
+  if (page.length === 0) break;
   rows.push(...page);
+  lastSeenId = page[page.length - 1].id;
   if (page.length < 1000) break;
 }
 
@@ -138,6 +153,24 @@ if (problems.length) {
 }
 if (places.length === 0) {
   console.error("No valid places -- refusing to write an empty dataset.");
+  process.exit(1);
+}
+
+// A schema drift that makes mapRow() reject MOST (not literally all) rows
+// must not silently overwrite the bundled dataset with a gutted one: this
+// runs unattended in CI and auto-commits its output (refresh-jummah.yml),
+// with no human review gate before the push.
+let previousCount = 0;
+try {
+  previousCount = JSON.parse(readFileSync(outPath, "utf8")).length;
+} catch {
+  // No previous file (first run ever) -- nothing to compare against.
+}
+const MIN_RETENTION = 0.9;
+if (previousCount > 0 && places.length < previousCount * MIN_RETENTION) {
+  console.error(
+    `Refusing to write: ${places.length} places is a ${Math.round((1 - places.length / previousCount) * 100)}% drop from the previous ${previousCount}. That looks like a validation/schema problem, not real data loss -- investigate before re-running.`,
+  );
   process.exit(1);
 }
 

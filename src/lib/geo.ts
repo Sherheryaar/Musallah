@@ -27,6 +27,31 @@ export function isInCoverage(lat: number, lng: number): boolean {
   );
 }
 
+/**
+ * Loose box around Northern Ireland + the Republic of Ireland, tuned to
+ * NOT catch Great Britain: Cornwall reaches lng -5.7, further west than
+ * Northern Ireland's easternmost point, so the latitude floor (Cornwall
+ * sits below 51.3) is what actually excludes it, not longitude alone.
+ * Deliberately conservative — missing a genuine NI/Ireland place here just
+ * means the phone-dialling code below falls back to its current (already
+ * correct for NI, occasionally wrong for the Republic) behaviour; the
+ * costly mistake would be flagging a real Great Britain location, and
+ * spot-checking the bundled dataset found none.
+ */
+const IRELAND_ISH_BOUNDS = {
+  minLat: 51.3,
+  maxLat: 55.5,
+  maxLng: -5.9,
+};
+
+export function isLikelyIreland(lat: number, lng: number): boolean {
+  return (
+    lat >= IRELAND_ISH_BOUNDS.minLat &&
+    lat <= IRELAND_ISH_BOUNDS.maxLat &&
+    lng <= IRELAND_ISH_BOUNDS.maxLng
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Area-search sanity check
 //

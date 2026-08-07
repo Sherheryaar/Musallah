@@ -40,7 +40,13 @@
 // the OSM import, madrasahs with no musalla). This script never deletes a
 // place; that is a human decision, taken in Supabase.
 
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  renameSync,
+  writeFileSync,
+} from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -256,7 +262,15 @@ function loadCache() {
 
 function saveCache(cache) {
   mkdirSync(dirname(cachePath), { recursive: true });
-  writeFileSync(cachePath, JSON.stringify(cache));
+  // Write-then-rename, not a direct write: this is called after every
+  // single cell (see call sites below), and a process kill mid-write would
+  // truncate the file, so loadCache()'s parse failure would discard EVERY
+  // cell already collected on the next run -- contradicting this file's
+  // own comment that a failure mid-run costs one cell, not the whole run.
+  // rename() replaces the destination atomically.
+  const tmpPath = `${cachePath}.tmp`;
+  writeFileSync(tmpPath, JSON.stringify(cache));
+  renameSync(tmpPath, cachePath);
 }
 
 const cache = loadCache();

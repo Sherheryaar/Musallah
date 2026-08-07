@@ -32,10 +32,13 @@ const SettingsContext = createContext<SettingsContextValue>({
 
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [settings, setSettings] = useState<PrayerSettings>(DEFAULT_SETTINGS);
-  // Set once the user changes anything. Guards against the (rare but real)
-  // race where disk hydration lands *after* a first-launch tap and silently
-  // reverts the user's choice.
-  const userEdited = useRef(false);
+  // Which fields the user has explicitly changed THIS session. Guards
+  // against the (rare but real) race where disk hydration lands *after* a
+  // first-launch tap and would otherwise revert the user's choice -- but
+  // per-field, not all-or-nothing: touching one setting (e.g. a facility
+  // filter) must not discard every OTHER saved preference (e.g. madhab)
+  // that hydration was about to restore.
+  const touchedKeys = useRef<Set<keyof PrayerSettings>>(new Set());
   // Only the fields the user has explicitly set — this, not the full
   // settings object, is what gets written to disk. Writing everything froze
   // then-current defaults into storage, so a later default change (shafi →
@@ -68,10 +71,21 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         if (cancelled || !stored) return;
         // Anything the user set before hydration finished wins over disk.
         persisted.current = { ...stored, ...persisted.current };
-        if (!userEdited.current) {
-          const fromDisk = stored;
-          setSettings((prev) => ({ ...prev, ...fromDisk }));
-        }
+        // Apply disk values only for fields the user hasn't touched yet
+        // this session -- a tap on one setting must not block every other
+        // saved preference from loading.
+        const fromDisk = stored;
+        setSettings((prev) => {
+          const next = { ...prev };
+          for (const key of Object.keys(fromDisk) as Array<
+            keyof PrayerSettings
+          >) {
+            if (!touchedKeys.current.has(key)) {
+              (next as Record<string, unknown>)[key] = fromDisk[key];
+            }
+          }
+          return next;
+        });
       } catch {
         // Corrupt/missing settings must never break launch -- keep defaults.
       }
@@ -82,7 +96,9 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const updateSettings = useCallback((patch: Partial<PrayerSettings>) => {
-    userEdited.current = true;
+    for (const key of Object.keys(patch) as Array<keyof PrayerSettings>) {
+      touchedKeys.current.add(key);
+    }
     persisted.current = { ...persisted.current, ...patch };
     // Fire-and-forget persistence -- never block the UI on a disk write.
     void AsyncStorage.setItem(
