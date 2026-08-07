@@ -321,7 +321,7 @@ export default function SettingsScreen() {
           <Text style={styles.aboutLabel}>Jamaat times</Text>
           <Text style={styles.aboutValue}>
             {
-              "Each masjid's own published timetable, via Mawaqit.net (with permission), Masjidbox, and mosque websites"
+              "Each masjid's own published timetable, via Mawaqit.net (with permission), Masjidbox, and mosque websites — plus the Sirat.uk mosque directory (ODC-By 1.0) where a masjid publishes nowhere else we can read"
             }
           </Text>
         </View>

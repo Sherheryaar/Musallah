@@ -20,6 +20,7 @@ import {
   cellText,
   htmlTableRows,
   iqamaToJamaat,
+  JAMAAT_KEYS,
   masjidboxDay,
   masjidboxJamaat,
   masjidboxState,
@@ -262,7 +263,11 @@ const datedTable = {
   async fetchOne(link) {
     const { text, error, rateLimited } = await getText(link.url, this.headers);
     if (error || rateLimited) return { error, rateLimited };
-    const isoDate = new Date().toISOString().slice(0, 10);
+    // Every mosque on this source is UK-based (the registry only carries
+    // UK dated-table pages), so "today" means today in the UK, not UTC —
+    // a run between 23:00-00:00 UTC during BST would otherwise read
+    // yesterday's UK-local row and publish it as if it were today's.
+    const isoDate = todayInZone("Europe/London");
     const jamaat = parseDatedJamaatTable(htmlTableRows(text), isoDate);
     if (!jamaat) {
       return { error: `no usable row for ${isoDate} (layout changed?)` };
@@ -273,4 +278,68 @@ const datedTable = {
   },
 };
 
-export const SOURCES = { mawaqit, masjidbox, "dated-table": datedTable };
+// --- Sirat.uk -----------------------------------------------------------------
+// A third-party UK mosque-times directory (https://sirat.uk/mosques/developers),
+// used only for places that had NO other source — see scripts/harvest-sirat.mjs
+// for how a place gets linked here. Identity is the mosque id captured at link
+// time (never proximity), same rule as every other provider.
+
+const SIRAT_API = "https://sirat.uk/mosques/v1";
+
+const sirat = {
+  id: "sirat",
+  label: "Sirat.uk",
+  credit: "Sirat.uk (UK mosque directory, ODC-By 1.0)",
+  // The API documents a shared 120 requests/minute-per-origin limit; this
+  // stays comfortably under it.
+  throttleMs: 600,
+  headers: { "User-Agent": BROWSERISH_UA, Accept: "application/json" },
+
+  plan(links) {
+    return links.map((link) => ({
+      key: link.placeId,
+      links: [link],
+      run: () => this.fetchOne(link),
+    }));
+  },
+
+  async fetchOne(link) {
+    // Sirat.uk is UK-only, so "today" must be the UK-local date, not UTC
+    // (see the identical fix on the dated-table source above).
+    const isoDate = todayInZone("Europe/London");
+    const { json, error, rateLimited } = await getJson(
+      `${SIRAT_API}/mosques/${encodeURIComponent(link.siratId)}/times?from=${isoDate}&to=${isoDate}`,
+      this.headers,
+    );
+    if (error || rateLimited) return { error, rateLimited };
+    const day = Array.isArray(json)
+      ? json.find((d) => d?.date === isoDate)
+      : null;
+    if (!day) return { error: `no record for ${isoDate}` };
+
+    const jamaat = {};
+    const skipped = [];
+    for (const key of JAMAAT_KEYS) {
+      const time = toHHMM(day[key]);
+      if (time) jamaat[key] = time;
+      else skipped.push(key);
+    }
+    const jumuah = [
+      ...new Set(
+        (Array.isArray(day.jumuah) ? day.jumuah : [])
+          .map((j) => toHHMM(j?.time))
+          .filter(Boolean),
+      ),
+    ].sort();
+
+    const results = new Map();
+    results.set(link.placeId, {
+      jamaat: Object.keys(jamaat).length > 0 ? jamaat : undefined,
+      jumuah: jumuah.length > 0 ? jumuah : undefined,
+      skipped,
+    });
+    return { results };
+  },
+};
+
+export const SOURCES = { mawaqit, masjidbox, "dated-table": datedTable, sirat };

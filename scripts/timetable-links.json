@@ -1,5 +1,21 @@
 [
   {
+    "placeId": "abdullah-masjid-mib-1738",
+    "source": "sirat",
+    "placeName": "Abdullah Masjid",
+    "siratId": "mosque-000311",
+    "siratName": "Abdullah Masjid – Hayes Welfare Association",
+    "matchedDistanceM": 53
+  },
+  {
+    "placeId": "aberdeen-mosque-and-islamic-centre-mib-1",
+    "source": "sirat",
+    "placeName": "Aberdeen Mosque and Islamic Centre",
+    "siratId": "mosque-000525",
+    "siratName": "Aberdeen Muslim & Islamic Centre",
+    "matchedDistanceM": 17
+  },
+  {
     "placeId": "aberfeldy-islamic-cultural-centre-mib-1112",
     "source": "mawaqit",
     "placeName": "Aberfeldy Islamic Cultural Centre",
@@ -9,6 +25,22 @@
     "lat": 51.513403605854,
     "lng": -0.0050411694557373,
     "matchedDistanceM": 53
+  },
+  {
+    "placeId": "abubakr-masjid-mib-1131",
+    "source": "sirat",
+    "placeName": "Abubakr Masjid",
+    "siratId": "mosque-000522",
+    "siratName": "Abubakr Mosque Southall",
+    "matchedDistanceM": 35
+  },
+  {
+    "placeId": "acton-mosque-mib-1130",
+    "source": "sirat",
+    "placeName": "Acton Mosque",
+    "siratId": "mosque-000511",
+    "siratName": "Acton Mosque",
+    "matchedDistanceM": 20
   },
   {
     "placeId": "adam-mosque-dawah-academy-mib-1744",
@@ -33,6 +65,22 @@
     "matchedDistanceM": 2
   },
   {
+    "placeId": "airdrie-and-coatbridge-islamic-centre-mib-58",
+    "source": "sirat",
+    "placeName": "Airdrie and Coatbridge Islamic Centre",
+    "siratId": "mosque-000187",
+    "siratName": "Airdrie Islamic Centre",
+    "matchedDistanceM": 58
+  },
+  {
+    "placeId": "aisha-masjid-islamic-centre-mib-1481",
+    "source": "sirat",
+    "placeName": "Aisha Masjid & Islamic Centre",
+    "siratId": "mosque-000429",
+    "siratName": "Aisha Masjid & Islamic Centre",
+    "matchedDistanceM": 56
+  },
+  {
     "placeId": "al-amanah-mosque-mib-242",
     "source": "mawaqit",
     "placeName": "Al-Amanah Mosque",
@@ -42,6 +90,14 @@
     "lat": 52.467148453971,
     "lng": -1.8765163421631,
     "matchedDistanceM": 42
+  },
+  {
+    "placeId": "al-ansaar-welfare-and-education-mib-2600",
+    "source": "sirat",
+    "placeName": "Al-Ansaar Welfare and Education",
+    "siratId": "mosque-000158",
+    "siratName": "Al-Ansaar Welfare & Education",
+    "matchedDistanceM": 28
   },
   {
     "placeId": "al-ansar-islamic-education-centre-mib-812",
@@ -66,6 +122,22 @@
     "matchedDistanceM": 9
   },
   {
+    "placeId": "al-birr-community-centre-mib-1887",
+    "source": "sirat",
+    "placeName": "Al-Birr Community Centre",
+    "siratId": "mosque-000117",
+    "siratName": "Al-Birr Community Centre and Mosque",
+    "matchedDistanceM": 45
+  },
+  {
+    "placeId": "al-emaan-centre-mib-1123",
+    "source": "sirat",
+    "placeName": "Al-Emaan Centre",
+    "siratId": "mosque-000510",
+    "siratName": "Al-Emaan Centre",
+    "matchedDistanceM": 14
+  },
+  {
     "placeId": "al-falah-braintree-islamic-centre-mib-927",
     "source": "mawaqit",
     "placeName": "Al Falah Braintree Islamic Centre",
@@ -75,6 +147,14 @@
     "lat": 51.8776805,
     "lng": 0.5501436,
     "matchedDistanceM": 209
+  },
+  {
+    "placeId": "al-falah-centre-mib-14051001",
+    "source": "sirat",
+    "placeName": "Al Falah Centre",
+    "siratId": "mosque-000245",
+    "siratName": "Al Falah Centre",
+    "matchedDistanceM": 60
   },
   {
     "placeId": "al-falah-community-support-centre-mib-1032",
@@ -106,6 +186,54 @@
     "matchedDistanceM": 6
   },
   {
+    "placeId": "al-habib-islamic-centre-mib-408",
+    "source": "sirat",
+    "placeName": "Al-Habib Islamic Centre",
+    "siratId": "mosque-000037",
+    "siratName": "Al-Habib Islamic Centre",
+    "matchedDistanceM": 14
+  },
+  {
+    "placeId": "al-habib-trust-mib-1638",
+    "source": "sirat",
+    "placeName": "Al Habib Trust",
+    "siratId": "mosque-000460",
+    "siratName": "Al-Habib Trust",
+    "matchedDistanceM": 96
+  },
+  {
+    "placeId": "al-hashim-academy-mib-1588",
+    "source": "sirat",
+    "placeName": "Al Hashim Academy",
+    "siratId": "mosque-000273",
+    "siratName": "Al Hashim Academy",
+    "matchedDistanceM": 26
+  },
+  {
+    "placeId": "al-hayat-centre-mib-1694",
+    "source": "sirat",
+    "placeName": "Al Hayat Centre",
+    "siratId": "mosque-000388",
+    "siratName": "Al-Hayat Centre",
+    "matchedDistanceM": 23
+  },
+  {
+    "placeId": "al-hira-educational-centre-mib-2235",
+    "source": "sirat",
+    "placeName": "Al-Hira Educational Centre",
+    "siratId": "mosque-000491",
+    "siratName": "Al-Hira Educational & Cultural Centre",
+    "matchedDistanceM": 74
+  },
+  {
+    "placeId": "al-huda-preston-mib-15041902",
+    "source": "sirat",
+    "placeName": "Al Huda Preston",
+    "siratId": "mosque-000521",
+    "siratName": "Al Huda Preston",
+    "matchedDistanceM": 48
+  },
+  {
     "placeId": "al-ikhlas-centre-mib-3116",
     "source": "mawaqit",
     "placeName": "Al Ikhlas Centre",
@@ -117,6 +245,110 @@
     "matchedDistanceM": 15
   },
   {
+    "placeId": "al-jalal-masjid-mib-1763",
+    "source": "sirat",
+    "placeName": "Al-Jalal Masjid",
+    "siratId": "mosque-000364",
+    "siratName": "Al Jalal Masjid",
+    "matchedDistanceM": 60
+  },
+  {
+    "placeId": "al-jamaat-ul-muslimin-mib-1953",
+    "source": "sirat",
+    "placeName": "Al-Jamaat-ul-Muslimin",
+    "siratId": "mosque-000056",
+    "siratName": "Al-Jamatul-Muslimin of Bangladesh",
+    "matchedDistanceM": 11
+  },
+  {
+    "placeId": "al-jamat-ul-muslimin-of-bangladesh-mib-1951",
+    "source": "sirat",
+    "placeName": "Al-Jamat-ul-Muslimin of Bangladesh",
+    "siratId": "mosque-000043",
+    "siratName": "Baitul Ma’mur Jami' Masjid & Bangladeshi Islamic Centre",
+    "matchedDistanceM": 41
+  },
+  {
+    "placeId": "al-jamia-suffa-tul-islam-grand-mosque-mib-201",
+    "source": "sirat",
+    "placeName": "Al-Jamia Suffa-Tul-Islam Grand Mosque",
+    "siratId": "mosque-000585",
+    "siratName": "Al-Jamia Suffa-Tul-Islam Grand Mosque",
+    "matchedDistanceM": 18
+  },
+  {
+    "placeId": "al-khair-musallah-mib-1108",
+    "source": "sirat",
+    "placeName": "Al Khair Musallah",
+    "siratId": "mosque-000038",
+    "siratName": "Al-Khair Foundation Prayer Room and Hall",
+    "matchedDistanceM": 35
+  },
+  {
+    "placeId": "al-madina-islamic-centre-mib-1266",
+    "source": "sirat",
+    "placeName": "Al Madina Islamic Centre",
+    "siratId": "mosque-000044",
+    "siratName": "Al-Madina Mitcham Islamic Centre",
+    "matchedDistanceM": 24
+  },
+  {
+    "placeId": "al-madina-jami-masjid-mib-1548",
+    "source": "sirat",
+    "placeName": "Al-Madina Jami Masjid",
+    "siratId": "mosque-000082",
+    "siratName": "Al-Madina Jami Masjid Worcester",
+    "matchedDistanceM": 7
+  },
+  {
+    "placeId": "al-madina-jamia-masjid-mib-2037",
+    "source": "sirat",
+    "placeName": "Al-Madina Jamia Masjid",
+    "siratId": "mosque-000208",
+    "siratName": "Al Madina Jamia",
+    "matchedDistanceM": 35
+  },
+  {
+    "placeId": "al-madina-masjid-mib-1041",
+    "source": "sirat",
+    "placeName": "Al-Madina Masjid",
+    "siratId": "mosque-000483",
+    "siratName": "Al Madina Mosque Barking",
+    "matchedDistanceM": 115
+  },
+  {
+    "placeId": "al-madinah-masjid-mib-1737",
+    "source": "sirat",
+    "placeName": "Al Madinah Masjid",
+    "siratId": "mosque-000151",
+    "siratName": "Al Madinah Masjid Hayes",
+    "matchedDistanceM": 37
+  },
+  {
+    "placeId": "al-maktoum-mosque-mib-1083",
+    "source": "sirat",
+    "placeName": "Al Maktoum Mosque",
+    "siratId": "mosque-000225",
+    "siratName": "Al Maktoum Mosque Dundee",
+    "matchedDistanceM": 25
+  },
+  {
+    "placeId": "al-manar-centre-mib-576",
+    "source": "sirat",
+    "placeName": "Al-Manar Centre",
+    "siratId": "mosque-000488",
+    "siratName": "Al-Manar Centre",
+    "matchedDistanceM": 64
+  },
+  {
+    "placeId": "al-muzzammil-mosque-mib-1406",
+    "source": "sirat",
+    "placeName": "Al Muzzammil Mosque",
+    "siratId": "mosque-000205",
+    "siratName": "Al Muzzammil Mosque",
+    "matchedDistanceM": 27
+  },
+  {
     "placeId": "al-nehar-mosque-education-centre-mib-1217",
     "source": "mawaqit",
     "placeName": "Al-Nehar Mosque & Education Centre",
@@ -126,6 +358,22 @@
     "lat": 51.5326935,
     "lng": -0.1195728,
     "matchedDistanceM": 4
+  },
+  {
+    "placeId": "al-noor-mosque-mib-1945",
+    "source": "sirat",
+    "placeName": "Al Noor Mosque",
+    "siratId": "mosque-000436",
+    "siratName": "Al Noor Masjid",
+    "matchedDistanceM": 2
+  },
+  {
+    "placeId": "al-rahman-mosque-and-cultural-centre-mib-159",
+    "source": "sirat",
+    "placeName": "Al-Rahman Mosque and Cultural Centre",
+    "siratId": "mosque-000294",
+    "siratName": "Al-Rahman Mosque & Cultural Centre",
+    "matchedDistanceM": 19
   },
   {
     "placeId": "al-rahman-mosque-community-centre-mib-1092",
@@ -161,6 +409,30 @@
     "matchedDistanceM": 9
   },
   {
+    "placeId": "amic-central-mosque-mib-1683",
+    "source": "sirat",
+    "placeName": "AMIC Central Mosque",
+    "siratId": "mosque-000045",
+    "siratName": "Central Mosque and Community Centre",
+    "matchedDistanceM": 52
+  },
+  {
+    "placeId": "amir-e-millat-mosque-and-community-centre-mib-139",
+    "source": "sirat",
+    "placeName": "Amir-e-Millat Mosque and Community Centre",
+    "siratId": "mosque-000550",
+    "siratName": "Amir-e-Millat Mosque and Community Centre",
+    "matchedDistanceM": 95
+  },
+  {
+    "placeId": "an-noor-masjid-and-community-centre-mib-2628",
+    "source": "sirat",
+    "placeName": "An-Noor Masjid and Community Centre",
+    "siratId": "mosque-000539",
+    "siratName": "An Noor Cultural & Community Centre",
+    "matchedDistanceM": 81
+  },
+  {
     "placeId": "anjuman-e-islamia-jamia-mosque-mib-1287",
     "source": "masjidbox",
     "placeName": "Anjuman-e-Islamia Jamia Mosque",
@@ -169,12 +441,68 @@
     "slug": "markazi-jamia-masjid-newham"
   },
   {
+    "placeId": "anjuman-e-naqeebul-islam-mosque-mib-263",
+    "source": "sirat",
+    "placeName": "Anjuman-e-Naqeebul-Islam Mosque",
+    "siratId": "mosque-000310",
+    "siratName": "Anjuman-e-Naqueb-ul-Islam",
+    "matchedDistanceM": 25
+  },
+  {
     "placeId": "anjuman-hidaya-heathrow-masjid-mib-1749",
     "source": "masjidbox",
     "placeName": "Anjuman Hidaya Heathrow Masjid",
     "url": "https://masjidbox.com/prayer-times/heathrow-jamia-masjid",
     "masjidboxName": "HEATHROW JAMIA MASJID",
     "slug": "heathrow-jamia-masjid"
+  },
+  {
+    "placeId": "ar-rahman-masjid-mib-403",
+    "source": "sirat",
+    "placeName": "Ar-Rahman Masjid",
+    "siratId": "mosque-000335",
+    "siratName": "Al Rahman Masjid",
+    "matchedDistanceM": 137
+  },
+  {
+    "placeId": "as-shifa-and-karimia-mosque-mib-1967",
+    "source": "sirat",
+    "placeName": "As-Shifa and Karimia Mosque",
+    "siratId": "mosque-000030",
+    "siratName": "Karimia Institute",
+    "matchedDistanceM": 45
+  },
+  {
+    "placeId": "ashaadibi-masjid-and-cultural-centre-mib-746",
+    "source": "sirat",
+    "placeName": "Ashaadibi Masjid and Cultural Centre",
+    "siratId": "mosque-000575",
+    "siratName": "Ashaadibi Masjid & Community Hub",
+    "matchedDistanceM": 72
+  },
+  {
+    "placeId": "ashford-muslim-association-mib-2631",
+    "source": "sirat",
+    "placeName": "Ashford Muslim Association",
+    "siratId": "mosque-000401",
+    "siratName": "Ashford Muslim Association",
+    "matchedDistanceM": 44
+  },
+  {
+    "placeId": "ashford-staines-community-centre-mib-497",
+    "source": "sirat",
+    "placeName": "Ashford & Staines Community Centre",
+    "siratId": "mosque-000105",
+    "siratName": "Ashford & Staines Community Centre",
+    "matchedDistanceM": 9
+  },
+  {
+    "placeId": "ashton-central-mosque-mib-433",
+    "source": "sirat",
+    "placeName": "Ashton Central Mosque",
+    "siratId": "mosque-000519",
+    "siratName": "Ashton Central Mosque",
+    "matchedDistanceM": 35
   },
   {
     "placeId": "ashton-jame-mosque-islamic-centre-mib-2719",
@@ -188,6 +516,30 @@
     "matchedDistanceM": 8
   },
   {
+    "placeId": "assunnah-islamic-centre-mib-1173",
+    "source": "sirat",
+    "placeName": "Assunnah Islamic Centre",
+    "siratId": "mosque-000472",
+    "siratName": "Assunnah Islamic Centre",
+    "matchedDistanceM": 42
+  },
+  {
+    "placeId": "aylesbury-vale-islamic-centre-mib-1689",
+    "source": "sirat",
+    "placeName": "Aylesbury Vale Islamic Centre",
+    "siratId": "mosque-000471",
+    "siratName": "Aylesbury Vale Islamic Centre",
+    "matchedDistanceM": 35
+  },
+  {
+    "placeId": "ayrshire-central-mosque-mib-2807",
+    "source": "sirat",
+    "placeName": "Ayrshire Central Mosque",
+    "siratId": "mosque-000399",
+    "siratName": "Ayrshire Central Mosque",
+    "matchedDistanceM": 6
+  },
+  {
     "placeId": "azhar-academy-mib-3713",
     "source": "mawaqit",
     "placeName": "Azhar Academy",
@@ -199,12 +551,68 @@
     "matchedDistanceM": 12
   },
   {
+    "placeId": "azmat-e-islam-masjid-mib-2023",
+    "source": "sirat",
+    "placeName": "Azmat-e-Islam Masjid",
+    "siratId": "mosque-000352",
+    "siratName": "Azmet E Islam",
+    "matchedDistanceM": 15
+  },
+  {
     "placeId": "bait-ul-aziz-islamic-cultural-centre-mib-1322",
     "source": "masjidbox",
     "placeName": "Bait-ul-Aziz Islamic Cultural Centre",
     "url": "https://masjidbox.com/prayer-times/baitulaziz-icc",
     "masjidboxName": "BAITUL AZIZ ISLAMIC CULTURAL CENTRE",
     "slug": "baitulaziz-icc"
+  },
+  {
+    "placeId": "bait-ul-mukarram-jamia-mosque-mib-2198",
+    "source": "sirat",
+    "placeName": "Bait-ul-Mukarram Jamia Mosque",
+    "siratId": "mosque-000301",
+    "siratName": "Baitul Mukarram Jame Masjid",
+    "matchedDistanceM": 24
+  },
+  {
+    "placeId": "baitul-amaan-mosque-mib-2710",
+    "source": "sirat",
+    "placeName": "Baitul Amaan Mosque",
+    "siratId": "mosque-000440",
+    "siratName": "Kentish Town Baitul Aman Mosque",
+    "matchedDistanceM": 9
+  },
+  {
+    "placeId": "baitul-aman-mosque-and-cultural-centre-mib-2647",
+    "source": "sirat",
+    "placeName": "Baitul Aman Mosque and Cultural Centre",
+    "siratId": "mosque-000618",
+    "siratName": "Baitul Aman – Mosque and Cultural Centre",
+    "matchedDistanceM": 9
+  },
+  {
+    "placeId": "baitul-rahman-masjid-mib-259",
+    "source": "sirat",
+    "placeName": "Baitul Rahman Masjid",
+    "siratId": "mosque-000448",
+    "siratName": "SRICC Baitul Rahman Masjid",
+    "matchedDistanceM": 10
+  },
+  {
+    "placeId": "baitur-rahman-masjid-mib-1283",
+    "source": "sirat",
+    "placeName": "Baitur Rahman Masjid",
+    "siratId": "mosque-000272",
+    "siratName": "Baitur Rahman Masjid",
+    "matchedDistanceM": 74
+  },
+  {
+    "placeId": "balham-mosque-mib-1400",
+    "source": "sirat",
+    "placeName": "Balham Mosque",
+    "siratId": "mosque-000087",
+    "siratName": "Balham Masjid & Tooting Islamic Centre",
+    "matchedDistanceM": 25
   },
   {
     "placeId": "bath-islamic-centre-and-mosque-mib-44",
@@ -251,6 +659,22 @@
     "matchedDistanceM": 36
   },
   {
+    "placeId": "bilal-jamia-masjid-education-centre-mib-2024",
+    "source": "sirat",
+    "placeName": "Bilal Jamia Masjid & Education Centre",
+    "siratId": "mosque-000578",
+    "siratName": "Bilal Jamia Masjid and Madressa",
+    "matchedDistanceM": 80
+  },
+  {
+    "placeId": "birmingham-central-mosque-mib-155",
+    "source": "sirat",
+    "placeName": "Birmingham Central Mosque",
+    "siratId": "mosque-000580",
+    "siratName": "Birmingham Central Mosque",
+    "matchedDistanceM": 55
+  },
+  {
     "placeId": "bishopbriggs-muslim-community-centre-mib-1601",
     "source": "mawaqit",
     "placeName": "Bishopbriggs Muslim Community Centre",
@@ -260,6 +684,30 @@
     "lat": 55.8978197,
     "lng": -4.2115236,
     "matchedDistanceM": 165
+  },
+  {
+    "placeId": "bismillah-cultural-centre-mib-2682",
+    "source": "sirat",
+    "placeName": "Bismillah Cultural Centre",
+    "siratId": "mosque-000418",
+    "siratName": "Bismillah Centre",
+    "matchedDistanceM": 30
+  },
+  {
+    "placeId": "blackhall-mosque-mib-2736",
+    "source": "sirat",
+    "placeName": "Blackhall Mosque",
+    "siratId": "mosque-000565",
+    "siratName": "B l a c k h a l l M O S Q U E",
+    "matchedDistanceM": 103
+  },
+  {
+    "placeId": "blackheath-jamia-mosque-mib-82",
+    "source": "sirat",
+    "placeName": "Blackheath Jamia Mosque",
+    "siratId": "mosque-000224",
+    "siratName": "Blackheath Jamia Mosque",
+    "matchedDistanceM": 29
   },
   {
     "placeId": "bourneville-masjid-community-centre-mib-1743",
@@ -273,6 +721,14 @@
     "matchedDistanceM": 7
   },
   {
+    "placeId": "bow-central-mosque-islamic-centre-mib-1344",
+    "source": "sirat",
+    "placeName": "Bow Central Mosque & Islamic Centre",
+    "siratId": "mosque-000053",
+    "siratName": "Bow Central Mosque",
+    "matchedDistanceM": 12
+  },
+  {
     "placeId": "bow-muslim-community-centre-mib-1544",
     "source": "mawaqit",
     "placeName": "Bow Muslim Community Centre",
@@ -282,6 +738,22 @@
     "lat": 51.5325259,
     "lng": -0.0317094,
     "matchedDistanceM": 6
+  },
+  {
+    "placeId": "bristol-central-mosque-mib-2650",
+    "source": "sirat",
+    "placeName": "Bristol Central Mosque",
+    "siratId": "mosque-000133",
+    "siratName": "Bristol Central Mosque",
+    "matchedDistanceM": 3
+  },
+  {
+    "placeId": "bristol-jamia-mosque-mib-514",
+    "source": "sirat",
+    "placeName": "Bristol Jamia Mosque",
+    "siratId": "mosque-000189",
+    "siratName": "Bristol jamia Mosque",
+    "matchedDistanceM": 67
   },
   {
     "placeId": "bristol-turkish-community-bsw-mib-2794",
@@ -295,12 +767,84 @@
     "matchedDistanceM": 44
   },
   {
+    "placeId": "british-muslim-heritage-centre-mib-1116",
+    "source": "sirat",
+    "placeName": "British Muslim Heritage Centre",
+    "siratId": "mosque-000080",
+    "siratName": "British Muslim Heritage Centre",
+    "matchedDistanceM": 58
+  },
+  {
+    "placeId": "brixton-hill-islamic-centre-mib-1080",
+    "source": "sirat",
+    "placeName": "Brixton Hill Islamic Centre",
+    "siratId": "mosque-000332",
+    "siratName": "Brixton Hill Islamic Centre",
+    "matchedDistanceM": 30
+  },
+  {
+    "placeId": "bromley-by-bow-bangladeshi-forum-muslim-cultural-centre-mib-1351",
+    "source": "sirat",
+    "placeName": "Bromley by Bow Bangladeshi Forum & Muslim Cultural Centre",
+    "siratId": "mosque-000452",
+    "siratName": "Bromley by Bow Bangladeshi Forum & Muslim Cultural Centre",
+    "matchedDistanceM": 52
+  },
+  {
+    "placeId": "bromley-islamic-centre-mib-1707",
+    "source": "sirat",
+    "placeName": "Bromley Islamic Centre",
+    "siratId": "mosque-000296",
+    "siratName": "Bromley Islamic Centre",
+    "matchedDistanceM": 14
+  },
+  {
+    "placeId": "burhan-uddin-masjid-mib-1118",
+    "source": "sirat",
+    "placeName": "Burhan Uddin Masjid",
+    "siratId": "mosque-000251",
+    "siratName": "Burhan Uddin Masjid",
+    "matchedDistanceM": 74
+  },
+  {
+    "placeId": "bwa-muslim-cultural-centre-and-mosque-mib-1320",
+    "source": "sirat",
+    "placeName": "BWA Muslim Cultural Centre and Mosque",
+    "siratId": "mosque-000586",
+    "siratName": "BWA Muslim Cultural Centre and Mosque",
+    "matchedDistanceM": 21
+  },
+  {
+    "placeId": "camberwell-islamic-centre-mib-307",
+    "source": "sirat",
+    "placeName": "Camberwell Islamic Centre",
+    "siratId": "mosque-000209",
+    "siratName": "Camberwell Islamic Centre",
+    "matchedDistanceM": 44
+  },
+  {
     "placeId": "cambridge-university-islamic-society-mib-567",
     "source": "masjidbox",
     "placeName": "Cambridge University Islamic Society",
     "url": "https://masjidbox.com/prayer-times/cambridge-university-islamic-society-prayer-room",
     "masjidboxName": "Cambridge University Islamic Society Prayer Room",
     "slug": "cambridge-university-islamic-society-prayer-room"
+  },
+  {
+    "placeId": "cann-hall-masjid-mib-156",
+    "source": "sirat",
+    "placeName": "Cann Hall Masjid",
+    "siratId": "mosque-000144",
+    "siratName": "Cann Hall Masjid",
+    "matchedDistanceM": 71
+  },
+  {
+    "placeId": "canterbury-muslim-cultural-centre-mib-568",
+    "source": "sirat",
+    "placeName": "Canterbury Muslim Cultural Centre",
+    "siratId": "mosque-000608",
+    "siratName": "Canterbury Mosque",
+    "matchedDistanceM": 43
   },
   {
     "placeId": "cavan-islamic-society-mib-600",
@@ -325,6 +869,22 @@
     "matchedDistanceM": 19
   },
   {
+    "placeId": "central-jamme-mosque-mib-2106",
+    "source": "sirat",
+    "placeName": "Central Jamme Mosque",
+    "siratId": "mosque-000442",
+    "siratName": "Central Jamme Masjid, Reading",
+    "matchedDistanceM": 30
+  },
+  {
+    "placeId": "central-mosque-islamic-centre-mib-757",
+    "source": "sirat",
+    "placeName": "Central Mosque & Islamic Centre",
+    "siratId": "mosque-000309",
+    "siratName": "Edinburgh Central Mosque",
+    "matchedDistanceM": 46
+  },
+  {
     "placeId": "chelsea-muslim-community-mib-15042204",
     "source": "mawaqit",
     "placeName": "Chelsea Muslim Community",
@@ -334,6 +894,22 @@
     "lat": 51.481081030825,
     "lng": -0.17885868465577,
     "matchedDistanceM": 106
+  },
+  {
+    "placeId": "chesham-mosque-mib-609",
+    "source": "sirat",
+    "placeName": "Chesham Mosque",
+    "siratId": "mosque-000490",
+    "siratName": "Chesham Mosque",
+    "matchedDistanceM": 23
+  },
+  {
+    "placeId": "chingford-islamic-society-mib-1382",
+    "source": "sirat",
+    "placeName": "Chingford Islamic Society",
+    "siratId": "mosque-000617",
+    "siratName": "Chingford Islamic Society",
+    "matchedDistanceM": 25
   },
   {
     "placeId": "city-mosque-preston-mib-1446",
@@ -347,6 +923,14 @@
     "matchedDistanceM": 13
   },
   {
+    "placeId": "clitheroe-masjid-mib-2767",
+    "source": "sirat",
+    "placeName": "Clitheroe Masjid",
+    "siratId": "mosque-000195",
+    "siratName": "Clithero Mosque",
+    "matchedDistanceM": 16
+  },
+  {
     "placeId": "colchester-islamic-cultural-association-mib-622",
     "source": "mawaqit",
     "placeName": "Colchester Islamic Cultural Association",
@@ -356,6 +940,38 @@
     "lat": 51.8877135,
     "lng": 0.9050246,
     "matchedDistanceM": 8
+  },
+  {
+    "placeId": "collier-row-masjid-mib-1605",
+    "source": "sirat",
+    "placeName": "Collier Row Masjid",
+    "siratId": "mosque-000099",
+    "siratName": "Collier Row Mosque",
+    "matchedDistanceM": 36
+  },
+  {
+    "placeId": "collingwood-masjid-mib-17080307",
+    "source": "sirat",
+    "placeName": "Collingwood Masjid",
+    "siratId": "mosque-000021",
+    "siratName": "Collingwood Street Cultural Centre & Jame Masjid",
+    "matchedDistanceM": 4
+  },
+  {
+    "placeId": "coventry-cross-mosque-islamic-centre-mib-1353",
+    "source": "sirat",
+    "placeName": "Coventry Cross Mosque & Islamic Centre",
+    "siratId": "mosque-000256",
+    "siratName": "Coventry Cross Mosque & Islamic Community Centre",
+    "matchedDistanceM": 57
+  },
+  {
+    "placeId": "cradley-heath-central-mosque-islamic-centre-mib-2362",
+    "source": "sirat",
+    "placeName": "Cradley Heath Central Mosque & Islamic Centre",
+    "siratId": "mosque-000013",
+    "siratName": "Cradley Heath Central Mosque & Islamic Centre",
+    "matchedDistanceM": 84
   },
   {
     "placeId": "craigavon-mosque-node-13208406265",
@@ -380,6 +996,22 @@
     "matchedDistanceM": 4
   },
   {
+    "placeId": "croydon-masjid-and-islamic-centre-mib-1114",
+    "source": "sirat",
+    "placeName": "Croydon Masjid and Islamic Centre",
+    "siratId": "mosque-000057",
+    "siratName": "Croydon Mosque & Islamic Centre",
+    "matchedDistanceM": 126
+  },
+  {
+    "placeId": "daneshouse-islamic-education-centre-mib-1253",
+    "source": "sirat",
+    "placeName": "Daneshouse Islamic Education Centre",
+    "siratId": "mosque-000543",
+    "siratName": "Daneshouse Masjid",
+    "matchedDistanceM": 32
+  },
+  {
     "placeId": "dar-ul-islam-central-mosque-mib-1893",
     "source": "mawaqit",
     "placeName": "Dar ul Islam Central Mosque",
@@ -389,6 +1021,54 @@
     "lat": 54.5704816,
     "lng": -1.2311383,
     "matchedDistanceM": 9
+  },
+  {
+    "placeId": "dar-ul-uloom-qadria-jalani-masjid-mib-1386",
+    "source": "sirat",
+    "placeName": "Dar-ul-Uloom Qadria Jalani Masjid",
+    "siratId": "mosque-000462",
+    "siratName": "Darul Uloom Qadria Jilania - Walthamstow",
+    "matchedDistanceM": 110
+  },
+  {
+    "placeId": "dar-us-salam-mosque-and-islamic-centre-mib-1855",
+    "source": "sirat",
+    "placeName": "Dar-us-Salam Mosque and Islamic Centre",
+    "siratId": "mosque-000372",
+    "siratName": "Darus Salam Mosque & Islamic Centre",
+    "matchedDistanceM": 102
+  },
+  {
+    "placeId": "dartford-masjid-and-islamic-centre-mib-1746",
+    "source": "sirat",
+    "placeName": "Dartford Masjid and Islamic Centre",
+    "siratId": "mosque-000078",
+    "siratName": "Dartford Masjid and Islamic Centre (DMIC)",
+    "matchedDistanceM": 13
+  },
+  {
+    "placeId": "darul-arqam-mib-1471",
+    "source": "sirat",
+    "placeName": "Darul Arqam",
+    "siratId": "mosque-000306",
+    "siratName": "Darul Arqam Educational Trust",
+    "matchedDistanceM": 79
+  },
+  {
+    "placeId": "darul-ihsaan-barking-mib-1016",
+    "source": "sirat",
+    "placeName": "Darul Ihsaan Barking",
+    "siratId": "mosque-000093",
+    "siratName": "Darul Ihsaan Barking",
+    "matchedDistanceM": 4
+  },
+  {
+    "placeId": "darul-quran-islamic-centre-mib-2769",
+    "source": "sirat",
+    "placeName": "Darul Quran Islamic Centre",
+    "siratId": "mosque-000517",
+    "siratName": "Darul-Quran Islamic Center",
+    "matchedDistanceM": 92
   },
   {
     "placeId": "dawatul-islam-mosque-mib-792",
@@ -402,11 +1082,99 @@
     "matchedDistanceM": 2
   },
   {
+    "placeId": "derby-jamia-mosque-mib-668",
+    "source": "sirat",
+    "placeName": "Derby Jamia Mosque",
+    "siratId": "mosque-000475",
+    "siratName": "Derby Jamia Mosque",
+    "matchedDistanceM": 88
+  },
+  {
+    "placeId": "didsbury-mosque-and-islamic-centre-mib-1799",
+    "source": "sirat",
+    "placeName": "Didsbury Mosque and Islamic Centre",
+    "siratId": "mosque-000513",
+    "siratName": "Didsbury Mosque",
+    "matchedDistanceM": 96
+  },
+  {
+    "placeId": "dumfries-islamic-society-mib-738",
+    "source": "sirat",
+    "placeName": "Dumfries Islamic Society",
+    "siratId": "mosque-000222",
+    "siratName": "Dumfries Islamic Society",
+    "matchedDistanceM": 23
+  },
+  {
+    "placeId": "east-ham-islamic-centre-mib-289",
+    "source": "sirat",
+    "placeName": "East Ham Islamic Centre",
+    "siratId": "mosque-000261",
+    "siratName": "East Ham Islamic Centre",
+    "matchedDistanceM": 23
+  },
+  {
+    "placeId": "east-kilbride-mosque-mib-1594",
+    "source": "sirat",
+    "placeName": "East Kilbride Mosque",
+    "siratId": "mosque-000484",
+    "siratName": "Faizan E Attar - East Kilbride Islamic Centre",
+    "matchedDistanceM": 107
+  },
+  {
+    "placeId": "east-london-markazi-mosque-mib-1350",
+    "source": "sirat",
+    "placeName": "East London Markazi Mosque",
+    "siratId": "mosque-000011",
+    "siratName": "The Markazi Masjid London",
+    "matchedDistanceM": 28
+  },
+  {
     "placeId": "east-london-mosque-london-muslim-centre-mib-1378",
     "source": "dated-table",
     "placeName": "East London Mosque & London Muslim Centre",
     "url": "https://www.eastlondonmosque.org.uk/prayer-times",
     "credit": "eastlondonmosque.org.uk (published timetable)"
+  },
+  {
+    "placeId": "eastbourne-islamic-cultural-centre-mib-750",
+    "source": "sirat",
+    "placeName": "Eastbourne Islamic Cultural Centre",
+    "siratId": "mosque-000574",
+    "siratName": "Eastbourne Mosque",
+    "matchedDistanceM": 67
+  },
+  {
+    "placeId": "easton-jamia-masjid-mib-518",
+    "source": "sirat",
+    "placeName": "Easton Jamia Masjid",
+    "siratId": "mosque-000508",
+    "siratName": "Easton Jamia Masjid",
+    "matchedDistanceM": 70
+  },
+  {
+    "placeId": "eccles-mosque-mib-1836",
+    "source": "sirat",
+    "placeName": "Eccles Mosque",
+    "siratId": "mosque-000164",
+    "siratName": "Eccles Mosque",
+    "matchedDistanceM": 147
+  },
+  {
+    "placeId": "edgware-central-mosque-mib-15063001",
+    "source": "sirat",
+    "placeName": "Edgware Central Mosque",
+    "siratId": "mosque-000523",
+    "siratName": "Edgware Central Mosque",
+    "matchedDistanceM": 59
+  },
+  {
+    "placeId": "edgware-islamic-cultural-trust-mib-304",
+    "source": "sirat",
+    "placeName": "Edgware Islamic Cultural Trust",
+    "siratId": "mosque-000227",
+    "siratName": "Edgware Islamic Cultural Trust",
+    "matchedDistanceM": 104
   },
   {
     "placeId": "elland-mosque-association-mib-819",
@@ -418,6 +1186,22 @@
     "lat": 53.6827273,
     "lng": -1.8383437,
     "matchedDistanceM": 3
+  },
+  {
+    "placeId": "ely-islamic-centre-mib-1700",
+    "source": "sirat",
+    "placeName": "Ely Islamic Centre",
+    "siratId": "mosque-000283",
+    "siratName": "Ely Mosque",
+    "matchedDistanceM": 10
+  },
+  {
+    "placeId": "eman-foundation-dawah-centre-mib-1442",
+    "source": "sirat",
+    "placeName": "Eman Foundation Dawah Centre",
+    "siratId": "mosque-000200",
+    "siratName": "Eman Foundation",
+    "matchedDistanceM": 71
   },
   {
     "placeId": "epsom-islamic-centre-mib-2622",
@@ -494,6 +1278,14 @@
     "matchedDistanceM": 17
   },
   {
+    "placeId": "falkirk-central-mosque-mib-2776",
+    "source": "sirat",
+    "placeName": "Falkirk Central Mosque",
+    "siratId": "mosque-000353",
+    "siratName": "Falkirk Central Mosque Anwar-e-Madina",
+    "matchedDistanceM": 2
+  },
+  {
     "placeId": "falkirk-islamic-centre-mib-764",
     "source": "mawaqit",
     "placeName": "Falkirk Islamic Centre",
@@ -516,6 +1308,14 @@
     "matchedDistanceM": 8
   },
   {
+    "placeId": "fife-islamic-centre-mib-806",
+    "source": "sirat",
+    "placeName": "Fife Islamic Centre",
+    "siratId": "mosque-000017",
+    "siratName": "Fife Islamic Centre – Noor-e-Madina Mosque",
+    "matchedDistanceM": 9
+  },
+  {
     "placeId": "finsbury-park-mosque-mib-1226",
     "source": "mawaqit",
     "placeName": "Finsbury Park Mosque",
@@ -527,6 +1327,14 @@
     "matchedDistanceM": 5
   },
   {
+    "placeId": "forest-gate-mosque-mib-1300",
+    "source": "sirat",
+    "placeName": "Forest Gate Mosque",
+    "siratId": "mosque-000547",
+    "siratName": "Forest Gate Central Masjid",
+    "matchedDistanceM": 86
+  },
+  {
     "placeId": "gambian-islamic-community-centre-mib-2016062002",
     "source": "mawaqit",
     "placeName": "Gambian Islamic Community Centre",
@@ -536,6 +1344,22 @@
     "lat": 52.490133466215,
     "lng": -1.9581493735313,
     "matchedDistanceM": 59
+  },
+  {
+    "placeId": "ghousia-islamic-community-centre-mib-1018",
+    "source": "sirat",
+    "placeName": "Ghousia Islamic Community Centre",
+    "siratId": "mosque-000179",
+    "siratName": "Gloucester Ghousia Masjid",
+    "matchedDistanceM": 12
+  },
+  {
+    "placeId": "glasgow-islamic-centre-and-central-mosque-mib-790",
+    "source": "sirat",
+    "placeName": "Glasgow Islamic Centre and Central Mosque",
+    "siratId": "mosque-000169",
+    "siratName": "Glasgow Central Mosque",
+    "matchedDistanceM": 5
   },
   {
     "placeId": "glasgow-mena-trust-mib-18032502",
@@ -568,6 +1392,54 @@
     "slug": "goldington-islamic-centre"
   },
   {
+    "placeId": "gravesend-muslim-cultural-centre-mib-1439",
+    "source": "sirat",
+    "placeName": "Gravesend Muslim Cultural Centre",
+    "siratId": "mosque-000540",
+    "siratName": "Gravesend Central Mosque",
+    "matchedDistanceM": 10
+  },
+  {
+    "placeId": "great-barr-muslim-foundation-mib-1636",
+    "source": "sirat",
+    "placeName": "Great Barr Muslim Foundation",
+    "siratId": "mosque-000501",
+    "siratName": "Great Barr Muslim Foundation",
+    "matchedDistanceM": 56
+  },
+  {
+    "placeId": "green-lane-masjid-community-centre-mib-117",
+    "source": "sirat",
+    "placeName": "Green Lane Masjid & Community Centre",
+    "siratId": "mosque-000406",
+    "siratName": "Green Lane Masjid",
+    "matchedDistanceM": 140
+  },
+  {
+    "placeId": "greenbank-masjid-way-394676530",
+    "source": "sirat",
+    "placeName": "Greenbank Masjid",
+    "siratId": "mosque-000360",
+    "siratName": "Greenbank Masjid",
+    "matchedDistanceM": 41
+  },
+  {
+    "placeId": "greenwich-islamic-centre-mib-1143",
+    "source": "sirat",
+    "placeName": "Greenwich Islamic Centre",
+    "siratId": "mosque-000537",
+    "siratName": "Greenwich Islamic Centre",
+    "matchedDistanceM": 111
+  },
+  {
+    "placeId": "hackney-central-masjid-mib-1404",
+    "source": "sirat",
+    "placeName": "Hackney Central Masjid",
+    "siratId": "mosque-000198",
+    "siratName": "Hackney Central Masjid",
+    "matchedDistanceM": 26
+  },
+  {
     "placeId": "hadayat-ul-muslimeen-mosque-mib-1853",
     "source": "mawaqit",
     "placeName": "Hadayat ul Muslimeen Mosque",
@@ -577,6 +1449,46 @@
     "lat": 53.461177720959,
     "lng": -2.2751191564487,
     "matchedDistanceM": 2
+  },
+  {
+    "placeId": "halesowen-dudley-yemeni-community-association-mib-1654",
+    "source": "sirat",
+    "placeName": "Halesowen Dudley Yemeni Community Association",
+    "siratId": "mosque-000308",
+    "siratName": "Halesowen/Dudley Yemeni Community Association",
+    "matchedDistanceM": 72
+  },
+  {
+    "placeId": "hanafi-sunni-jamia-masjid-e-raza-mib-354",
+    "source": "sirat",
+    "placeName": "Hanafi Sunni Jamia Masjid-e-Raza",
+    "siratId": "mosque-000562",
+    "siratName": "Masjid-E-Raza",
+    "matchedDistanceM": 31
+  },
+  {
+    "placeId": "handsworth-islamic-centre-mib-229",
+    "source": "sirat",
+    "placeName": "Handsworth Islamic Centre",
+    "siratId": "mosque-000029",
+    "siratName": "UKIM Handsworth Islamic Centre",
+    "matchedDistanceM": 52
+  },
+  {
+    "placeId": "harlesden-ummah-community-centre-mib-1079",
+    "source": "sirat",
+    "placeName": "Harlesden Ummah Community Centre",
+    "siratId": "mosque-000113",
+    "siratName": "Harlesden Ummah",
+    "matchedDistanceM": 118
+  },
+  {
+    "placeId": "harlow-islamic-centre-mib-836",
+    "source": "sirat",
+    "placeName": "Harlow Islamic Centre",
+    "siratId": "mosque-000257",
+    "siratName": "Harlow Islamic Centre",
+    "matchedDistanceM": 4
   },
   {
     "placeId": "harrogate-islamic-association-node-13128414737",
@@ -590,6 +1502,38 @@
     "matchedDistanceM": 7
   },
   {
+    "placeId": "harrow-central-mosque-mib-1187",
+    "source": "sirat",
+    "placeName": "Harrow Central Mosque",
+    "siratId": "mosque-000265",
+    "siratName": "Harrow Central Mosque",
+    "matchedDistanceM": 20
+  },
+  {
+    "placeId": "havering-islamic-cultural-centre-mib-2642",
+    "source": "sirat",
+    "placeName": "Havering Islamic Cultural Centre",
+    "siratId": "mosque-000527",
+    "siratName": "Havering Islamic Cultural Centre",
+    "matchedDistanceM": 99
+  },
+  {
+    "placeId": "hazrat-bilal-centre-mib-2748",
+    "source": "sirat",
+    "placeName": "Hazrat Bilal Centre",
+    "siratId": "mosque-000385",
+    "siratName": "Hazrat Bilal Masjid /Centre",
+    "matchedDistanceM": 63
+  },
+  {
+    "placeId": "hazrat-sultan-bahu-trust-jamiah-islamiyah-mosque-mib-220",
+    "source": "sirat",
+    "placeName": "Hazrat Sultan Bahu Trust Jamiah Islamiyah Mosque",
+    "siratId": "mosque-000393",
+    "siratName": "Hazrat Sultan Bahu Trust",
+    "matchedDistanceM": 37
+  },
+  {
     "placeId": "hendon-mosque-and-islamic-centre-mib-1042",
     "source": "mawaqit",
     "placeName": "Hendon Mosque and Islamic Centre",
@@ -599,6 +1543,22 @@
     "lat": 51.5775793,
     "lng": -0.2383841,
     "matchedDistanceM": 51
+  },
+  {
+    "placeId": "hethersett-masjid-mosque-and-community-centre-mib-1695",
+    "source": "sirat",
+    "placeName": "Hethersett Masjid Mosque and Community Centre",
+    "siratId": "mosque-000582",
+    "siratName": "Hethersett Masjid",
+    "matchedDistanceM": 26
+  },
+  {
+    "placeId": "hifz-ul-qur-an-and-islamic-education-centre-mib-2705",
+    "source": "sirat",
+    "placeName": "Hifz-ul Qur'an and Islamic Education Centre",
+    "siratId": "mosque-000277",
+    "siratName": "Masjid Al-Fath / Hifzul Quran Islamic Education Centre",
+    "matchedDistanceM": 37
   },
   {
     "placeId": "hillside-islamic-cultural-centre-mib-1291",
@@ -612,12 +1572,44 @@
     "matchedDistanceM": 13
   },
   {
+    "placeId": "hind-grove-cultural-and-community-association-mib-2839",
+    "source": "sirat",
+    "placeName": "Hind Grove Cultural and Community Association",
+    "siratId": "mosque-000034",
+    "siratName": "Hind Grove Masjid & Cultural Centre",
+    "matchedDistanceM": 9
+  },
+  {
+    "placeId": "hockwell-ring-masjid-mib-944",
+    "source": "sirat",
+    "placeName": "Hockwell Ring Masjid",
+    "siratId": "mosque-000230",
+    "siratName": "Hockwell Ring Masjid",
+    "matchedDistanceM": 32
+  },
+  {
     "placeId": "holborn-muslim-community-association-mib-1090",
     "source": "masjidbox",
     "placeName": "Holborn Muslim Community Association",
     "url": "https://masjidbox.com/prayer-times/holborn-mosque",
     "masjidboxName": "Holborn Mosque",
     "slug": "holborn-mosque"
+  },
+  {
+    "placeId": "hounslow-jamia-masjid-islamic-centre-mib-1212",
+    "source": "sirat",
+    "placeName": "Hounslow Jamia Masjid & Islamic Centre",
+    "siratId": "mosque-000274",
+    "siratName": "Hounslow Jamia Masjid & Islamic Centre",
+    "matchedDistanceM": 97
+  },
+  {
+    "placeId": "hounslow-muslim-centre-mib-23",
+    "source": "sirat",
+    "placeName": "Hounslow Muslim Centre",
+    "siratId": "mosque-000258",
+    "siratName": "Hounslow Muslim Centre",
+    "matchedDistanceM": 28
   },
   {
     "placeId": "huda-community-centre-mib-2830",
@@ -631,12 +1623,84 @@
     "matchedDistanceM": 8
   },
   {
+    "placeId": "hulton-lane-centre-for-education-mib-1688",
+    "source": "sirat",
+    "placeName": "Hulton Lane Centre for Education",
+    "siratId": "mosque-000336",
+    "siratName": "Hulton Lane Centre for Education",
+    "matchedDistanceM": 16
+  },
+  {
+    "placeId": "huntingdon-islamic-education-and-prayer-centre-mib-946",
+    "source": "sirat",
+    "placeName": "Huntingdon Islamic Education and Prayer Centre",
+    "siratId": "mosque-000561",
+    "siratName": "Huntingdon Jamia Mosque",
+    "matchedDistanceM": 29
+  },
+  {
+    "placeId": "hyde-jamia-mosque-and-islamic-centre-mib-1822",
+    "source": "sirat",
+    "placeName": "Hyde Jamia Mosque and Islamic Centre",
+    "siratId": "mosque-000573",
+    "siratName": "Hyde Jamia Mosque & Islamic Centre",
+    "matchedDistanceM": 12
+  },
+  {
     "placeId": "ilford-islamic-centre-mib-1307",
     "source": "masjidbox",
     "placeName": "Ilford Islamic Centre",
     "url": "https://masjidbox.com/prayer-times/ilfordmosque",
     "masjidboxName": "Ilford Islamic Centre",
     "slug": "ilfordmosque"
+  },
+  {
+    "placeId": "imaan-masjid-mib-1616",
+    "source": "sirat",
+    "placeName": "Imaan Masjid",
+    "siratId": "mosque-000201",
+    "siratName": "Imaan Masjid",
+    "matchedDistanceM": 8
+  },
+  {
+    "placeId": "international-khatme-nabuwat-movement-mib-1304",
+    "source": "sirat",
+    "placeName": "International Khatme-Nabuwat Movement",
+    "siratId": "mosque-000556",
+    "siratName": "International Khatme Nubuwwat Movement / St Georges Road Masjid",
+    "matchedDistanceM": 87
+  },
+  {
+    "placeId": "ipswich-and-suffolk-bangladeshi-muslim-community-and-mosque--mib-884",
+    "source": "sirat",
+    "placeName": "Ipswich and Suffolk Bangladeshi Muslim Community and Mosque Centre",
+    "siratId": "mosque-000249",
+    "siratName": "Ipswich Mosque",
+    "matchedDistanceM": 44
+  },
+  {
+    "placeId": "ipswich-shahjalal-islamic-centre-masjid-mib-1490",
+    "source": "sirat",
+    "placeName": "Ipswich Shahjalal Islamic Centre & Masjid",
+    "siratId": "mosque-000486",
+    "siratName": "Shahjalal Islamic Centre & Masjid",
+    "matchedDistanceM": 45
+  },
+  {
+    "placeId": "iqra-centre-mib-2667",
+    "source": "sirat",
+    "placeName": "Iqra Centre",
+    "siratId": "mosque-000426",
+    "siratName": "IQRA Masjid",
+    "matchedDistanceM": 125
+  },
+  {
+    "placeId": "iqra-community-centre-mib-1367",
+    "source": "sirat",
+    "placeName": "Iqra Community Centre",
+    "siratId": "mosque-000441",
+    "siratName": "IQRA Community Centre",
+    "matchedDistanceM": 144
   },
   {
     "placeId": "iqraa-ethiopian-muslim-centre-node-12169889359",
@@ -661,6 +1725,38 @@
     "matchedDistanceM": 5
   },
   {
+    "placeId": "islamic-association-of-north-london-mib-1047",
+    "source": "sirat",
+    "placeName": "Islamic Association of North London",
+    "siratId": "mosque-000412",
+    "siratName": "Islamic Association of North London",
+    "matchedDistanceM": 14
+  },
+  {
+    "placeId": "islamic-centre-edgware-mib-309",
+    "source": "sirat",
+    "placeName": "Islamic Centre Edgware",
+    "siratId": "mosque-000290",
+    "siratName": "Islamic Centre Edgware",
+    "matchedDistanceM": 63
+  },
+  {
+    "placeId": "islamic-centre-milton-keynes-mib-1119",
+    "source": "sirat",
+    "placeName": "Islamic Centre Milton Keynes",
+    "siratId": "mosque-000545",
+    "siratName": "Milton Keynes Muslim Association",
+    "matchedDistanceM": 57
+  },
+  {
+    "placeId": "islamic-cultural-centre-and-al-rahma-mosque-mib-1029",
+    "source": "sirat",
+    "placeName": "Islamic Cultural Centre and Al-Rahma Mosque",
+    "siratId": "mosque-000002",
+    "siratName": "Liverpool Muslim Society / Al Rahma Mosque",
+    "matchedDistanceM": 51
+  },
+  {
     "placeId": "islamic-cultural-centre-mib-1067",
     "source": "mawaqit",
     "placeName": "Islamic Cultural Centre",
@@ -670,6 +1766,14 @@
     "lat": 51.547045084432,
     "lng": -0.2745966883606,
     "matchedDistanceM": 9
+  },
+  {
+    "placeId": "islamic-cultural-centre-mib-2115",
+    "source": "sirat",
+    "placeName": "Islamic Cultural Centre",
+    "siratId": "mosque-000163",
+    "siratName": "Rhyl Masjid & Islamic Cultural Centre",
+    "matchedDistanceM": 19
   },
   {
     "placeId": "islamic-dawah-centre-mib-1284",
@@ -683,6 +1787,54 @@
     "matchedDistanceM": 16
   },
   {
+    "placeId": "islamic-education-trust-of-cumbernauld-mib-800",
+    "source": "sirat",
+    "placeName": "Islamic Education Trust of Cumbernauld",
+    "siratId": "mosque-000411",
+    "siratName": "Islamic Education Trust Cumbernauld",
+    "matchedDistanceM": 109
+  },
+  {
+    "placeId": "islamic-society-mib-1851",
+    "source": "sirat",
+    "placeName": "Islamic Society",
+    "siratId": "mosque-000380",
+    "siratName": "University of Manchester Islamic Society – Sackville Prayer Hall",
+    "matchedDistanceM": 41
+  },
+  {
+    "placeId": "islamic-tarbiya-academy-mib-677",
+    "source": "sirat",
+    "placeName": "Islamic Tarbiya Academy",
+    "siratId": "mosque-000362",
+    "siratName": "Islamic Tarbiyah Academy",
+    "matchedDistanceM": 18
+  },
+  {
+    "placeId": "jabir-bin-zayd-islamic-centre-mib-74",
+    "source": "sirat",
+    "placeName": "Jabir bin Zayd Islamic Centre",
+    "siratId": "mosque-000168",
+    "siratName": "Jabir Bin Zayd Islamic Centre",
+    "matchedDistanceM": 14
+  },
+  {
+    "placeId": "jalalabad-muslim-association-mib-446",
+    "source": "sirat",
+    "placeName": "Jalalabad Muslim Association",
+    "siratId": "mosque-000552",
+    "siratName": "Jalalabad Association",
+    "matchedDistanceM": 42
+  },
+  {
+    "placeId": "jalalia-jame-masjid-mib-2136",
+    "source": "sirat",
+    "placeName": "Jalalia Jame Masjid",
+    "siratId": "mosque-000302",
+    "siratName": "Jalalia Jaame Mosque",
+    "matchedDistanceM": 24
+  },
+  {
     "placeId": "jalalia-mosque-and-islamic-education-centre-mib-2619",
     "source": "mawaqit",
     "placeName": "Jalalia Mosque and Islamic Education Centre",
@@ -692,6 +1844,38 @@
     "lat": 51.4782353,
     "lng": -3.1904134,
     "matchedDistanceM": 22
+  },
+  {
+    "placeId": "jalalia-sunni-jami-masjid-islamic-education-centre-mib-2331",
+    "source": "sirat",
+    "placeName": "Jalalia Sunni Jami Masjid & Islamic Education Centre",
+    "siratId": "mosque-000286",
+    "siratName": "Jalalia Sunni Jami Masjid & Islamic Education Centre",
+    "matchedDistanceM": 71
+  },
+  {
+    "placeId": "jame-masjid-e-noor-mib-1859",
+    "source": "sirat",
+    "placeName": "Jame Masjid-e-Noor",
+    "siratId": "mosque-000150",
+    "siratName": "Jame'ah Masjid E Noor",
+    "matchedDistanceM": 62
+  },
+  {
+    "placeId": "jame-masjid-e-noor-mib-355",
+    "source": "sirat",
+    "placeName": "Jame Masjid-e-Noor",
+    "siratId": "mosque-000120",
+    "siratName": "Jame Masjid-e-Noor",
+    "matchedDistanceM": 48
+  },
+  {
+    "placeId": "jame-masjid-ghausia-mib-2232",
+    "source": "sirat",
+    "placeName": "Jame Masjid Ghausia",
+    "siratId": "mosque-000365",
+    "siratName": "The Slough Islamic Trust - Jamia Ghousia Masjid & Islamic Centre",
+    "matchedDistanceM": 102
   },
   {
     "placeId": "jami-ah-tul-madinah-way-252172173",
@@ -705,12 +1889,60 @@
     "matchedDistanceM": 56
   },
   {
+    "placeId": "jamia-al-karam-masjid-mib-2659",
+    "source": "sirat",
+    "placeName": "Jamia Al-Karam Masjid",
+    "siratId": "mosque-000447",
+    "siratName": "Al Karam – Mosque",
+    "matchedDistanceM": 30
+  },
+  {
+    "placeId": "jamia-darus-sunnah-mib-2533",
+    "source": "sirat",
+    "placeName": "Jamia Darus Sunnah",
+    "siratId": "mosque-000324",
+    "siratName": "Jamia Darus Sunnah London",
+    "matchedDistanceM": 15
+  },
+  {
     "placeId": "jamia-islamia-central-mosque-mib-1856",
     "source": "masjidbox",
     "placeName": "Jamia Islamia & Central Mosque",
     "url": "https://masjidbox.com/prayer-times/city-jamia-masjid",
     "masjidboxName": "City Jamia Masjid",
     "slug": "city-jamia-masjid"
+  },
+  {
+    "placeId": "jamia-islamia-mib-797",
+    "source": "sirat",
+    "placeName": "Jamia Islamia",
+    "siratId": "mosque-000259",
+    "siratName": "Jamia Islamia Glasgow",
+    "matchedDistanceM": 28
+  },
+  {
+    "placeId": "jamia-khizra-masjid-and-islamic-centre-bury-mib-556",
+    "source": "sirat",
+    "placeName": "Jamia Khizra Masjid and Islamic Centre Bury",
+    "siratId": "mosque-000146",
+    "siratName": "Khizra Mosque – Walmersley Road",
+    "matchedDistanceM": 56
+  },
+  {
+    "placeId": "jamia-masjid-al-furqan-mib-2133",
+    "source": "sirat",
+    "placeName": "Jamia Masjid al-Furqan",
+    "siratId": "mosque-000481",
+    "siratName": "Masjid Al Furqan",
+    "matchedDistanceM": 55
+  },
+  {
+    "placeId": "jamia-masjid-al-mustafa-mib-2113",
+    "source": "sirat",
+    "placeName": "Jamia Masjid al Mustafa",
+    "siratId": "mosque-000463",
+    "siratName": "Redhill Jamia Mosque Al Mustafa",
+    "matchedDistanceM": 128
   },
   {
     "placeId": "jamia-masjid-bilal-mib-587",
@@ -724,12 +1956,60 @@
     "matchedDistanceM": 24
   },
   {
+    "placeId": "jamia-masjid-e-khizra-and-islamic-centre-mib-555",
+    "source": "sirat",
+    "placeName": "Jamia Masjid-e-Khizra and Islamic Centre",
+    "siratId": "mosque-000408",
+    "siratName": "Jamia Khizra Mosque and Islamic Centre, Bury",
+    "matchedDistanceM": 15
+  },
+  {
     "placeId": "jamia-masjid-ghosia-mib-1392",
     "source": "masjidbox",
     "placeName": "Jamia Masjid Ghosia",
     "url": "https://masjidbox.com/prayer-times/wfialondon",
     "masjidboxName": "Waltham Forest Islamic Association",
     "slug": "wfialondon"
+  },
+  {
+    "placeId": "jamia-masjid-ibrahim-mib-536",
+    "source": "sirat",
+    "placeName": "Jamia Masjid Ibrahim",
+    "siratId": "mosque-000112",
+    "siratName": "UKIM Ibrahim Masjid",
+    "matchedDistanceM": 39
+  },
+  {
+    "placeId": "jamia-masjid-naqshbandia-aslamia-mib-111",
+    "source": "sirat",
+    "placeName": "Jamia Masjid Naqshbandia Aslamia",
+    "siratId": "mosque-000001",
+    "siratName": "Jamia Masjid Naqshbandia Aslamia",
+    "matchedDistanceM": 59
+  },
+  {
+    "placeId": "jamia-masjid-west-drayton-mib-1642",
+    "source": "sirat",
+    "placeName": "Jamia Masjid West Drayton",
+    "siratId": "mosque-000138",
+    "siratName": "Jamia Masjid West Drayton",
+    "matchedDistanceM": 72
+  },
+  {
+    "placeId": "jamia-mosque-gulzar-e-habib-and-education-centre-mib-2200",
+    "source": "sirat",
+    "placeName": "Jamia Mosque Gulzar-e-Habib and Education Centre",
+    "siratId": "mosque-000090",
+    "siratName": "Gulzar-e-Habib Mosque & Education Centre",
+    "matchedDistanceM": 10
+  },
+  {
+    "placeId": "jamia-mosque-noor-ul-islam-mib-2011",
+    "source": "sirat",
+    "placeName": "Jamia Mosque Noor-ul-Islam",
+    "siratId": "mosque-000609",
+    "siratName": "Noor E Islam",
+    "matchedDistanceM": 47
   },
   {
     "placeId": "jamia-mosque-sultania-education-centre-mib-2864",
@@ -741,6 +2021,38 @@
     "lat": 53.8228071,
     "lng": -2.2360093,
     "matchedDistanceM": 55
+  },
+  {
+    "placeId": "jamia-sawfia-masjid-mib-2329",
+    "source": "sirat",
+    "placeName": "Jamia Sawfia Masjid",
+    "siratId": "mosque-000428",
+    "siratName": "Jamia Masjid Swafia",
+    "matchedDistanceM": 3
+  },
+  {
+    "placeId": "jamia-shan-e-islam-welfare-education-centre-mib-2227",
+    "source": "sirat",
+    "placeName": "Jamia Shan-e-Islam Welfare & Education Centre",
+    "siratId": "mosque-000176",
+    "siratName": "Jamia Masjid Shan-e-Islam",
+    "matchedDistanceM": 101
+  },
+  {
+    "placeId": "jamiat-us-salam-mib-293",
+    "source": "sirat",
+    "placeName": "Jamiat us-Salam",
+    "siratId": "mosque-000295",
+    "siratName": "Jamiat-us-Salam",
+    "matchedDistanceM": 57
+  },
+  {
+    "placeId": "jamiatul-ilm-wal-huda-uk-mib-342",
+    "source": "sirat",
+    "placeName": "Jamiatul-Ilm Wal-Huda UK",
+    "siratId": "mosque-000260",
+    "siratName": "Jamiatul Ilm Wal Huda",
+    "matchedDistanceM": 21
   },
   {
     "placeId": "jamiyat-tabligh-ul-islam-madressa-mib-474",
@@ -765,12 +2077,68 @@
     "matchedDistanceM": 6
   },
   {
+    "placeId": "jamiyat-tabligh-ul-islam-mosque-mib-436",
+    "source": "sirat",
+    "placeName": "Jamiyat Tabligh-ul-Islam Mosque",
+    "siratId": "mosque-000244",
+    "siratName": "Jamiyat Central Mosque",
+    "matchedDistanceM": 62
+  },
+  {
+    "placeId": "jumma-masjid-mib-47",
+    "source": "sirat",
+    "placeName": "Jumma Masjid",
+    "siratId": "mosque-000520",
+    "siratName": "Jumma Masjid",
+    "matchedDistanceM": 18
+  },
+  {
+    "placeId": "jumu-ah-salaah-mib-17080604",
+    "source": "sirat",
+    "placeName": "Jumu'ah Salaah",
+    "siratId": "mosque-000242",
+    "siratName": "Cambourne Jumu’ah Salaah",
+    "matchedDistanceM": 37
+  },
+  {
+    "placeId": "jumu-ah-salaah-mib-2588",
+    "source": "sirat",
+    "placeName": "Jumu'ah Salaah",
+    "siratId": "mosque-000323",
+    "siratName": "New Malden Jummah",
+    "matchedDistanceM": 66
+  },
+  {
+    "placeId": "karimia-mosque-and-institute-mib-1965",
+    "source": "sirat",
+    "placeName": "Karimia Mosque and Institute",
+    "siratId": "mosque-000049",
+    "siratName": "Karimia Masjid & Institute",
+    "matchedDistanceM": 133
+  },
+  {
+    "placeId": "kent-islamic-centre-mosque-mib-601",
+    "source": "sirat",
+    "placeName": "Kent Islamic Centre Mosque",
+    "siratId": "mosque-000262",
+    "siratName": "Chatham Hill Mosque & Kent Islamic Centre",
+    "matchedDistanceM": 25
+  },
+  {
     "placeId": "khanqah-naqshbandia-mujaddidia-mib-1839",
     "source": "masjidbox",
     "placeName": "Khanqah Naqshbandia Mujaddidia",
     "url": "https://masjidbox.com/prayer-times/khanqah-naqshbandia",
     "masjidboxName": "Khanqah Naqshbandia",
     "slug": "khanqah-naqshbandia"
+  },
+  {
+    "placeId": "khidmah-academy-mib-2857",
+    "source": "sirat",
+    "placeName": "Khidmah Academy",
+    "siratId": "mosque-000101",
+    "siratName": "Khidmah Academy",
+    "matchedDistanceM": 53
   },
   {
     "placeId": "kings-cross-mosque-and-islamic-cultural-centre-mib-1091",
@@ -784,6 +2152,38 @@
     "matchedDistanceM": 109
   },
   {
+    "placeId": "kotku-mosque-mib-1927",
+    "source": "sirat",
+    "placeName": "Kotku Mosque",
+    "siratId": "mosque-000100",
+    "siratName": "TCA & Kotku Mosque",
+    "matchedDistanceM": 45
+  },
+  {
+    "placeId": "lambeth-masjid-and-progressive-community-centre-mib-2773",
+    "source": "sirat",
+    "placeName": "Lambeth Masjid and Progressive Community Centre",
+    "siratId": "mosque-000457",
+    "siratName": "Lambeth Masjid – Progressive Community Centre",
+    "matchedDistanceM": 122
+  },
+  {
+    "placeId": "lansbury-masjid-mib-141",
+    "source": "sirat",
+    "placeName": "Lansbury Masjid",
+    "siratId": "mosque-000036",
+    "siratName": "Lansbury Estate Masjid",
+    "matchedDistanceM": 65
+  },
+  {
+    "placeId": "leagrave-hall-masjid-mib-39",
+    "source": "sirat",
+    "placeName": "Leagrave Hall Masjid",
+    "siratId": "mosque-000376",
+    "siratName": "Leagrave Hall Masjid",
+    "matchedDistanceM": 107
+  },
+  {
     "placeId": "leeds-grand-mosque-mib-945",
     "source": "mawaqit",
     "placeName": "Leeds Grand Mosque",
@@ -793,6 +2193,54 @@
     "lat": 53.8065442,
     "lng": -1.5679982,
     "matchedDistanceM": 23
+  },
+  {
+    "placeId": "leeds-islamic-centre-mib-932",
+    "source": "sirat",
+    "placeName": "Leeds Islamic Centre",
+    "siratId": "mosque-000614",
+    "siratName": "Leeds Islamic Centre",
+    "matchedDistanceM": 74
+  },
+  {
+    "placeId": "leicester-central-mosque-mib-965",
+    "source": "sirat",
+    "placeName": "Leicester Central Mosque",
+    "siratId": "mosque-000162",
+    "siratName": "The Leicester Central Mosque",
+    "matchedDistanceM": 112
+  },
+  {
+    "placeId": "leigh-masjid-mib-2700",
+    "source": "sirat",
+    "placeName": "Leigh Masjid",
+    "siratId": "mosque-000269",
+    "siratName": "Masjid al-Furqān Leigh",
+    "matchedDistanceM": 16
+  },
+  {
+    "placeId": "lewisham-islamic-centre-mib-1256",
+    "source": "sirat",
+    "placeName": "Lewisham Islamic Centre",
+    "siratId": "mosque-000569",
+    "siratName": "Lewisham Islamic Centre",
+    "matchedDistanceM": 81
+  },
+  {
+    "placeId": "leytonstone-mosque-mib-1384",
+    "source": "sirat",
+    "placeName": "Leytonstone Mosque",
+    "siratId": "mosque-000155",
+    "siratName": "Leytonstone Islamic Association",
+    "matchedDistanceM": 33
+  },
+  {
+    "placeId": "lincoln-green-mosque-mib-1157",
+    "source": "sirat",
+    "placeName": "Lincoln Green Mosque",
+    "siratId": "mosque-000096",
+    "siratName": "Lincoln Green Mosque",
+    "matchedDistanceM": 15
   },
   {
     "placeId": "lincoln-mosque-and-islamic-association-mib-2294156",
@@ -806,6 +2254,54 @@
     "matchedDistanceM": 36
   },
   {
+    "placeId": "liverpool-mosque-islamic-institute-mib-1028",
+    "source": "sirat",
+    "placeName": "Liverpool Mosque & Islamic Institute",
+    "siratId": "mosque-000416",
+    "siratName": "Liverpool Mosque & Islamic Institute",
+    "matchedDistanceM": 14
+  },
+  {
+    "placeId": "locksley-lane-cultural-association-and-mosque-mib-17080306",
+    "source": "sirat",
+    "placeName": "Locksley Lane Cultural Association and Mosque",
+    "siratId": "mosque-000322",
+    "siratName": "Locksley Estate Mosque",
+    "matchedDistanceM": 7
+  },
+  {
+    "placeId": "london-colney-islamic-centre-mib-1458",
+    "source": "sirat",
+    "placeName": "London Colney Islamic Centre",
+    "siratId": "mosque-000532",
+    "siratName": "London Colney Islamic Centre",
+    "matchedDistanceM": 7
+  },
+  {
+    "placeId": "london-islamic-cultural-centre-mib-1178",
+    "source": "sirat",
+    "placeName": "London Islamic Cultural Centre",
+    "siratId": "mosque-000560",
+    "siratName": "London Islamic Cultural Society",
+    "matchedDistanceM": 137
+  },
+  {
+    "placeId": "loughborough-mosque-and-islamic-cultural-association-mib-1755",
+    "source": "sirat",
+    "placeName": "Loughborough Mosque and Islamic Cultural Association",
+    "siratId": "mosque-000069",
+    "siratName": "Loughborough Mosque",
+    "matchedDistanceM": 50
+  },
+  {
+    "placeId": "lozells-central-mosque-mib-207",
+    "source": "sirat",
+    "placeName": "Lozells Central Mosque",
+    "siratId": "mosque-000581",
+    "siratName": "Lozells Central Mosque",
+    "matchedDistanceM": 9
+  },
+  {
     "placeId": "luton-islamic-centre-mib-1765",
     "source": "mawaqit",
     "placeName": "Luton Islamic Centre",
@@ -817,12 +2313,92 @@
     "matchedDistanceM": 7
   },
   {
+    "placeId": "madina-islamic-mission-and-islamic-centre-mib-862",
+    "source": "sirat",
+    "placeName": "Madina Islamic Mission and Islamic Centre",
+    "siratId": "mosque-000048",
+    "siratName": "Madina Islamic Mission",
+    "matchedDistanceM": 44
+  },
+  {
+    "placeId": "madina-jame-masjid-and-muslim-community-centre-mib-1377",
+    "source": "sirat",
+    "placeName": "Madina Jame Masjid and Muslim Community Centre",
+    "siratId": "mosque-000154",
+    "siratName": "Madina Jame Masjid Docklands",
+    "matchedDistanceM": 79
+  },
+  {
+    "placeId": "madina-jamia-masjid-islamic-centre-mib-2000",
+    "source": "sirat",
+    "placeName": "Madina Jamia Masjid & Islamic Centre",
+    "siratId": "mosque-000010",
+    "siratName": "Madina Mosque & Islamic Centre",
+    "matchedDistanceM": 60
+  },
+  {
+    "placeId": "madina-masjid-and-muslim-welfare-house-mib-2053",
+    "source": "sirat",
+    "placeName": "Madina Masjid and Muslim Welfare House",
+    "siratId": "mosque-000304",
+    "siratName": "Madina Masjid Oxford",
+    "matchedDistanceM": 80
+  },
+  {
+    "placeId": "madina-masjid-mib-1772",
+    "source": "sirat",
+    "placeName": "Madina Masjid",
+    "siratId": "mosque-000367",
+    "siratName": "Madinah Masjid",
+    "matchedDistanceM": 10
+  },
+  {
+    "placeId": "madina-masjid-mib-2119",
+    "source": "sirat",
+    "placeName": "Madina Masjid",
+    "siratId": "mosque-000062",
+    "siratName": "Madina Masjid Newbold Rochdale",
+    "matchedDistanceM": 73
+  },
+  {
+    "placeId": "madina-masjid-mib-655",
+    "source": "sirat",
+    "placeName": "Madina Masjid",
+    "siratId": "mosque-000299",
+    "siratName": "Madina Masjid Darwen",
+    "matchedDistanceM": 15
+  },
+  {
+    "placeId": "madina-masjid-muslim-cultural-centre-mib-1286",
+    "source": "sirat",
+    "placeName": "Madina Masjid & Muslim Cultural Centre",
+    "siratId": "mosque-000593",
+    "siratName": "Madina Masjid",
+    "matchedDistanceM": 15
+  },
+  {
+    "placeId": "madina-mosque-mib-574",
+    "source": "sirat",
+    "placeName": "Madina Mosque",
+    "siratId": "mosque-000409",
+    "siratName": "Madina Mosque Cardiff",
+    "matchedDistanceM": 2
+  },
+  {
     "placeId": "madinatul-ilm-way-1413120285",
     "source": "masjidbox",
     "placeName": "Madinatul Ilm",
     "url": "https://masjidbox.com/prayer-times/madinatul-ilm",
     "masjidboxName": "Madinatul Ilm",
     "slug": "madinatul-ilm"
+  },
+  {
+    "placeId": "madni-jamia-masjid-mib-483",
+    "source": "sirat",
+    "placeName": "Madni Jamia Masjid",
+    "siratId": "mosque-000231",
+    "siratName": "Madni Jamia Masjid",
+    "matchedDistanceM": 75
   },
   {
     "placeId": "madni-masjid-and-muslims-education-centre-mib-1972",
@@ -858,6 +2434,30 @@
     "matchedDistanceM": 12
   },
   {
+    "placeId": "madrasa-mujadidia-mib-128",
+    "source": "sirat",
+    "placeName": "Madrasa Mujadidia",
+    "siratId": "mosque-000356",
+    "siratName": "Masjid Mujadidia",
+    "matchedDistanceM": 40
+  },
+  {
+    "placeId": "madressa-taleem-ul-islam-mib-320",
+    "source": "sirat",
+    "placeName": "Madressa Taleem Ul Islam",
+    "siratId": "mosque-000293",
+    "siratName": "Taleem Ul Islam",
+    "matchedDistanceM": 3
+  },
+  {
+    "placeId": "makki-jamia-masjid-mib-2199",
+    "source": "sirat",
+    "placeName": "Makki Jamia Masjid",
+    "siratId": "mosque-000266",
+    "siratName": "Makki Mosque Sheffield",
+    "matchedDistanceM": 7
+  },
+  {
     "placeId": "makki-masjid-and-anjuman-islah-ul-muslimeen-mib-825",
     "source": "mawaqit",
     "placeName": "Makki Masjid and Anjuman Islah-ul-Muslimeen",
@@ -869,6 +2469,30 @@
     "matchedDistanceM": 7
   },
   {
+    "placeId": "makki-masjid-and-madressa-mib-240",
+    "source": "sirat",
+    "placeName": "Makki Masjid and Madressa",
+    "siratId": "mosque-000435",
+    "siratName": "Makki Masjid & Madrasa",
+    "matchedDistanceM": 85
+  },
+  {
+    "placeId": "makki-masjid-mib-2284",
+    "source": "sirat",
+    "placeName": "Makki Masjid",
+    "siratId": "mosque-000496",
+    "siratName": "Makki Masjid",
+    "matchedDistanceM": 63
+  },
+  {
+    "placeId": "makki-masjid-mib-948",
+    "source": "sirat",
+    "placeName": "Makki Masjid",
+    "siratId": "mosque-000284",
+    "siratName": "Makki Masjid",
+    "matchedDistanceM": 29
+  },
+  {
     "placeId": "makki-masjid-trust-mib-2614",
     "source": "mawaqit",
     "placeName": "Makki Masjid Trust",
@@ -878,6 +2502,46 @@
     "lat": 52.814580450844,
     "lng": -1.6425486675585,
     "matchedDistanceM": 9
+  },
+  {
+    "placeId": "maldon-district-islamic-cultural-association-mib-524",
+    "source": "sirat",
+    "placeName": "Maldon District Islamic Cultural Association",
+    "siratId": "mosque-000499",
+    "siratName": "Maldon District Islamic Cultural Association",
+    "matchedDistanceM": 44
+  },
+  {
+    "placeId": "manarat-masjid-mib-706",
+    "source": "sirat",
+    "placeName": "Manarat Masjid",
+    "siratId": "mosque-000477",
+    "siratName": "Manarat Foundation",
+    "matchedDistanceM": 48
+  },
+  {
+    "placeId": "manchester-central-mosque-and-islamic-cultural-centre-mib-1864",
+    "source": "sirat",
+    "placeName": "Manchester Central Mosque and Islamic Cultural Centre",
+    "siratId": "mosque-000092",
+    "siratName": "Manchester Central Mosque",
+    "matchedDistanceM": 35
+  },
+  {
+    "placeId": "markaz-at-tawheed-mib-2792",
+    "source": "sirat",
+    "placeName": "Markaz at-Tawheed",
+    "siratId": "mosque-000313",
+    "siratName": "Markaz At-Tawheed",
+    "matchedDistanceM": 30
+  },
+  {
+    "placeId": "markaz-dar-ul-ehsan-manchester-mib-249",
+    "source": "sirat",
+    "placeName": "Markaz Dar-ul-Ehsan Manchester",
+    "siratId": "mosque-000081",
+    "siratName": "Markaz Darulehsan Manchester",
+    "matchedDistanceM": 17
   },
   {
     "placeId": "markaz-mu-aadh-ibn-jabal-mib-2863",
@@ -902,6 +2566,22 @@
     "matchedDistanceM": 7
   },
   {
+    "placeId": "markaz-us-sunnah-mib-1725",
+    "source": "sirat",
+    "placeName": "Markaz us-Sunnah",
+    "siratId": "mosque-000466",
+    "siratName": "Markaz us-Sunnah",
+    "matchedDistanceM": 36
+  },
+  {
+    "placeId": "markaz-us-sunnah-mib-57498761",
+    "source": "sirat",
+    "placeName": "Markaz us Sunnah",
+    "siratId": "mosque-000355",
+    "siratName": "Markaz As-Sunnah",
+    "matchedDistanceM": 6
+  },
+  {
     "placeId": "markazi-jame-masjid-riza-and-islamic-centre-mib-868",
     "source": "masjidbox",
     "placeName": "Markazi Jame Masjid Riza and Islamic Centre",
@@ -921,6 +2601,54 @@
     "matchedDistanceM": 10
   },
   {
+    "placeId": "markazi-jamia-masjid-mib-2328",
+    "source": "sirat",
+    "placeName": "Markazi Jamia Masjid",
+    "siratId": "mosque-000063",
+    "siratName": "Markazi Jamia Mosque Wakefield",
+    "matchedDistanceM": 27
+  },
+  {
+    "placeId": "markazi-jamia-mosque-ghousia-ahl-e-sunnat-wal-jamaat-mib-2064",
+    "source": "sirat",
+    "placeName": "Markazi Jamia Mosque Ghousia Ahl-e-Sunnat wal Jamaat",
+    "siratId": "mosque-000116",
+    "siratName": "Masjid Ghousia",
+    "matchedDistanceM": 116
+  },
+  {
+    "placeId": "markazi-jamia-mosque-mib-832",
+    "source": "sirat",
+    "placeName": "Markazi Jamia Mosque",
+    "siratId": "mosque-000035",
+    "siratName": "Markazi Jamia Masjid Ghousia (Ahle Sunnat Wa Jamaat)",
+    "matchedDistanceM": 48
+  },
+  {
+    "placeId": "masjid-abdul-aziz-bin-baz-mib-199",
+    "source": "sirat",
+    "placeName": "Masjid Abdul Aziz Bin Baz",
+    "siratId": "mosque-000072",
+    "siratName": "Masjid Abdul-Aziz Bin Bāz",
+    "matchedDistanceM": 127
+  },
+  {
+    "placeId": "masjid-abdullah-ibn-masud-mib-1692",
+    "source": "sirat",
+    "placeName": "Masjid Abdullah ibn Masud",
+    "siratId": "mosque-000487",
+    "siratName": "Masjid Abdullah ibn Masud",
+    "matchedDistanceM": 28
+  },
+  {
+    "placeId": "masjid-abu-bakr-siddique-mib-1618",
+    "source": "sirat",
+    "placeName": "Masjid Abu Bakr Siddique",
+    "siratId": "mosque-000066",
+    "siratName": "Masjid Abubakr Siddique",
+    "matchedDistanceM": 31
+  },
+  {
     "placeId": "masjid-abu-bakr-way-117007188",
     "source": "mawaqit",
     "placeName": "Masjid Abu Bakr",
@@ -930,6 +2658,14 @@
     "lat": 53.411085898617,
     "lng": -1.3960790634155,
     "matchedDistanceM": 12
+  },
+  {
+    "placeId": "masjid-abu-hurairah-mib-2707",
+    "source": "sirat",
+    "placeName": "Masjid Abu Hurairah",
+    "siratId": "mosque-000371",
+    "siratName": "Madrasah Abu Hurairah",
+    "matchedDistanceM": 69
   },
   {
     "placeId": "masjid-adam-way-1322886232",
@@ -954,6 +2690,14 @@
     "matchedDistanceM": 11
   },
   {
+    "placeId": "masjid-al-bilal-mib-937",
+    "source": "sirat",
+    "placeName": "Masjid Al Bilal",
+    "siratId": "mosque-000243",
+    "siratName": "Masjid Bilal",
+    "matchedDistanceM": 32
+  },
+  {
     "placeId": "masjid-al-falah-and-islamic-cultural-centre-mib-1358",
     "source": "mawaqit",
     "placeName": "Masjid Al Falah and Islamic Cultural Centre",
@@ -976,6 +2720,22 @@
     "matchedDistanceM": 10
   },
   {
+    "placeId": "masjid-al-hikmah-mib-1302",
+    "source": "sirat",
+    "placeName": "Masjid-Al Hikmah",
+    "siratId": "mosque-000106",
+    "siratName": "Masjid Al-Hikmah",
+    "matchedDistanceM": 84
+  },
+  {
+    "placeId": "masjid-al-humera-mib-875",
+    "source": "sirat",
+    "placeName": "Masjid Al-Humera",
+    "siratId": "mosque-000576",
+    "siratName": "Masjid Al-Humera",
+    "matchedDistanceM": 77
+  },
+  {
     "placeId": "masjid-al-jannah-mib-16062301",
     "source": "mawaqit",
     "placeName": "Masjid Al-Jannah",
@@ -985,6 +2745,86 @@
     "lat": 51.512874856372,
     "lng": -0.5940818041563,
     "matchedDistanceM": 4
+  },
+  {
+    "placeId": "masjid-al-khazra-mib-15032802",
+    "source": "sirat",
+    "placeName": "Masjid Al Khazra",
+    "siratId": "mosque-000500",
+    "siratName": "Masjid Al Khazra",
+    "matchedDistanceM": 30
+  },
+  {
+    "placeId": "masjid-al-noor-mib-2825",
+    "source": "sirat",
+    "placeName": "Masjid al-Noor",
+    "siratId": "mosque-000344",
+    "siratName": "Al Noor Masjid",
+    "matchedDistanceM": 12
+  },
+  {
+    "placeId": "masjid-al-noor-mib-498",
+    "source": "sirat",
+    "placeName": "Masjid Al-Noor",
+    "siratId": "mosque-000541",
+    "siratName": "Masjid Al Noor",
+    "matchedDistanceM": 31
+  },
+  {
+    "placeId": "masjid-al-ummah-mib-1740",
+    "source": "sirat",
+    "placeName": "Masjid al-Ummah",
+    "siratId": "mosque-000235",
+    "siratName": "Masjid al-Ummah Sandwell",
+    "matchedDistanceM": 11
+  },
+  {
+    "placeId": "masjid-al-yaqeen-mib-1637",
+    "source": "sirat",
+    "placeName": "Masjid al Yaqeen",
+    "siratId": "mosque-000012",
+    "siratName": "Masjid Al Yaqeen",
+    "matchedDistanceM": 4
+  },
+  {
+    "placeId": "masjid-albirr-mib-1383",
+    "source": "sirat",
+    "placeName": "Masjid Albirr",
+    "siratId": "mosque-000250",
+    "siratName": "Albirr Foundation",
+    "matchedDistanceM": 84
+  },
+  {
+    "placeId": "masjid-alhikmah-mib-973",
+    "source": "sirat",
+    "placeName": "Masjid Alhikmah",
+    "siratId": "mosque-000512",
+    "siratName": "Masjid Alhikmah",
+    "matchedDistanceM": 60
+  },
+  {
+    "placeId": "masjid-an-noor-mib-1452",
+    "source": "sirat",
+    "placeName": "Masjid An Noor",
+    "siratId": "mosque-000281",
+    "siratName": "An-Noor Masjid & Community Centre",
+    "matchedDistanceM": 74
+  },
+  {
+    "placeId": "masjid-an-noor-mib-15032903",
+    "source": "sirat",
+    "placeName": "Masjid An-Noor",
+    "siratId": "mosque-000180",
+    "siratName": "Masjid An Noor",
+    "matchedDistanceM": 64
+  },
+  {
+    "placeId": "masjid-and-madrasah-al-tawhid-mib-1391",
+    "source": "sirat",
+    "placeName": "Masjid and Madrasah Al-Tawhid",
+    "siratId": "mosque-000174",
+    "siratName": "Masjid Tawhid Leyton",
+    "matchedDistanceM": 84
   },
   {
     "placeId": "masjid-ar-rashideen-node-13129966917",
@@ -1004,6 +2844,30 @@
     "url": "https://masjidbox.com/prayer-times/astonmasjid",
     "masjidboxName": "Masjidus Sunnah An Nabawiyyah",
     "slug": "astonmasjid"
+  },
+  {
+    "placeId": "masjid-as-sunnah-mib-1208",
+    "source": "sirat",
+    "placeName": "Masjid-as-Sunnah",
+    "siratId": "mosque-000518",
+    "siratName": "Masjid Us Sunnah",
+    "matchedDistanceM": 19
+  },
+  {
+    "placeId": "masjid-as-sunnah-mib-142",
+    "source": "sirat",
+    "placeName": "Masjid As-Sunnah",
+    "siratId": "mosque-000132",
+    "siratName": "Masjid As-Sunnah, Bradford",
+    "matchedDistanceM": 62
+  },
+  {
+    "placeId": "masjid-at-taqwa-mib-15042701",
+    "source": "sirat",
+    "placeName": "Masjid at-Taqwa",
+    "siratId": "mosque-000387",
+    "siratName": "Masjid At Taqwa",
+    "matchedDistanceM": 49
   },
   {
     "placeId": "masjid-at-taqwa-mib-1938",
@@ -1036,6 +2900,38 @@
     "matchedDistanceM": 6
   },
   {
+    "placeId": "masjid-ayesha-mib-1169",
+    "source": "sirat",
+    "placeName": "Masjid Ayesha",
+    "siratId": "mosque-000369",
+    "siratName": "Masjid Ayesha",
+    "matchedDistanceM": 68
+  },
+  {
+    "placeId": "masjid-baytul-ilm-mib-247",
+    "source": "sirat",
+    "placeName": "Masjid Baytul Ilm",
+    "siratId": "mosque-000502",
+    "siratName": "Madrasah Baytul ‘Ilm (Masjid Ibrāheem)",
+    "matchedDistanceM": 122
+  },
+  {
+    "placeId": "masjid-bilal-mib-1631",
+    "source": "sirat",
+    "placeName": "Masjid Bilal",
+    "siratId": "mosque-000175",
+    "siratName": "Masjid E Bilal",
+    "matchedDistanceM": 30
+  },
+  {
+    "placeId": "masjid-bilal-mib-1800",
+    "source": "sirat",
+    "placeName": "Masjid Bilal",
+    "siratId": "mosque-000579",
+    "siratName": "Masjid e Bilal",
+    "matchedDistanceM": 33
+  },
+  {
     "placeId": "masjid-bilal-mib-1976",
     "source": "mawaqit",
     "placeName": "Masjid Bilal",
@@ -1045,6 +2941,86 @@
     "lat": 52.9473905,
     "lng": -1.1744496,
     "matchedDistanceM": 19
+  },
+  {
+    "placeId": "masjid-e-anisul-islam-mib-360",
+    "source": "sirat",
+    "placeName": "Masjid-e-Anisul Islam",
+    "siratId": "mosque-000016",
+    "siratName": "MASJID-E-ANISUL ISLAM",
+    "matchedDistanceM": 90
+  },
+  {
+    "placeId": "masjid-e-aqsa-mib-2083",
+    "source": "sirat",
+    "placeName": "Masjid-e-Aqsa",
+    "siratId": "mosque-000298",
+    "siratName": "Masjid E Aqsa",
+    "matchedDistanceM": 107
+  },
+  {
+    "placeId": "masjid-e-hamza-islamic-centre-mib-164",
+    "source": "sirat",
+    "placeName": "Masjid-e-Hamza & Islamic Centre",
+    "siratId": "mosque-000319",
+    "siratName": "Masjid e Hamza",
+    "matchedDistanceM": 6
+  },
+  {
+    "placeId": "masjid-e-noorul-islam-mib-314",
+    "source": "sirat",
+    "placeName": "Masjid-e-Noorul Islam",
+    "siratId": "mosque-000396",
+    "siratName": "Masjide Noorul Islam",
+    "matchedDistanceM": 23
+  },
+  {
+    "placeId": "masjid-e-quba-mib-1146",
+    "source": "sirat",
+    "placeName": "Masjid e Quba",
+    "siratId": "mosque-000015",
+    "siratName": "Masjid Quba",
+    "matchedDistanceM": 29
+  },
+  {
+    "placeId": "masjid-e-quba-mib-1303",
+    "source": "sirat",
+    "placeName": "Masjid-e-Quba",
+    "siratId": "mosque-000551",
+    "siratName": "Masjid-E-Quba, Forest Gate",
+    "matchedDistanceM": 21
+  },
+  {
+    "placeId": "masjid-e-sajedeen-mib-348",
+    "source": "sirat",
+    "placeName": "Masjid-e-Sajedeen",
+    "siratId": "mosque-000046",
+    "siratName": "Masjid E Sajedeen",
+    "matchedDistanceM": 6
+  },
+  {
+    "placeId": "masjid-e-salaam-mib-2093",
+    "source": "sirat",
+    "placeName": "Masjid-e-Salaam",
+    "siratId": "mosque-000178",
+    "siratName": "Masjid e Salaam",
+    "matchedDistanceM": 109
+  },
+  {
+    "placeId": "masjid-e-saliheen-mib-326",
+    "source": "sirat",
+    "placeName": "Masjid-e-Saliheen",
+    "siratId": "mosque-000531",
+    "siratName": "Masjid e Saliheen (Blackburn)",
+    "matchedDistanceM": 71
+  },
+  {
+    "placeId": "masjid-e-umar-mib-438",
+    "source": "sirat",
+    "placeName": "Masjid-e-Umar",
+    "siratId": "mosque-000161",
+    "siratName": "Masjid E-Umar",
+    "matchedDistanceM": 79
   },
   {
     "placeId": "masjid-e-umar-mib-572",
@@ -1058,6 +3034,14 @@
     "matchedDistanceM": 4
   },
   {
+    "placeId": "masjid-e-usman-mib-489",
+    "source": "sirat",
+    "placeName": "Masjid-e-Usman",
+    "siratId": "mosque-000172",
+    "siratName": "Madressa Khaliliya & Education Centre (Masjid-e-Usman)",
+    "matchedDistanceM": 18
+  },
+  {
     "placeId": "masjid-e-yusuf-mib-1723",
     "source": "mawaqit",
     "placeName": "Masjid-e-Yusuf",
@@ -1067,6 +3051,22 @@
     "lat": 51.5659172,
     "lng": -0.1207514,
     "matchedDistanceM": 7
+  },
+  {
+    "placeId": "masjid-eesa-ibn-maryam-mib-1634",
+    "source": "sirat",
+    "placeName": "Masjid Eesa ibn Maryam",
+    "siratId": "mosque-000088",
+    "siratName": "Masjid Eesa ibn Maryam",
+    "matchedDistanceM": 28
+  },
+  {
+    "placeId": "masjid-hamza-mib-21",
+    "source": "sirat",
+    "placeName": "Masjid Hamza",
+    "siratId": "mosque-000524",
+    "siratName": "Masjid-E-Hamzah",
+    "matchedDistanceM": 50
   },
   {
     "placeId": "masjid-hazrat-mujaddid-alf-e-sani-trust-mib-177",
@@ -1099,12 +3099,28 @@
     "slug": "ukim-masjid-ibrahim"
   },
   {
+    "placeId": "masjid-ilyas-mib-1751",
+    "source": "sirat",
+    "placeName": "Masjid Ilyas",
+    "siratId": "mosque-000123",
+    "siratName": "MASJID ILYAS",
+    "matchedDistanceM": 50
+  },
+  {
     "placeId": "masjid-khadijah-and-islamic-centre-mib-2062",
     "source": "masjidbox",
     "placeName": "Masjid Khadijah and Islamic Centre",
     "url": "https://masjidbox.com/prayer-times/khadijah",
     "masjidboxName": "UKIM Masjid Khadijah & Islamic Centre",
     "slug": "khadijah"
+  },
+  {
+    "placeId": "masjid-markaz-al-huda-mib-1106",
+    "source": "sirat",
+    "placeName": "Masjid Markaz Al-Huda",
+    "siratId": "mosque-000124",
+    "siratName": "Markaz Al-Huda",
+    "matchedDistanceM": 96
   },
   {
     "placeId": "masjid-mu-adh-ibn-jabal-mib-631",
@@ -1118,6 +3134,38 @@
     "matchedDistanceM": 9
   },
   {
+    "placeId": "masjid-noor-education-centre-mib-17080603",
+    "source": "sirat",
+    "placeName": "Masjid Noor & Education Centre",
+    "siratId": "mosque-000253",
+    "siratName": "Masjid Noor & Education Centre",
+    "matchedDistanceM": 35
+  },
+  {
+    "placeId": "masjid-noor-ul-islam-mib-401",
+    "source": "sirat",
+    "placeName": "Masjid Noor ul Islam",
+    "siratId": "mosque-000449",
+    "siratName": "Masjid-e-Noorul Islam",
+    "matchedDistanceM": 2
+  },
+  {
+    "placeId": "masjid-qamarul-islam-mib-114",
+    "source": "sirat",
+    "placeName": "Masjid Qamarul Islam",
+    "siratId": "mosque-000140",
+    "siratName": "Masjid Qamarul Islam",
+    "matchedDistanceM": 136
+  },
+  {
+    "placeId": "masjid-quba-mib-160",
+    "source": "sirat",
+    "placeName": "Masjid Quba",
+    "siratId": "mosque-000597",
+    "siratName": "Masjid e Quba Leeds",
+    "matchedDistanceM": 16
+  },
+  {
     "placeId": "masjid-ramadan-mib-1159",
     "source": "mawaqit",
     "placeName": "Masjid Ramadan",
@@ -1129,12 +3177,60 @@
     "matchedDistanceM": 15
   },
   {
+    "placeId": "masjid-rowdha-mib-613",
+    "source": "sirat",
+    "placeName": "Masjid Rowdha",
+    "siratId": "mosque-000085",
+    "siratName": "Al-Rawdha Mosque",
+    "matchedDistanceM": 42
+  },
+  {
+    "placeId": "masjid-taqwa-mib-1198",
+    "source": "sirat",
+    "placeName": "Masjid Taqwa",
+    "siratId": "mosque-000504",
+    "siratName": "Masjid Taqwa Birmingham",
+    "matchedDistanceM": 52
+  },
+  {
     "placeId": "masjid-tauheedul-islam-mib-317",
     "source": "masjidbox",
     "placeName": "Masjid Tauheedul Islam",
     "url": "https://masjidbox.com/prayer-times/masjid-e-tauheedul-islam",
     "slug": "masjid-e-tauheedul-islam",
     "masjidboxName": "Masjid e Tauheedul Islam"
+  },
+  {
+    "placeId": "masjid-ul-abraar-mib-602",
+    "source": "sirat",
+    "placeName": "Masjid-ul-Abraar",
+    "siratId": "mosque-000129",
+    "siratName": "Masjidul Abraar",
+    "matchedDistanceM": 41
+  },
+  {
+    "placeId": "masjid-ul-aqsa-and-islamic-centre-mib-70",
+    "source": "sirat",
+    "placeName": "Masjid-ul-Aqsa and Islamic Centre",
+    "siratId": "mosque-000458",
+    "siratName": "Masjid-Ul-Aqsa",
+    "matchedDistanceM": 87
+  },
+  {
+    "placeId": "masjid-ul-hidayah-mib-1279",
+    "source": "sirat",
+    "placeName": "Masjid ul-Hidayah",
+    "siratId": "mosque-000248",
+    "siratName": "Masjid Ul Hidayah",
+    "matchedDistanceM": 89
+  },
+  {
+    "placeId": "masjid-umar-mib-974",
+    "source": "sirat",
+    "placeName": "Masjid Umar",
+    "siratId": "mosque-000004",
+    "siratName": "Masjid Umar",
+    "matchedDistanceM": 3
   },
   {
     "placeId": "masjid-ur-rahmah-mib-2248",
@@ -1154,6 +3250,14 @@
     "lat": 52.5242061,
     "lng": -1.8589892,
     "matchedDistanceM": 5
+  },
+  {
+    "placeId": "masjid-usman-mib-113",
+    "source": "sirat",
+    "placeName": "Masjid Usman",
+    "siratId": "mosque-000470",
+    "siratName": "Masjid Usman",
+    "matchedDistanceM": 127
   },
   {
     "placeId": "masjid-uthman-mib-584",
@@ -1178,6 +3282,70 @@
     "matchedDistanceM": 7
   },
   {
+    "placeId": "masjid-zakariya-mib-2326",
+    "source": "sirat",
+    "placeName": "Masjid Zakariya",
+    "siratId": "mosque-000528",
+    "siratName": "Masjid Zakariya",
+    "matchedDistanceM": 28
+  },
+  {
+    "placeId": "mayfair-islamic-centre-mib-1425",
+    "source": "sirat",
+    "placeName": "Mayfair Islamic Centre",
+    "siratId": "mosque-000289",
+    "siratName": "Mayfair Islamic Centre",
+    "matchedDistanceM": 8
+  },
+  {
+    "placeId": "mazahirul-uloom-london-mib-1365",
+    "source": "sirat",
+    "placeName": "Mazahirul Uloom London",
+    "siratId": "mosque-000340",
+    "siratName": "Mazahirul Uloom Masjid",
+    "matchedDistanceM": 53
+  },
+  {
+    "placeId": "meadows-muslim-centre-mib-1968",
+    "source": "sirat",
+    "placeName": "Meadows Muslim Centre",
+    "siratId": "mosque-000252",
+    "siratName": "Meadows Muslim Centre",
+    "matchedDistanceM": 32
+  },
+  {
+    "placeId": "mevlana-rumi-mosque-dialogue-centre-mib-2834",
+    "source": "sirat",
+    "placeName": "Mevlana Rumi Mosque & Dialogue Centre",
+    "siratId": "mosque-000333",
+    "siratName": "Rumi Mosque",
+    "matchedDistanceM": 48
+  },
+  {
+    "placeId": "mid-sussex-islamic-centre-and-mosque-mib-4",
+    "source": "sirat",
+    "placeName": "Mid Sussex Islamic Centre and Mosque",
+    "siratId": "mosque-000210",
+    "siratName": "Mid Sussex Islamic Centre & Masjid",
+    "matchedDistanceM": 17
+  },
+  {
+    "placeId": "mitcham-islamic-centre-mib-496",
+    "source": "sirat",
+    "placeName": "Mitcham Islamic Centre",
+    "siratId": "mosque-000019",
+    "siratName": "Makkah Masjid Mitcham",
+    "matchedDistanceM": 13
+  },
+  {
+    "placeId": "morden-islamic-centre-mib-2780",
+    "source": "sirat",
+    "placeName": "Morden Islamic Centre",
+    "siratId": "mosque-000039",
+    "siratName": "Morden Islamic Community Centre",
+    "matchedDistanceM": 24
+  },
+  {
     "placeId": "mosque-islamic-centre-of-brent-mib-1072",
     "source": "mawaqit",
     "placeName": "Mosque & Islamic Centre of Brent",
@@ -1187,6 +3355,38 @@
     "lat": 51.5557341,
     "lng": -0.216654,
     "matchedDistanceM": 6
+  },
+  {
+    "placeId": "mount-pleasant-medina-islamic-trust-mib-55",
+    "source": "sirat",
+    "placeName": "Mount Pleasant Medina Islamic Trust",
+    "siratId": "mosque-000246",
+    "siratName": "Madina Mosque",
+    "matchedDistanceM": 12
+  },
+  {
+    "placeId": "muhaddith-e-azam-mission-leicester-mib-3719",
+    "source": "sirat",
+    "placeName": "Muhaddith-e-Azam Mission Leicester",
+    "siratId": "mosque-000040",
+    "siratName": "Muhaddith E Azam Mission Leicester",
+    "matchedDistanceM": 149
+  },
+  {
+    "placeId": "muhammadi-masjid-mib-429",
+    "source": "sirat",
+    "placeName": "Muhammadi Masjid",
+    "siratId": "mosque-000183",
+    "siratName": "Muhammadi Masjid",
+    "matchedDistanceM": 51
+  },
+  {
+    "placeId": "muslim-association-of-salisbury-mib-1250",
+    "source": "sirat",
+    "placeName": "Muslim Association of Salisbury",
+    "siratId": "mosque-000236",
+    "siratName": "Salisbury Central Masjid",
+    "matchedDistanceM": 30
   },
   {
     "placeId": "muslim-community-trust-jamia-masjid-mib-1389",
@@ -1208,6 +3408,14 @@
     "matchedDistanceM": 9
   },
   {
+    "placeId": "muslim-education-centre-mib-2688",
+    "source": "sirat",
+    "placeName": "Muslim Education Centre",
+    "siratId": "mosque-000571",
+    "siratName": "Muslim Education Centre and Welfare Trust",
+    "matchedDistanceM": 17
+  },
+  {
     "placeId": "muslim-welfare-house-mib-1225",
     "source": "mawaqit",
     "placeName": "Muslim Welfare House",
@@ -1219,6 +3427,22 @@
     "matchedDistanceM": 4
   },
   {
+    "placeId": "muslim-welfare-house-sheffield-mib-2207",
+    "source": "sirat",
+    "placeName": "Muslim Welfare House (Sheffield)",
+    "siratId": "mosque-000297",
+    "siratName": "Muslim Welfare House Sheffield",
+    "matchedDistanceM": 17
+  },
+  {
+    "placeId": "muslim-world-league-mib-1423",
+    "source": "sirat",
+    "placeName": "Muslim World League",
+    "siratId": "mosque-000384",
+    "siratName": "Muslim World League London Office",
+    "matchedDistanceM": 7
+  },
+  {
     "placeId": "muslim-youth-foundation-mib-1861",
     "source": "mawaqit",
     "placeName": "Muslim Youth Foundation",
@@ -1228,6 +3452,78 @@
     "lat": 53.483942994746,
     "lng": -2.2373977159386,
     "matchedDistanceM": 10
+  },
+  {
+    "placeId": "nagina-mosque-and-urdu-school-mib-2038",
+    "source": "sirat",
+    "placeName": "Nagina Mosque and Urdu School",
+    "siratId": "mosque-000425",
+    "siratName": "Nagina Jamia Masjid",
+    "matchedDistanceM": 41
+  },
+  {
+    "placeId": "nasfat-islamic-centre-mib-1441",
+    "source": "sirat",
+    "placeName": "NASFAT Islamic Centre",
+    "siratId": "mosque-000555",
+    "siratName": "NASFAT Manchester Central",
+    "matchedDistanceM": 35
+  },
+  {
+    "placeId": "neath-mosque-and-islamic-cultural-centre-mib-1360",
+    "source": "sirat",
+    "placeName": "Neath Mosque and Islamic Cultural Centre",
+    "siratId": "mosque-000535",
+    "siratName": "Neath Islamic Cultural Centre",
+    "matchedDistanceM": 113
+  },
+  {
+    "placeId": "new-abu-bakr-mosque-node-13128419079",
+    "source": "sirat",
+    "placeName": "New Abu Bakr Mosque",
+    "siratId": "mosque-000291",
+    "siratName": "Abu Bakr Mosque and Cultural Centre",
+    "matchedDistanceM": 68
+  },
+  {
+    "placeId": "new-madina-masjid-mib-630",
+    "source": "sirat",
+    "placeName": "New Madina Masjid",
+    "siratId": "mosque-000534",
+    "siratName": "UKIM Madina Masjid Nelson",
+    "matchedDistanceM": 63
+  },
+  {
+    "placeId": "newark-islamic-centre-mib-1681",
+    "source": "sirat",
+    "placeName": "Newark Islamic Centre",
+    "siratId": "mosque-000095",
+    "siratName": "Newark Islamic Centre",
+    "matchedDistanceM": 85
+  },
+  {
+    "placeId": "newbury-jamme-masjid-mib-2715",
+    "source": "sirat",
+    "placeName": "Newbury Jamme Masjid",
+    "siratId": "mosque-000058",
+    "siratName": "Newbury Jamme Masjid",
+    "matchedDistanceM": 33
+  },
+  {
+    "placeId": "newbury-park-islamic-cultural-centre-mib-776",
+    "source": "sirat",
+    "placeName": "Newbury Park Islamic Cultural Centre",
+    "siratId": "mosque-000102",
+    "siratName": "Newbury Park Masjid",
+    "matchedDistanceM": 139
+  },
+  {
+    "placeId": "newcastle-central-mosque-mib-1926",
+    "source": "sirat",
+    "placeName": "Newcastle Central Mosque",
+    "siratId": "mosque-000379",
+    "siratName": "Newcastle Central Mosque / Masjid Al-Tawhid",
+    "matchedDistanceM": 62
   },
   {
     "placeId": "newport-central-mosque-mib-1948",
@@ -1252,6 +3548,14 @@
     "matchedDistanceM": 3
   },
   {
+    "placeId": "noor-ul-islam-mosque-mib-480",
+    "source": "sirat",
+    "placeName": "Noor-ul-Islam Mosque",
+    "siratId": "mosque-000068",
+    "siratName": "Masjid Noorul Islam Bradford",
+    "matchedDistanceM": 57
+  },
+  {
     "placeId": "noor-ul-islam-mosque-mib-577",
     "source": "mawaqit",
     "placeName": "Noor ul Islam Mosque",
@@ -1263,12 +3567,100 @@
     "matchedDistanceM": 11
   },
   {
+    "placeId": "noor-ur-islam-mosque-mib-1390",
+    "source": "sirat",
+    "placeName": "Noor-ur-Islam Mosque",
+    "siratId": "mosque-000381",
+    "siratName": "Waltham Forest Noor Ul Islam",
+    "matchedDistanceM": 80
+  },
+  {
+    "placeId": "norbury-islamic-academy-mib-1113",
+    "source": "sirat",
+    "placeName": "Norbury Islamic Academy",
+    "siratId": "mosque-000378",
+    "siratName": "Norbury Islamic Academy",
+    "matchedDistanceM": 34
+  },
+  {
+    "placeId": "norbury-muslim-centre-mib-2812",
+    "source": "sirat",
+    "placeName": "Norbury Muslim Centre",
+    "siratId": "mosque-000199",
+    "siratName": "Norbury Muslim Centre",
+    "matchedDistanceM": 17
+  },
+  {
+    "placeId": "north-devon-islamic-culture-centre-mib-1197",
+    "source": "sirat",
+    "placeName": "North Devon Islamic Culture Centre",
+    "siratId": "mosque-000148",
+    "siratName": "North Devon Islamic Culture Centre",
+    "matchedDistanceM": 18
+  },
+  {
+    "placeId": "northampton-mosque-and-islamic-centre-mib-1499",
+    "source": "sirat",
+    "placeName": "Northampton Mosque and Islamic Centre",
+    "siratId": "mosque-000361",
+    "siratName": "Northampton Islamic Centre",
+    "matchedDistanceM": 71
+  },
+  {
     "placeId": "norwich-and-norfolk-muslim-association-mib-267",
     "source": "masjidbox",
     "placeName": "Norwich and Norfolk Muslim Association",
     "url": "https://masjidbox.com/prayer-times/nnma",
     "masjidboxName": "NNMA",
     "slug": "nnma"
+  },
+  {
+    "placeId": "old-kent-road-mosque-islamic-cultural-centre-mib-1326",
+    "source": "sirat",
+    "placeName": "Old Kent Road Mosque & Islamic Cultural Centre",
+    "siratId": "mosque-000022",
+    "siratName": "Old Kent Road Mosque & Islamic Cultural Centre",
+    "matchedDistanceM": 19
+  },
+  {
+    "placeId": "oldham-central-masjid-and-islamic-centre-mib-2003",
+    "source": "sirat",
+    "placeName": "Oldham Central Masjid and Islamic Centre",
+    "siratId": "mosque-000473",
+    "siratName": "Oldham Central Masjid & Islamic Centre",
+    "matchedDistanceM": 29
+  },
+  {
+    "placeId": "omar-faruque-mosque-and-cultural-centre-mib-2539",
+    "source": "sirat",
+    "placeName": "Omar Faruque Mosque and Cultural Centre",
+    "siratId": "mosque-000397",
+    "siratName": "Omar Faruque Mosque and Cultural Centre",
+    "matchedDistanceM": 59
+  },
+  {
+    "placeId": "oxford-central-mosque-mib-2051",
+    "source": "sirat",
+    "placeName": "Oxford Central Mosque",
+    "siratId": "mosque-000331",
+    "siratName": "Central Oxford Mosque Society",
+    "matchedDistanceM": 25
+  },
+  {
+    "placeId": "oxford-university-islamic-society-prayer-room-node-4851854319",
+    "source": "sirat",
+    "placeName": "Oxford University Islamic Society Prayer Room",
+    "siratId": "mosque-000598",
+    "siratName": "Oxford University Islamic Society",
+    "matchedDistanceM": 27
+  },
+  {
+    "placeId": "paigham-e-islam-trust-mib-244",
+    "source": "sirat",
+    "placeName": "Paigham-e-Islam Trust",
+    "siratId": "mosque-000594",
+    "siratName": "Paigham-E-Islam Trust Britain",
+    "matchedDistanceM": 43
   },
   {
     "placeId": "peacehaven-mosque-way-1287258792",
@@ -1293,12 +3685,76 @@
     "matchedDistanceM": 7
   },
   {
+    "placeId": "poplar-mosque-community-centre-mib-1432",
+    "source": "sirat",
+    "placeName": "Poplar Mosque & Community Centre",
+    "siratId": "mosque-000061",
+    "siratName": "Poplar Mosque and Community Centre",
+    "matchedDistanceM": 23
+  },
+  {
+    "placeId": "port-talbot-masjid-islamic-centre-mib-2070",
+    "source": "sirat",
+    "placeName": "Port Talbot Masjid & Islamic Centre",
+    "siratId": "mosque-000603",
+    "siratName": "Port Talbot Mosque",
+    "matchedDistanceM": 11
+  },
+  {
+    "placeId": "portsmouth-central-masjid-mib-2073",
+    "source": "sirat",
+    "placeName": "Portsmouth Central Masjid",
+    "siratId": "mosque-000033",
+    "siratName": "Portsmouth Central Masjid",
+    "matchedDistanceM": 9
+  },
+  {
+    "placeId": "portsmouth-jamia-mosque-mib-2074",
+    "source": "sirat",
+    "placeName": "Portsmouth Jamia Mosque",
+    "siratId": "mosque-000143",
+    "siratName": "Portsmouth Jami Mosque - Islamic Centre",
+    "matchedDistanceM": 63
+  },
+  {
     "placeId": "purley-masjid-mib-374",
     "source": "masjidbox",
     "placeName": "Purley Masjid",
     "url": "https://masjidbox.com/prayer-times/purley-masjid",
     "masjidboxName": "Purley Masjid",
     "slug": "purley-masjid"
+  },
+  {
+    "placeId": "purley-musallah-mib-1213",
+    "source": "sirat",
+    "placeName": "Purley musallah",
+    "siratId": "mosque-000300",
+    "siratName": "Purley Masjid",
+    "matchedDistanceM": 130
+  },
+  {
+    "placeId": "qadria-trust-masjid-community-education-centre-mib-134",
+    "source": "sirat",
+    "placeName": "Qadria Trust Masjid Community & Education Centre",
+    "siratId": "mosque-000615",
+    "siratName": "Qadria Trust",
+    "matchedDistanceM": 31
+  },
+  {
+    "placeId": "quran-academy-bristol-mib-125",
+    "source": "sirat",
+    "placeName": "Quran Academy Bristol",
+    "siratId": "mosque-000443",
+    "siratName": "Quran Academy",
+    "matchedDistanceM": 53
+  },
+  {
+    "placeId": "quwwatul-islam-mosque-mib-1305",
+    "source": "sirat",
+    "placeName": "Quwwatul Islam Mosque",
+    "siratId": "mosque-000570",
+    "siratName": "Quwwat-ul-Islam Society",
+    "matchedDistanceM": 80
   },
   {
     "placeId": "rabbaniah-islamic-cultural-centre-mib-634",
@@ -1312,6 +3768,14 @@
     "matchedDistanceM": 22
   },
   {
+    "placeId": "redbridge-masjid-islamic-centre-mib-1309",
+    "source": "sirat",
+    "placeName": "Redbridge Masjid & Islamic Centre",
+    "siratId": "mosque-000103",
+    "siratName": "Redbridge Islamic Centre",
+    "matchedDistanceM": 63
+  },
+  {
     "placeId": "redbridge-mosque-islamic-centre-mib-1317",
     "source": "mawaqit",
     "placeName": "Redbridge Mosque & Islamic Centre",
@@ -1323,6 +3787,14 @@
     "matchedDistanceM": 85
   },
   {
+    "placeId": "riverside-muslim-association-mib-1715",
+    "source": "sirat",
+    "placeName": "Riverside Muslim Association",
+    "siratId": "mosque-000612",
+    "siratName": "Riverside Muslim Association (RMA)",
+    "matchedDistanceM": 49
+  },
+  {
     "placeId": "romford-mosque-mib-1192",
     "source": "masjidbox",
     "placeName": "Romford Mosque",
@@ -1331,12 +3803,60 @@
     "masjidboxName": "Romford Mosque"
   },
   {
+    "placeId": "rugby-masjid-mib-2164",
+    "source": "sirat",
+    "placeName": "Rugby Masjid",
+    "siratId": "mosque-000410",
+    "siratName": "Rugby Mosque",
+    "matchedDistanceM": 8
+  },
+  {
+    "placeId": "salaam-community-association-and-masjid-mib-15042503",
+    "source": "sirat",
+    "placeName": "Salaam Community Association and Masjid",
+    "siratId": "mosque-000118",
+    "siratName": "Salaam Community Association and Masjid",
+    "matchedDistanceM": 47
+  },
+  {
+    "placeId": "scarborough-islamic-society-mib-1107",
+    "source": "sirat",
+    "placeName": "Scarborough Islamic Society",
+    "siratId": "mosque-000398",
+    "siratName": "Scarborough Islamic Centre",
+    "matchedDistanceM": 12
+  },
+  {
+    "placeId": "seven-kings-mosque-mib-1313",
+    "source": "sirat",
+    "placeName": "Seven Kings Mosque",
+    "siratId": "mosque-000109",
+    "siratName": "Seven Kings Muslim Educational Trust",
+    "matchedDistanceM": 19
+  },
+  {
     "placeId": "shadwell-jamme-masjid-mib-1373",
     "source": "masjidbox",
     "placeName": "Shadwell Jamme Masjid",
     "url": "https://masjidbox.com/prayer-times/shadwell-jame-masjid",
     "masjidboxName": "Shadwell Jame Masjid",
     "slug": "shadwell-jame-masjid"
+  },
+  {
+    "placeId": "shah-jalal-islamic-centre-mib-15042501",
+    "source": "sirat",
+    "placeName": "Shah Jalal Islamic Centre",
+    "siratId": "mosque-000032",
+    "siratName": "SHAH-JALAL | ISLAMIC CENTRE",
+    "matchedDistanceM": 126
+  },
+  {
+    "placeId": "shah-jalal-jame-masjid-mib-224",
+    "source": "sirat",
+    "placeName": "Shah Jalal Jame Masjid",
+    "siratId": "mosque-000347",
+    "siratName": "Shah Jalal Mosque",
+    "matchedDistanceM": 8
   },
   {
     "placeId": "shah-jalal-mosque-and-islamic-cultural-centre-mib-573",
@@ -1359,6 +3879,14 @@
     "lat": 51.5909457,
     "lng": -2.9835106,
     "matchedDistanceM": 15
+  },
+  {
+    "placeId": "shah-poran-islamic-centre-mib-2837",
+    "source": "sirat",
+    "placeName": "Shah Poran Islamic Centre",
+    "siratId": "mosque-000007",
+    "siratName": "Shah Poran Islamic Centre",
+    "matchedDistanceM": 59
   },
   {
     "placeId": "shah-poran-masjid-and-islamic-centre-trust-mib-1153",
@@ -1391,6 +3919,30 @@
     "matchedDistanceM": 12
   },
   {
+    "placeId": "shepherds-bush-mosque-and-muslim-cultural-centre-mib-1165",
+    "source": "sirat",
+    "placeName": "Shepherds Bush Mosque and Muslim Cultural Centre",
+    "siratId": "mosque-000610",
+    "siratName": "Shepherds Bush Mosque",
+    "matchedDistanceM": 19
+  },
+  {
+    "placeId": "sheppey-islamic-cultural-centre-mib-603",
+    "source": "sirat",
+    "placeName": "Sheppey Islamic Cultural Centre",
+    "siratId": "mosque-000276",
+    "siratName": "Sheppey Islamic Cultural Centre",
+    "matchedDistanceM": 111
+  },
+  {
+    "placeId": "shropshire-islamic-foundation-mib-2683",
+    "source": "sirat",
+    "placeName": "Shropshire Islamic Foundation",
+    "siratId": "mosque-000370",
+    "siratName": "Shropshire Islamic Foundation",
+    "matchedDistanceM": 23
+  },
+  {
     "placeId": "sketty-mosque-and-community-centre-mib-1756",
     "source": "mawaqit",
     "placeName": "Sketty Mosque and Community Centre",
@@ -1400,6 +3952,22 @@
     "lat": 51.6160588,
     "lng": -3.990131,
     "matchedDistanceM": 186
+  },
+  {
+    "placeId": "sleaford-islamic-centre-mib-1682",
+    "source": "sirat",
+    "placeName": "Sleaford Islamic Centre",
+    "siratId": "mosque-000407",
+    "siratName": "Sleaford Islamic Centre",
+    "matchedDistanceM": 126
+  },
+  {
+    "placeId": "soho-hill-muslim-birmingham-education-welfare-centre-mib-2966",
+    "source": "sirat",
+    "placeName": "Soho Hill Muslim Birmingham Education & Welfare Centre",
+    "siratId": "mosque-000237",
+    "siratName": "Soho Hill Muslim School",
+    "matchedDistanceM": 63
   },
   {
     "placeId": "south-essex-islamic-community-centre-way-616755825",
@@ -1419,6 +3987,54 @@
     "lat": 51.468097969879,
     "lng": -3.1694751977921,
     "matchedDistanceM": 2
+  },
+  {
+    "placeId": "southampton-medina-mosque-trust-mib-2247",
+    "source": "sirat",
+    "placeName": "Southampton Medina Mosque Trust",
+    "siratId": "mosque-000424",
+    "siratName": "Medina Mosque Southampton",
+    "matchedDistanceM": 48
+  },
+  {
+    "placeId": "southend-mosque-and-islamic-trust-mib-2256",
+    "source": "sirat",
+    "placeName": "Southend Mosque and Islamic Trust",
+    "siratId": "mosque-000115",
+    "siratName": "Southend Mosque",
+    "matchedDistanceM": 110
+  },
+  {
+    "placeId": "st-albans-islamic-centre-mib-2262",
+    "source": "sirat",
+    "placeName": "St Albans Islamic Centre",
+    "siratId": "mosque-000203",
+    "siratName": "St Albans Islamic Centre",
+    "matchedDistanceM": 12
+  },
+  {
+    "placeId": "stafford-muslim-prayer-hall-committee-ltd-mib-2267",
+    "source": "sirat",
+    "placeName": "Stafford Muslim Prayer Hall Committee Ltd",
+    "siratId": "mosque-000202",
+    "siratName": "Stafford Muslim Prayer Hall",
+    "matchedDistanceM": 12
+  },
+  {
+    "placeId": "stanford-le-hope-jamme-masjid-mib-1747",
+    "source": "sirat",
+    "placeName": "Stanford-le-Hope Jamme Masjid",
+    "siratId": "mosque-000086",
+    "siratName": "Stanford Jamme Masjid",
+    "matchedDistanceM": 24
+  },
+  {
+    "placeId": "stevenage-muslim-community-centre-mib-2270",
+    "source": "sirat",
+    "placeName": "Stevenage Muslim Community Centre",
+    "siratId": "mosque-000159",
+    "siratName": "Stevenage Muslim Community Centre",
+    "matchedDistanceM": 65
   },
   {
     "placeId": "stratford-islamic-association-mib-1276",
@@ -1454,6 +4070,14 @@
     "matchedDistanceM": 47
   },
   {
+    "placeId": "sutton-islamic-centre-mib-1332",
+    "source": "sirat",
+    "placeName": "Sutton Islamic Centre",
+    "siratId": "mosque-000530",
+    "siratName": "Sutton Islamic Centre",
+    "matchedDistanceM": 25
+  },
+  {
     "placeId": "swansea-city-mosque-islamic-community-centre-mib-2819",
     "source": "mawaqit",
     "placeName": "Swansea City Mosque & Islamic Community Centre",
@@ -1465,6 +4089,14 @@
     "matchedDistanceM": 13
   },
   {
+    "placeId": "swindon-mosque-mib-2316",
+    "source": "sirat",
+    "placeName": "Swindon Mosque",
+    "siratId": "mosque-000616",
+    "siratName": "Swindon Jami’ah Masjid",
+    "matchedDistanceM": 50
+  },
+  {
     "placeId": "taiba-welfare-foundation-mib-718",
     "source": "mawaqit",
     "placeName": "Taiba Welfare Foundation",
@@ -1474,6 +4106,14 @@
     "lat": 51.614489626778,
     "lng": -0.27675272215957,
     "matchedDistanceM": 33
+  },
+  {
+    "placeId": "tajdaar-e-madina-mib-979",
+    "source": "sirat",
+    "placeName": "Tajdaar e Madina",
+    "siratId": "mosque-000240",
+    "siratName": "Tajdaar-e-Madina",
+    "matchedDistanceM": 77
   },
   {
     "placeId": "taleem-mosque-community-centre-mib-1735",
@@ -1509,6 +4149,14 @@
     "matchedDistanceM": 7
   },
   {
+    "placeId": "tawakkuliah-jami-masjid-mib-432",
+    "source": "sirat",
+    "placeName": "Tawakkuliah Jami Masjid",
+    "siratId": "mosque-000149",
+    "siratName": "Tawakkulia Jamia Masjid",
+    "matchedDistanceM": 84
+  },
+  {
     "placeId": "tawfiq-masjid-mib-15041601",
     "source": "mawaqit",
     "placeName": "Tawfiq Masjid",
@@ -1542,6 +4190,30 @@
     "matchedDistanceM": 28
   },
   {
+    "placeId": "teviot-bangladeshi-cultural-community-group-mib-15042402",
+    "source": "sirat",
+    "placeName": "Teviot Bangladeshi Cultural Community Group",
+    "siratId": "mosque-000074",
+    "siratName": "Teviot Masjid",
+    "matchedDistanceM": 46
+  },
+  {
+    "placeId": "thames-view-muslim-centre-mib-1714",
+    "source": "sirat",
+    "placeName": "Thames View Muslim Centre",
+    "siratId": "mosque-000077",
+    "siratName": "Thames View Muslim Association",
+    "matchedDistanceM": 41
+  },
+  {
+    "placeId": "the-guidance-centre-mib-1701",
+    "source": "sirat",
+    "placeName": "The Guidance Centre",
+    "siratId": "mosque-000478",
+    "siratName": "The Guidance Centre",
+    "matchedDistanceM": 10
+  },
+  {
     "placeId": "the-mosque-of-brayatee-mib-1633",
     "source": "mawaqit",
     "placeName": "The Mosque of Brayatee",
@@ -1551,6 +4223,22 @@
     "lat": 52.487676,
     "lng": -1.9219111,
     "matchedDistanceM": 37
+  },
+  {
+    "placeId": "the-prayer-space-mib-1493",
+    "source": "sirat",
+    "placeName": "The Prayer Space",
+    "siratId": "mosque-000600",
+    "siratName": "The Prayer Space",
+    "matchedDistanceM": 136
+  },
+  {
+    "placeId": "thornton-heath-islamic-centre-mib-2378",
+    "source": "sirat",
+    "placeName": "Thornton Heath Islamic Centre",
+    "siratId": "mosque-000190",
+    "siratName": "Thornton Heath Islamic Centre",
+    "matchedDistanceM": 74
   },
   {
     "placeId": "tilbury-mosque-mib-1748",
@@ -1575,12 +4263,108 @@
     "matchedDistanceM": 3
   },
   {
+    "placeId": "turners-and-locksley-masjid-mib-15042401",
+    "source": "sirat",
+    "placeName": "Turners and Locksley Masjid",
+    "siratId": "mosque-000173",
+    "siratName": "Turners Road Masjid",
+    "matchedDistanceM": 13
+  },
+  {
+    "placeId": "ukim-iqra-centre-mib-2627",
+    "source": "sirat",
+    "placeName": "UKIM - Iqra Centre",
+    "siratId": "mosque-000303",
+    "siratName": "Iqra Centre",
+    "matchedDistanceM": 5
+  },
+  {
     "placeId": "ukim-jamie-darul-isra-mosque-mib-594",
     "source": "masjidbox",
     "placeName": "UKIM - Jamie Darul Isra' Mosque",
     "url": "https://masjidbox.com/prayer-times/dar-ul-isra",
     "masjidboxName": "Dar Ul Isra",
     "slug": "dar-ul-isra"
+  },
+  {
+    "placeId": "ukim-madina-masjid-islamic-centre-mib-2405",
+    "source": "sirat",
+    "placeName": "UKIM - Madina Masjid & Islamic Centre",
+    "siratId": "mosque-000503",
+    "siratName": "Madina Masjid & Islamic Centre",
+    "matchedDistanceM": 57
+  },
+  {
+    "placeId": "ukim-markazi-jamia-masjid-khizra-mib-1804",
+    "source": "sirat",
+    "placeName": "UKIM - Markazi Jamia Masjid Khizra",
+    "siratId": "mosque-000114",
+    "siratName": "UKIM Khizra Mosque",
+    "matchedDistanceM": 100
+  },
+  {
+    "placeId": "ukim-neeli-masjid-islamic-centre-mib-2124",
+    "source": "sirat",
+    "placeName": "UKIM - Neeli Masjid & Islamic Centre",
+    "siratId": "mosque-000454",
+    "siratName": "Neeli Mosque & Islamic Centre (UKIM)",
+    "matchedDistanceM": 23
+  },
+  {
+    "placeId": "ukim-york-mosque-and-islamic-centre-mib-2423",
+    "source": "sirat",
+    "placeName": "UKIM - York Mosque and Islamic Centre",
+    "siratId": "mosque-000405",
+    "siratName": "York Mosque & Islamic Centre",
+    "matchedDistanceM": 50
+  },
+  {
+    "placeId": "umar-education-and-welfare-centre-mib-1464",
+    "source": "sirat",
+    "placeName": "Umar Education and Welfare Centre",
+    "siratId": "mosque-000383",
+    "siratName": "Umar Education and Welfare Centre",
+    "matchedDistanceM": 71
+  },
+  {
+    "placeId": "umar-mosque-and-community-centre-mib-206",
+    "source": "sirat",
+    "placeName": "Umar Mosque and Community Centre",
+    "siratId": "mosque-000089",
+    "siratName": "Umar Masjid & Community Centre",
+    "matchedDistanceM": 54
+  },
+  {
+    "placeId": "ummah-masjid-mib-1687",
+    "source": "sirat",
+    "placeName": "Ummah Masjid",
+    "siratId": "mosque-000514",
+    "siratName": "Ummah Masjid",
+    "matchedDistanceM": 114
+  },
+  {
+    "placeId": "under-construction-healey-islamic-trust-mib-1610",
+    "source": "sirat",
+    "placeName": "Under Construction - Healey Islamic Trust",
+    "siratId": "mosque-000233",
+    "siratName": "Masjid Quba - Healey Islamic Trust",
+    "matchedDistanceM": 51
+  },
+  {
+    "placeId": "under-reconstruction-maidstone-community-and-islamic-centre-mib-1785",
+    "source": "sirat",
+    "placeName": "Under Reconstruction Maidstone Community and Islamic Centre",
+    "siratId": "mosque-000455",
+    "siratName": "Maidstonemosque - Community and Islamic Center",
+    "matchedDistanceM": 21
+  },
+  {
+    "placeId": "uxbridge-masjid-mib-1196",
+    "source": "sirat",
+    "placeName": "Uxbridge Masjid",
+    "siratId": "mosque-000420",
+    "siratName": "Uxbridge Masjid",
+    "matchedDistanceM": 48
   },
   {
     "placeId": "valide-sultan-c-acirc-mii-mib-1148",
@@ -1613,12 +4397,60 @@
     "matchedDistanceM": 4
   },
   {
+    "placeId": "wembley-central-masjid-mib-1063",
+    "source": "sirat",
+    "placeName": "Wembley Central Masjid",
+    "siratId": "mosque-000386",
+    "siratName": "Wembley Central Masjid",
+    "matchedDistanceM": 16
+  },
+  {
+    "placeId": "west-london-islamic-cultural-centre-mib-1161",
+    "source": "sirat",
+    "placeName": "West London Islamic Cultural Centre",
+    "siratId": "mosque-000084",
+    "siratName": "West London Islamic Cultural Centre",
+    "matchedDistanceM": 20
+  },
+  {
     "placeId": "west-norwood-mosque-mib-1444",
     "source": "masjidbox",
     "placeName": "West Norwood Mosque",
     "url": "https://masjidbox.com/prayer-times/west-norwood-mosque",
     "masjidboxName": "West Norwood Mosque",
     "slug": "west-norwood-mosque"
+  },
+  {
+    "placeId": "west-wales-islamic-cultural-association-mib-500",
+    "source": "sirat",
+    "placeName": "West Wales Islamic Cultural Association",
+    "siratId": "mosque-000217",
+    "siratName": "West Wales Islamic Cultural Association & Masjid",
+    "matchedDistanceM": 61
+  },
+  {
+    "placeId": "westferry-community-organisation-mib-179",
+    "source": "sirat",
+    "placeName": "Westferry Community Organisation",
+    "siratId": "mosque-000451",
+    "siratName": "Westferry Community Masjid",
+    "matchedDistanceM": 15
+  },
+  {
+    "placeId": "weston-islamic-education-centre-mib-578",
+    "source": "sirat",
+    "placeName": "Weston Islamic Education Centre",
+    "siratId": "mosque-000595",
+    "siratName": "Weston Islamic Education Centre",
+    "matchedDistanceM": 22
+  },
+  {
+    "placeId": "whitley-bay-islamic-cultural-centre-mib-2862",
+    "source": "sirat",
+    "placeName": "Whitley Bay Islamic Cultural Centre",
+    "siratId": "mosque-000280",
+    "siratName": "Whitley Bay Islamic Cultural Centre",
+    "matchedDistanceM": 14
   },
   {
     "placeId": "wimbledon-mosque-mib-1260",
@@ -1640,6 +4472,14 @@
     "slug": "wmca"
   },
   {
+    "placeId": "wolverhampton-mosque-trust-mib-2408",
+    "source": "sirat",
+    "placeName": "Wolverhampton Mosque Trust",
+    "siratId": "mosque-000025",
+    "siratName": "Jamia Masjid Aqsa, Wolverhampton",
+    "matchedDistanceM": 24
+  },
+  {
     "placeId": "woodfarm-education-centre-mib-805",
     "source": "mawaqit",
     "placeName": "Woodfarm Education Centre",
@@ -1651,6 +4491,14 @@
     "matchedDistanceM": 176
   },
   {
+    "placeId": "wycombe-islamic-mission-mosque-trust-ltd-mib-842",
+    "source": "sirat",
+    "placeName": "Wycombe Islamic Mission & Mosque Trust Ltd",
+    "siratId": "mosque-000505",
+    "siratName": "Wycombe Mosque",
+    "matchedDistanceM": 57
+  },
+  {
     "placeId": "yca-cultural-centre-mib-2949",
     "source": "mawaqit",
     "placeName": "YCA Cultural Centre",
@@ -1660,6 +4508,38 @@
     "lat": 52.526134120312,
     "lng": -2.0071096538212,
     "matchedDistanceM": 34
+  },
+  {
+    "placeId": "york-muslim-association-mib-2421",
+    "source": "sirat",
+    "placeName": "York Muslim Association",
+    "siratId": "mosque-000345",
+    "siratName": "York Muslim Association",
+    "matchedDistanceM": 8
+  },
+  {
+    "placeId": "zakariya-masjid-and-madresa-e-furqaniah-mib-1761",
+    "source": "sirat",
+    "placeName": "Zakariya Masjid and Madresa-e-Furqaniah",
+    "siratId": "mosque-000147",
+    "siratName": "Zakariya Masjid",
+    "matchedDistanceM": 9
+  },
+  {
+    "placeId": "zakariyya-jaame-masjid-mib-399",
+    "source": "sirat",
+    "placeName": "Zakariyya Jaame Masjid",
+    "siratId": "mosque-000506",
+    "siratName": "Zakariyya Jaame Masjid",
+    "matchedDistanceM": 109
+  },
+  {
+    "placeId": "zakariyya-masjid-mib-1312",
+    "source": "sirat",
+    "placeName": "Zakariyya Masjid",
+    "siratId": "mosque-000170",
+    "siratName": "Zakariyya Masjid",
+    "matchedDistanceM": 63
   },
   {
     "placeId": "zaytuna-masjid-mib-1741",
