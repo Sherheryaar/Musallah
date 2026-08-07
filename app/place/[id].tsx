@@ -23,9 +23,11 @@ import {
 import { usePlaces } from "@/context/PlacesContext";
 import { useSettings } from "@/context/SettingsContext";
 import { useTheme } from "@/context/ThemeContext";
+import OfflineScreen from "@/components/OfflineScreen";
 import SuggestionSheet from "@/components/SuggestionSheet";
 import { submitEditSuggestion } from "@/lib/feedback";
 import { FACILITY_ICONS, PLACE_TYPE_ICONS, type IconName } from "@/lib/icons";
+import { isLikelyIreland } from "@/lib/geo";
 import { computePrayerTimes, PrayerTimes } from "@/lib/prayerTimes";
 import {
   placeTypeColors,
@@ -58,24 +60,45 @@ const PRAYER_ROWS: {
   { label: "Isha", jamaatKey: "isha", calculatedKey: "Isha" },
 ];
 
-function ukPhoneToTel(display: string): string {
+/**
+ * Northern Ireland uses the UK's own numbering plan end-to-end (the "028"
+ * area code, and the same "07" mobile ranges as Great Britain), so a bare
+ * leading "0" number there really does mean +44. The Republic of Ireland
+ * doesn't: a Dublin/Cork/Galway landline written locally ("01 234 5678")
+ * also starts with "0", but dials as +353. Neither area code nor mobile
+ * prefix distinguishes the two on shape alone, so this checks the PLACE's
+ * own location, and inside that region only overrides to +353 for numbers
+ * that aren't already unambiguously Northern Irish (028 landlines, or 07
+ * mobiles shared UK-wide).
+ */
+function phoneToTel(display: string, place: Place): string {
   // Strip everything except digits and a leading "+" -- display strings
   // like "(020) 7650 3000" must still produce a dialable URL.
   const digits = display.replace(/[^\d+]/g, "");
-  if (digits.startsWith("0")) {
-    return "tel:+44" + digits.slice(1);
+  if (!digits.startsWith("0")) {
+    return "tel:" + digits;
   }
-  return "tel:" + digits;
+  const isNorthernIrelandShaped =
+    digits.startsWith("028") || digits.startsWith("07");
+  if (isLikelyIreland(place.lat, place.lng) && !isNorthernIrelandShaped) {
+    return "tel:+353" + digits.slice(1);
+  }
+  return "tel:+44" + digits.slice(1);
 }
 
 function confidenceLabel(confidence?: "verified" | "community" | "unverified"): string {
   switch (confidence) {
     case "verified":
       return "Verified";
-    case "community":
-      return "Community-verified";
-    default:
+    case "unverified":
       return "Unverified";
+    case "community":
+    default:
+      // Matches isCorroborated() (data/places.ts): a place with no
+      // confidence set at all is treated the same as "community" here, not
+      // as "unverified" -- otherwise this label would contradict the green
+      // corroborated checkmark shown right next to it.
+      return "Community-verified";
   }
 }
 
@@ -89,7 +112,8 @@ export default function PlaceDetailScreen() {
   const { colors } = useTheme();
   const { id } = useLocalSearchParams<{ id: string }>();
   const insets = useSafeAreaInsets();
-  const { places } = usePlaces();
+  const { places, status: placesStatus, refresh: refreshPlaces } =
+    usePlaces();
   // Memoized lookup: this screen re-renders on form/times state changes,
   // and a linear scan per render is wasted work as the dataset grows.
   const place = useMemo(() => places.find((p) => p.id === id), [places, id]);
@@ -112,6 +136,12 @@ export default function PlaceDetailScreen() {
   );
 
   if (!place) {
+    // Distinguish "we have no data at all" from "this id genuinely doesn't
+    // exist" -- the first is an offline/connectivity problem with a retry,
+    // not a dead link.
+    if (placesStatus === "offline") {
+      return <OfflineScreen onRetry={refreshPlaces} />;
+    }
     return (
       <View style={styles.missing}>
         <Text style={styles.missingText}>Place not found.</Text>
@@ -153,7 +183,7 @@ export default function PlaceDetailScreen() {
     contactRows.push({
       label: "Phone",
       icon: "phone",
-      url: ukPhoneToTel(place.phone),
+      url: phoneToTel(place.phone, place),
       accessibilityLabel: "Call phone",
     });
   }
@@ -250,7 +280,7 @@ export default function PlaceDetailScreen() {
           <TouchableOpacity
             style={styles.quickAction}
             onPress={() => {
-              Linking.openURL(ukPhoneToTel(place.phone!)).catch(() => {});
+              Linking.openURL(phoneToTel(place.phone!, place)).catch(() => {});
             }}
             accessibilityRole="button"
             accessibilityLabel="Call phone"

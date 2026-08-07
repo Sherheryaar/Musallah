@@ -8,49 +8,76 @@ import React, {
   useState,
 } from "react";
 import { AppState } from "react-native";
-import { Place, PLACES } from "@/data/places";
-import { fetchPlaces, getCachedPlaces } from "@/data/placesRepo";
+import { Place } from "@/data/places";
+import { fetchPlaces } from "@/data/placesRepo";
 import { supabase } from "@/lib/supabase";
+
+/**
+ * "loading": nothing yet, first fetch still in flight.
+ * "ready": at least one successful fetch this session -- `places` is real.
+ * "offline": no successful fetch yet AND the most recent attempt failed.
+ *   A LATER failure while already "ready" does NOT move back to "offline":
+ *   whatever's already on screen stays up, since it's still genuinely true
+ *   (places don't move), and punishing a brief signal drop by hiding
+ *   everything the user already found would be a worse experience than a
+ *   quietly stale foreground-refresh.
+ */
+export type PlacesStatus = "loading" | "ready" | "offline";
 
 type PlacesContextValue = {
   places: Place[];
+  status: PlacesStatus;
   refresh: () => Promise<void>;
 };
 
 const PlacesContext = createContext<PlacesContextValue>({
-  places: PLACES,
+  places: [],
+  status: "loading",
   refresh: async () => {},
 });
 
 const FOREGROUND_REFRESH_MS = 60 * 1000;
 const REALTIME_DEBOUNCE_MS = 500;
+// While showing the offline screen, retry on a timer too -- not just on the
+// user's tap or the app returning to the foreground -- so a connection that
+// comes back while the app is sitting open in front of them is picked up
+// without any action on their part.
+const OFFLINE_RETRY_MS = 10 * 1000;
 
 export function PlacesProvider({ children }: { children: React.ReactNode }) {
-  const [places, setPlaces] = useState<Place[]>(PLACES);
+  const [places, setPlaces] = useState<Place[]>([]);
+  const [status, setStatus] = useState<PlacesStatus>("loading");
   const mounted = useRef(true);
   const lastFetch = useRef(0);
-  const hasNetworkData = useRef(false);
+  const hasLoadedOnce = useRef(false);
   const inFlightRefresh = useRef<Promise<void> | null>(null);
   // Fingerprint of the last rows applied, so refreshes that return identical
   // data don't force a pointless re-render of the map and list.
   const lastApplied = useRef<string | null>(null);
 
   // Deduped network refresh: concurrent callers (launch + foreground +
-  // realtime) share a single request instead of racing, and lastFetch only
-  // advances on success so a failed fetch doesn't block the next retry.
+  // realtime + the offline retry timer) share a single request instead of
+  // racing, and lastFetch only advances on success so a failed fetch
+  // doesn't block the next retry.
   const refresh = useCallback((): Promise<void> => {
     if (inFlightRefresh.current) return inFlightRefresh.current;
     const request = (async () => {
       const loaded = await fetchPlaces();
-      if (loaded && mounted.current) {
-        hasNetworkData.current = true;
+      if (!mounted.current) return;
+      if (loaded) {
+        hasLoadedOnce.current = true;
         lastFetch.current = Date.now();
+        setStatus("ready");
         const fingerprint = JSON.stringify(loaded);
         if (fingerprint !== lastApplied.current) {
           lastApplied.current = fingerprint;
           setPlaces(loaded);
         }
+      } else if (!hasLoadedOnce.current) {
+        setStatus("offline");
       }
+      // else: already showing real data from an earlier success -- a
+      // failed refresh just means "no change", not "go blank".
     })().finally(() => {
       inFlightRefresh.current = null;
     });
@@ -58,16 +85,8 @@ export function PlacesProvider({ children }: { children: React.ReactNode }) {
     return request;
   }, []);
 
-  // Launch: hydrate instantly from the on-device cache (no network wait)
-  // while the network refresh runs in parallel. Network data always wins,
-  // so a slow cache read can never overwrite fresher rows.
   useEffect(() => {
     mounted.current = true;
-    getCachedPlaces().then((cached) => {
-      if (cached && mounted.current && !hasNetworkData.current) {
-        setPlaces(cached);
-      }
-    });
     refresh();
     return () => {
       mounted.current = false;
@@ -87,6 +106,13 @@ export function PlacesProvider({ children }: { children: React.ReactNode }) {
     });
     return () => sub.remove();
   }, [refresh]);
+
+  // Auto-retry while offline (see OFFLINE_RETRY_MS above).
+  useEffect(() => {
+    if (status !== "offline") return;
+    const id = setInterval(refresh, OFFLINE_RETRY_MS);
+    return () => clearInterval(id);
+  }, [status, refresh]);
 
   // Live updates: whenever any row in `places` changes on Supabase
   // (insert/update/delete), refetch the list. Debounced so a burst of row
@@ -114,9 +140,12 @@ export function PlacesProvider({ children }: { children: React.ReactNode }) {
     };
   }, [refresh]);
 
-  // Stable context value: consumers only re-render when places change,
-  // not every time the provider re-renders.
-  const value = useMemo(() => ({ places, refresh }), [places, refresh]);
+  // Stable context value: consumers only re-render when places/status
+  // change, not every time the provider re-renders.
+  const value = useMemo(
+    () => ({ places, status, refresh }),
+    [places, status, refresh],
+  );
 
   return (
     <PlacesContext.Provider value={value}>{children}</PlacesContext.Provider>

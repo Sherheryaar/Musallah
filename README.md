@@ -9,7 +9,7 @@ An Expo (React Native + TypeScript) app for iOS, Android **and** web from one co
 - **Facility filters**: sisters' space, wudu, disabled access, parking, jumu'ah, janazah — persisted across launches.
 - **Place detail page**: get directions, call/website/social links, jumu'ah times, jamaat times next to calculated start times, facility checklist, verification status + source, and "suggest an edit".
 - **Prayer times calculated on-device** (`src/lib/prayerCalc.ts` — no API): Moonsighting Committee (UK-appropriate) or Muslim World League, Asr at 1 or 2 mithl, and a Shafaq (Isha twilight) choice for the Moonsighting method. A dedicated prayer screen shows the full schedule with current/next prayer countdown, previous/next day navigation and the Hijri date.
-- **Live data with offline fallback**: places load from Supabase (realtime updates + refresh when the app foregrounds), are cached on-device, and fall back to the bundled dataset in `src/data/places.json` when offline or unconfigured.
+- **Live data only, by design**: places load from Supabase (realtime updates + refresh when the app foregrounds) and are held in memory for the session — never cached to disk and never bundled into the app itself, so the manually-curated place list can't be lifted wholesale from an app-bundle extraction or a device backup. Offline (or before the first successful load), a dedicated screen says so and offers a retry, which also happens automatically every 10s while it's showing and whenever the app returns to the foreground. Prayer times and the Qibla screen don't need this data and work fully offline regardless.
 - **Suggestions**: "suggest an edit" and "add a missing place" write to the Supabase `submissions` table; if that fails, a pre-filled email is opened instead, and the form says which one happened.
 - **Privacy by design**: location never leaves the device; no accounts, no analytics. Suggestions are the only data ever sent.
 
@@ -51,7 +51,7 @@ Supabase credentials live in `.env` (gitignored):
     EXPO_PUBLIC_SUPABASE_URL=...
     EXPO_PUBLIC_SUPABASE_ANON_KEY=...
 
-Without them the app still runs fully, using the bundled dataset. The anon key is shipped inside the app bundle by design, so the Supabase project **must** have Row Level Security enabled: public read on `places`, insert-only on `submissions`.
+Without them the app has no place data to show at all — see "Live data only" above, and the offline screen is exactly what an unconfigured install sees. The anon key is shipped inside the app bundle by design, so the Supabase project **must** have Row Level Security enabled: public read on `places`, insert-only on `submissions`.
 
 To set up a fresh Supabase project, run `scripts/schema.sql` in the SQL editor — it creates both tables **with the RLS policies the security model depends on** (plus a length cap on submissions and the realtime publication), then seed data with `scripts/seed-places.sql`.
 
@@ -77,13 +77,14 @@ The prayer-time tests pin golden values that were cross-checked against publishe
         FilterSheet.tsx      Facility filter modal
         PlaceCard.tsx        List row
         SuggestionForm.tsx   Suggest an edit / add a place
+        OfflineScreen.tsx    Shown when there's no connection and no data yet
       context/
-        PlacesContext.tsx    Data: Supabase -> cache -> bundled fallback
+        PlacesContext.tsx    Data: Supabase only, in memory for the session
         SettingsContext.tsx  Preferences, persisted to AsyncStorage
       data/
-        places.ts            Place schema + labels; bundled data re-export
-        places.json          Bundled offline dataset (generated -- see below)
-        placesRepo.ts        Supabase fetch, row validation, on-device cache
+        places.ts            Place schema + labels (no bundled data)
+        places.json          Pipeline artifact only -- never imported by the app
+        placesRepo.ts        Supabase fetch + row validation, no on-device cache
       lib/
         prayerCalc.ts        On-device solar prayer-time calculation
         prayerTimes.ts       Display helpers over prayerCalc
@@ -102,11 +103,11 @@ The prayer-time tests pin golden values that were cross-checked against publishe
 
 ## Data pipeline
 
-The Supabase `places` table is the source of truth. The bundled offline dataset (`src/data/places.json`) is synced from it directly:
+The Supabase `places` table is the source of truth, and the ONLY place the shipped app ever reads it from (see "Live data only" above). `src/data/places.json` is a pipeline artifact, not something the app ships with — it exists so the dataset is reviewable in a diff and other scripts (`verify-places.mjs`, `csv-to-places.mjs`) have a snapshot to work from. Sync it from Supabase with:
 
     npm run sync:places
 
-This fetches every row over the public read policy (anon key from `.env`), validates each one with the same rules the app enforces at runtime, and rewrites `src/data/places.json`. Re-run it whenever the database changes meaningfully, and commit the result — it's what offline and unconfigured installs see.
+This fetches every row over the public read policy (anon key from `.env`), validates each one with the same rules the app enforces at runtime, and rewrites `src/data/places.json`. Re-run it whenever the database changes meaningfully, and commit the result for the record — nothing reads it at runtime, so there's no rush.
 
 (`npm run build:places` still exists for the older CSV-export route: dashboard → export `places` as CSV → save as `data/places.csv` → run it.)
 
@@ -123,18 +124,23 @@ Jamaat and Jumu'ah times come from **each mosque's own published timetable**, re
 | `scripts/lib/timetable.mjs` | pure parsing/normalising helpers — unit-tested |
 | `scripts/refresh-times.mjs` | the orchestrator: fetch, diff, write |
 | `scripts/discover-timetables.mjs` | sweeps mosque websites for timetables we can already read |
+| `scripts/harvest-mawaqit.mjs` / `scripts/gen-mawaqit-links.mjs` | matches Mawaqit's directory against our places, then registers confident matches |
+| `scripts/harvest-sirat.mjs` / `scripts/gen-sirat-links.mjs` | same, for the Sirat.uk directory |
 
 Providers currently supported:
 
 - **`mawaqit`** — Mawaqit's public search API. Reads each mosque's `iqama` entries, which are either clock times or `+N` offsets from the adhan (resolved against that mosque's own times).
 - **`masjidbox`** — a `masjidbox.net/<slug>` page, whose grid gives Athan and Iqamah per prayer.
 - **`dated-table`** — the generic one: *any* mosque publishing a yearly or monthly HTML calendar (one row per date, columns named per prayer). East London Mosque is the first entry of this kind, not a special case. Registering another mosque is a registry row with a URL — **no new code**.
+- **`sirat`** — [Sirat.uk](https://sirat.uk/mosques/developers)'s keyless UK mosque-times API (ODC-By 1.0 licensed). Unlike the three above, this is a third-party directory rather than a platform mosques publish to directly, so it is used ONLY to fill places that had no other source at all — 360 of them, found by `scripts/harvest-sirat.mjs` matching Sirat.uk's ~605 mosques against our 2,081 places with no timetable source, on distance (≤150 m) plus a fuzzy name-token check tight enough to reject "same town, different mosque" pairs (this rejected real candidates in testing — see the comments in that file). It never overrides a place already registered to a mosque-published source.
 
-`scripts/discover-timetables.mjs` finds candidates for those last two automatically: it probes each place's own website, fingerprints known platforms, and — for dated tables — actually parses today's row, reporting only what really yields times. It writes ready-to-paste registry entries for a human to approve; nothing is auto-registered, because a mis-registered source would show another mosque's prayer times.
+`scripts/discover-timetables.mjs` finds candidates for `masjidbox`/`dated-table` automatically: it probes each place's own website, fingerprints known platforms, and — for dated tables — actually parses today's row, reporting only what really yields times. It writes ready-to-paste registry entries for a human to approve; nothing is auto-registered, because a mis-registered source would show another mosque's prayer times.
+
+`scripts/harvest-mawaqit.mjs` and `scripts/harvest-sirat.mjs` do the equivalent for those two directories by matching coordinates and names instead of probing a website, and write a report (which matches, how far apart, whether the names agree) to review BEFORE running `scripts/gen-mawaqit-links.mjs` / `scripts/gen-sirat-links.mjs`, which write only the name-agreeing matches into the registry. Proximity-only and ambiguous matches are left out of both the report's "ready" bucket and the generated registry — read the report and add those by hand only after confirming each is the right mosque.
 
 Adding a provider means adding a source entry plus registry rows; the orchestrator needs no changes. Every source must be credited in the app's About screen.
 
-**App size is unaffected by any of this.** The pipeline lives in `scripts/`, which Metro never bundles — only the resulting times reach the app, at ~160 bytes per place. Measured: if *all* 2,244 places carried jamaat times, the bundled dataset would grow from 171 KB to 182 KB gzipped (+11 KB, because the times compress well).
+**App size is unaffected by any of this.** The pipeline lives in `scripts/`, which Metro never bundles, and — unlike before this app moved to live-data-only — none of its output reaches the app bundle either: jamaat/Jumu'ah times, like every other field, are read live from Supabase at runtime, never shipped as a static asset.
 
 Safety rules, each because the failure it prevents is worse than a stale time:
 

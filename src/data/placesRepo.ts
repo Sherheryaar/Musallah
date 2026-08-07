@@ -1,5 +1,3 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
-
 import {
   applyFacilityDefaults,
   cleanNotes,
@@ -12,12 +10,6 @@ import {
 } from "@/data/places";
 import { supabase } from "@/lib/supabase";
 
-// v2: v1 caches can hold a silently TRUNCATED dataset (the fetch used to
-// stop at PostgREST's default 1000-row limit — see fetchPlaces), and a
-// truncated cache beats the full bundled data in PlacesContext. Bumping the
-// key discards them; readCache sweeps the old entry.
-const CACHE_KEY = "places:v2";
-const LEGACY_CACHE_KEY = "places:v1";
 const FETCH_TIMEOUT_MS = 8000;
 // PostgREST caps any single response at 1000 rows (its default max), so the
 // full table must be read in pages. The page count backstop only exists to
@@ -39,8 +31,17 @@ const JAMAAT_PRAYER_KEYS = [
   "isha",
 ] as const;
 
-/** "5:15" / "05:15" — the only shape the UI renders as a jamaat time. */
-const TIME_RE = /^\d{1,2}:\d{2}$/;
+/**
+ * "5:15" / "05:15" with hour 0-23 and minute 0-59 — the only shape the UI
+ * renders as a prayer time. A digit-count-only regex would also accept
+ * something like "25:99"; the caller renders this text directly, so a
+ * malformed value must be rejected here, not just shaped correctly.
+ */
+function isValidHHMM(value: string): boolean {
+  const m = value.trim().match(/^(\d{1,2}):(\d{2})$/);
+  if (!m) return false;
+  return Number(m[1]) <= 23 && Number(m[2]) <= 59;
+}
 
 /**
  * Raw Supabase row. Every field is `unknown` on purpose: the table can be
@@ -79,11 +80,16 @@ function asOptionalUrl(value: unknown): string | undefined {
 
 /**
  * An unknown type (e.g. a typo'd enum value) falls back to the most generic
- * label instead of rendering "undefined" all over the UI.
+ * label instead of rendering "undefined" all over the UI. Case/whitespace
+ * are normalised first so a hand-edited "Masjid" still matches "masjid" —
+ * otherwise it fell to "musalla" and silently lost the masjid-only facility
+ * defaults (jumu'ah, wudu) applied below.
  */
 function coerceType(value: unknown): PlaceType {
-  return (PLACE_TYPES as readonly string[]).includes(value as string)
-    ? (value as PlaceType)
+  const normalized =
+    typeof value === "string" ? value.trim().toLowerCase() : value;
+  return (PLACE_TYPES as readonly string[]).includes(normalized as string)
+    ? (normalized as PlaceType)
     : "musalla";
 }
 
@@ -119,7 +125,7 @@ function coerceJamaat(value: unknown): JamaatTimes | undefined {
   let hasTime = false;
   for (const key of JAMAAT_PRAYER_KEYS) {
     const t = raw[key];
-    if (typeof t === "string" && TIME_RE.test(t.trim())) {
+    if (typeof t === "string" && isValidHHMM(t)) {
       jamaat[key] = t.trim();
       hasTime = true;
     }
@@ -137,8 +143,22 @@ function buildPlace(raw: Record<string, unknown>): Place | null {
   if (typeof raw.id !== "string" || raw.id === "") return null;
   if (typeof raw.name !== "string" || raw.name === "") return null;
   if (typeof raw.address !== "string") return null;
-  if (typeof raw.lat !== "number" || !Number.isFinite(raw.lat)) return null;
-  if (typeof raw.lng !== "number" || !Number.isFinite(raw.lng)) return null;
+  if (
+    typeof raw.lat !== "number" ||
+    !Number.isFinite(raw.lat) ||
+    raw.lat < -90 ||
+    raw.lat > 90
+  ) {
+    return null;
+  }
+  if (
+    typeof raw.lng !== "number" ||
+    !Number.isFinite(raw.lng) ||
+    raw.lng < -180 ||
+    raw.lng > 180
+  ) {
+    return null;
+  }
 
   const type = coerceType(raw.type);
   const place: Place = {
@@ -160,9 +180,11 @@ function buildPlace(raw: Record<string, unknown>): Place | null {
   if (
     Array.isArray(raw.jumuahTimes) &&
     raw.jumuahTimes.length > 0 &&
-    raw.jumuahTimes.every((t): t is string => typeof t === "string")
+    raw.jumuahTimes.every(
+      (t): t is string => typeof t === "string" && isValidHHMM(t),
+    )
   ) {
-    place.jumuahTimes = raw.jumuahTimes;
+    place.jumuahTimes = raw.jumuahTimes.map((t) => t.trim());
   }
   const jamaat = coerceJamaat(raw.jamaat);
   if (jamaat) place.jamaat = jamaat;
@@ -185,12 +207,19 @@ function buildPlace(raw: Record<string, unknown>): Place | null {
   const instagram = asOptionalUrl(raw.instagram);
   if (instagram) place.instagram = instagram;
 
-  if (
-    raw.confidence === "verified" ||
-    raw.confidence === "community" ||
-    raw.confidence === "unverified"
-  ) {
-    place.confidence = raw.confidence;
+  if (typeof raw.confidence === "string" && raw.confidence.trim() !== "") {
+    const normalized = raw.confidence.trim().toLowerCase();
+    // isCorroborated() (places.ts) treats a MISSING confidence as
+    // corroborated by design, for genuinely-untouched rows. An unrecognised
+    // but PRESENT value (a typo, wrong casing) must not fall into that same
+    // "missing" bucket -- that would silently show an intended-unverified
+    // place as verified. Treat it as the conservative "unverified" instead.
+    place.confidence =
+      normalized === "verified" ||
+      normalized === "community" ||
+      normalized === "unverified"
+        ? normalized
+        : "unverified";
   }
 
   return place;
@@ -220,51 +249,13 @@ function mapRowToPlace(row: PlacesRow): Place | null {
   });
 }
 
-async function readCache(): Promise<Place[] | null> {
-  // Sweep the pre-pagination cache; it may be silently truncated (see
-  // CACHE_KEY comment) and must never be served again.
-  void AsyncStorage.removeItem(LEGACY_CACHE_KEY).catch(() => {});
-  try {
-    const raw = await AsyncStorage.getItem(CACHE_KEY);
-    if (!raw) return null;
-    const parsed: unknown = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return null;
-    // Cached entries get the same validation as network rows: a cache
-    // written by an older app version (or corrupted on disk) must degrade
-    // to the bundled data, not flow unchecked into the UI.
-    const places = parsed
-      .map((entry) =>
-        entry && typeof entry === "object"
-          ? buildPlace(entry as Record<string, unknown>)
-          : null,
-      )
-      .filter((place): place is Place => place !== null);
-    return places.length > 0 ? places : null;
-  } catch {
-    return null;
-  }
-}
-
-async function writeCache(places: Place[]): Promise<void> {
-  try {
-    await AsyncStorage.setItem(CACHE_KEY, JSON.stringify(places));
-  } catch {
-    // Cache write failure must not break the app.
-  }
-}
-
-/**
- * Last successfully fetched places from the on-device cache, or null.
- * Read this first on launch (stale-while-revalidate): it renders instantly
- * with no network wait, then `fetchPlaces` refreshes in the background.
- */
-export async function getCachedPlaces(): Promise<Place[] | null> {
-  return readCache();
-}
-
 /**
  * Fetch the latest places from Supabase, or null when offline/unconfigured/
- * failed. Callers decide the fallback (cache, bundled data, keep current).
+ * failed. Deliberately no on-device cache and no bundled fallback dataset:
+ * this app requires a live connection so the manually-curated place list
+ * is never written anywhere it could be lifted from a single device or
+ * app-bundle extraction (see the header comment on src/data/places.ts).
+ * Callers (PlacesContext) decide what to show while there's nothing yet.
  */
 export async function fetchPlaces(): Promise<Place[] | null> {
   if (!supabase) {
@@ -277,21 +268,32 @@ export async function fetchPlaces(): Promise<Place[] | null> {
   try {
     // Page through the whole table. A bare select("*") silently stops at
     // PostgREST's 1000-row cap, which once shipped an app that lost more
-    // than half the dataset whenever the network fetch succeeded. Ordered
-    // by id so pages can't skip or duplicate rows between requests.
+    // than half the dataset whenever the network fetch succeeded.
+    //
+    // Paged by a KEYSET (id > lastSeenId), not offset/range: offset paging
+    // re-runs "skip N rows" on each request, so a row inserted or deleted
+    // ahead of the cursor between two page requests shifts every later
+    // row's position and the next page silently skips or repeats one.
+    // Ordering by id makes id > lastSeenId a stable cursor regardless of
+    // concurrent writes elsewhere in the table.
     const rows: PlacesRow[] = [];
+    let lastSeenId: string | null = null;
     for (let page = 0; page < MAX_PAGES; page++) {
-      const from = page * PAGE_SIZE;
-      const { data, error } = await supabase
+      let query = supabase
         .from("places")
         .select("*")
         .order("id")
-        .range(from, from + PAGE_SIZE - 1)
+        .limit(PAGE_SIZE)
         .abortSignal(controller.signal);
+      if (lastSeenId !== null) {
+        query = query.gt("id", lastSeenId);
+      }
+      const { data, error } = await query;
 
       if (error) return null;
       if (!data || data.length === 0) break;
       rows.push(...(data as PlacesRow[]));
+      lastSeenId = (data[data.length - 1] as PlacesRow).id as string;
       if (data.length < PAGE_SIZE) break;
     }
     if (rows.length === 0) return null;
@@ -301,8 +303,6 @@ export async function fetchPlaces(): Promise<Place[] | null> {
       .filter((place): place is Place => place !== null);
     if (places.length === 0) return null;
 
-    // Fire-and-forget: don't make the UI wait on a disk write.
-    void writeCache(places);
     return places;
   } catch {
     return null;

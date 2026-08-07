@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   AppState,
   FlatList,
@@ -21,6 +27,7 @@ import { usePlaces } from "@/context/PlacesContext";
 import { useSettings } from "@/context/SettingsContext";
 import BottomSheet from "@/components/BottomSheet";
 import FilterSheet from "@/components/FilterSheet";
+import OfflineScreen from "@/components/OfflineScreen";
 import PlaceCard from "@/components/PlaceCard";
 import PlacesMap from "@/components/PlacesMap";
 import SuggestionSheet from "@/components/SuggestionSheet";
@@ -192,7 +199,8 @@ export default function HomeScreen() {
   // Bottom inset keeps the list clear of the Android gesture/nav bar
   // (the app draws edge-to-edge on Android).
   const insets = useSafeAreaInsets();
-  const { places } = usePlaces();
+  const { places, status: placesStatus, refresh: refreshPlaces } =
+    usePlaces();
   const { settings, updateSettings } = useSettings();
   const { reportLocation } = useNotifications();
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(
@@ -204,6 +212,9 @@ export default function HomeScreen() {
   const [query, setQuery] = useState("");
   const [searchOrigin, setSearchOrigin] = useState<SearchOrigin | null>(null);
   const [searchNote, setSearchNote] = useState<string | null>(null);
+  // Bumped on every searchArea() call so a slower, out-of-order geocode
+  // response can tell it's been superseded and skip applying its result.
+  const searchGeneration = useRef(0);
   const [recenterNonce, setRecenterNonce] = useState(0);
 
   // Get location once at launch, then keep it updated as the user moves
@@ -311,6 +322,11 @@ export default function HomeScreen() {
     if (!text) return;
     Keyboard.dismiss();
     if (Platform.OS === "web") return; // typing already filters names on web
+    // A slower search started earlier must never overwrite a newer one's
+    // result: bump a generation counter, and only apply this run's outcome
+    // if nothing newer started while it was awaiting the geocoder.
+    const generation = ++searchGeneration.current;
+    const isStale = () => searchGeneration.current !== generation;
     setSearchNote(null);
     try {
       const nearestHit = async (q: string) => {
@@ -356,7 +372,9 @@ export default function HomeScreen() {
         }
       };
       const hit = (await nearestHit(text)) ?? (await nearestHit(`${text}, UK`));
-      if (hit && (await looksRight(hit))) {
+      const right = hit ? await looksRight(hit) : false;
+      if (isStale()) return;
+      if (hit && right) {
         // The query stays in the box \u2014 it IS the search state ("Near X"
         // lives in the input, not a separate chip).
         setSearchOrigin({ lat: hit.latitude, lng: hit.longitude, label: text });
@@ -366,6 +384,7 @@ export default function HomeScreen() {
         );
       }
     } catch {
+      if (isStale()) return;
       setSearchNote(
         "Area search needs a connection \u2014 try a place name instead.",
       );
@@ -433,6 +452,16 @@ export default function HomeScreen() {
     return map;
   }, [places]);
 
+  // Debounced text actually used to filter/recluster: the box itself
+  // updates every keystroke (below), but re-filtering 2,000+ places and
+  // reclustering the map on EVERY keystroke is wasted work while someone's
+  // still mid-word, and was measurably janky on slower devices.
+  const [debouncedQuery, setDebouncedQuery] = useState("");
+  useEffect(() => {
+    const handle = setTimeout(() => setDebouncedQuery(query), 150);
+    return () => clearTimeout(handle);
+  }, [query]);
+
   // The search box doubles as the area anchor and the live name filter.
   // While its text is exactly the anchored area ("Stratford"), it's an
   // AREA, not a name filter — filtering names by it too would hide every
@@ -440,9 +469,10 @@ export default function HomeScreen() {
   // text, it's a name query again.
   const effectiveQuery =
     searchOrigin &&
-    query.trim().toLowerCase() === searchOrigin.label.trim().toLowerCase()
+    debouncedQuery.trim().toLowerCase() ===
+      searchOrigin.label.trim().toLowerCase()
       ? ""
-      : query.trim();
+      : debouncedQuery.trim();
 
   // Filter (must have ALL selected facilities + match the typed query),
   // preserving nearest-first order. Jumu'ah-only venues are hidden by
@@ -668,6 +698,14 @@ export default function HomeScreen() {
       }
     />
   );
+
+  // Nothing loaded yet AND the most recent fetch failed: there's no
+  // bundled/cached dataset to fall back to (by design — see
+  // src/data/places.ts), so show the offline screen instead of an empty
+  // map. This must come after every hook above, never before.
+  if (placesStatus === "offline") {
+    return <OfflineScreen onRetry={refreshPlaces} />;
+  }
 
   return (
     <View style={styles.screen}>

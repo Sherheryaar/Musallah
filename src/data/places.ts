@@ -1,16 +1,14 @@
 // ---------------------------------------------------------------------------
-// Place schema + the bundled offline dataset.
+// Place schema + shared helpers over it.
 //
-// The dataset itself lives in places.json so that `npm run build:places`
-// (scripts/csv-to-places.mjs) can regenerate it from a CSV export of the
-// Supabase `places` table without anyone hand-editing TypeScript.
-//
-// The shipped places.json is SAMPLE SEED DATA -- real London places, but
-// placeholder facility details. Verify everything before showing it to real
-// users (see project plan, §3).
+// Deliberately NOT bundled with data: this app requires a live connection
+// (see PlacesContext) precisely so the manually-curated place list is never
+// shipped as a static asset inside the app binary, where anyone could
+// extract it by unzipping the install. src/data/places.json still exists as
+// the data PIPELINE's artifact (what scripts/sync-places.mjs writes and
+// scripts/csv-to-places.mjs / scripts/verify-places.mjs read) -- it is just
+// never imported from here, so Metro never bundles it into the app.
 // ---------------------------------------------------------------------------
-
-import bundledPlaces from "./places.json";
 
 export type PlaceType = "masjid" | "musalla" | "multi_faith_room";
 
@@ -191,19 +189,3 @@ export function disambiguateName(name: string, address: string): string {
   return `${trimmed} (${pick.replace(/[()]/g, "").trim()})`;
 }
 
-/**
- * Bundled offline dataset (see header comment). The cast is safe because
- * places.json is only ever produced by scripts/sync-places.mjs or
- * scripts/csv-to-places.mjs, both of which enforce the full Place shape
- * before writing: ids, coordinates, place types, facility booleans, jamaat
- * structure (source/recordedOn/HH:MM times), confidence enum, and http(s)
- * URLs. Generic names are disambiguated here, at load time.
- */
-export const PLACES: Place[] = (bundledPlaces as unknown as Place[]).map(
-  (place) => ({
-    ...place,
-    name: disambiguateName(place.name, place.address),
-    facilities: applyFacilityDefaults(place.type, place.facilities),
-    notes: place.notes ? cleanNotes(place.notes) : undefined,
-  }),
-);
