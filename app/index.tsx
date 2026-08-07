@@ -1147,8 +1147,9 @@ const createStyles = (colors: ThemeColors) =>
     backgroundColor: colors.accent,
     // Grow from the left edge, not the centre. The ARRAY form, not
     // "left center": react-native-web passes the string straight through as
-    // a `transform-origin` DOM attribute, which React rejects.
-    transformOrigin: ["0%", "50%"],
+    // a `transform-origin` DOM attribute, which React rejects. Native
+    // requires all three values [x, y, z] — two crashes the renderer.
+    transformOrigin: ["0%", "50%", 0],
     // No borderRadius: scaling X squashes it to a sub-pixel smear at low
     // progress. The track's own radius + overflow does the rounding.
   },
