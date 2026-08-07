@@ -44,7 +44,7 @@ import {
 import { hapticSuccess, hapticTick } from "@/lib/haptics";
 import { elevation } from "@/lib/elevation";
 import { MIN_TARGET } from "@/lib/metrics";
-import { radius, spacing, type ThemeColors } from "@/lib/theme";
+import { radius, spacing, type, type ThemeColors } from "@/lib/theme";
 import { useReducedMotion } from "@/lib/useReducedMotion";
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
@@ -1183,16 +1183,14 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark", dial: numbe
       marginTop: spacing.s,
     },
     kicker: {
-      fontSize: 13,
+      ...type.footnote,
       fontWeight: "700",
       letterSpacing: 1.2,
       color: colors.textSecondary,
     },
     heroNumber: {
-      fontSize: 52,
-      lineHeight: 60,
+      ...type.display,
       fontWeight: "700",
-      letterSpacing: -1.5,
       color: colors.text,
       fontVariant: ["tabular-nums"],
     },
@@ -1207,9 +1205,8 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark", dial: numbe
       minHeight: 60,
     },
     heroWord: {
-      fontSize: 34,
+      ...type.hero,
       fontWeight: "700",
-      letterSpacing: -0.5,
     },
 
     dialWrap: {
@@ -1258,11 +1255,10 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark", dial: numbe
     },
     cardinal: {
       marginTop: TICK_MAJOR.h + 6,
-      fontSize: 12,
+      ...type.caption,
       fontWeight: "700",
       letterSpacing: 1.2,
       color: colors.textSecondary,
-      lineHeight: 15,
     },
     cardinalNorth: {
       color: colors.text,
@@ -1323,13 +1319,13 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark", dial: numbe
       marginVertical: 2,
     },
     metricLabel: {
-      fontSize: 10,
+      ...type.micro,
       fontWeight: "700",
       letterSpacing: 0.8,
       color: colors.textSecondary,
     },
     metricValue: {
-      fontSize: 15,
+      ...type.callout,
       fontWeight: "600",
       color: colors.text,
       fontVariant: ["tabular-nums"],
@@ -1353,9 +1349,8 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark", dial: numbe
     },
     noteText: {
       flex: 1,
-      fontSize: 13,
+      ...type.footnote,
       color: colors.text,
-      lineHeight: 19,
     },
     noteButton: {
       minHeight: MIN_TARGET,
@@ -1365,7 +1360,7 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark", dial: numbe
       borderRadius: radius.m,
     },
     noteButtonLabel: {
-      fontSize: 14,
+      ...type.subhead,
       fontWeight: "700",
       color: colors.accent,
     },
@@ -1390,14 +1385,13 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark", dial: numbe
       gap: 2,
     },
     sunTitle: {
-      fontSize: 15,
+      ...type.callout,
       fontWeight: "700",
       color: colors.text,
     },
     sunSummary: {
-      fontSize: 13,
+      ...type.footnote,
       color: colors.textSecondary,
-      lineHeight: 18,
     },
     sunBodyWrap: {
       paddingHorizontal: spacing.l,
@@ -1405,12 +1399,11 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark", dial: numbe
       gap: spacing.s,
     },
     sunBody: {
-      fontSize: 13,
+      ...type.footnote,
       color: colors.textSecondary,
-      lineHeight: 19,
     },
     sunInstruction: {
-      fontSize: 16,
+      ...type.body,
       fontWeight: "700",
       color: colors.text,
     },
@@ -1425,22 +1418,17 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark", dial: numbe
       minHeight: MIN_TARGET,
     },
     tipsTitle: {
-      fontSize: 13,
-      fontWeight: "700",
+      ...type.eyebrow,
       color: colors.textSecondary,
-      textTransform: "uppercase",
-      letterSpacing: 0.6,
     },
     tipsBody: {
-      fontSize: 13,
+      ...type.footnote,
       color: colors.textSecondary,
-      lineHeight: 19,
       paddingBottom: spacing.s,
     },
     privacy: {
-      fontSize: 12,
+      ...type.caption,
       color: colors.textSecondary,
-      lineHeight: 17,
       textAlign: "center",
       // No `opacity`. textSecondary is already the palette's quiet ink and is
       // tuned to sit exactly at AA on `surface` (4.92:1 light); dimming it to

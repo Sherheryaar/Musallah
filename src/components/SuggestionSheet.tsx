@@ -18,7 +18,7 @@ import { useReducedMotion } from "@/lib/useReducedMotion";
 import { useSheetAnimation } from "@/lib/useSheetAnimation";
 import { useTheme } from "@/context/ThemeContext";
 import { elevation } from "@/lib/elevation";
-import { radius, spacing, type ThemeColors } from "@/lib/theme";
+import { radius, spacing, type, type ThemeColors } from "@/lib/theme";
 
 type Props = {
   visible: boolean;
@@ -199,7 +199,7 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark") =>
       gap: spacing.m,
     },
     title: {
-      fontSize: 17,
+      ...type.title5,
       fontWeight: "700",
       color: colors.text,
     },

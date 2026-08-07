@@ -17,7 +17,7 @@ import { useNotifications } from "@/context/NotificationsContext";
 import { useSettings } from "@/context/SettingsContext";
 import { useTheme } from "@/context/ThemeContext";
 import { PRAYER_KEYS, PRAYER_LABELS } from "@/lib/notificationPlan";
-import { radius, spacing, type ThemeColors } from "@/lib/theme";
+import { radius, spacing, type, type ThemeColors } from "@/lib/theme";
 import { MIN_TARGET } from "@/lib/metrics";
 
 type IconName = React.ComponentProps<typeof MaterialCommunityIcons>["name"];
@@ -521,16 +521,12 @@ const createStyles = (colors: ThemeColors) =>
     marginTop: 0,
   },
   sectionTitle: {
-    fontSize: 13,
-    fontWeight: "700",
+    ...type.eyebrow,
     color: colors.textSecondary,
-    textTransform: "uppercase",
-    letterSpacing: 0.6,
   },
   sectionIntro: {
-    fontSize: 13,
+    ...type.footnote,
     color: colors.textSecondary,
-    lineHeight: 18,
     marginBottom: spacing.s,
   },
   card: {
@@ -568,7 +564,7 @@ const createStyles = (colors: ThemeColors) =>
     backgroundColor: colors.accentSoft,
   },
   themeChipLabel: {
-    fontSize: 14,
+    ...type.subhead,
     fontWeight: "600",
     color: colors.textSecondary,
   },
@@ -576,7 +572,7 @@ const createStyles = (colors: ThemeColors) =>
     color: colors.accent,
   },
   themeHint: {
-    fontSize: 12,
+    ...type.caption,
     color: colors.textSecondary,
     paddingHorizontal: spacing.m,
     paddingBottom: spacing.m,
@@ -594,14 +590,13 @@ const createStyles = (colors: ThemeColors) =>
     paddingRight: spacing.m,
   },
   optionLabel: {
-    fontSize: 15,
+    ...type.callout,
     fontWeight: "600",
     color: colors.text,
   },
   optionDetail: {
-    fontSize: 12,
+    ...type.caption,
     color: colors.textSecondary,
-    lineHeight: 16,
     marginTop: 2,
   },
   radioOuter: {
@@ -639,9 +634,8 @@ const createStyles = (colors: ThemeColors) =>
     paddingVertical: spacing.m,
   },
   permissionNoteText: {
-    fontSize: 13,
+    ...type.footnote,
     color: colors.attention,
-    lineHeight: 18,
   },
   reminderRow: {
     paddingHorizontal: spacing.l,
@@ -668,7 +662,7 @@ const createStyles = (colors: ThemeColors) =>
     borderColor: colors.accent,
   },
   reminderChipLabel: {
-    fontSize: 13,
+    ...type.footnote,
     fontWeight: "600",
     color: colors.textSecondary,
   },
@@ -679,18 +673,17 @@ const createStyles = (colors: ThemeColors) =>
     padding: spacing.l,
   },
   privacyTitle: {
-    fontSize: 14,
+    ...type.subhead,
     fontWeight: "600",
     color: colors.text,
   },
   privacyBody: {
-    fontSize: 13,
+    ...type.footnote,
     color: colors.textSecondary,
-    lineHeight: 18,
     marginTop: 4,
   },
   footnote: {
-    fontSize: 12,
+    ...type.caption,
     color: colors.textSecondary,
     marginTop: spacing.s,
   },
@@ -705,14 +698,13 @@ const createStyles = (colors: ThemeColors) =>
     flex: 1,
   },
   creditName: {
-    fontSize: 14,
+    ...type.subhead,
     fontWeight: "600",
     color: colors.text,
   },
   creditRole: {
-    fontSize: 12,
+    ...type.caption,
     color: colors.textSecondary,
-    lineHeight: 16,
     marginTop: 2,
   },
   aboutRow: {
@@ -721,11 +713,11 @@ const createStyles = (colors: ThemeColors) =>
     padding: spacing.l,
   },
   aboutLabel: {
-    fontSize: 14,
+    ...type.subhead,
     color: colors.text,
   },
   aboutValue: {
-    fontSize: 14,
+    ...type.subhead,
     color: colors.textSecondary,
   },
 });

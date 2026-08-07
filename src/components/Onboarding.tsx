@@ -9,7 +9,7 @@ import { useSettings } from "@/context/SettingsContext";
 import { useTheme } from "@/context/ThemeContext";
 import { elevation } from "@/lib/elevation";
 import { MIN_TARGET } from "@/lib/metrics";
-import { radius, spacing, type ThemeColors } from "@/lib/theme";
+import { radius, spacing, type, type ThemeColors } from "@/lib/theme";
 
 // First run, before anything asks for anything.
 //
@@ -245,14 +245,12 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark") =>
       alignItems: "flex-start",
     },
     title: {
-      fontSize: 20,
-      lineHeight: 26,
+      ...type.title3,
       fontWeight: "700",
       color: colors.text,
     },
     body: {
-      fontSize: 14,
-      lineHeight: 20,
+      ...type.subhead,
       color: colors.textSecondary,
     },
     divider: {
@@ -262,13 +260,12 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark") =>
       marginVertical: spacing.xs,
     },
     question: {
-      fontSize: 15,
+      ...type.callout,
       fontWeight: "700",
       color: colors.text,
     },
     hint: {
-      fontSize: 13,
-      lineHeight: 18,
+      ...type.footnote,
       color: colors.textSecondary,
     },
     choices: {
@@ -293,7 +290,7 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark") =>
       backgroundColor: colors.accentSoft,
     },
     choiceLabel: {
-      fontSize: 15,
+      ...type.callout,
       fontWeight: "700",
       color: colors.text,
     },
@@ -301,7 +298,7 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark") =>
       color: colors.accent,
     },
     choiceSub: {
-      fontSize: 12,
+      ...type.caption,
       color: colors.textSecondary,
     },
     primary: {
@@ -314,7 +311,7 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark") =>
       overflow: "hidden",
     },
     primaryLabel: {
-      fontSize: 16,
+      ...type.body,
       fontWeight: "700",
       // canvas, not white: the dark accent is light enough that white fails.
       color: colors.canvas,
@@ -328,7 +325,7 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark") =>
       overflow: "hidden",
     },
     secondaryLabel: {
-      fontSize: 15,
+      ...type.callout,
       fontWeight: "600",
       color: colors.textSecondary,
     },

@@ -22,6 +22,7 @@ import {
   lightColors,
   radius,
   spacing,
+  type,
   type ThemeColors,
 } from "../src/lib/theme";
 import { MIN_TARGET } from "../src/lib/metrics";
@@ -193,15 +194,14 @@ const createStyles = (colors: ThemeColors) =>
       backgroundColor: colors.surface,
     },
     errorTitle: {
-      fontSize: 18,
+      ...type.title4,
       fontWeight: "700",
       color: colors.text,
     },
     errorBody: {
-      fontSize: 14,
+      ...type.subhead,
       color: colors.textSecondary,
       textAlign: "center",
-      lineHeight: 20,
     },
     errorButton: {
       marginTop: spacing.s,
@@ -216,7 +216,7 @@ const createStyles = (colors: ThemeColors) =>
       // Not "#FFFFFF": on the lightened dark-mode accent that measures
       // 2.07:1. colors.canvas tracks the theme and clears AA in both.
       color: colors.canvas,
-      fontSize: 15,
+      ...type.callout,
       fontWeight: "600",
     },
   });

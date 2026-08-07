@@ -6,7 +6,7 @@ import { useRouter } from "expo-router";
 import Touchable from "./Touchable";
 import { useTheme } from "@/context/ThemeContext";
 import { MIN_TARGET } from "@/lib/metrics";
-import { radius, spacing, type ThemeColors } from "@/lib/theme";
+import { radius, spacing, type, type ThemeColors } from "@/lib/theme";
 
 type Props = {
   onRetry: () => Promise<void>;
@@ -112,16 +112,15 @@ const createStyles = (colors: ThemeColors) =>
       gap: spacing.m,
     },
     title: {
-      fontSize: 20,
+      ...type.title3,
       fontWeight: "700",
       color: colors.text,
       marginTop: spacing.s,
     },
     body: {
-      fontSize: 15,
+      ...type.callout,
       color: colors.textSecondary,
       textAlign: "center",
-      lineHeight: 21,
       maxWidth: 340,
     },
     retryButton: {
@@ -143,7 +142,7 @@ const createStyles = (colors: ThemeColors) =>
     // canvas, not white: the dark theme's accent is light — white would fail.
     retryLabel: {
       color: colors.canvas,
-      fontSize: 16,
+      ...type.body,
       fontWeight: "600",
     },
     links: {
@@ -164,7 +163,7 @@ const createStyles = (colors: ThemeColors) =>
       overflow: "hidden",
     },
     linkLabel: {
-      fontSize: 15,
+      ...type.callout,
       fontWeight: "600",
       color: colors.accent,
     },

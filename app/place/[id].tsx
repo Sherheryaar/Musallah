@@ -36,6 +36,7 @@ import {
   placeTypeColors,
   spacing,
   radius,
+  type,
   type ThemeColors,
 } from "@/lib/theme";
 import { MIN_TARGET } from "@/lib/metrics";
@@ -557,7 +558,7 @@ const createStyles = (colors: ThemeColors) =>
     justifyContent: "center",
   },
   missingText: {
-    fontSize: 16,
+    ...type.body,
     color: colors.textSecondary,
   },
   hero: {
@@ -582,20 +583,18 @@ const createStyles = (colors: ThemeColors) =>
   // perceptible hierarchy; the real hierarchy is 22/700 → 14/400 → 12/600,
   // which is doing all the work already.
   heroMeta: {
-    fontSize: 12,
+    ...type.caption,
     fontWeight: "600",
     color: HERO_TEXT,
   },
   heroName: {
-    fontSize: 22,
+    ...type.title2,
     fontWeight: "700",
     color: HERO_TEXT,
-    lineHeight: 28,
   },
   heroAddress: {
-    fontSize: 14,
+    ...type.subhead,
     color: HERO_TEXT,
-    lineHeight: 20,
   },
   actionRow: {
     flexDirection: "row",
@@ -617,7 +616,7 @@ const createStyles = (colors: ThemeColors) =>
   // canvas, not white: the dark theme's accent is light green.
   directionsLabel: {
     color: colors.canvas,
-    fontSize: 16,
+    ...type.body,
     fontWeight: "600",
   },
   quickAction: {
@@ -639,16 +638,12 @@ const createStyles = (colors: ThemeColors) =>
     gap: spacing.m,
   },
   sectionTitle: {
-    fontSize: 14,
-    fontWeight: "600",
+    ...type.eyebrow,
     color: colors.textSecondary,
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
   },
   sectionBody: {
-    fontSize: 16,
+    ...type.body,
     color: colors.text,
-    lineHeight: 22,
   },
   prayerTable: {
     gap: spacing.s,
@@ -664,7 +659,7 @@ const createStyles = (colors: ThemeColors) =>
   },
   prayerNameCell: {
     flex: 1,
-    fontSize: 16,
+    ...type.body,
     color: colors.text,
   },
   prayerTimeCell: {
@@ -672,20 +667,17 @@ const createStyles = (colors: ThemeColors) =>
     // clips the time. flexShrink: 0 keeps the columns aligned.
     minWidth: 64,
     flexShrink: 0,
-    fontSize: 14,
+    ...type.subhead,
     textAlign: "center",
   },
   prayerHeaderCell: {
-    fontSize: 12,
-    fontWeight: "600",
+    ...type.eyebrow,
     color: colors.textSecondary,
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
   },
   prayerJamaatCell: {
     minWidth: 64,
     flexShrink: 0,
-    fontSize: 16,
+    ...type.body,
     fontWeight: "700",
     color: colors.text,
     textAlign: "center",
@@ -694,20 +686,18 @@ const createStyles = (colors: ThemeColors) =>
   prayerCalculatedCell: {
     minWidth: 64,
     flexShrink: 0,
-    fontSize: 16,
+    ...type.body,
     color: colors.textSecondary,
     textAlign: "center",
     ...numeric,
   },
   jamaatSource: {
-    fontSize: 14,
+    ...type.subhead,
     color: colors.textSecondary,
-    lineHeight: 20,
   },
   jamaatCaution: {
-    fontSize: 13,
+    ...type.footnote,
     color: colors.attention,
-    lineHeight: 18,
   },
   contactList: {
     gap: spacing.s,
@@ -725,13 +715,13 @@ const createStyles = (colors: ThemeColors) =>
     gap: spacing.s,
   },
   contactLabel: {
-    fontSize: 16,
+    ...type.body,
     fontWeight: "600",
     color: colors.text,
   },
   contactValue: {
     flex: 1,
-    fontSize: 16,
+    ...type.body,
     color: colors.accent,
     textAlign: "right",
   },
@@ -747,7 +737,7 @@ const createStyles = (colors: ThemeColors) =>
     marginLeft: "auto",
   },
   facilityLabel: {
-    fontSize: 16,
+    ...type.body,
     color: colors.text,
   },
   facilityLabelMissing: {
@@ -759,9 +749,8 @@ const createStyles = (colors: ThemeColors) =>
     padding: spacing.m,
   },
   verificationText: {
-    fontSize: 14,
+    ...type.subhead,
     color: colors.textSecondary,
-    lineHeight: 20,
   },
   verificationStatus: {
     fontWeight: "600",
@@ -773,7 +762,7 @@ const createStyles = (colors: ThemeColors) =>
     minHeight: MIN_TARGET,
   },
   suggestEditLabel: {
-    fontSize: 14,
+    ...type.subhead,
     color: colors.accent,
   },
 });

@@ -10,7 +10,7 @@ import {
 import Touchable from "./Touchable";
 import { type SubmissionResult } from "@/lib/feedback";
 import { useTheme } from "@/context/ThemeContext";
-import { spacing, radius, type ThemeColors } from "@/lib/theme";
+import { spacing, radius, type, type ThemeColors } from "@/lib/theme";
 import { MIN_TARGET } from "@/lib/metrics";
 
 // Visible cap, well under the database's 2000-char hard limit: suggestions
@@ -220,7 +220,7 @@ const createStyles = (colors: ThemeColors) =>
       borderColor: colors.accent,
     },
     topicLabel: {
-      fontSize: 13,
+      ...type.footnote,
       fontWeight: "600",
       color: colors.textSecondary,
     },
@@ -229,9 +229,8 @@ const createStyles = (colors: ThemeColors) =>
     },
     input: {
       minHeight: 88,
-      fontSize: 16,
+      ...type.body,
       color: colors.text,
-      lineHeight: 22,
       padding: spacing.m,
       backgroundColor: colors.surface,
       borderRadius: radius.m,
@@ -239,7 +238,7 @@ const createStyles = (colors: ThemeColors) =>
       borderColor: colors.border,
     },
     inputMeta: {
-      fontSize: 12,
+      ...type.caption,
       color: colors.textSecondary,
       textAlign: "right",
       marginTop: -spacing.s,
@@ -258,19 +257,17 @@ const createStyles = (colors: ThemeColors) =>
     // canvas, not white: the dark theme's accent is light — white would fail.
     sendLabel: {
       color: colors.canvas,
-      fontSize: 16,
+      ...type.body,
       fontWeight: "600",
     },
     successText: {
-      fontSize: 14,
+      ...type.subhead,
       color: colors.positive,
-      lineHeight: 20,
       textAlign: "center",
     },
     noteText: {
-      fontSize: 13,
+      ...type.footnote,
       color: colors.textSecondary,
-      lineHeight: 18,
       textAlign: "center",
     },
   });

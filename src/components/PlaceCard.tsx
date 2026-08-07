@@ -17,6 +17,7 @@ import {
   placeTypeColors,
   spacing,
   radius,
+  type,
   type ThemeColors,
 } from "@/lib/theme";
 
@@ -156,14 +157,13 @@ const createStyles = (colors: ThemeColors) =>
   },
   name: {
     flex: 1,
-    fontSize: 16,
+    ...type.body,
     fontWeight: "600",
     color: colors.text,
-    lineHeight: 22,
   },
   // Pill chip: reads as "at a glance" info rather than body text.
   distance: {
-    fontSize: 13,
+    ...type.footnote,
     color: colors.accent,
     fontWeight: "700",
     backgroundColor: colors.accentSoft,
@@ -180,7 +180,7 @@ const createStyles = (colors: ThemeColors) =>
     gap: spacing.xs,
   },
   metaText: {
-    fontSize: 13,
+    ...type.footnote,
     color: colors.textSecondary,
   },
   facilityRow: {

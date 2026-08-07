@@ -14,7 +14,7 @@ import Touchable from "./Touchable";
 import { FACILITY_KEYS, FACILITY_LABELS, FacilityKey } from "@/data/places";
 import { useTheme } from "@/context/ThemeContext";
 import { elevation } from "@/lib/elevation";
-import { radius, spacing, type ThemeColors } from "@/lib/theme";
+import { radius, spacing, type, type ThemeColors } from "@/lib/theme";
 import { useReducedMotion } from "@/lib/useReducedMotion";
 import { useSheetAnimation } from "@/lib/useSheetAnimation";
 
@@ -290,19 +290,18 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark") =>
     alignItems: "center",
   },
   title: {
-    fontSize: 18,
+    ...type.title4,
     fontWeight: "700",
     color: colors.text,
   },
   clear: {
-    fontSize: 14,
+    ...type.subhead,
     fontWeight: "600",
     color: colors.accent,
   },
   subtitle: {
-    fontSize: 13,
+    ...type.footnote,
     color: colors.textSecondary,
-    lineHeight: 18,
     marginBottom: spacing.s,
   },
   row: {
@@ -316,21 +315,17 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark") =>
     flex: 1,
   },
   rowLabel: {
-    fontSize: 16,
+    ...type.body,
     color: colors.text,
   },
   rowHint: {
-    fontSize: 12,
+    ...type.caption,
     color: colors.textSecondary,
-    lineHeight: 16,
     marginTop: 2,
   },
   sectionTitle: {
-    fontSize: 13,
-    fontWeight: "700",
+    ...type.eyebrow,
     color: colors.textSecondary,
-    textTransform: "uppercase",
-    letterSpacing: 0.6,
     marginTop: spacing.l,
   },
   box: {
@@ -363,7 +358,7 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark") =>
   // where white text fails contrast — canvas flips to near-black there.
   doneLabel: {
     color: colors.canvas,
-    fontSize: 16,
+    ...type.body,
     fontWeight: "700",
   },
 });

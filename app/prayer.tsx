@@ -17,7 +17,7 @@ import { useTheme } from "@/context/ThemeContext";
 import { FALLBACK_LOCATION } from "@/lib/geo";
 import { formatHijri } from "@/lib/hijri";
 import { computePrayerSchedule, PrayerScheduleEntry } from "@/lib/prayerTimes";
-import { radius, spacing, type ThemeColors } from "@/lib/theme";
+import { radius, spacing, type, type ThemeColors } from "@/lib/theme";
 
 const WEEKDAYS = [
   "Sunday",
@@ -373,14 +373,11 @@ const createStyles = (colors: ThemeColors) =>
     gap: spacing.xs,
   },
   heroKicker: {
-    fontSize: 13,
-    fontWeight: "600",
+    ...type.eyebrow,
     color: colors.accent,
-    textTransform: "uppercase",
-    letterSpacing: 0.6,
   },
   heroTitle: {
-    fontSize: 26,
+    ...type.title1,
     fontWeight: "700",
     color: colors.text,
   },
@@ -408,20 +405,20 @@ const createStyles = (colors: ThemeColors) =>
     paddingHorizontal: spacing.s,
   },
   dateTitle: {
-    fontSize: 16,
+    ...type.body,
     fontWeight: "700",
     color: colors.text,
     textAlign: "center",
   },
   hijriDate: {
-    fontSize: 12,
+    ...type.caption,
     fontWeight: "600",
     color: colors.textSecondary,
     letterSpacing: 0.4,
   },
   todayChip: {
     marginTop: 2,
-    fontSize: 12,
+    ...type.caption,
     fontWeight: "700",
     color: colors.accent,
   },
@@ -444,12 +441,12 @@ const createStyles = (colors: ThemeColors) =>
     backgroundColor: colors.accentSoft,
   },
   rowLabel: {
-    fontSize: 16,
+    ...type.body,
     fontWeight: "600",
     color: colors.text,
   },
   rowTime: {
-    fontSize: 16,
+    ...type.body,
     fontWeight: "600",
     color: colors.text,
     fontVariant: ["tabular-nums"],
@@ -463,14 +460,13 @@ const createStyles = (colors: ThemeColors) =>
     fontWeight: "700",
   },
   note: {
-    fontSize: 14,
+    ...type.subhead,
     color: colors.textSecondary,
     textAlign: "center",
   },
   footnote: {
-    fontSize: 12,
+    ...type.caption,
     color: colors.textSecondary,
-    lineHeight: 18,
     textAlign: "center",
   },
   footnoteLink: {

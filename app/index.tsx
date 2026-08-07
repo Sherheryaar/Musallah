@@ -51,6 +51,7 @@ import {
   placeTypeColors,
   radius,
   spacing,
+  type,
   type ThemeColors,
 } from "@/lib/theme";
 
@@ -1006,7 +1007,7 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark") =>
     borderColor: colors.border,
     paddingLeft: spacing.l,
     paddingRight: spacing.xl + spacing.m, // room for the ✕ so text never runs under it
-    fontSize: 15,
+    ...type.callout,
     color: colors.text,
     // The token, not a hand-rolled shadow. These values WERE `raised`
     // byte-for-byte, but written out they also drew a black shadow in dark
@@ -1047,7 +1048,7 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark") =>
     borderColor: colors.accent,
   },
   filterButtonLabel: {
-    fontSize: 14,
+    ...type.subhead,
     fontWeight: "600",
     color: colors.textSecondary,
   },
@@ -1062,7 +1063,7 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark") =>
   },
   searchNote: {
     flexShrink: 1,
-    fontSize: 13,
+    ...type.footnote,
     color: colors.textSecondary,
     backgroundColor: colors.canvas,
     paddingHorizontal: spacing.m,
@@ -1097,13 +1098,13 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark") =>
     borderColor: colors.canvas,
   },
   legendLabel: {
-    fontSize: 12,
+    ...type.caption,
     fontWeight: "600",
     color: colors.textSecondary,
   },
   fallbackNote: {
     alignSelf: "flex-start",
-    fontSize: 13,
+    ...type.footnote,
     color: colors.textSecondary,
     backgroundColor: colors.canvas,
     paddingHorizontal: spacing.m,
@@ -1112,7 +1113,7 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark") =>
     overflow: "hidden",
   },
   fallbackNoteWeb: {
-    fontSize: 14,
+    ...type.subhead,
     color: colors.textSecondary,
     paddingHorizontal: spacing.l,
     paddingBottom: spacing.s,
@@ -1137,12 +1138,12 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark") =>
     gap: 2,
   },
   nextLabel: {
-    fontSize: 11,
+    ...type.micro,
     color: colors.textSecondary,
     ...numeric,
   },
   nextTime: {
-    fontSize: 20,
+    ...type.title3,
     fontWeight: "700",
     color: colors.accent,
     ...numeric,
@@ -1157,11 +1158,11 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark") =>
     gap: 2,
   },
   timeLabel: {
-    fontSize: 12,
+    ...type.caption,
     color: colors.textSecondary,
   },
   timeValue: {
-    fontSize: 14,
+    ...type.subhead,
     fontWeight: "600",
     color: colors.text,
     ...numeric,
@@ -1214,15 +1215,14 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark") =>
     gap: spacing.s,
   },
   emptyTitle: {
-    fontSize: 16,
+    ...type.body,
     fontWeight: "600",
     color: colors.text,
   },
   emptyText: {
-    fontSize: 14,
+    ...type.subhead,
     color: colors.textSecondary,
     textAlign: "center",
-    lineHeight: 20,
   },
   emptyButton: {
     alignItems: "center",
@@ -1231,7 +1231,7 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark") =>
     marginTop: spacing.s,
   },
   emptyButtonLabel: {
-    fontSize: 14,
+    ...type.subhead,
     color: colors.accent,
     fontWeight: "600",
   },
@@ -1248,7 +1248,7 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark") =>
     justifyContent: "center",
   },
   listFooterText: {
-    fontSize: 14,
+    ...type.subhead,
     color: colors.textSecondary,
   },
   savedSection: {
@@ -1256,10 +1256,7 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark") =>
     marginBottom: spacing.l,
   },
   savedTitle: {
-    fontSize: 12,
-    fontWeight: "700",
-    letterSpacing: 0.8,
-    textTransform: "uppercase",
+    ...type.eyebrow,
     color: colors.textSecondary,
   },
   fridayBanner: {
@@ -1275,12 +1272,11 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark") =>
   },
   fridayBannerText: {
     flex: 1,
-    fontSize: 13,
-    lineHeight: 18,
+    ...type.footnote,
     color: colors.text,
   },
   listFooterLink: {
-    fontSize: 14,
+    ...type.subhead,
     color: colors.accent,
     fontWeight: "600",
   },

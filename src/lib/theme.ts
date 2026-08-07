@@ -130,23 +130,64 @@ export const radius = {
  */
 export const numeric = { fontVariant: ["tabular-nums"] } satisfies TextStyle;
 
+/**
+ * The type scale: SIZE and LEADING only. Weight and colour stay at the call
+ * site, because they vary independently of the step — `body` is used at 400,
+ * 600 and 700 in this app, and a `bodyStrong` token per weight just moves the
+ * combinatorial mess into this file.
+ *
+ * Spread it first, so anything a call site adds still wins:
+ *
+ *   rowLabel: { ...type.body, fontWeight: "600", color: colors.text },
+ *
+ * Why the values changed: the previous version of this object was written
+ * aspirationally and never adopted — every screen hand-picked sizes instead,
+ * which produced 42 distinct size/leading/weight combinations across 107 text
+ * styles, including SEVEN spellings of the uppercase section header. These
+ * steps are the ones the app actually renders, so adopting the scale is
+ * mostly a no-op on screen; what it removes is the accidental variance.
+ *
+ * Every step names a lineHeight, which is the part that was really missing.
+ * Roughly half the app's text styles set a fontSize and no leading at all,
+ * leaving the two platforms to apply their own font defaults — so the same
+ * label occupied a different height on iOS than on Android.
+ */
 export const type = {
-  display: { fontSize: 44, lineHeight: 52, fontWeight: "700", letterSpacing: -1 },
-  title1: { fontSize: 24, lineHeight: 30, fontWeight: "700" },
-  title2: { fontSize: 20, lineHeight: 26, fontWeight: "700" },
-  title3: { fontSize: 17, lineHeight: 22, fontWeight: "700" },
-  bodyStrong: { fontSize: 16, lineHeight: 22, fontWeight: "600" },
-  body: { fontSize: 16, lineHeight: 22, fontWeight: "400" },
-  callout: { fontSize: 15, lineHeight: 20, fontWeight: "600" },
-  subhead: { fontSize: 14, lineHeight: 20, fontWeight: "400" },
-  footnote: { fontSize: 13, lineHeight: 19, fontWeight: "400" },
-  caption: { fontSize: 12, lineHeight: 17, fontWeight: "400" },
-  /** Small uppercase label above a value. */
+  /** The qibla turn/bearing readout — the largest thing in the app. */
+  display: { fontSize: 52, lineHeight: 60, letterSpacing: -1.5 },
+  /** The qibla lock-on word ("Aligned"). */
+  hero: { fontSize: 34, lineHeight: 40, letterSpacing: -0.5 },
+  /** Screen-level headline: the prayer countdown. */
+  title1: { fontSize: 26, lineHeight: 32 },
+  /** A place's name on its own page. */
+  title2: { fontSize: 22, lineHeight: 28 },
+  /** Card and dialog titles. */
+  title3: { fontSize: 20, lineHeight: 26 },
+  title4: { fontSize: 18, lineHeight: 24 },
+  title5: { fontSize: 17, lineHeight: 22 },
+  /** Default reading size: list rows, table cells, prose. */
+  body: { fontSize: 16, lineHeight: 22 },
+  callout: { fontSize: 15, lineHeight: 20 },
+  subhead: { fontSize: 14, lineHeight: 20 },
+  /** Secondary/explanatory text — the app's most-used step after body. */
+  footnote: { fontSize: 13, lineHeight: 18 },
+  caption: { fontSize: 12, lineHeight: 16 },
+  /** Instrument labels and dense metadata. */
+  micro: { fontSize: 11, lineHeight: 15 },
+  /**
+   * The one uppercase section label. The only COMPLETE role in here — it
+   * carries tracking, transform and weight, because all three are the role
+   * rather than a choice: a 13px uppercase run needs the extra letterSpacing
+   * to stay readable and the extra weight to hold up at that size, neither of
+   * which is true of any other step. Fixing the weight here is also what
+   * finishes the job: the seven places that spell this label were split 4/3
+   * between 700 and 600 for no reason anyone chose.
+   */
   eyebrow: {
-    fontSize: 11,
-    lineHeight: 15,
+    fontSize: 13,
+    lineHeight: 18,
     fontWeight: "700",
-    letterSpacing: 0.8,
+    letterSpacing: 0.6,
     textTransform: "uppercase",
   },
 } satisfies Record<string, TextStyle>;
