@@ -1,10 +1,11 @@
 import React, { useMemo, useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useRouter } from "expo-router";
 
 import Touchable from "./Touchable";
 import { useTheme } from "@/context/ThemeContext";
+import { MIN_TARGET } from "@/lib/metrics";
 import { radius, spacing, type ThemeColors } from "@/lib/theme";
 
 type Props = {
@@ -36,7 +37,16 @@ export default function OfflineScreen({ onRetry }: Props) {
   };
 
   return (
-    <View style={styles.screen}>
+    // Scrollable, and centred by the content container rather than by a fixed
+    // flex box: this screen REPLACES the whole app when the first fetch fails,
+    // so if its content outgrew the viewport at a large system font size the
+    // "Try again" button became unreachable with nothing to scroll — leaving
+    // no way back into the app at all.
+    <ScrollView
+      style={styles.screen}
+      contentContainerStyle={styles.content}
+      showsVerticalScrollIndicator={false}
+    >
       <MaterialCommunityIcons
         name="wifi-off"
         size={56}
@@ -80,7 +90,7 @@ export default function OfflineScreen({ onRetry }: Props) {
           </Touchable>
         ))}
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -88,10 +98,17 @@ const createStyles = (colors: ThemeColors) =>
   StyleSheet.create({
     screen: {
       flex: 1,
+      backgroundColor: colors.surface,
+    },
+    content: {
+      // flexGrow + justifyContent centres the content while it fits, then lets
+      // it scroll once it doesn't. `flex: 1` here would cap it at the viewport
+      // and clip instead.
+      flexGrow: 1,
       alignItems: "center",
       justifyContent: "center",
-      backgroundColor: colors.surface,
       paddingHorizontal: spacing.xl,
+      paddingVertical: spacing.xl,
       gap: spacing.m,
     },
     title: {
@@ -114,7 +131,11 @@ const createStyles = (colors: ThemeColors) =>
       paddingVertical: spacing.m,
       paddingHorizontal: spacing.xl,
       minWidth: 140,
+      // Padding alone left this at ~43pt — under the minimum on both
+      // platforms, on the one button that gets the user back into the app.
+      minHeight: MIN_TARGET,
       alignItems: "center",
+      justifyContent: "center",
     },
     retryButtonBusy: {
       opacity: 0.6,
@@ -134,7 +155,7 @@ const createStyles = (colors: ThemeColors) =>
       flexDirection: "row",
       alignItems: "center",
       gap: spacing.s,
-      minHeight: 44,
+      minHeight: MIN_TARGET,
       paddingHorizontal: spacing.l,
       borderRadius: radius.l,
       borderWidth: 1,

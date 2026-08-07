@@ -24,6 +24,7 @@ import {
   spacing,
   type ThemeColors,
 } from "../src/lib/theme";
+import { MIN_TARGET } from "../src/lib/metrics";
 
 // Pin the layout direction left-to-right, at MODULE scope so it runs before
 // anything renders (inside a component or an effect is too late, and it
@@ -204,7 +205,7 @@ const createStyles = (colors: ThemeColors) =>
     },
     errorButton: {
       marginTop: spacing.s,
-      minHeight: 44,
+      minHeight: MIN_TARGET,
       paddingHorizontal: spacing.xl,
       borderRadius: radius.l,
       backgroundColor: colors.accent,

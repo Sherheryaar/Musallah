@@ -167,7 +167,7 @@ const createStyles = (colors: ThemeColors) =>
     color: colors.accent,
     fontWeight: "700",
     backgroundColor: colors.accentSoft,
-    borderRadius: 999,
+    borderRadius: radius.pill,
     paddingHorizontal: spacing.s + 2,
     paddingVertical: 3,
     overflow: "hidden",

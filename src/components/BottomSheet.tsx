@@ -11,7 +11,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useTheme } from "@/context/ThemeContext";
 import { elevation } from "@/lib/elevation";
-import { spacing, type ThemeColors } from "@/lib/theme";
+import { radius, spacing, type ThemeColors } from "@/lib/theme";
 import { useReducedMotion } from "@/lib/useReducedMotion";
 
 // Dependency-free bottom sheet: plain Animated + PanResponder, no gesture
@@ -224,18 +224,14 @@ export default function BottomSheet({ children, aboveSheet }: Props) {
           invisible; it exists purely so the snap points are computed
           against the container the sheet lives in rather than the window. */}
       <View
-        style={StyleSheet.absoluteFill}
-        pointerEvents="none"
+        style={[StyleSheet.absoluteFill, styles.inert]}
         onLayout={(e) => {
           const next = e.nativeEvent.layout.height;
           if (next > 0) setMeasuredHeight(next);
         }}
       />
       {aboveSheet ? (
-        <Animated.View
-          pointerEvents="box-none"
-          style={[styles.aboveSheet, { top: aboveSheetTop }]}
-        >
+        <Animated.View style={[styles.aboveSheet, { top: aboveSheetTop }]}>
           {aboveSheet}
         </Animated.View>
       ) : null}
@@ -268,6 +264,12 @@ export default function BottomSheet({ children, aboveSheet }: Props) {
 
 const createStyles = (colors: ThemeColors, scheme: "light" | "dark") =>
   StyleSheet.create({
+  // pointerEvents in `style`, not as a prop — react-native-web deprecated the
+  // prop form, and the style form works on both platforms.
+  /** Measuring layer: must never intercept a touch. */
+  inert: {
+    pointerEvents: "none",
+  },
   aboveSheet: {
     position: "absolute",
     left: 0,
@@ -278,6 +280,9 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark") =>
     alignItems: "flex-end",
     paddingRight: spacing.l,
     paddingBottom: spacing.m,
+    // box-none: the strip itself is transparent to touches so the map stays
+    // draggable through it, while the recenter button inside stays tappable.
+    pointerEvents: "box-none",
   },
   sheet: {
     position: "absolute",
@@ -287,8 +292,8 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark") =>
     // canvas, not surface: in dark mode `surface` is DARKER than the map
     // tiles behind it, so the sheet read as a hole rather than a panel.
     backgroundColor: colors.canvas,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    borderTopLeftRadius: radius.xxl,
+    borderTopRightRadius: radius.xxl,
     // A black shadow is invisible on a dark backdrop, so dark mode gets a
     // hairline instead — that edge is what separates sheet from map there.
     borderTopWidth: 1,
@@ -307,7 +312,12 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark") =>
     width: 44,
     height: 5,
     borderRadius: 2.5,
-    backgroundColor: colors.border,
+    // controlBorder, not border: this bar is the ONLY thing telling a sighted
+    // user the sheet can be dragged, and at `border` it measured 1.26:1 on the
+    // canvas it sits on — technically drawn, effectively invisible. The
+    // screen-reader path (accessibilityRole="adjustable" above) was already
+    // fine; this is the visual half of the same affordance.
+    backgroundColor: colors.controlBorder,
   },
   body: {
     flex: 1,

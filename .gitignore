@@ -20,3 +20,8 @@ apply-jummah-times.sql
 apply-mawaqit-jummah.sql
 timetable-discovery.json
 timetable-discovery-report.md
+
+# Agent skills are vendored tooling, not app code: 12 MB of markdown, CSV data
+# and font binaries. skills-lock.json IS committed — it pins the versions, and
+# `npx skills experimental_install` restores this directory from it.
+.claude/skills/

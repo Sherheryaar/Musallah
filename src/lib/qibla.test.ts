@@ -4,6 +4,7 @@ import {
   angleDelta,
   compassPoint,
   distanceToKaabaKm,
+  instrumentSize,
   KAABA,
   normalizeAngle,
   qiblaBearing,
@@ -235,5 +236,50 @@ describe("qiblaGuidance", () => {
     expect(qiblaGuidance(150, 119).instruction).toBe("Turn left 31°");
     // Facing just west of north, qibla ESE: shortest turn is right.
     expect(qiblaGuidance(350, 20).instruction).toBe("Turn right 30°");
+  });
+});
+
+describe("instrumentSize", () => {
+  const MAX = 320;
+  const MIN = 200;
+
+  it("uses the available width when it fits between the bounds", () => {
+    expect(instrumentSize(280, MAX, MIN)).toBe(280);
+  });
+
+  it("caps at max on a wide screen", () => {
+    // A tablet or the desktop web layout.
+    expect(instrumentSize(1248, MAX, MIN)).toBe(MAX);
+  });
+
+  // The regression this function exists for. useWindowDimensions() reports 0
+  // before the first layout, so `0 - spacing.l * 2` reached the dial as -32,
+  // and every radius derives from it: the bezel asked SVG for r=-31 and r=-34
+  // and the needle for a -32x-32 canvas. Both platforms reject negatives.
+  it("never returns a negative size, whatever the window reports", () => {
+    for (const available of [-32, -1, 0, 12]) {
+      expect(instrumentSize(available, MAX, MIN)).toBe(MIN);
+      expect(instrumentSize(available, MAX, MIN)).toBeGreaterThan(0);
+    }
+  });
+
+  it("survives a non-finite width instead of poisoning the geometry", () => {
+    // NaN passes through Math.min/Math.max unchanged, so without the explicit
+    // guard a NaN width would reach the SVG attributes just as a negative did.
+    for (const bad of [NaN, Infinity, -Infinity]) {
+      expect(instrumentSize(bad, MAX, MIN)).toBe(MIN);
+    }
+  });
+
+  it("keeps every derived dial radius positive", () => {
+    // Mirrors app/qibla.tsx's geometry: c -> rOuter -> rMinor / rMajor.
+    const RIM = 12;
+    for (const available of [-32, 0, 100, 280, 1248]) {
+      const dial = instrumentSize(available, MAX, MIN);
+      const c = dial / 2;
+      const rOuter = c - RIM;
+      expect(rOuter - 6 / 2).toBeGreaterThan(0); // rMinor
+      expect(rOuter - 12 / 2).toBeGreaterThan(0); // rMajor
+    }
   });
 });

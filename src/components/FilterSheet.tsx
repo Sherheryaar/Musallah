@@ -83,10 +83,17 @@ export default function FilterSheet({
     // onAccessibilityEscape is the iOS counterpart to the Android
     // BackHandler above — the two-finger-Z gesture — not a duplicate of it.
     <Animated.View
-      style={[styles.backdrop, { opacity: progress }]}
-      // Without this the fading-out scrim keeps eating taps for the whole
-      // 180ms exit.
-      pointerEvents={visible ? "auto" : "none"}
+      style={[
+        styles.backdrop,
+        { opacity: progress },
+        // In `style`, not as a prop: react-native-web deprecated the prop
+        // form ("props.pointerEvents is deprecated. Use style.pointerEvents"),
+        // and the style form is supported on both platforms.
+        //
+        // Without this the fading-out scrim keeps eating taps for the whole
+        // 180ms exit.
+        { pointerEvents: visible ? "auto" : "none" },
+      ]}
       accessibilityViewIsModal
       onAccessibilityEscape={onClose}
     >
@@ -254,8 +261,8 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark") =>
   },
   card: {
     backgroundColor: colors.canvas,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    borderTopLeftRadius: radius.xxl,
+    borderTopRightRadius: radius.xxl,
     padding: spacing.xl,
     gap: spacing.s,
     // Never taller than most of the screen, so the sheet cannot grow off
@@ -331,7 +338,10 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark") =>
     height: 26,
     borderRadius: 8,
     borderWidth: 2,
-    borderColor: colors.border,
+    // controlBorder: unchecked, this box IS the checkbox — there is no label
+    // inside it and no fill. In `border` it measured 1.26:1 on canvas, so all
+    // eight checkboxes in this sheet were invisible until ticked.
+    borderColor: colors.controlBorder,
     alignItems: "center",
     justifyContent: "center",
   },

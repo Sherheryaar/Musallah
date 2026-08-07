@@ -44,6 +44,8 @@ import {
 import { CalcOptions, computePrayerSchedule } from "@/lib/prayerTimes";
 import { submitNewPlaceSuggestion } from "@/lib/feedback";
 import { useTheme } from "@/context/ThemeContext";
+import { elevation } from "@/lib/elevation";
+import { MIN_TARGET } from "@/lib/metrics";
 import {
   numeric,
   placeTypeColors,
@@ -76,8 +78,8 @@ type SearchOrigin = { lat: number; lng: number; label: string };
 const keyExtractor = (item: Result) => item.place.id;
 
 function useStyles() {
-  const { colors } = useTheme();
-  return useMemo(() => createStyles(colors), [colors]);
+  const { colors, scheme } = useTheme();
+  return useMemo(() => createStyles(colors, scheme), [colors, scheme]);
 }
 
 /**
@@ -878,7 +880,7 @@ isFriday && !fridayNoticeDismissed && listResults.length > 0 ? (
               onSelect={openPlace}
             />
           </View>
-          <View style={styles.overlayTop} pointerEvents="box-none">
+          <View style={styles.overlayTop}>
             {searchRow}
             {searchNoteRow}
             {mapLegend}
@@ -952,7 +954,7 @@ isFriday && !fridayNoticeDismissed && listResults.length > 0 ? (
   );
 }
 
-const createStyles = (colors: ThemeColors) =>
+const createStyles = (colors: ThemeColors, scheme: "light" | "dark") =>
   StyleSheet.create({
   screen: {
     flex: 1,
@@ -980,6 +982,10 @@ const createStyles = (colors: ThemeColors) =>
     right: 0,
     padding: spacing.m,
     gap: spacing.s,
+    // In `style` rather than as a prop: react-native-web deprecated the prop
+    // form. "box-none" is what lets map gestures through the gaps between the
+    // search row and the legend while those stay tappable.
+    pointerEvents: "box-none",
   },
   searchRow: {
     flexDirection: "row",
@@ -993,7 +999,7 @@ const createStyles = (colors: ThemeColors) =>
     justifyContent: "center",
   },
   searchInput: {
-    minHeight: 44,
+    minHeight: MIN_TARGET,
     backgroundColor: colors.canvas,
     borderRadius: radius.l,
     borderWidth: 1,
@@ -1002,11 +1008,12 @@ const createStyles = (colors: ThemeColors) =>
     paddingRight: spacing.xl + spacing.m, // room for the ✕ so text never runs under it
     fontSize: 15,
     color: colors.text,
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 3,
+    // The token, not a hand-rolled shadow. These values WERE `raised`
+    // byte-for-byte, but written out they also drew a black shadow in dark
+    // mode (where it is invisible) and tripped react-native-web's
+    // "shadow* style props are deprecated" warning on the web build. The
+    // helper handles all three platforms and both schemes.
+    ...elevation(scheme, "raised"),
   },
   clearButton: {
     position: "absolute",
@@ -1021,18 +1028,14 @@ const createStyles = (colors: ThemeColors) =>
     overflow: "hidden",
   },
   filterButton: {
-    minHeight: 44,
+    minHeight: MIN_TARGET,
     justifyContent: "center",
     paddingHorizontal: spacing.l,
     backgroundColor: colors.canvas,
     borderRadius: radius.l,
     borderWidth: 1,
     borderColor: colors.border,
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 3,
+    ...elevation(scheme, "raised"),
     // Android only: clip the press ripple to the rounded corners — without
     // this it flashes as a full rectangle behind them. The elevation shadow
     // survives clipping (it draws from the outline); iOS must NOT clip, or
@@ -1079,11 +1082,7 @@ const createStyles = (colors: ThemeColors) =>
     borderColor: colors.border,
     paddingHorizontal: spacing.m,
     paddingVertical: spacing.s,
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 3,
+    ...elevation(scheme, "raised"),
   },
   legendItem: {
     flexDirection: "row",
@@ -1194,13 +1193,13 @@ const createStyles = (colors: ThemeColors) =>
     borderColor: colors.border,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#000",
-    shadowOpacity: 0.15,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 2 },
-    // Below the sheet's elevation (12) so the sheet slides over it when
-    // dragged to full — see BottomSheet's aboveSheet contract.
-    elevation: 4,
+    // `floating` is the level a FAB belongs on, and its Android elevation (6)
+    // is still below the sheet's (12), so the sheet keeps sliding over this
+    // when dragged to full — see BottomSheet's aboveSheet contract. The old
+    // hand-rolled values (iOS 0.15/6/2 against the dial's 0.06/18/8, both at
+    // Android elevation 3–4) were exactly the cross-platform drift
+    // elevation.ts was written to end.
+    ...elevation(scheme, "floating"),
   },
   listContainer: {
     flex: 1,
@@ -1228,7 +1227,7 @@ const createStyles = (colors: ThemeColors) =>
   emptyButton: {
     alignItems: "center",
     justifyContent: "center",
-    minHeight: 44,
+    minHeight: MIN_TARGET,
     marginTop: spacing.s,
   },
   emptyButtonLabel: {

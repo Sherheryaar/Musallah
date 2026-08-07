@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Platform, StyleSheet, Text, View } from "react-native";
+import { Platform, ScrollView, StyleSheet, Text, View } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import * as Location from "expo-location";
@@ -8,6 +8,7 @@ import Touchable from "./Touchable";
 import { useSettings } from "@/context/SettingsContext";
 import { useTheme } from "@/context/ThemeContext";
 import { elevation } from "@/lib/elevation";
+import { MIN_TARGET } from "@/lib/metrics";
 import { radius, spacing, type ThemeColors } from "@/lib/theme";
 
 // First run, before anything asks for anything.
@@ -98,6 +99,19 @@ export default function Onboarding({ onDone }: Props) {
   return (
     <View style={styles.backdrop} accessibilityViewIsModal>
       <View style={styles.card}>
+        {/* The prose and the madhab choice scroll; the buttons below do not.
+            This card is modal and has no dismiss affordance other than those
+            buttons, so at large system font sizes it grew past the top and
+            bottom of the screen and the user could not get out of onboarding
+            at all — the app was unusable before it started. FilterSheet
+            already carries this exact fix (its own comment describes the same
+            bug at 200%); this component never got it. Pinning the actions
+            outside the scroll region means they cannot go off-screen however
+            tall the content gets. */}
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={styles.scrollContent}
+        >
         <MaterialCommunityIcons
           name="map-marker-radius-outline"
           size={34}
@@ -156,6 +170,7 @@ export default function Onboarding({ onDone }: Props) {
           Prayer times and the Qibla compass are calculated on your phone, so
           they keep working with no signal at all.
         </Text>
+        </ScrollView>
 
         {Platform.OS === "web" ? (
           <Touchable
@@ -213,7 +228,21 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark") =>
       padding: spacing.xl,
       gap: spacing.m,
       alignItems: "flex-start",
+      // Never taller than the screen, so the pinned buttons below always have
+      // somewhere to sit.
+      maxHeight: "100%",
       ...elevation(scheme, "floating"),
+    },
+    scroll: {
+      // flexShrink, NOT flex: 1 — flex would make the scroll region claim the
+      // full card height even when the content is short, stranding the buttons
+      // at the bottom of a mostly empty card. Same reasoning as FilterSheet.
+      flexShrink: 1,
+      alignSelf: "stretch",
+    },
+    scrollContent: {
+      gap: spacing.m,
+      alignItems: "flex-start",
     },
     title: {
       fontSize: 20,
@@ -249,7 +278,7 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark") =>
     },
     choice: {
       flex: 1,
-      minHeight: 44,
+      minHeight: MIN_TARGET,
       justifyContent: "center",
       paddingVertical: spacing.s,
       paddingHorizontal: spacing.m,
@@ -292,7 +321,7 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark") =>
     },
     secondary: {
       alignSelf: "stretch",
-      minHeight: 44,
+      minHeight: MIN_TARGET,
       alignItems: "center",
       justifyContent: "center",
       borderRadius: radius.l,

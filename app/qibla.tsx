@@ -5,18 +5,20 @@ import {
   Easing,
   Linking,
   Platform,
-  Pressable,
   ScrollView,
   StyleSheet,
   Text,
   View,
   useWindowDimensions,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Location from "expo-location";
 import { Accelerometer, Magnetometer } from "expo-sensors";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import Svg, { Circle, Path, Polygon } from "react-native-svg";
 
+import KaabaMark from "@/components/KaabaMark";
+import Touchable from "@/components/Touchable";
 import { useSettings } from "@/context/SettingsContext";
 import { useTheme } from "@/context/ThemeContext";
 import {
@@ -32,6 +34,7 @@ import {
   angleDelta,
   compassPoint,
   distanceToKaabaKm,
+  instrumentSize,
   qiblaBearing,
   qiblaFromSun,
   qiblaGuidance,
@@ -39,6 +42,8 @@ import {
   smoothAngle,
 } from "@/lib/qibla";
 import { hapticSuccess, hapticTick } from "@/lib/haptics";
+import { elevation } from "@/lib/elevation";
+import { MIN_TARGET } from "@/lib/metrics";
 import { radius, spacing, type ThemeColors } from "@/lib/theme";
 import { useReducedMotion } from "@/lib/useReducedMotion";
 
@@ -49,6 +54,23 @@ const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 // fits a 360px phone, a foldable and the web layout without three sets of
 // magic numbers.
 const MAX_DIAL = 320;
+/**
+ * Floor for the dial, and it is load-bearing rather than defensive.
+ *
+ * `useWindowDimensions()` reports a width of 0 before the first layout, which
+ * made `windowWidth - spacing.l * 2` evaluate to -32. Every radius on the dial
+ * derives from that, so the bezel asked SVG for r=-31 and r=-34 and the
+ * needle for a -32×-32 canvas — invalid on both platforms:
+ *
+ *   Error: <circle> attribute r: A negative value is not valid. ("-31")
+ *   Error: <svg> attribute width: A negative value is not valid. ("-32")
+ *
+ * Clamping here fixes it once for every dimension downstream, since they all
+ * come from `dial`. 200 is small enough never to bind on a real device (the
+ * narrowest phones are ~320dp wide) and large enough to stay a legible
+ * instrument if it ever does.
+ */
+const MIN_DIAL = 200;
 /** Distance from the dial's edge to the outer end of the graduations. */
 const RIM = 12;
 const TICK_MINOR = { w: 1.5, h: 6 };
@@ -116,9 +138,13 @@ const CARDINALS: { angle: number; label: string }[] = [
 // is what makes the last 3° readable.
 const TAPE_RANGE = 30;
 const TAPE_HEIGHT = 46;
+const MAX_TAPE = 360;
 
 /** Below this the needle is drawn as authoritative; above it, as a hint. */
 const HYSTERESIS_EXIT_DEG = 8;
+
+/** The Kaaba mark's box at the needle's tip. */
+const KAABA_SIZE = 26;
 
 type HeadingState =
   | { kind: "loading" }
@@ -132,6 +158,15 @@ const PLATFORM: "ios" | "android" | "other" =
 /** react-native-web has no native animated module and warns if asked. */
 const NATIVE_DRIVER = Platform.OS !== "web";
 
+/**
+ * Hoisted, not `Number.prototype.toLocaleString()` at the call site: the
+ * metrics strip re-renders on roughly every whole degree of turn, and each
+ * bare toLocaleString() call builds a fresh formatter (locale data parse plus
+ * lookup tables) to print a number that only changes when the user's
+ * coordinates do.
+ */
+const KM_FORMAT = new Intl.NumberFormat("en-GB", { maximumFractionDigits: 0 });
+
 /** "13:42" in the user's local time. */
 function formatClock(date: Date): string {
   return `${String(date.getHours()).padStart(2, "0")}:${String(
@@ -144,9 +179,17 @@ export default function QiblaScreen() {
   const { settings } = useSettings();
   const { width: windowWidth } = useWindowDimensions();
   const reduceMotion = useReducedMotion();
+  // Edge-to-edge on Android: without this the privacy line at the foot of the
+  // scroll sits under the gesture/navigation bar.
+  const insets = useSafeAreaInsets();
 
-  const dial = Math.min(MAX_DIAL, windowWidth - spacing.l * 2);
-  const tapeWidth = Math.min(360, windowWidth - spacing.l * 2);
+  // Clamped below as well as above — see instrumentSize, which is unit-tested
+  // because the missing lower bound put negative radii into the SVG. Without
+  // it a pre-layout width of 0 also made the tape's px-per-degree negative,
+  // which positioned its graduations backwards off the left edge.
+  const available = windowWidth - spacing.l * 2;
+  const dial = instrumentSize(available, MAX_DIAL, MIN_DIAL);
+  const tapeWidth = instrumentSize(available, MAX_TAPE, MIN_DIAL);
   const pxPerDeg = tapeWidth / 2 / TAPE_RANGE;
   const styles = useMemo(
     () => createStyles(colors, scheme, dial),
@@ -622,7 +665,10 @@ export default function QiblaScreen() {
   return (
     <ScrollView
       style={styles.screen}
-      contentContainerStyle={styles.content}
+      contentContainerStyle={[
+        styles.content,
+        { paddingBottom: spacing.xxl + insets.bottom },
+      ]}
       showsVerticalScrollIndicator={false}
     >
       {/* ---------------------------------------------------------------
@@ -678,7 +724,6 @@ export default function QiblaScreen() {
             NOT rotate — it is the target, not part of the rose. */}
         {instrument ? (
           <Animated.View
-            pointerEvents="none"
             style={[styles.gate, { opacity: gateOpacity }]}
           >
             <MaterialCommunityIcons
@@ -692,13 +737,17 @@ export default function QiblaScreen() {
         <View style={styles.dial}>
           {/* Screen-fixed overlay: the capture window and the confirmation
               ring belong to the GATE, not to the rose, so they must not
-              rotate with the heading. */}
+              rotate with the heading.
+
+              pointerEvents goes in the style array rather than on the prop: on
+              react-native-web the prop form reaches the DOM through an RNW View
+              and warns. This layer's parent is the dial itself, which is NOT
+              inert, so unlike the two Svgs below it needs its own. */}
           {instrument ? (
             <Svg
               width={dial}
               height={dial}
-              style={StyleSheet.absoluteFill}
-              pointerEvents="none"
+              style={[StyleSheet.absoluteFill, styles.inert]}
             >
               {/* The ±5° window, visible BEFORE you reach it. */}
               <Path d={captureWedge} fill={colors.accent} opacity={0.14} />
@@ -731,14 +780,13 @@ export default function QiblaScreen() {
               styles.face,
               instrument ? { transform: [{ rotate: faceSpin }] } : null,
             ]}
-            pointerEvents="none"
           >
-            {/* The graduated bezel: 72 ticks in two nodes. */}
+            {/* The graduated bezel: 72 ticks in two nodes. No pointerEvents of
+                its own — `styles.face` above is already inert. */}
             <Svg
               width={dial}
               height={dial}
               style={StyleSheet.absoluteFill}
-              pointerEvents="none"
             >
               <Circle
                 cx={c}
@@ -766,7 +814,6 @@ export default function QiblaScreen() {
               <View
                 key={label}
                 style={[styles.rotor, { transform: [{ rotate: `${angle}deg` }] }]}
-                pointerEvents="none"
               >
                 {/* Counter-rotated so the letter stays upright as the dial
                     turns. Rotation is about the glyph's own centre, which
@@ -799,7 +846,6 @@ export default function QiblaScreen() {
                   styles.rotor,
                   { transform: [{ rotate: `${sunNow.sun.azimuth}deg` }] },
                 ]}
-                pointerEvents="none"
               >
                 <Animated.View
                   style={{
@@ -830,16 +876,15 @@ export default function QiblaScreen() {
                   ],
                 },
               ]}
-              pointerEvents="none"
             >
-              {/* Kept as emoji deliberately: MaterialCommunityIcons has no
-                  Kaaba glyph (`mosque` is a domed mosque — the wrong
-                  building). Pinned to a fixed box so the two platforms'
-                  different emoji metrics can't shift the needle. */}
+              {/* Authored SVG, not the 🕋 emoji this used to be — see
+                  KaabaMark. It follows `needleColor`, so when the compass is
+                  not trustworthy the mark dims with the needle instead of
+                  contradicting it. */}
               <Animated.View
                 style={{
-                  width: 26,
-                  height: 26,
+                  width: KAABA_SIZE,
+                  height: KAABA_SIZE,
                   alignItems: "center",
                   justifyContent: "center",
                   transform: [
@@ -848,18 +893,20 @@ export default function QiblaScreen() {
                   ],
                 }}
               >
-                <Text allowFontScaling={false} style={styles.kaaba}>
-                  {"🕋"}
-                </Text>
+                <KaabaMark
+                  size={KAABA_SIZE}
+                  color={needleColor}
+                  bandColor={colors.canvas}
+                />
               </Animated.View>
               {/* One polygon: tip, shoulders, and a counterweight tail
                   crossing the hub. The old head-plus-stem pair met at a
                   visible seam and could not taper. */}
+              {/* `styles.rotor` on the parent is already inert. */}
               <Svg
                 width={dial}
                 height={dial}
                 style={StyleSheet.absoluteFill}
-                pointerEvents="none"
               >
                 <Polygon points={needlePoints} fill={needleColor} />
               </Svg>
@@ -908,7 +955,12 @@ export default function QiblaScreen() {
                   width: 1.5,
                   height: major ? 12 : 7,
                   borderRadius: 1,
-                  backgroundColor: colors.border,
+                  // controlBorder: this tape exists precisely BECAUSE the last
+                  // few degrees are unreadable on the rim, so its scale is the
+                  // thing being read. In `border` the graduations measured
+                  // 1.26:1 — the tape had no legible scale at all, defeating
+                  // the reason it was added.
+                  backgroundColor: colors.controlBorder,
                 }}
               />
             );
@@ -948,7 +1000,7 @@ export default function QiblaScreen() {
         <View style={styles.metric}>
           <Text style={styles.metricLabel}>TO MAKKAH</Text>
           <Text style={styles.metricValue}>
-            {`${Math.round(distanceKm).toLocaleString()} km`}
+            {`${KM_FORMAT.format(distanceKm)} km`}
           </Text>
         </View>
         <View style={styles.metricDivider} />
@@ -977,14 +1029,14 @@ export default function QiblaScreen() {
         <View style={styles.note}>
           <Text style={styles.noteText}>{heading.reason}</Text>
           {Platform.OS !== "web" ? (
-            <Pressable
+            <Touchable
               onPress={requestLocation}
               accessibilityRole="button"
               accessibilityLabel="Allow location access"
               style={styles.noteButton}
             >
               <Text style={styles.noteButtonLabel}>Allow location</Text>
-            </Pressable>
+            </Touchable>
           ) : null}
         </View>
       ) : null}
@@ -1005,7 +1057,10 @@ export default function QiblaScreen() {
           only working technique.
           --------------------------------------------------------------- */}
       <View style={styles.sunCard}>
-        <Pressable
+        {/* Touchable, not Pressable: this screen was the only one still using
+            bare Pressables, so its three controls were the only taps in the
+            app with no Android ripple and no press scale. */}
+        <Touchable
           onPress={() => setSunOpen((v) => !v)}
           accessibilityRole="button"
           accessibilityState={{ expanded: sunExpanded }}
@@ -1037,7 +1092,7 @@ export default function QiblaScreen() {
             size={22}
             color={colors.textSecondary}
           />
-        </Pressable>
+        </Touchable>
 
         {sunExpanded ? (
           <View style={styles.sunBodyWrap}>
@@ -1061,7 +1116,7 @@ export default function QiblaScreen() {
           hold the phone flat AT THE MOMENT it is tilted, which is worth far
           more than a permanent paragraph saying so. */}
       <View style={styles.tips}>
-        <Pressable
+        <Touchable
           onPress={() => setTipsOpen((v) => !v)}
           accessibilityRole="button"
           accessibilityState={{ expanded: tipsOpen }}
@@ -1073,7 +1128,7 @@ export default function QiblaScreen() {
             size={20}
             color={colors.textSecondary}
           />
-        </Pressable>
+        </Touchable>
         {tipsOpen ? (
           <Text style={styles.tipsBody}>
             Hold the phone flat and level, screen up. Steel, speakers, laptops
@@ -1095,17 +1150,17 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark", dial: numbe
   // Depth reads differently per theme: a black shadow on a near-black
   // screen is mathematically invisible, so dark mode expresses lift by
   // luminance (a lighter well, a lit top edge) instead.
+  //
+  // The shadow half now comes from elevation(scheme, "ambient") rather than
+  // being written out here. Hand-rolled, this declared iOS 0.06/18/8 while the
+  // recenter button declared 0.15/6/2 and both landed on Android elevation 3–4
+  // — the two surfaces matched on one platform and not the other, which is the
+  // precise drift elevation.ts's own docstring describes. It also emitted
+  // react-native-web's "shadow* style props are deprecated" warning.
   const lift =
     scheme === "dark"
       ? { borderColor: colors.surfaceSecondary }
-      : {
-          borderColor: colors.border,
-          shadowColor: "#000",
-          shadowOpacity: 0.06,
-          shadowRadius: 18,
-          shadowOffset: { width: 0, height: 8 },
-          elevation: 3,
-        };
+      : { borderColor: colors.border, ...elevation(scheme, "ambient") };
 
   return StyleSheet.create({
     screen: {
@@ -1145,7 +1200,11 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark", dial: numbe
       flexDirection: "row",
       alignItems: "center",
       gap: spacing.s,
-      height: 60,
+      // minHeight, not height: 60 matches heroNumber's lineHeight so the hero
+      // doesn't jump as it swaps between the two, but a hard height clipped
+      // the 34px "Aligned" — the screen's whole success state — for anyone
+      // running large text. minHeight keeps the alignment and lets it grow.
+      minHeight: 60,
     },
     heroWord: {
       fontSize: 34,
@@ -1157,11 +1216,20 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark", dial: numbe
       width: dial,
       alignItems: "center",
     },
+    // pointerEvents lives in these styles rather than as a prop on each
+    // element: react-native-web deprecated the prop form. The dial's layers
+    // all need the same treatment — they are a rendered instrument, not
+    // controls, and must never intercept a touch meant for the scroll view.
+    /** Any decorative layer that must never intercept a touch. */
+    inert: {
+      pointerEvents: "none",
+    },
     gate: {
       height: 20,
       alignItems: "center",
       justifyContent: "center",
       marginBottom: -4,
+      pointerEvents: "none",
     },
     dial: {
       width: dial,
@@ -1175,6 +1243,7 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark", dial: numbe
       position: "absolute",
       width: dial,
       height: dial,
+      pointerEvents: "none",
     },
     // Each glyph sits in a full-size layer rotated about the dial's centre;
     // its child is pinned to the top, so rotating the layer sweeps the child
@@ -1185,6 +1254,7 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark", dial: numbe
       height: dial,
       alignItems: "center",
       paddingTop: RIM,
+      pointerEvents: "none",
     },
     cardinal: {
       marginTop: TICK_MAJOR.h + 6,
@@ -1196,12 +1266,6 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark", dial: numbe
     },
     cardinalNorth: {
       color: colors.text,
-    },
-    kaaba: {
-      fontSize: 21,
-      lineHeight: 26,
-      includeFontPadding: false,
-      textAlign: "center",
     },
     hub: {
       position: "absolute",
@@ -1294,7 +1358,7 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark", dial: numbe
       lineHeight: 19,
     },
     noteButton: {
-      minHeight: 44,
+      minHeight: MIN_TARGET,
       justifyContent: "center",
       paddingHorizontal: spacing.m,
       marginVertical: -spacing.m,
@@ -1319,7 +1383,7 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark", dial: numbe
       alignItems: "center",
       gap: spacing.m,
       padding: spacing.l,
-      minHeight: 44,
+      minHeight: MIN_TARGET,
     },
     sunHeaderText: {
       flex: 1,
@@ -1358,7 +1422,7 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark", dial: numbe
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "space-between",
-      minHeight: 44,
+      minHeight: MIN_TARGET,
     },
     tipsTitle: {
       fontSize: 13,
@@ -1378,7 +1442,10 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark", dial: numbe
       color: colors.textSecondary,
       lineHeight: 17,
       textAlign: "center",
-      opacity: 0.9,
+      // No `opacity`. textSecondary is already the palette's quiet ink and is
+      // tuned to sit exactly at AA on `surface` (4.92:1 light); dimming it to
+      // 0.9 composited to 4.03:1 and pushed it under. The palette tests never
+      // caught it because the alpha lived here, not in the palette.
     },
   });
 };

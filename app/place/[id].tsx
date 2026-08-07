@@ -38,6 +38,7 @@ import {
   radius,
   type ThemeColors,
 } from "@/lib/theme";
+import { MIN_TARGET } from "@/lib/metrics";
 
 // The hero band is always the deep masjid green — the identity colour the
 // pins already use. Deliberately NOT per-type: white text fails contrast
@@ -334,10 +335,12 @@ export default function PlaceDetailScreen() {
           accessibilityState={{ selected: saved }}
           accessibilityLabel={saved ? "Remove from saved" : "Save this place"}
         >
+          {/* The filled/outline glyph carries the state (with
+              accessibilityState above); the colour is accent either way. */}
           <MaterialCommunityIcons
             name={saved ? "heart" : "heart-outline"}
             size={19}
-            color={saved ? colors.accent : colors.accent}
+            color={colors.accent}
           />
         </Touchable>
         <Touchable
@@ -541,7 +544,8 @@ const createStyles = (colors: ThemeColors) =>
   content: {
     padding: spacing.l,
     gap: spacing.l,
-    paddingBottom: spacing.xxl,
+    // No paddingBottom here — the inline style adds insets.bottom to it, so a
+    // value in the stylesheet is always overridden and only misleads.
     // Centered, phone-width column on desktop browsers.
     width: "100%",
     maxWidth: 680,
@@ -558,7 +562,7 @@ const createStyles = (colors: ThemeColors) =>
   },
   hero: {
     backgroundColor: HERO_BACKGROUND,
-    borderRadius: 16,
+    borderRadius: radius.xl,
     padding: spacing.l,
     paddingVertical: spacing.xl - spacing.xs,
     gap: spacing.xs,
@@ -568,11 +572,19 @@ const createStyles = (colors: ThemeColors) =>
     alignItems: "center",
     gap: spacing.xs + 2,
   },
+  // No `opacity` on any of the three. White has only 5.02:1 to spend on this
+  // green, so dimming it is expensive: the address shipped at 0.9, which
+  // composites to 4.40:1 and fails AA for 14px regular text. The palette
+  // tests never saw it, because they compare opaque colours and this was a
+  // stylesheet alpha — theme.test.ts now composites these explicitly.
+  //
+  // Nothing is lost visually. 0.9 vs 0.95 vs 1.0 white on this green is not a
+  // perceptible hierarchy; the real hierarchy is 22/700 → 14/400 → 12/600,
+  // which is doing all the work already.
   heroMeta: {
     fontSize: 12,
     fontWeight: "600",
     color: HERO_TEXT,
-    opacity: 0.95,
   },
   heroName: {
     fontSize: 22,
@@ -583,7 +595,6 @@ const createStyles = (colors: ThemeColors) =>
   heroAddress: {
     fontSize: 14,
     color: HERO_TEXT,
-    opacity: 0.9,
     lineHeight: 20,
   },
   actionRow: {
@@ -649,7 +660,7 @@ const createStyles = (colors: ThemeColors) =>
   prayerRow: {
     flexDirection: "row",
     alignItems: "center",
-    minHeight: 44,
+    minHeight: MIN_TARGET,
   },
   prayerNameCell: {
     flex: 1,
@@ -706,7 +717,7 @@ const createStyles = (colors: ThemeColors) =>
     alignItems: "center",
     justifyContent: "space-between",
     gap: spacing.m,
-    minHeight: 44,
+    minHeight: MIN_TARGET,
   },
   contactLabelWrap: {
     flexDirection: "row",
@@ -759,7 +770,7 @@ const createStyles = (colors: ThemeColors) =>
   suggestEditButton: {
     alignItems: "center",
     justifyContent: "center",
-    minHeight: 44,
+    minHeight: MIN_TARGET,
   },
   suggestEditLabel: {
     fontSize: 14,

@@ -25,6 +25,17 @@ export const lightColors = {
   surface: "#F9F8F7",
   surfaceSecondary: "#F0EFED",
   border: "#E6E5E3",
+  // `border` is a DIVIDER: it separates things that are already legible on
+  // their own, and at 1.26:1 on canvas that is exactly the right weight for
+  // one. It is the wrong colour for the OUTLINE OF A CONTROL, which WCAG
+  // 1.4.11 requires to clear 3:1 whenever that outline is the only thing
+  // identifying the control. Three places were relying on it that way — the
+  // sheet's drag handle, the unselected radio rings in Settings, and the
+  // qibla turn tape's graduations — and all three were effectively invisible.
+  // This is the weakest value that clears 3:1 on canvas, surface,
+  // surfaceSecondary AND accentSoft, so it stays a hairline instead of
+  // becoming a second tier of ink. Enforced by theme.test.ts.
+  controlBorder: "#8A8784",
   // The identity colour: the same deep masjid green as the map pins.
   // (Was a generic blue; green is the app's most meaningful colour.)
   accent: "#2E7D57",
@@ -55,6 +66,7 @@ export const darkColors: ThemeColors = {
   surface: "#141312",
   surfaceSecondary: "#2C2B28",
   border: "#3A3835",
+  controlBorder: "#7C7973",
   accent: "#6FC59B",
   accentSoft: "#1C332A",
   positive: "#63B98D",
@@ -99,6 +111,12 @@ export const spacing = {
 export const radius = {
   m: 8,
   l: 12,
+  /** Cards that carry a whole screen's identity — the place-detail hero. */
+  xl: 16,
+  /** The bottom sheet's top corners. */
+  xxl: 20,
+  /** Fully rounded: distance chips, reminder chips. */
+  pill: 999,
 };
 
 

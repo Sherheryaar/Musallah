@@ -33,7 +33,28 @@ const tags = [
   '<link rel="apple-touch-icon" href="/icon-192.png" />',
   // Match the app's dark surface behind the root element, so overscroll
   // and load flashes aren't white in dark mode.
-  "<style>@media (prefers-color-scheme: dark){body{background-color:#141312}}</style>",
+  //
+  // The rest of this block themes the browser surfaces the app doesn't draw
+  // itself. react-native-web sets `outline: none` on every Pressable, so on
+  // the web build keyboard focus was completely invisible — you could Tab
+  // through the whole app and never see where you were. :focus-visible (not
+  // :focus) means a mouse press still shows nothing, which is the point.
+  //
+  // `color-scheme` is what makes the native scrollbars, the text caret and
+  // the form controls follow the theme; without it they stay light-mode
+  // widgets on a near-black page.
+  [
+    "<style>",
+    ":root{color-scheme:light dark}",
+    "@media (prefers-color-scheme: dark){body{background-color:#141312}}",
+    // accent, from src/lib/theme.ts. Two rules rather than a variable so the
+    // ring survives even if the document's custom properties are stripped.
+    "*:focus-visible{outline:2px solid #2E7D57!important;outline-offset:2px!important;border-radius:4px}",
+    "@media (prefers-color-scheme: dark){*:focus-visible{outline-color:#6FC59B!important}}",
+    "::selection{background:#2E7D57;color:#fff}",
+    "@media (prefers-color-scheme: dark){::selection{background:#6FC59B;color:#201F1D}}",
+    "</style>",
+  ].join(""),
 ].join("\n    ");
 
 if (!html.includes("</head>")) {

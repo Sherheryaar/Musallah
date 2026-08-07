@@ -11,6 +11,7 @@ import Touchable from "./Touchable";
 import { type SubmissionResult } from "@/lib/feedback";
 import { useTheme } from "@/context/ThemeContext";
 import { spacing, radius, type ThemeColors } from "@/lib/theme";
+import { MIN_TARGET } from "@/lib/metrics";
 
 // Visible cap, well under the database's 2000-char hard limit: suggestions
 // are triaged by a human, and a screenful is the most anyone reads.
@@ -205,7 +206,7 @@ const createStyles = (colors: ThemeColors) =>
     topicChip: {
       // 44pt: both platforms' guidelines want 44/48 for a tap target,
       // and these chips were 32.
-      minHeight: 44,
+      minHeight: MIN_TARGET,
       justifyContent: "center",
       paddingHorizontal: spacing.m,
       paddingVertical: spacing.xs,
@@ -248,7 +249,7 @@ const createStyles = (colors: ThemeColors) =>
       borderRadius: radius.m,
       paddingVertical: spacing.m,
       alignItems: "center",
-      minHeight: 44,
+      minHeight: MIN_TARGET,
       justifyContent: "center",
     },
     sendButtonDisabled: {

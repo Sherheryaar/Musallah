@@ -8,6 +8,8 @@ import {
 } from "react-native";
 import { Link } from "expo-router";
 import * as Location from "expo-location";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import Touchable from "@/components/Touchable";
 import { useSettings } from "@/context/SettingsContext";
@@ -97,6 +99,12 @@ function useStyles() {
 
 export default function PrayerScreen() {
   const styles = useStyles();
+  const { colors } = useTheme();
+  // The app draws edge-to-edge on Android, so the last thing on this screen —
+  // the "Change in Settings" link — sat under the gesture/navigation bar.
+  // index, settings and place/[id] all pad by this; these two screens were
+  // simply missed.
+  const insets = useSafeAreaInsets();
   const { settings } = useSettings();
   const [location, setLocation] = useState(FALLBACK_LOCATION);
   const [usingFallback, setUsingFallback] = useState(false);
@@ -201,6 +209,9 @@ export default function PrayerScreen() {
   const highlightKey =
     dayOffset === 0 && status ? status.currentLabel.toLowerCase() : null;
 
+  /** Today is the earliest day this screen shows — see the date nav below. */
+  const atToday = dayOffset === 0;
+
   const dateTitle = `${WEEKDAYS[selectedDate.getDay()]} ${ordinal(
     selectedDate.getDate(),
   )} ${MONTHS[selectedDate.getMonth()]}`;
@@ -210,7 +221,13 @@ export default function PrayerScreen() {
   const mithlLabel = settings.madhab === "hanafi" ? "2 mithl" : "1 mithl";
 
   return (
-    <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
+    <ScrollView
+      style={styles.screen}
+      contentContainerStyle={[
+        styles.content,
+        { paddingBottom: spacing.xxl + insets.bottom },
+      ]}
+    >
       {status ? (
         <View style={styles.heroCard}>
           <Text style={styles.heroKicker}>
@@ -223,13 +240,30 @@ export default function PrayerScreen() {
       ) : null}
 
       <View style={styles.dateNav}>
+        {/* Today is the floor. A prayer time that has already passed is not
+            information anyone needs — the screen is for "when do I pray next",
+            and the only useful direction from today is forwards. Disabled
+            rather than hidden: the control keeps its place in the row, so the
+            date stays centred and nothing shifts when you step forward and the
+            button becomes live. */}
         <Touchable
           style={styles.chevronButton}
-          onPress={() => setDayOffset((o) => o - 1)}
+          onPress={() => setDayOffset((o) => Math.max(0, o - 1))}
+          disabled={atToday}
           accessibilityRole="button"
           accessibilityLabel="Previous day"
+          accessibilityState={{ disabled: atToday }}
         >
-          <Text style={styles.chevron}>{"\u2039"}</Text>
+          {/* MaterialCommunityIcons, not the \u2039 and \u203a text glyphs these were:
+              every other piece of chrome in the app is from this one icon set,
+              and a font glyph renders at a different weight and baseline on
+              each platform \u2014 exactly the drift _layout.tsx already removed
+              when it dropped \ud83e\udded and \u2699\ufe0f for vector icons. */}
+          <MaterialCommunityIcons
+            name="chevron-left"
+            size={26}
+            color={colors.accent}
+          />
         </Touchable>
         <View style={styles.dateCenter}>
           <Text style={styles.dateTitle}>{dateTitle}</Text>
@@ -253,7 +287,11 @@ export default function PrayerScreen() {
           accessibilityRole="button"
           accessibilityLabel="Next day"
         >
-          <Text style={styles.chevron}>{"\u203A"}</Text>
+          <MaterialCommunityIcons
+            name="chevron-right"
+            size={26}
+            color={colors.accent}
+          />
         </Touchable>
       </View>
 
@@ -362,12 +400,6 @@ const createStyles = (colors: ThemeColors) =>
     justifyContent: "center",
     // Clips the Android ripple to the rounded corners.
     overflow: "hidden",
-  },
-  chevron: {
-    fontSize: 24,
-    lineHeight: 28,
-    color: colors.accent,
-    fontWeight: "600",
   },
   dateCenter: {
     flex: 1,

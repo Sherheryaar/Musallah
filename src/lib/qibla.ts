@@ -19,6 +19,32 @@ import { julianDate, sunPosition } from "./prayerCalc";
 /** Kaaba, Masjid al-Haram. Same reference point the adhan library uses. */
 export const KAABA = { lat: 21.4225241, lng: 39.8261818 } as const;
 
+/**
+ * Size for the dial and the turn tape, clamped at BOTH ends.
+ *
+ * Lives here, tested, because the missing lower bound was a real rendering
+ * bug rather than a hypothetical one. `useWindowDimensions()` reports a width
+ * of 0 before the first layout, so `windowWidth - padding` went NEGATIVE, and
+ * because every radius on the dial derives from it the bezel asked SVG for
+ * r=-31 and r=-34 while the needle asked for a -32×-32 canvas:
+ *
+ *   Error: <circle> attribute r: A negative value is not valid. ("-31")
+ *   Error: <svg> attribute width: A negative value is not valid. ("-32")
+ *
+ * Clamping the one input fixes every dimension downstream of it.
+ */
+export function instrumentSize(
+  available: number,
+  max: number,
+  min: number,
+): number {
+  // Guard the input too: NaN propagates through Math.min/max unchanged, and a
+  // NaN width would put NaN into every SVG attribute just as happily as a
+  // negative one did.
+  if (!Number.isFinite(available)) return min;
+  return Math.max(min, Math.min(max, available));
+}
+
 const EARTH_RADIUS_KM = 6371;
 
 const toRad = (deg: number) => (deg * Math.PI) / 180;

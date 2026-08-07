@@ -86,8 +86,13 @@ export default function SuggestionSheet({
 
   return (
     <Animated.View
-      style={[styles.backdrop, { opacity: progress }]}
-      pointerEvents={visible ? "auto" : "none"}
+      style={[
+        styles.backdrop,
+        { opacity: progress },
+        // In `style`, not as a prop: the prop form is deprecated on
+        // react-native-web. Stops the fading-out scrim eating taps.
+        { pointerEvents: visible ? "auto" : "none" },
+      ]}
       onLayout={(e) => setContainerHeight(e.nativeEvent.layout.height)}
       // See FilterSheet: this traps VoiceOver inside the overlay, and
       // onAccessibilityEscape is the iOS twin of the BackHandler above.

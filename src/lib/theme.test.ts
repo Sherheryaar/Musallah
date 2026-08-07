@@ -32,6 +32,26 @@ export function contrastRatio(a: string, b: string): number {
 }
 
 /**
+ * The colour a semi-transparent foreground ACTUALLY renders as, composited
+ * over its background.
+ *
+ * This is the hole the rest of this file had: every assertion above compares
+ * two opaque palette entries, so a perfectly good colour dimmed with
+ * `opacity` in a stylesheet was never measured. Two shipped that way —
+ * place/[id]'s hero address at 0.9 (4.40:1) and qibla's privacy line at 0.9
+ * (4.03:1 in light) — both under AA while every palette test passed.
+ */
+export function composite(fg: string, bg: string, alpha: number): string {
+  const parse = (hex: string) => {
+    const n = parseInt(hex.slice(1), 16);
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  };
+  const [f, b] = [parse(fg), parse(bg)];
+  const mix = f.map((c, i) => Math.round(c * alpha + b[i] * (1 - alpha)));
+  return `#${mix.map((c) => c.toString(16).padStart(2, "0")).join("")}`;
+}
+
+/**
  * The three surfaces body text lands on. surfaceSecondary is included
  * because it backs the search field's clear button (app/index.tsx) and the
  * verification block (app/place/[id].tsx) — but note it only ever carries
@@ -88,10 +108,84 @@ describe.each([
     expect(contrastRatio(colors.border, colors.canvas)).toBeGreaterThan(1.1);
   });
 
+  // `controlBorder` is the one that must clear the real 1.4.11 bar, because
+  // where it is used the outline IS the control: the sheet's drag handle, the
+  // unselected radio rings, the qibla tape's graduations. Asserted against
+  // accentSoft too — the tape's capture window is painted in it, and the
+  // graduations run straight through.
+  it.each(["canvas", "surface", "surfaceSecondary", "accentSoft"] as const)(
+    "control outlines are identifiable on %s",
+    (bg) => {
+      expect(
+        contrastRatio(colors.controlBorder, colors[bg]),
+      ).toBeGreaterThanOrEqual(AA_GRAPHIC);
+    },
+  );
+
+  // ...and it must still read as a hairline. A control outline that measures
+  // as strongly as body text stops looking like an outline.
+  it("control outlines recede behind secondary text", () => {
+    expect(contrastRatio(colors.controlBorder, colors.canvas)).toBeLessThan(
+      contrastRatio(colors.textSecondary, colors.canvas),
+    );
+  });
+
   it("the you-are-here blue is readable", () => {
     expect(
       contrastRatio(colors.youAreHere, colors.canvas),
     ).toBeGreaterThanOrEqual(AA_GRAPHIC);
+  });
+});
+
+/**
+ * Text the app deliberately dims with `opacity`. Every entry here is a real
+ * stylesheet rule, and the alpha is part of the rendered colour — so it has
+ * to be measured as composited, not as the palette entry it started from.
+ *
+ * If you add an `opacity` to a Text style anywhere, add it here too.
+ */
+describe("dimmed text", () => {
+  // app/place/[id].tsx — the hero band is always the masjid green.
+  const HERO_BG = placeTypeColors.masjid;
+  const HERO_TEXT = "#FFFFFF";
+
+  const CASES: {
+    where: string;
+    fg: string;
+    bg: string;
+    alpha: number;
+  }[] = [
+    { where: "place hero meta", fg: HERO_TEXT, bg: HERO_BG, alpha: 0.95 },
+    { where: "place hero address", fg: HERO_TEXT, bg: HERO_BG, alpha: 1 },
+    { where: "place hero name", fg: HERO_TEXT, bg: HERO_BG, alpha: 1 },
+    {
+      where: "qibla privacy line (light)",
+      fg: lightColors.textSecondary,
+      bg: lightColors.surface,
+      alpha: 1,
+    },
+    {
+      where: "qibla privacy line (dark)",
+      fg: darkColors.textSecondary,
+      bg: darkColors.surface,
+      alpha: 1,
+    },
+  ];
+
+  it.each(CASES)("$where stays readable at opacity $alpha", ({ fg, bg, alpha }) => {
+    expect(
+      contrastRatio(composite(fg, bg, alpha), bg),
+    ).toBeGreaterThanOrEqual(AA_NORMAL);
+  });
+
+  // Guards the reasoning, not just the values: white on the hero green has
+  // only 5.02:1 to spend, so there is very little room to dim it before AA
+  // breaks. 0.9 — what the address shipped with — is already under.
+  it("leaves almost no headroom to dim white on the hero green", () => {
+    expect(contrastRatio(HERO_TEXT, HERO_BG)).toBeLessThan(5.5);
+    expect(
+      contrastRatio(composite(HERO_TEXT, HERO_BG, 0.9), HERO_BG),
+    ).toBeLessThan(AA_NORMAL);
   });
 });
 

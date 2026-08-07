@@ -18,6 +18,7 @@ import { useSettings } from "@/context/SettingsContext";
 import { useTheme } from "@/context/ThemeContext";
 import { PRAYER_KEYS, PRAYER_LABELS } from "@/lib/notificationPlan";
 import { radius, spacing, type ThemeColors } from "@/lib/theme";
+import { MIN_TARGET } from "@/lib/metrics";
 
 type IconName = React.ComponentProps<typeof MaterialCommunityIcons>["name"];
 
@@ -554,7 +555,7 @@ const createStyles = (colors: ThemeColors) =>
     alignItems: "center",
     justifyContent: "center",
     gap: spacing.s - 2,
-    minHeight: 44,
+    minHeight: MIN_TARGET,
     borderRadius: radius.m,
     borderWidth: 1,
     borderColor: colors.border,
@@ -608,7 +609,11 @@ const createStyles = (colors: ThemeColors) =>
     height: 20,
     borderRadius: 10,
     borderWidth: 2,
-    borderColor: colors.border,
+    // controlBorder, not border: this ring IS the unselected state. Drawn in
+    // `border` it measured 1.26:1, so the nine option rows across this screen
+    // showed one selected row and eight blanks — nothing said the blanks were
+    // radio buttons you could pick.
+    borderColor: colors.controlBorder,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -651,7 +656,7 @@ const createStyles = (colors: ThemeColors) =>
   reminderChip: {
     paddingHorizontal: spacing.m,
     paddingVertical: spacing.s,
-    borderRadius: 999,
+    borderRadius: radius.pill,
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.surface,
@@ -694,7 +699,7 @@ const createStyles = (colors: ThemeColors) =>
     alignItems: "center",
     gap: spacing.m,
     padding: spacing.l,
-    minHeight: 44,
+    minHeight: MIN_TARGET,
   },
   creditTextWrap: {
     flex: 1,
