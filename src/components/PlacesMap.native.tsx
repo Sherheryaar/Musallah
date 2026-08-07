@@ -236,7 +236,17 @@ export default function PlacesMap({
       onRegionChangeComplete={(r) => setRegion(r)}
       showsUserLocation={userLocation !== null}
       userInterfaceStyle={scheme}
-      customMapStyle={scheme === "dark" ? DARK_MAP_STYLE : undefined}
+      // An EMPTY ARRAY for light, NOT undefined. MapView.java's setMapStyle
+      // is `if (map != null && customMapStyleString != null)`, so a null
+      // style is not "reset" — it is "do nothing", and the dark style stayed
+      // applied for the rest of the session. `[]` works precisely because an
+      // empty array is truthy in JS: the library's own
+      // `customMapStyle ? JSON.stringify(...) : undefined` turns it into the
+      // string "[]", which reaches Android as a style declaring no overrides,
+      // i.e. the default map. Anything falsy here silently does nothing.
+      // (Apple Maps ignores this prop and follows userInterfaceStyle above,
+      // which is why only Android was stuck.)
+      customMapStyle={scheme === "dark" ? DARK_MAP_STYLE : []}
       // Google Maps ships its own chrome, and all of it fought the app's --
       // on Android only, which is exactly the sort of divergence that goes
       // unnoticed when testing on an iPhone. All three are inert on Apple

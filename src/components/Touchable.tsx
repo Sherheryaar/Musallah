@@ -151,6 +151,17 @@ export default function Touchable({
   return (
     <Animated.View style={[layout, { transform: [{ scale }] }]}>
       <Pressable
+        // Keyed by scheme so a theme change builds a FRESH native view.
+        //
+        // Android draws a rounded/rippled view's background through a cached
+        // drawable, and it does not always repaint when only the colour VALUE
+        // changes — a control whose selected state changes at the same moment
+        // repaints, but one that merely re-themes can keep its old colour. So
+        // switching to dark left the unselected "Light" chip and the already
+        // selected option rows painted in the light palette, i.e. near-white
+        // boxes holding near-white text. Remounting sidesteps the cache
+        // entirely, and only ever costs a rebuild on an actual theme switch.
+        key={scheme}
         {...rest}
         disabled={disabled}
         android_ripple={ripple}
