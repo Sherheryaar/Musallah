@@ -151,6 +151,31 @@ export function cleanNotes(notes: string): string | undefined {
 }
 
 /**
+ * Some directory rows carry a blank "additional directions" CSV column
+ * concatenated straight into the address, so it shows up as a literal
+ * segment like "17 Wellington Road, n/a, Tipton,Sandwell, DY4 8RS" or
+ * "...Cavan,None until 2015" — junk that reads as part of the street
+ * address unless it's stripped. Only the offending segment (and, for a
+ * leading international dialling code like "+353", its own segment) is
+ * removed; every other segment's existing comma/spacing style is left
+ * untouched, since that is this dataset's normal (if inconsistent) format,
+ * not a defect.
+ */
+const ADDRESS_JUNK_SEGMENT_RE =
+  /(?:n\/a|none|not\s+known|unknown|tbc|tbd|tba|none\s+(?:until|in|till)\s*\d{4}|not\s+until\s*\d{4}|none\s+working)/i;
+
+export function cleanAddress(address: string): string {
+  let out = address;
+  out = out.replace(new RegExp(`,\\s*${ADDRESS_JUNK_SEGMENT_RE.source}\\s*(?=,|$)`, "gi"), "");
+  out = out.replace(new RegExp(`^\\s*${ADDRESS_JUNK_SEGMENT_RE.source}\\s*,\\s*`, "i"), "");
+  out = out.replace(/,\s*(\+\d{1,4})\s*(?=,|$)/g, "");
+  out = out.replace(/^\s*(\+\d{1,4})\s*,\s*/, "");
+  out = out.replace(/,\s*,/g, ",");
+  out = out.replace(/,\s*$/, "");
+  return out.trim();
+}
+
+/**
  * Facility knowledge that follows from what a place IS: a masjid holds
  * jumu'ah and provides wudu by definition — directory rows just don't
  * record it. Nothing else is ever assumed (sisters' space, parking,

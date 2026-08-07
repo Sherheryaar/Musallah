@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   applyFacilityDefaults,
+  cleanAddress,
   cleanNotes,
   disambiguateName,
   FACILITY_KEYS,
@@ -132,6 +133,42 @@ describe("cleanNotes", () => {
       ),
     ).toBe(
       "One of the largest mosques in the UK. Sisters' entrance via the London Muslim Centre.",
+    );
+  });
+});
+
+describe("cleanAddress", () => {
+  it("strips a placeholder segment left by a blank CSV column (real dataset examples)", () => {
+    expect(cleanAddress("17 Wellington Road, n/a, Tipton,Sandwell, DY4 8RS")).toBe(
+      "17 Wellington Road, Tipton,Sandwell, DY4 8RS",
+    );
+    expect(cleanAddress("246 Bow Road, not known, Bow,Tower Hamlets, E3 3AP")).toBe(
+      "246 Bow Road, Bow,Tower Hamlets, E3 3AP",
+    );
+    expect(
+      cleanAddress("3 Sherwood Ave, Abbeyquarter, Ballyhaunis,None until 2015"),
+    ).toBe("3 Sherwood Ave, Abbeyquarter, Ballyhaunis");
+  });
+
+  it("strips a stray international dialling code", () => {
+    expect(cleanAddress("Kesh Road, +353, Gortnakesh,Cavan,")).toBe(
+      "Kesh Road, Gortnakesh,Cavan",
+    );
+  });
+
+  it("collapses an empty segment left by a blank line-2 field", () => {
+    expect(
+      cleanAddress(
+        "King George VI Building, University of Newcastle upon Tyne, , Newcastle upon Tyne, NE1 7RU",
+      ),
+    ).toBe(
+      "King George VI Building, University of Newcastle upon Tyne, Newcastle upon Tyne, NE1 7RU",
+    );
+  });
+
+  it("leaves normal addresses, including inconsistent comma spacing, untouched", () => {
+    expect(cleanAddress("9 Roundel Street, Darnall,Sheffield, S9 3LE")).toBe(
+      "9 Roundel Street, Darnall,Sheffield, S9 3LE",
     );
   });
 });

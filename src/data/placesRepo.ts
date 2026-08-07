@@ -1,5 +1,6 @@
 import {
   applyFacilityDefaults,
+  cleanAddress,
   cleanNotes,
   disambiguateName,
   FACILITY_KEYS,
@@ -161,13 +162,14 @@ function buildPlace(raw: Record<string, unknown>): Place | null {
   }
 
   const type = coerceType(raw.type);
+  const address = cleanAddress(raw.address);
   const place: Place = {
     id: raw.id,
     // "Prayer Room" x63 in the dataset — append the venue from the address
     // so identical generic names stop being indistinguishable.
-    name: disambiguateName(raw.name, raw.address),
+    name: disambiguateName(raw.name, address),
     type,
-    address: raw.address,
+    address,
     lat: raw.lat,
     lng: raw.lng,
     // Masjid ⇒ jumu'ah + wudu by definition; nothing else is assumed.
