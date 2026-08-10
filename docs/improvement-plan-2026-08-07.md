@@ -14,6 +14,16 @@
 > - **X11–X22 remainder, and the LATER tier.**
 >
 > Anything below that is already done is left in place as the rationale.
+>
+> **UPDATE — 2026-08-10.** A measured performance pass landed (commit
+> `3a6ade8`): per-keystroke search cost, refresh diffing, per-instance
+> stylesheet rebuilds, map re-grouping on GPS fixes, prayer-time memoization
+> and the qibla sun-scan double-run are all fixed, with before/after numbers
+> in the commit message. Separately, the jamaat-times gap now has a
+> community loop (commit `42827d3`): one-tap confirm/dispute on places with
+> times, provenance-tagged contributions on places without — see
+> `docs/jamaat-triage.md`. The X-tier items above (typography migration,
+> bottom-sheet translateY rewrite) remain open for the reasons stated.
 
 # Musallah — Final Design & Engineering Plan
 
