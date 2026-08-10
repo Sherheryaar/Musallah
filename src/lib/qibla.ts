@@ -14,7 +14,7 @@
 // solar model) and the moment each day when the sun sits along the qibla
 // line — a compass-free cross-check anyone can perform with a shadow.
 
-import { julianDate, sunPosition } from "./prayerCalc";
+import { sunPosition } from "./prayerCalc";
 
 /** Kaaba, Masjid al-Haram. Same reference point the adhan library uses. */
 export const KAABA = { lat: 21.4225241, lng: 39.8261818 } as const;
@@ -148,31 +148,33 @@ export type SunPosition = {
   altitude: number;
 };
 
+const MS_PER_DAY = 86_400_000;
 /**
- * Where the sun is, for a location and instant. Uses the same solar model
- * as the prayer times (praytimes.org / Meeus simplified), which is accurate
- * to well under a degree — far better than any phone magnetometer.
+ * Julian Date of the Unix epoch. Lets an instant be converted straight from
+ * epoch milliseconds, with no Date object and no calendar arithmetic — which
+ * is what makes the minute-by-minute scan in qiblaSunCrossings affordable.
+ * Verified against julianDate() in qibla.test.ts.
  */
-export function sunAzimuth(
+const JD_UNIX_EPOCH = 2440587.5;
+
+/**
+ * Where the sun is, for a location and an instant given in epoch
+ * milliseconds. Uses the same solar model as the prayer times
+ * (praytimes.org / Meeus simplified), which is accurate to well under a
+ * degree — far better than any phone magnetometer.
+ */
+export function sunAzimuthAt(
   lat: number,
   lng: number,
-  when: Date,
+  epochMs: number,
 ): SunPosition {
-  // Julian date of the instant, in UT.
-  const jd =
-    julianDate(when.getUTCFullYear(), when.getUTCMonth() + 1, when.getUTCDate()) +
-    (when.getUTCHours() +
-      when.getUTCMinutes() / 60 +
-      when.getUTCSeconds() / 3600) /
-      24;
+  const jd = epochMs / MS_PER_DAY + JD_UNIX_EPOCH;
   const { declination, equationOfTime } = sunPosition(jd);
 
   // Hour angle: how far the sun is past the local meridian, in degrees,
   // positive in the afternoon. Solar time = UT + EqT + longitude/15.
   const utHours =
-    when.getUTCHours() +
-    when.getUTCMinutes() / 60 +
-    when.getUTCSeconds() / 3600;
+    (((epochMs % MS_PER_DAY) + MS_PER_DAY) % MS_PER_DAY) / 3_600_000;
   const solarHours = utHours + equationOfTime + lng / 15;
   const hourAngle = (solarHours - 12) * 15;
 
@@ -192,6 +194,11 @@ export function sunAzimuth(
   const azimuth = normalizeAngle(toDeg(Math.atan2(y, x)) + 180);
 
   return { azimuth, altitude };
+}
+
+/** Where the sun is at a given Date. Thin wrapper over sunAzimuthAt. */
+export function sunAzimuth(lat: number, lng: number, when: Date): SunPosition {
+  return sunAzimuthAt(lat, lng, when.getTime());
 }
 
 export type SunAlignment = {
@@ -262,50 +269,62 @@ export function qiblaSunCrossings(
   const bearing = qiblaBearing(lat, lng);
   const start = new Date(day);
   start.setHours(0, 0, 0, 0);
+  const startMs = start.getTime();
 
-  const offsetAt = (t: Date) => {
-    const { azimuth, altitude } = sunAzimuth(lat, lng, t);
-    return { delta: angleDelta(azimuth, bearing), altitude };
-  };
+  // Epoch milliseconds throughout, and only the two ANSWERS become Date
+  // objects. The scan walks 1,440 instants; building a Date for each — and
+  // re-deriving its Julian date from calendar fields — was the most expensive
+  // thing the qibla screen did, for a result the arithmetic gives directly.
+  const deltaAt = (ms: number) =>
+    angleDelta(sunAzimuthAt(lat, lng, ms).azimuth, bearing);
 
-  const refine = (lo: Date, hi: Date): Date => {
-    let a = lo.getTime();
-    let b = hi.getTime();
-    for (let i = 0; i < 30; i++) {
+  const refine = (loMs: number, hiMs: number): Date => {
+    let a = loMs;
+    let b = hiMs;
+    let signA = Math.sign(deltaAt(a));
+    // 20 halvings of a 60-second bracket lands inside a tenth of a
+    // millisecond — far beyond the minute this is displayed to, and the
+    // remaining iterations were pure cost. `signA` is carried rather than
+    // recomputed: the old loop evaluated the solar model twice per step when
+    // only the midpoint had moved.
+    for (let i = 0; i < 20; i++) {
       const mid = (a + b) / 2;
-      const da = offsetAt(new Date(a)).delta;
-      const dm = offsetAt(new Date(mid)).delta;
-      if (Math.sign(da) === Math.sign(dm)) a = mid;
-      else b = mid;
+      const signMid = Math.sign(deltaAt(mid));
+      if (signA === signMid) {
+        a = mid;
+        signA = signMid;
+      } else {
+        b = mid;
+      }
     }
     return new Date(Math.round((a + b) / 2));
   };
 
   let towards: Date | null = null;
   let away: Date | null = null;
-  let prev = offsetAt(start);
-  let prevTime = start;
+  const first = sunAzimuthAt(lat, lng, startMs);
+  let prevDelta = angleDelta(first.azimuth, bearing);
+  let prevAltitude = first.altitude;
 
   for (let minute = 1; minute <= 24 * 60; minute++) {
-    const t = new Date(start.getTime() + minute * 60_000);
-    const curr = offsetAt(t);
-    // Sign change in the offset = the sun crossed the qibla azimuth.
-    // Skip jumps across the ±180° wrap, which are not crossings.
-    const crossed =
-      Math.sign(curr.delta) !== Math.sign(prev.delta) &&
-      Math.abs(curr.delta - prev.delta) < 180;
-    if (crossed && curr.altitude > 0 && prev.altitude > 0) {
-      towards ??= refine(prevTime, t);
+    const ms = startMs + minute * 60_000;
+    const sun = sunAzimuthAt(lat, lng, ms);
+    const delta = angleDelta(sun.azimuth, bearing);
+    const signChanged = Math.sign(delta) !== Math.sign(prevDelta);
+    // Both crossings need daylight either side, so this gate can be checked
+    // before the (rarer) sign-change branches rather than inside each.
+    if (signChanged && sun.altitude > 0 && prevAltitude > 0) {
+      const jump = Math.abs(delta - prevDelta);
+      if (jump < 180) {
+        // The sun crossed the qibla azimuth itself.
+        towards ??= refine(ms - 60_000, ms);
+      } else {
+        // The opposite crossing: the offset passed through ±180°.
+        away ??= new Date(ms - 30_000);
+      }
     }
-    // The opposite crossing: offset passes through ±180°.
-    const oppositeCrossed =
-      Math.sign(curr.delta) !== Math.sign(prev.delta) &&
-      Math.abs(curr.delta - prev.delta) >= 180;
-    if (oppositeCrossed && curr.altitude > 0 && prev.altitude > 0) {
-      away ??= new Date(prevTime.getTime() + 30_000);
-    }
-    prev = curr;
-    prevTime = t;
+    prevDelta = delta;
+    prevAltitude = sun.altitude;
   }
   return { towards, away };
 }

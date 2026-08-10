@@ -47,26 +47,55 @@ export function tokenize(text: string): string[] {
 }
 
 /**
+ * Scratch rows for the DP below, allocated once.
+ *
+ * A single keystroke compares this many token pairs across the whole dataset:
+ * roughly six tokens per place over a few thousand places. Two fresh arrays
+ * per call meant tens of thousands of short-lived allocations per keystroke,
+ * all of them the same couple of dozen slots.
+ *
+ * Module-level state is safe here because JavaScript is single-threaded and
+ * withinEditDistance neither recurses nor awaits, so no second caller can be
+ * mid-comparison. The buffers grow on demand and are never shrunk; the widest
+ * token seen bounds them, which for place names is a few dozen characters.
+ */
+let dpPrev = new Int32Array(64);
+let dpCurr = new Int32Array(64);
+
+/**
  * Bounded Levenshtein distance check (true if distance ≤ max). Classic
  * two-row DP with an early exit when the whole row exceeds max.
  */
 function withinEditDistance(a: string, b: string, max: number): boolean {
-  if (Math.abs(a.length - b.length) > max) return false;
-  let prev = new Array<number>(b.length + 1);
-  let curr = new Array<number>(b.length + 1);
-  for (let j = 0; j <= b.length; j++) prev[j] = j;
+  const bLen = b.length;
+  if (Math.abs(a.length - bLen) > max) return false;
+  if (dpPrev.length < bLen + 1) {
+    dpPrev = new Int32Array(bLen + 1);
+    dpCurr = new Int32Array(bLen + 1);
+  }
+  let prev = dpPrev;
+  let curr = dpCurr;
+  for (let j = 0; j <= bLen; j++) prev[j] = j;
   for (let i = 1; i <= a.length; i++) {
     curr[0] = i;
-    let rowMin = curr[0];
-    for (let j = 1; j <= b.length; j++) {
-      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
-      curr[j] = Math.min(prev[j] + 1, curr[j - 1] + 1, prev[j - 1] + cost);
-      if (curr[j] < rowMin) rowMin = curr[j];
+    let rowMin = i;
+    const ac = a.charCodeAt(i - 1);
+    for (let j = 1; j <= bLen; j++) {
+      const cost = ac === b.charCodeAt(j - 1) ? 0 : 1;
+      const substitute = prev[j - 1] + cost;
+      const insert = curr[j - 1] + 1;
+      const remove = prev[j] + 1;
+      let best = substitute < insert ? substitute : insert;
+      if (remove < best) best = remove;
+      curr[j] = best;
+      if (best < rowMin) rowMin = best;
     }
     if (rowMin > max) return false;
-    [prev, curr] = [curr, prev];
+    const swap = prev;
+    prev = curr;
+    curr = swap;
   }
-  return prev[b.length] <= max;
+  return prev[bLen] <= max;
 }
 
 /**
@@ -84,17 +113,37 @@ function tokenMatches(textToken: string, queryToken: string): boolean {
 }
 
 /**
- * True when every query token matches some text token. Tokens are expected
- * pre-computed via tokenize() for the text side (do it once per place, not
- * once per keystroke).
+ * True when every query token matches some text token. BOTH sides are
+ * pre-tokenised: the text side once per place, and the query side once per
+ * keystroke.
+ *
+ * Tokenising the query inside this function (which is what the old
+ * `fuzzyMatches(tokens, query)` shape forced) meant the same short string was
+ * lowercased, NFD-normalised and split by four regexes once per PLACE — a few
+ * thousand times per keystroke — to produce an identical result every time.
  */
+export function fuzzyMatchesTokens(
+  textTokens: readonly string[],
+  queryTokens: readonly string[],
+): boolean {
+  if (queryTokens.length === 0) return true;
+  for (const qt of queryTokens) {
+    let found = false;
+    for (const tt of textTokens) {
+      if (tokenMatches(tt, qt)) {
+        found = true;
+        break;
+      }
+    }
+    if (!found) return false;
+  }
+  return true;
+}
+
+/** Convenience wrapper for one-off checks and tests. */
 export function fuzzyMatches(
   textTokens: readonly string[],
   query: string,
 ): boolean {
-  const queryTokens = tokenize(query);
-  if (queryTokens.length === 0) return true;
-  return queryTokens.every((qt) =>
-    textTokens.some((tt) => tokenMatches(tt, qt)),
-  );
+  return fuzzyMatchesTokens(textTokens, tokenize(query));
 }

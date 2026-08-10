@@ -7,6 +7,8 @@ import {
   disambiguateName,
   FACILITY_KEYS,
   FacilityKey,
+  Place,
+  placesEqual,
 } from "./places";
 
 const noFacilities = () =>
@@ -169,6 +171,138 @@ describe("cleanAddress", () => {
   it("leaves normal addresses, including inconsistent comma spacing, untouched", () => {
     expect(cleanAddress("9 Roundel Street, Darnall,Sheffield, S9 3LE")).toBe(
       "9 Roundel Street, Darnall,Sheffield, S9 3LE",
+    );
+  });
+});
+
+describe("placesEqual", () => {
+  /**
+   * Every optional field populated. The point of a fully-populated fixture is
+   * the "notices a change to any field" test below: it walks these keys, so a
+   * field left out here is a field the test cannot police.
+   */
+  const full = (): Place => ({
+    id: "abc",
+    name: "Central Masjid",
+    type: "masjid",
+    address: "1 High Street, Leeds, LS1 1AA",
+    lat: 53.8008,
+    lng: -1.5491,
+    facilities: {
+      sistersSpace: true,
+      wudu: true,
+      disabledAccess: false,
+      parking: true,
+      jumuah: true,
+      janazah: false,
+    },
+    jumuahOnly: true,
+    jumuahTimes: ["13:00", "13:45"],
+    jamaat: {
+      fajr: "05:15",
+      dhuhr: "13:30",
+      asr: "17:00",
+      maghrib: "20:45",
+      isha: "22:00",
+      source: "Website timetable",
+      recordedOn: "2026-07-01",
+    },
+    notes: "Enter from the rear",
+    lastVerified: "2026-07-02",
+    source: "Phone call",
+    phone: "0113 000 0000",
+    website: "https://example.org",
+    facebook: "https://facebook.com/example",
+    instagram: "https://instagram.com/example",
+    confidence: "verified",
+  });
+
+  it("treats structurally identical datasets as equal", () => {
+    expect(placesEqual([full()], [full()])).toBe(true);
+    expect(placesEqual([], [])).toBe(true);
+  });
+
+  it("notices length and ordering differences", () => {
+    const a = full();
+    const b = { ...full(), id: "def" };
+    expect(placesEqual([a], [a, b])).toBe(false);
+    expect(placesEqual([a, b], [b, a])).toBe(false);
+  });
+
+  // The guard that makes this function safe to extend: adding a field to
+  // `Place` without adding it to placeEqual fails here.
+  it("notices a change to any field", () => {
+    const changed: Record<string, unknown> = {
+      id: "other",
+      name: "Other name",
+      type: "musalla",
+      address: "2 Low Street",
+      lat: 53.9,
+      lng: -1.6,
+      jumuahOnly: undefined,
+      jumuahTimes: ["13:00"],
+      notes: "Different note",
+      lastVerified: "2026-08-01",
+      source: "Visit",
+      phone: "0113 111 1111",
+      website: "https://other.example",
+      facebook: undefined,
+      instagram: "https://instagram.com/other",
+      confidence: "unverified",
+    };
+    for (const [key, value] of Object.entries(changed)) {
+      const mutated = { ...full(), [key]: value } as Place;
+      expect(placesEqual([full()], [mutated]), `field ${key}`).toBe(false);
+    }
+
+    for (const key of FACILITY_KEYS) {
+      const mutated = full();
+      mutated.facilities = {
+        ...mutated.facilities,
+        [key]: !mutated.facilities[key],
+      };
+      expect(placesEqual([full()], [mutated]), `facility ${key}`).toBe(false);
+    }
+
+    // jamaat is a nested object, so each of ITS fields needs the same check —
+    // a stale jamaat time is the most consequential thing this could miss.
+    const jamaatFields = Object.keys(full().jamaat!) as Array<
+      keyof NonNullable<Place["jamaat"]>
+    >;
+    for (const key of jamaatFields) {
+      const mutated = full();
+      mutated.jamaat = { ...mutated.jamaat!, [key]: "changed" };
+      expect(placesEqual([full()], [mutated]), `jamaat ${key}`).toBe(false);
+    }
+    const withoutJamaat = full();
+    delete withoutJamaat.jamaat;
+    expect(placesEqual([full()], [withoutJamaat])).toBe(false);
+  });
+
+  it("covers every key of Place", () => {
+    // Belt and braces for the loop above: if `Place` grows a field, this
+    // fails until the fixture (and therefore the mutation test) includes it.
+    expect(Object.keys(full()).sort()).toEqual(
+      [
+        "address",
+        "confidence",
+        "facebook",
+        "facilities",
+        "id",
+        "instagram",
+        "jamaat",
+        "jumuahOnly",
+        "jumuahTimes",
+        "lastVerified",
+        "lat",
+        "lng",
+        "name",
+        "notes",
+        "phone",
+        "source",
+        "type",
+        "website",
+      ].sort(),
     );
   });
 });

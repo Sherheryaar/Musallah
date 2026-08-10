@@ -17,6 +17,7 @@ import { useTheme } from "@/context/ThemeContext";
 import { FALLBACK_LOCATION } from "@/lib/geo";
 import { formatHijri } from "@/lib/hijri";
 import { computePrayerSchedule, PrayerScheduleEntry } from "@/lib/prayerTimes";
+import { createThemedStyles } from "@/lib/themedStyles";
 import { radius, spacing, type, type ThemeColors } from "@/lib/theme";
 
 const WEEKDAYS = [
@@ -90,11 +91,6 @@ function getStatus(
     nextLabel: next.label,
     msUntilNext: next.time.getTime() - now.getTime(),
   };
-}
-
-function useStyles() {
-  const { colors } = useTheme();
-  return useMemo(() => createStyles(colors), [colors]);
 }
 
 export default function PrayerScreen() {
@@ -352,7 +348,7 @@ export default function PrayerScreen() {
   );
 }
 
-const createStyles = (colors: ThemeColors) =>
+const useStyles = createThemedStyles((colors: ThemeColors) =>
   StyleSheet.create({
   screen: {
     flex: 1,
@@ -473,4 +469,5 @@ const createStyles = (colors: ThemeColors) =>
     color: colors.accent,
     fontWeight: "600",
   },
-});
+}),
+);

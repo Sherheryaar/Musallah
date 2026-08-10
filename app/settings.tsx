@@ -17,15 +17,11 @@ import { useNotifications } from "@/context/NotificationsContext";
 import { useSettings } from "@/context/SettingsContext";
 import { useTheme } from "@/context/ThemeContext";
 import { PRAYER_KEYS, PRAYER_LABELS } from "@/lib/notificationPlan";
+import { createThemedStyles } from "@/lib/themedStyles";
 import { radius, spacing, type, type ThemeColors } from "@/lib/theme";
 import { MIN_TARGET } from "@/lib/metrics";
 
 type IconName = React.ComponentProps<typeof MaterialCommunityIcons>["name"];
-
-function useStyles() {
-  const { colors } = useTheme();
-  return useMemo(() => createStyles(colors), [colors]);
-}
 
 const PRIVACY_POINTS: { title: string; body: string }[] = [
   {
@@ -496,7 +492,7 @@ export default function SettingsScreen() {
   );
 }
 
-const createStyles = (colors: ThemeColors) =>
+const useStyles = createThemedStyles((colors: ThemeColors) =>
   StyleSheet.create({
   screen: {
     flex: 1,
@@ -720,4 +716,5 @@ const createStyles = (colors: ThemeColors) =>
     ...type.subhead,
     color: colors.textSecondary,
   },
-});
+}),
+);

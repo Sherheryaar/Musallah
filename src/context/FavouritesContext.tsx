@@ -29,6 +29,13 @@ const MAX_FAVOURITES = 100;
 type FavouritesValue = {
   /** Ordered ids, oldest first. */
   ids: string[];
+  /**
+   * The same ids as a set, for membership tests. Consumers filter whole
+   * datasets against this (the home screen excludes saved places from the
+   * nearby list, and the saved-only filter runs over every place), which an
+   * array scan turns into O(places × favourites).
+   */
+  idSet: ReadonlySet<string>;
   isFavourite: (id: string) => boolean;
   toggle: (id: string) => void;
   /** False until storage has been read, so the UI can avoid flicker. */
@@ -37,6 +44,7 @@ type FavouritesValue = {
 
 const FavouritesContext = createContext<FavouritesValue>({
   ids: [],
+  idSet: new Set(),
   isFavourite: () => false,
   toggle: () => {},
   hydrated: false,
@@ -95,14 +103,17 @@ export function FavouritesProvider({
     });
   }, []);
 
+  const idSet = useMemo(() => new Set(ids), [ids]);
+
   const value = useMemo<FavouritesValue>(
     () => ({
       ids,
-      isFavourite: (id: string) => ids.includes(id),
+      idSet,
+      isFavourite: (id: string) => idSet.has(id),
       toggle,
       hydrated,
     }),
-    [ids, toggle, hydrated],
+    [ids, idSet, toggle, hydrated],
   );
 
   return (

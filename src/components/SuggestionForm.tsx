@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import {
   ActivityIndicator,
   Text,
@@ -10,6 +10,7 @@ import {
 import Touchable from "./Touchable";
 import { type SubmissionResult } from "@/lib/feedback";
 import { useTheme } from "@/context/ThemeContext";
+import { createThemedStyles } from "@/lib/themedStyles";
 import { spacing, radius, type, type ThemeColors } from "@/lib/theme";
 import { MIN_TARGET } from "@/lib/metrics";
 
@@ -57,7 +58,7 @@ export default function SuggestionForm({
   onSent,
 }: Props) {
   const { colors } = useTheme();
-  const styles = useMemo(() => createStyles(colors), [colors]);
+  const styles = useStyles();
   const [message, setMessage] = useState("");
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
   const [sending, setSending] = useState(false);
@@ -188,7 +189,7 @@ export default function SuggestionForm({
   );
 }
 
-const createStyles = (colors: ThemeColors) =>
+const useStyles = createThemedStyles((colors: ThemeColors) =>
   StyleSheet.create({
     card: {
       backgroundColor: colors.canvas,
@@ -270,4 +271,5 @@ const createStyles = (colors: ThemeColors) =>
       color: colors.textSecondary,
       textAlign: "center",
     },
-  });
+  }),
+);

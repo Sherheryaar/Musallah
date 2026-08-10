@@ -31,6 +31,7 @@ import { submitEditSuggestion } from "@/lib/feedback";
 import { FACILITY_ICONS, PLACE_TYPE_ICONS, type IconName } from "@/lib/icons";
 import { isLikelyIreland } from "@/lib/geo";
 import { computePrayerTimes, PrayerTimes } from "@/lib/prayerTimes";
+import { createThemedStyles } from "@/lib/themedStyles";
 import {
   numeric,
   placeTypeColors,
@@ -107,21 +108,16 @@ function confidenceLabel(confidence?: "verified" | "community" | "unverified"): 
   }
 }
 
-function useStyles() {
-  const { colors } = useTheme();
-  return useMemo(() => createStyles(colors), [colors]);
-}
-
 export default function PlaceDetailScreen() {
   const styles = useStyles();
   const { colors } = useTheme();
   const { id } = useLocalSearchParams<{ id: string }>();
   const insets = useSafeAreaInsets();
-  const { places, status: placesStatus, refresh: refreshPlaces } =
-    usePlaces();
-  // Memoized lookup: this screen re-renders on form/times state changes,
-  // and a linear scan per render is wasted work as the dataset grows.
-  const place = useMemo(() => places.find((p) => p.id === id), [places, id]);
+  const { byId, status: placesStatus, refresh: refreshPlaces } = usePlaces();
+  // Straight off the shared id index (see PlacesContext) — this screen
+  // re-renders on form and prayer-time state changes, and the previous
+  // `places.find()` walked the whole dataset to reach one row.
+  const place = byId.get(id);
   const { settings } = useSettings();
   const { isFavourite, toggle: toggleFavourite } = useFavourites();
   const [showEditForm, setShowEditForm] = useState(false);
@@ -533,7 +529,7 @@ export default function PlaceDetailScreen() {
   );
 }
 
-const createStyles = (colors: ThemeColors) =>
+const useStyles = createThemedStyles((colors: ThemeColors) =>
   StyleSheet.create({
   screen: {
     flex: 1,
@@ -765,4 +761,5 @@ const createStyles = (colors: ThemeColors) =>
     ...type.subhead,
     color: colors.accent,
   },
-});
+}),
+);

@@ -80,11 +80,15 @@ function groupIntoCells(
   cellLat: number,
   cellLng: number,
 ): PinGroups {
+  // The cell size is constant for the whole pass, so it is formatted once
+  // here rather than interpolated into a few thousand per-place keys. Only
+  // the cells that survive as clusters pay for the full key.
+  const prefix = `${cellLat}:${cellLng}:`;
   const cells = new Map<string, PinCandidate[]>();
   for (const candidate of inView) {
     const cy = Math.floor(candidate.place.lat / cellLat);
     const cx = Math.floor(candidate.place.lng / cellLng);
-    const key = `${cellLat}:${cellLng}:${cy}:${cx}`;
+    const key = `${cy}:${cx}`;
     const bucket = cells.get(key);
     if (bucket) {
       bucket.push(candidate);
@@ -95,7 +99,7 @@ function groupIntoCells(
 
   const singles: PinCandidate[] = [];
   const clusters: PinCluster[] = [];
-  for (const [key, bucket] of cells) {
+  for (const [cellKey, bucket] of cells) {
     if (bucket.length === 1) {
       singles.push(bucket[0]);
       continue;
@@ -107,7 +111,10 @@ function groupIntoCells(
       sumLng += place.lng;
     }
     clusters.push({
-      key,
+      // The cell size stays part of a cluster's identity: two cells with the
+      // same index at different zooms are different clusters, and the slot
+      // assignment relies on that (see assignSlots).
+      key: prefix + cellKey,
       lat: sumLat / bucket.length,
       lng: sumLng / bucket.length,
       count: bucket.length,

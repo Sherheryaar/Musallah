@@ -1,7 +1,8 @@
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { Animated, Easing, Platform, StyleSheet, View } from "react-native";
 
 import { useTheme } from "@/context/ThemeContext";
+import { createThemedStyles } from "@/lib/themedStyles";
 import { radius, spacing, type ThemeColors } from "@/lib/theme";
 import { useReducedMotion } from "@/lib/useReducedMotion";
 
@@ -23,7 +24,7 @@ const BARS = ["70%", "45%", "32%"] as const;
 
 export default function PlacesSkeleton() {
   const { colors } = useTheme();
-  const styles = useMemo(() => createStyles(colors), [colors]);
+  const styles = useStyles();
   const reduceMotion = useReducedMotion();
 
   // ONE loop for every row. Opacity is native-drivable, so the pulse costs
@@ -84,7 +85,7 @@ export default function PlacesSkeleton() {
   );
 }
 
-const createStyles = (colors: ThemeColors) =>
+const useStyles = createThemedStyles((colors: ThemeColors) =>
   StyleSheet.create({
     wrap: {
       gap: spacing.m,
@@ -119,4 +120,5 @@ const createStyles = (colors: ThemeColors) =>
     barShort: {
       height: 10,
     },
-  });
+  }),
+);

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Platform, ScrollView, StyleSheet, Text, View } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
@@ -9,6 +9,7 @@ import { useSettings } from "@/context/SettingsContext";
 import { useTheme } from "@/context/ThemeContext";
 import { elevation } from "@/lib/elevation";
 import { MIN_TARGET } from "@/lib/metrics";
+import { createThemedStyles } from "@/lib/themedStyles";
 import { radius, spacing, type, type ThemeColors } from "@/lib/theme";
 
 // First run, before anything asks for anything.
@@ -35,8 +36,8 @@ type Props = {
 };
 
 export default function Onboarding({ onDone }: Props) {
-  const { colors, scheme } = useTheme();
-  const styles = useMemo(() => createStyles(colors, scheme), [colors, scheme]);
+  const { colors } = useTheme();
+  const styles = useStyles();
   const { settings, updateSettings } = useSettings();
   // `null` = storage not read yet. Gating on "has hydrated" rather than on
   // "the flag is absent" is what stops first-run users seeing a flash of
@@ -207,7 +208,7 @@ export default function Onboarding({ onDone }: Props) {
   );
 }
 
-const createStyles = (colors: ThemeColors, scheme: "light" | "dark") =>
+const useStyles = createThemedStyles((colors: ThemeColors, scheme: "light" | "dark") =>
   StyleSheet.create({
     backdrop: {
       ...StyleSheet.absoluteFillObject,
@@ -329,4 +330,5 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark") =>
       fontWeight: "600",
       color: colors.textSecondary,
     },
-  });
+  }),
+);

@@ -5,6 +5,11 @@ dist/
 web-build/
 *.log
 .DS_Store
+
+# Local build outputs. A release APK is ~60 MB of generated binary; it comes
+# from `eas build` and belongs on a release, not in git history.
+*.apk
+*.aab
 scripts/.overpass-cache.json
 app-example/
 expo-env.d.ts

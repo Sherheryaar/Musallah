@@ -12,6 +12,7 @@ import {
 } from "@/data/places";
 import { FACILITY_ICONS, PLACE_TYPE_ICONS } from "@/lib/icons";
 import { useTheme } from "@/context/ThemeContext";
+import { createThemedStyles } from "@/lib/themedStyles";
 import {
   numeric,
   placeTypeColors,
@@ -36,7 +37,7 @@ type Props = {
  */
 function PlaceCard({ place, distanceLabel, onPress }: Props) {
   const { colors } = useTheme();
-  const styles = useMemo(() => createStyles(colors), [colors]);
+  const styles = useStyles();
   // Memoized: recomputing per row on every list render adds up with
   // hundreds of places.
   const available = useMemo(
@@ -123,7 +124,7 @@ function PlaceCard({ place, distanceLabel, onPress }: Props) {
 // not on every keystroke, GPS tick, or unrelated screen state change.
 export default React.memo(PlaceCard);
 
-const createStyles = (colors: ThemeColors) =>
+const useStyles = createThemedStyles((colors: ThemeColors) =>
   StyleSheet.create({
   card: {
     flexDirection: "row",
@@ -188,4 +189,5 @@ const createStyles = (colors: ThemeColors) =>
     alignItems: "center",
     gap: spacing.m,
   },
-});
+}),
+);

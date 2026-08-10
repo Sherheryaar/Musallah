@@ -409,6 +409,20 @@ export default function QiblaScreen() {
     return () => clearInterval(id);
   }, []);
 
+  // Which calendar day the sun crossings below are for. A separate value from
+  // minuteTick because the crossings only change at MIDNIGHT, while the live
+  // sun position changes every minute — and the dependency that encoded that
+  // used to be the expression `minuteTick > 0 && new Date().getDate()`, which
+  // evaluates to `false` on the first render and to a number on the second.
+  // So the day-long scan ran twice on every visit to this screen, and would
+  // silently stop tracking the date if the tick were ever reset to 0.
+  const dayKey = useMemo(() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${now.getMonth()}-${now.getDate()}`;
+    // minuteTick is the clock this is sampled against, by design.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [minuteTick]);
+
   const point = coords ?? FALLBACK_LOCATION;
   const bearing = useMemo(
     () => qiblaBearing(point.lat, point.lng),
@@ -448,10 +462,13 @@ export default function QiblaScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [point.lat, point.lng, minuteTick],
   );
+  // The day's shadow-method crossings. The heaviest computation on this
+  // screen (a minute-by-minute scan of the whole day), and it only needs
+  // redoing when the date or the location changes — never on the minute tick.
   const crossings = useMemo(
     () => qiblaSunCrossings(point.lat, point.lng, new Date()),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [point.lat, point.lng, minuteTick > 0 && new Date().getDate()],
+    [point.lat, point.lng, dayKey],
   );
 
   // The sun method stops being a footnote the moment the compass can't be

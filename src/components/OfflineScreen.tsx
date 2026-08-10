@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useRouter } from "expo-router";
@@ -6,6 +6,7 @@ import { useRouter } from "expo-router";
 import Touchable from "./Touchable";
 import { useTheme } from "@/context/ThemeContext";
 import { MIN_TARGET } from "@/lib/metrics";
+import { createThemedStyles } from "@/lib/themedStyles";
 import { radius, spacing, type, type ThemeColors } from "@/lib/theme";
 
 type Props = {
@@ -26,7 +27,7 @@ const OFFLINE_ROUTES = [
  */
 export default function OfflineScreen({ onRetry }: Props) {
   const { colors } = useTheme();
-  const styles = useMemo(() => createStyles(colors), [colors]);
+  const styles = useStyles();
   const [retrying, setRetrying] = useState(false);
   const router = useRouter();
 
@@ -94,7 +95,7 @@ export default function OfflineScreen({ onRetry }: Props) {
   );
 }
 
-const createStyles = (colors: ThemeColors) =>
+const useStyles = createThemedStyles((colors: ThemeColors) =>
   StyleSheet.create({
     screen: {
       flex: 1,
@@ -167,4 +168,5 @@ const createStyles = (colors: ThemeColors) =>
       fontWeight: "600",
       color: colors.accent,
     },
-  });
+  }),
+);

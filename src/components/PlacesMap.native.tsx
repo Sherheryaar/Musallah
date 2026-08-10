@@ -121,20 +121,48 @@ export default function PlacesMap({
   // Wherever the user has panned/zoomed to; null until the first gesture.
   const [region, setRegion] = useState<MapRegion | null>(null);
 
-  const initialRegion = useMemo(() => {
+  // Computed ONCE, from a ref: MapView reads `initialRegion` on mount and
+  // never again, and the effects below own the camera after that. As a
+  // useMemo over [userLocation, results] this changed identity on every GPS
+  // fix, which dragged the pin grouping below along with it.
+  const initialRegionRef = useRef<MapRegion | null>(null);
+  if (initialRegionRef.current === null) {
     const centre = userLocation
       ? { lat: userLocation.lat, lng: userLocation.lng }
       : results[0]
         ? { lat: results[0].place.lat, lng: results[0].place.lng }
         : { lat: FALLBACK_REGION.latitude, lng: FALLBACK_REGION.longitude };
-
-    return {
+    initialRegionRef.current = {
       latitude: centre.lat,
       longitude: centre.lng,
       latitudeDelta: 0.05,
       longitudeDelta: 0.05,
     };
-  }, [userLocation, results]);
+  }
+  const initialRegion = initialRegionRef.current;
+
+  // Which viewport the pins are grouped for BEFORE the map reports one of
+  // its own. It has to follow the first GPS fix rather than stay on the
+  // mount-time fallback, because the effect below glides the camera to the
+  // user and `onRegionChangeComplete` only lands when that animation ends —
+  // without this, a cold start showed London's pins for the whole flight to
+  // wherever the user actually is.
+  //
+  // Keyed on the coordinates, not the object, so a fresh fix at the same
+  // place doesn't invalidate anything downstream.
+  const fallbackRegion = useMemo<MapRegion>(
+    () =>
+      userLocation
+        ? {
+            latitude: userLocation.lat,
+            longitude: userLocation.lng,
+            latitudeDelta: 0.05,
+            longitudeDelta: 0.05,
+          }
+        : initialRegion,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [userLocation?.lat, userLocation?.lng, initialRegion],
+  );
 
   // On the first GPS fix after mount, glide from the fallback view to the
   // user. initialRegion is only read once by the native map, so without this
@@ -203,9 +231,14 @@ export default function PlacesMap({
   // What the viewport renders: individual pins while under budget, numbered
   // cluster bubbles for dense areas when zoomed out — every place in view is
   // always represented (see src/lib/mapPins.ts).
+  //
+  // Note the `??` is resolved OUTSIDE the memo: once the map has reported a
+  // region, `fallbackRegion` moving with the user must not re-run the
+  // grouping, and it can't, because it is no longer part of the input.
+  const groupingRegion = region ?? fallbackRegion;
   const { singles, clusters } = useMemo(
-    () => buildPinGroups(results, region ?? initialRegion),
-    [results, region, initialRegion],
+    () => buildPinGroups(results, groupingRegion),
+    [results, groupingRegion],
   );
 
   // FIXED MARKER POOL. Exactly MAX_MARKERS Marker components mount once and

@@ -13,7 +13,9 @@ import {
   qiblaSunCrossings,
   smoothAngle,
   sunAzimuth,
+  sunAzimuthAt,
 } from "./qibla";
+import { julianDate } from "./prayerCalc";
 
 describe("qiblaBearing", () => {
   // Goldens are the widely published qibla bearings for these cities;
@@ -118,10 +120,47 @@ describe("compassPoint", () => {
   });
 });
 
+// sunAzimuthAt derives the Julian date straight from epoch milliseconds
+// (jd = ms / 86400000 + 2440587.5) instead of going through calendar fields,
+// which is what makes the 1,440-step scan in qiblaSunCrossings affordable.
+// That shortcut is only valid if it agrees with prayerCalc's julianDate() —
+// the function the prayer times are built on — so pin the identity here
+// rather than trusting a constant in a comment.
+describe("epoch to Julian date", () => {
+  it("matches prayerCalc.julianDate at midnight UTC", () => {
+    for (const iso of [
+      "1970-01-01",
+      "2000-02-29", // leap day, and the Gregorian century rule
+      "2026-08-10",
+      "2100-03-01", // 2100 is NOT a leap year
+    ]) {
+      const [y, m, d] = iso.split("-").map(Number);
+      const ms = Date.UTC(y, m - 1, d);
+      expect(ms / 86_400_000 + 2440587.5).toBe(julianDate(y, m, d));
+    }
+  });
+
+  it("advances by exactly one day per 86,400,000 ms", () => {
+    const ms = Date.UTC(2026, 7, 10);
+    expect((ms + 86_400_000) / 86_400_000 + 2440587.5).toBe(
+      julianDate(2026, 8, 11),
+    );
+  });
+});
+
 // The sun's position is fixed by astronomy, so these assert against facts
 // that hold independently of this implementation.
 describe("sunAzimuth", () => {
   const LONDON = { lat: 51.5074, lng: -0.1278 };
+
+  it("agrees whether given a Date or epoch milliseconds", () => {
+    for (const iso of ["2026-06-21T09:17:33Z", "2026-12-21T15:02:00Z"]) {
+      const t = new Date(iso);
+      expect(sunAzimuthAt(LONDON.lat, LONDON.lng, t.getTime())).toEqual(
+        sunAzimuth(LONDON.lat, LONDON.lng, t),
+      );
+    }
+  });
 
   /** Scan a UTC day for the instant the sun is highest. */
   function solarNoon(lat: number, lng: number, date: string): Date {

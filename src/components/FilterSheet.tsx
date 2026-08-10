@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
   BackHandler,
@@ -14,6 +14,7 @@ import Touchable from "./Touchable";
 import { FACILITY_KEYS, FACILITY_LABELS, FacilityKey } from "@/data/places";
 import { useTheme } from "@/context/ThemeContext";
 import { elevation } from "@/lib/elevation";
+import { createThemedStyles } from "@/lib/themedStyles";
 import { radius, spacing, type, type ThemeColors } from "@/lib/theme";
 import { useReducedMotion } from "@/lib/useReducedMotion";
 import { useSheetAnimation } from "@/lib/useSheetAnimation";
@@ -49,8 +50,8 @@ export default function FilterSheet({
   onClear,
   onClose,
 }: Props) {
-  const { colors, scheme } = useTheme();
-  const styles = useMemo(() => createStyles(colors, scheme), [colors, scheme]);
+  const { colors } = useTheme();
+  const styles = useStyles();
   const insets = useSafeAreaInsets();
   const reduceMotion = useReducedMotion();
   const { mounted, progress } = useSheetAnimation(visible, reduceMotion);
@@ -247,7 +248,7 @@ export default function FilterSheet({
   );
 }
 
-const createStyles = (colors: ThemeColors, scheme: "light" | "dark") =>
+const useStyles = createThemedStyles((colors: ThemeColors, scheme: "light" | "dark") =>
   StyleSheet.create({
   backdrop: {
     ...StyleSheet.absoluteFillObject,
@@ -361,4 +362,5 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark") =>
     ...type.body,
     fontWeight: "700",
   },
-});
+}),
+);

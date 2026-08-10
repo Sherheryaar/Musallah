@@ -11,6 +11,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useTheme } from "@/context/ThemeContext";
 import { elevation } from "@/lib/elevation";
+import { createThemedStyles } from "@/lib/themedStyles";
 import { radius, spacing, type ThemeColors } from "@/lib/theme";
 import { useReducedMotion } from "@/lib/useReducedMotion";
 
@@ -45,8 +46,8 @@ type Props = {
 };
 
 export default function BottomSheet({ children, aboveSheet }: Props) {
-  const { colors, scheme } = useTheme();
-  const styles = useMemo(() => createStyles(colors, scheme), [colors, scheme]);
+  const { colors } = useTheme();
+  const styles = useStyles();
   const { height: windowHeight } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const reduceMotion = useReducedMotion();
@@ -262,7 +263,7 @@ export default function BottomSheet({ children, aboveSheet }: Props) {
   );
 }
 
-const createStyles = (colors: ThemeColors, scheme: "light" | "dark") =>
+const useStyles = createThemedStyles((colors: ThemeColors, scheme: "light" | "dark") =>
   StyleSheet.create({
   // pointerEvents in `style`, not as a prop — react-native-web deprecated the
   // prop form, and the style form works on both platforms.
@@ -322,4 +323,5 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark") =>
   body: {
     flex: 1,
   },
-});
+}),
+);

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Animated,
   BackHandler,
@@ -18,6 +18,7 @@ import { useReducedMotion } from "@/lib/useReducedMotion";
 import { useSheetAnimation } from "@/lib/useSheetAnimation";
 import { useTheme } from "@/context/ThemeContext";
 import { elevation } from "@/lib/elevation";
+import { createThemedStyles } from "@/lib/themedStyles";
 import { radius, spacing, type, type ThemeColors } from "@/lib/theme";
 
 type Props = {
@@ -48,8 +49,8 @@ export default function SuggestionSheet({
   onSend,
   onClose,
 }: Props) {
-  const { colors, scheme } = useTheme();
-  const styles = useMemo(() => createStyles(colors, scheme), [colors, scheme]);
+  const { colors } = useTheme();
+  const styles = useStyles();
   const keyboardHeight = useKeyboardHeight();
   const reduceMotion = useReducedMotion();
   const { mounted, progress } = useSheetAnimation(visible, reduceMotion);
@@ -160,7 +161,7 @@ export default function SuggestionSheet({
   );
 }
 
-const createStyles = (colors: ThemeColors, scheme: "light" | "dark") =>
+const useStyles = createThemedStyles((colors: ThemeColors, scheme: "light" | "dark") =>
   StyleSheet.create({
     backdrop: {
       ...StyleSheet.absoluteFillObject,
@@ -203,4 +204,5 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark") =>
       fontWeight: "700",
       color: colors.text,
     },
-  });
+  }),
+);

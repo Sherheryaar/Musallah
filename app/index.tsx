@@ -34,8 +34,8 @@ import PlaceCard from "@/components/PlaceCard";
 import PlacesMap from "@/components/PlacesMap";
 import PlacesSkeleton from "@/components/PlacesSkeleton";
 import SuggestionSheet from "@/components/SuggestionSheet";
-import { distanceKm, formatDistance } from "@/lib/distance";
-import { fuzzyMatches, tokenize } from "@/lib/fuzzy";
+import { distanceFrom, distanceKm, formatDistance } from "@/lib/distance";
+import { fuzzyMatchesTokens, tokenize } from "@/lib/fuzzy";
 import {
   FALLBACK_LOCATION,
   isInCoverage,
@@ -46,6 +46,7 @@ import { submitNewPlaceSuggestion } from "@/lib/feedback";
 import { useTheme } from "@/context/ThemeContext";
 import { elevation } from "@/lib/elevation";
 import { MIN_TARGET } from "@/lib/metrics";
+import { createThemedStyles } from "@/lib/themedStyles";
 import {
   numeric,
   placeTypeColors,
@@ -78,10 +79,8 @@ type SearchOrigin = { lat: number; lng: number; label: string };
 // Module-level so the reference is stable across renders (helps FlatList).
 const keyExtractor = (item: Result) => item.place.id;
 
-function useStyles() {
-  const { colors, scheme } = useTheme();
-  return useMemo(() => createStyles(colors, scheme), [colors, scheme]);
-}
+/** One place's precomputed search fields — see getSearchIndex below. */
+type SearchEntry = { name: string; address: string; tokens: string[] };
 
 /**
  * The times bar answers the question people actually have — "when is the
@@ -214,11 +213,15 @@ export default function HomeScreen() {
   // Bottom inset keeps the list clear of the Android gesture/nav bar
   // (the app draws edge-to-edge on Android).
   const insets = useSafeAreaInsets();
-  const { places, status: placesStatus, refresh: refreshPlaces } =
-    usePlaces();
+  const {
+    places,
+    byId: placesById,
+    status: placesStatus,
+    refresh: refreshPlaces,
+  } = usePlaces();
   const { settings, updateSettings } = useSettings();
   const { reportLocation } = useNotifications();
-  const { ids: favouriteIds } = useFavourites();
+  const { ids: favouriteIds, idSet: savedIdSet } = useFavourites();
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(
     null,
   );
@@ -463,31 +466,59 @@ export default function HomeScreen() {
   // and ordered around the searched area (km), but each row is labelled
   // with the distance from the user (kmFromUser) — "the masjids in London,
   // and how far each one is from me".
-  const byDistance = useMemo<Result[]>(
-    () =>
-      places
-        .map((place) => ({
-          place,
-          km: distanceKm(origin.lat, origin.lng, place.lat, place.lng),
-          kmFromUser: distanceKm(
-            gpsOrigin.lat,
-            gpsOrigin.lng,
-            place.lat,
-            place.lng,
-          ),
-        }))
-        .sort((a, b) => a.km - b.km),
-    [places, origin.lat, origin.lng, gpsOrigin.lat, gpsOrigin.lng],
-  );
-
-  // Pre-tokenised name+address per place, so typo-tolerant matching doesn't
-  // re-tokenise 2,000+ strings on every keystroke.
-  const searchTokens = useMemo(() => {
-    const map = new Map<string, string[]>();
-    for (const place of places) {
-      map.set(place.id, tokenize(`${place.name} ${place.address}`));
+  const byDistance = useMemo<Result[]>(() => {
+    const measureFromAnchor = distanceFrom(origin.lat, origin.lng);
+    // With no area search the two anchors ARE the same point, which is the
+    // normal case — measuring twice then produced two identical numbers for
+    // every place in the dataset, on every GPS fix.
+    const sameAnchor =
+      origin.lat === gpsOrigin.lat && origin.lng === gpsOrigin.lng;
+    const measureFromUser = sameAnchor
+      ? measureFromAnchor
+      : distanceFrom(gpsOrigin.lat, gpsOrigin.lng);
+    const measured: Result[] = new Array(places.length);
+    for (let i = 0; i < places.length; i++) {
+      const place = places[i];
+      const km = measureFromAnchor(place.lat, place.lng);
+      measured[i] = {
+        place,
+        km,
+        kmFromUser: sameAnchor ? km : measureFromUser(place.lat, place.lng),
+      };
     }
-    return map;
+    return measured.sort((a, b) => a.km - b.km);
+  }, [places, origin.lat, origin.lng, gpsOrigin.lat, gpsOrigin.lng]);
+
+  // Pre-lowercased haystack and pre-tokenised name+address per place, so
+  // neither the exact-substring pass nor the typo-tolerant one has to
+  // re-derive them from thousands of strings on every keystroke.
+  //
+  // Built LAZILY, on the first keystroke: tokenising the whole dataset costs
+  // several thousand regex passes, and it used to run eagerly the moment the
+  // data landed — on the critical path of the first paint, for a feature the
+  // user may never touch. A ref keyed on the dataset it was built from is the
+  // whole cache; nothing re-renders when it fills.
+  const searchIndexRef = useRef<{
+    source: Place[];
+    entries: Map<string, SearchEntry>;
+  } | null>(null);
+  const getSearchIndex = useCallback(() => {
+    const cached = searchIndexRef.current;
+    if (cached && cached.source === places) return cached.entries;
+    const entries = new Map<string, SearchEntry>();
+    for (const place of places) {
+      // Name and address stay SEPARATE strings. Concatenating them into one
+      // haystack would quietly widen the exact-match pass to queries that
+      // straddle the join, which is a different feature from the one the
+      // fuzzy tier already provides.
+      entries.set(place.id, {
+        name: place.name.toLowerCase(),
+        address: place.address.toLowerCase(),
+        tokens: tokenize(`${place.name} ${place.address}`),
+      });
+    }
+    searchIndexRef.current = { source: places, entries };
+    return entries;
   }, [places]);
 
   // Debounced text actually used to filter/recluster: the box itself
@@ -521,8 +552,6 @@ export default function HomeScreen() {
   // typo-tolerant matches ("birmingam", "masjed", "mosque"→masjid) — so a
   // spelling mistake still finds the place, but exact hits always outrank
   // guesses. Distance order is preserved within each tier.
-  const savedIdSet = useMemo(() => new Set(favouriteIds), [favouriteIds]);
-
   const results = useMemo(() => {
     const selected = [...activeFilters]; // spread once, not once per place
     const q = effectiveQuery.toLowerCase();
@@ -545,16 +574,26 @@ export default function HomeScreen() {
           isFriday),
     );
     if (!q) return base;
+    const index = getSearchIndex();
+    // Tokenised ONCE, not once per place: fuzzyMatches(tokens, query) took the
+    // raw query string, so the same few characters were lowercased,
+    // NFD-normalised and split by four regexes a few thousand times per
+    // keystroke to produce the identical token list every time.
+    const queryTokens = tokenize(q);
     const exact: Result[] = [];
     const fuzzy: Result[] = [];
     for (const result of base) {
       const { place } = result;
-      if (
-        place.name.toLowerCase().includes(q) ||
-        place.address.toLowerCase().includes(q)
-      ) {
+      // The index is built from the same `places` array this list came from,
+      // so a miss shouldn't happen — but if it ever did, the place must still
+      // be findable by name. Dropping it would remove a real place from search
+      // results with nothing to show that anything went wrong.
+      const entry = index.get(place.id);
+      const name = entry?.name ?? place.name.toLowerCase();
+      const address = entry?.address ?? place.address.toLowerCase();
+      if (name.includes(q) || address.includes(q)) {
         exact.push(result);
-      } else if (fuzzyMatches(searchTokens.get(place.id) ?? [], q)) {
+      } else if (fuzzyMatchesTokens(entry?.tokens ?? [], queryTokens)) {
         fuzzy.push(result);
       }
     }
@@ -563,7 +602,7 @@ export default function HomeScreen() {
     byDistance,
     activeFilters,
     effectiveQuery,
-    searchTokens,
+    getSearchIndex,
     settings.corroboratedOnly,
     settings.savedOnly,
     savedIdSet,
@@ -597,17 +636,41 @@ export default function HomeScreen() {
 
   // Saved places, resolved from ids against the live dataset. Excluded
   // from the nearby list below so the same row never appears twice.
+  //
+  // Resolved through the id index and measured directly, rather than by
+  // scanning the sorted list: at most a hundred saved ids were being found by
+  // filtering a few thousand rows, and the filter re-ran on every GPS fix.
   const favourites = useMemo(() => {
     if (favouriteIds.length === 0) return [];
-    const wanted = new Set(favouriteIds);
-    const found = new Map(
-      byDistance.filter((r) => wanted.has(r.place.id)).map((r) => [r.place.id, r]),
-    );
-    // Keep the user's own order, not distance order.
-    return favouriteIds
-      .map((id) => found.get(id))
-      .filter((r): r is Result => r !== undefined);
-  }, [favouriteIds, byDistance]);
+    const measureFromAnchor = distanceFrom(origin.lat, origin.lng);
+    const sameAnchor =
+      origin.lat === gpsOrigin.lat && origin.lng === gpsOrigin.lng;
+    const measureFromUser = sameAnchor
+      ? measureFromAnchor
+      : distanceFrom(gpsOrigin.lat, gpsOrigin.lng);
+    const resolved: Result[] = [];
+    // The user's own order, not distance order.
+    for (const id of favouriteIds) {
+      const place = placesById.get(id);
+      // A saved id that is no longer in the dataset simply doesn't render —
+      // which is also the right behaviour when a place is removed upstream.
+      if (!place) continue;
+      const km = measureFromAnchor(place.lat, place.lng);
+      resolved.push({
+        place,
+        km,
+        kmFromUser: sameAnchor ? km : measureFromUser(place.lat, place.lng),
+      });
+    }
+    return resolved;
+  }, [
+    favouriteIds,
+    placesById,
+    origin.lat,
+    origin.lng,
+    gpsOrigin.lat,
+    gpsOrigin.lng,
+  ]);
 
   // Stable callbacks keep React.memo'd rows from re-rendering needlessly.
   const openPlace = useCallback(
@@ -741,7 +804,7 @@ export default function HomeScreen() {
   );
 
   const fridayBanner =
-isFriday && !fridayNoticeDismissed && listResults.length > 0 ? (
+    isFriday && !fridayNoticeDismissed && listResults.length > 0 ? (
       <View style={styles.fridayBanner}>
         <MaterialCommunityIcons
           name="calendar-star"
@@ -955,7 +1018,7 @@ isFriday && !fridayNoticeDismissed && listResults.length > 0 ? (
   );
 }
 
-const createStyles = (colors: ThemeColors, scheme: "light" | "dark") =>
+const useStyles = createThemedStyles((colors: ThemeColors, scheme: "light" | "dark") =>
   StyleSheet.create({
   screen: {
     flex: 1,
@@ -1280,4 +1343,5 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark") =>
     color: colors.accent,
     fontWeight: "600",
   },
-});
+}),
+);

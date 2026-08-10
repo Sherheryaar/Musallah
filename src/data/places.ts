@@ -95,6 +95,82 @@ export type Place = {
   confidence?: "verified" | "community" | "unverified";
 };
 
+/**
+ * Deep equality for two loaded datasets, used to decide whether a refresh
+ * actually changed anything (see PlacesContext).
+ *
+ * This replaces a `JSON.stringify(places)` fingerprint. That built a ~1.5 MB
+ * string out of a few thousand rows on EVERY successful fetch — launch, every
+ * foreground after a minute, and every realtime notification — and then held
+ * onto it for the rest of the session so the next fetch had something to
+ * compare against. This allocates nothing, stops at the first difference
+ * (which is the common case when something really did change), and compares
+ * against the array already in state.
+ *
+ * Every field is compared, and placesEqual is unit-tested by mutating each
+ * key of a fully-populated place in turn — so a field added to `Place` and
+ * forgotten here fails the test rather than silently freezing that field's
+ * updates on screen.
+ */
+export function placesEqual(a: readonly Place[], b: readonly Place[]): boolean {
+  if (a === b) return true;
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    if (!placeEqual(a[i], b[i])) return false;
+  }
+  return true;
+}
+
+function placeEqual(a: Place, b: Place): boolean {
+  if (
+    a.id !== b.id ||
+    a.name !== b.name ||
+    a.type !== b.type ||
+    a.address !== b.address ||
+    a.lat !== b.lat ||
+    a.lng !== b.lng ||
+    a.jumuahOnly !== b.jumuahOnly ||
+    a.notes !== b.notes ||
+    a.lastVerified !== b.lastVerified ||
+    a.source !== b.source ||
+    a.phone !== b.phone ||
+    a.website !== b.website ||
+    a.facebook !== b.facebook ||
+    a.instagram !== b.instagram ||
+    a.confidence !== b.confidence
+  ) {
+    return false;
+  }
+  for (const key of FACILITY_KEYS) {
+    if (a.facilities[key] !== b.facilities[key]) return false;
+  }
+  if (!stringsEqual(a.jumuahTimes, b.jumuahTimes)) return false;
+  return jamaatEqual(a.jamaat, b.jamaat);
+}
+
+function stringsEqual(a?: string[], b?: string[]): boolean {
+  if (a === b) return true;
+  if (!a || !b || a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] !== b[i]) return false;
+  }
+  return true;
+}
+
+function jamaatEqual(a?: JamaatTimes, b?: JamaatTimes): boolean {
+  if (a === b) return true;
+  if (!a || !b) return false;
+  return (
+    a.source === b.source &&
+    a.recordedOn === b.recordedOn &&
+    a.fajr === b.fajr &&
+    a.dhuhr === b.dhuhr &&
+    a.asr === b.asr &&
+    a.maghrib === b.maghrib &&
+    a.isha === b.isha
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Generic-name disambiguation
 //
@@ -164,10 +240,27 @@ export function cleanNotes(notes: string): string | undefined {
 const ADDRESS_JUNK_SEGMENT_RE =
   /(?:n\/a|none|not\s+known|unknown|tbc|tbd|tba|none\s+(?:until|in|till)\s*\d{4}|not\s+until\s*\d{4}|none\s+working)/i;
 
+// Derived from the pattern above, and compiled ONCE. These two were built with
+// `new RegExp(...)` inside cleanAddress, so loading the dataset compiled two
+// fresh regexes per row — a few thousand compilations on every launch and
+// every foreground refresh, which made this function cost several times what
+// the rest of the row validation put together does.
+const ADDRESS_JUNK_MID_RE = new RegExp(
+  `,\\s*${ADDRESS_JUNK_SEGMENT_RE.source}\\s*(?=,|$)`,
+  "gi",
+);
+const ADDRESS_JUNK_LEADING_RE = new RegExp(
+  `^\\s*${ADDRESS_JUNK_SEGMENT_RE.source}\\s*,\\s*`,
+  "i",
+);
+
 export function cleanAddress(address: string): string {
   let out = address;
-  out = out.replace(new RegExp(`,\\s*${ADDRESS_JUNK_SEGMENT_RE.source}\\s*(?=,|$)`, "gi"), "");
-  out = out.replace(new RegExp(`^\\s*${ADDRESS_JUNK_SEGMENT_RE.source}\\s*,\\s*`, "i"), "");
+  // ADDRESS_JUNK_MID_RE carries the `g` flag, which means it also carries a
+  // mutable lastIndex — safe here because String.replace with a global regex
+  // resets it, but the reason this must stay `replace` and never `test`/`exec`.
+  out = out.replace(ADDRESS_JUNK_MID_RE, "");
+  out = out.replace(ADDRESS_JUNK_LEADING_RE, "");
   out = out.replace(/,\s*(\+\d{1,4})\s*(?=,|$)/g, "");
   out = out.replace(/^\s*(\+\d{1,4})\s*,\s*/, "");
   out = out.replace(/,\s*,/g, ",");
