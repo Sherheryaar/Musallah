@@ -25,9 +25,11 @@ import { useFavourites } from "@/context/FavouritesContext";
 import { usePlaces } from "@/context/PlacesContext";
 import { useSettings } from "@/context/SettingsContext";
 import { useTheme } from "@/context/ThemeContext";
+import JamaatCheck from "@/components/JamaatCheck";
 import OfflineScreen from "@/components/OfflineScreen";
 import SuggestionSheet from "@/components/SuggestionSheet";
-import { submitEditSuggestion } from "@/lib/feedback";
+import { submitEditSuggestion, submitJamaatTimes } from "@/lib/feedback";
+import { JAMAAT_SOURCE_TOPICS } from "@/lib/jamaatContribution";
 import { FACILITY_ICONS, PLACE_TYPE_ICONS, type IconName } from "@/lib/icons";
 import { isLikelyIreland } from "@/lib/geo";
 import { computePrayerTimes, PrayerTimes } from "@/lib/prayerTimes";
@@ -121,6 +123,7 @@ export default function PlaceDetailScreen() {
   const { settings } = useSettings();
   const { isFavourite, toggle: toggleFavourite } = useFavourites();
   const [showEditForm, setShowEditForm] = useState(false);
+  const [showTimesForm, setShowTimesForm] = useState(false);
 
   // Computed on-device for this place's exact coordinates -- instant,
   // offline, and it follows the mithl/method chosen in Settings. Only the
@@ -440,6 +443,11 @@ export default function PlaceDetailScreen() {
               before relying on them.
             </Text>
           ) : null}
+          {/* The community loop for the Jamaat column: one-tap
+              confirm/dispute when times exist, an invitation to add them
+              when they don't. Sits INSIDE the prayer-times card because it
+              is about exactly the numbers (or dashes) directly above it. */}
+          <JamaatCheck place={place} onAddTimes={() => setShowTimesForm(true)} />
         </View>
       ) : null}
 
@@ -524,6 +532,21 @@ export default function PlaceDetailScreen() {
       ]}
       onSend={(message) => submitEditSuggestion(place, message)}
       onClose={() => setShowEditForm(false)}
+    />
+    {/* The jamaat-times contribution sheet (opened from JamaatCheck). The
+        topic chips ARE the provenance question — "where did these times
+        come from?" — answered by tapping, not typing, and prefixed onto
+        the message so triage can weigh each contribution instantly. */}
+    <SuggestionSheet
+      visible={showTimesForm}
+      title="Add jamaat times"
+      placeholder={
+        "e.g. Fajr 6:00, Dhuhr 1:30, Asr 6:45, Maghrib +5, Isha 9:15.\n" +
+        "Rough or partial is fine — every prayer you know helps."
+      }
+      topics={[...JAMAAT_SOURCE_TOPICS]}
+      onSend={(message) => submitJamaatTimes(place, message)}
+      onClose={() => setShowTimesForm(false)}
     />
     </View>
   );

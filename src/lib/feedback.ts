@@ -1,6 +1,7 @@
 import { Linking } from "react-native";
 
 import { Place } from "@/data/places";
+import { buildTimesContributionMessage } from "@/lib/jamaatContribution";
 import { supabase } from "@/lib/supabase";
 
 const FEEDBACK_EMAIL = "sheheryaarb@hotmail.com";
@@ -117,6 +118,53 @@ export async function submitNewPlaceSuggestion(
   if (await storeSubmission("new_place", null, trimmed)) return "stored";
 
   return (await openFeedbackEmail("New place suggestion", trimmed))
+    ? "email"
+    : "failed";
+}
+
+/**
+ * One-tap jamaat check-in ("still right" / "out of date"). The message is
+ * pre-built by src/lib/jamaatContribution.ts and rides the same `edit`
+ * submission kind the free-text flow uses — the marker prefix is what
+ * distinguishes it at triage.
+ *
+ * Deliberately NO email fallback: this is a zero-effort tap, and bouncing
+ * the user into a mail client to "finish" it would cost more than the
+ * signal is worth. Offline, it simply reports failure and the UI says so.
+ */
+export async function submitJamaatCheck(
+  place: Place,
+  message: string,
+): Promise<SubmissionResult> {
+  const trimmed = cleanMessage(message).slice(0, MAX_MESSAGE_LENGTH);
+  if (!trimmed) return "failed";
+  return (await storeSubmission("edit", place.id, trimmed))
+    ? "stored"
+    : "failed";
+}
+
+/**
+ * Typed-in jamaat times for a place that has none (or whose times need
+ * replacing). Same shape as submitEditSuggestion — including the email
+ * fallback, because here the user HAS typed something worth saving — but
+ * marked so triage can pull every timetable contribution in one search.
+ */
+export async function submitJamaatTimes(
+  place: Place,
+  message: string,
+): Promise<SubmissionResult> {
+  const trimmed = cleanMessage(message).slice(0, MAX_MESSAGE_LENGTH);
+  if (!trimmed) return "failed";
+  const marked = buildTimesContributionMessage(trimmed).slice(
+    0,
+    MAX_MESSAGE_LENGTH,
+  );
+
+  if (await storeSubmission("edit", place.id, marked)) return "stored";
+
+  const body =
+    "Place: " + place.name + "\n" + "ID: " + place.id + "\n\n" + marked;
+  return (await openFeedbackEmail("Jamaat times: " + place.name, body))
     ? "email"
     : "failed";
 }
