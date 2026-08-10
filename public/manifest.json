@@ -1,6 +1,6 @@
 {
-	"name": "Masjid Locator",
-	"short_name": "Masjid Locator",
+	"name": "Musallah",
+	"short_name": "Musallah",
 	"description": "Find the nearest masjid or prayer space — facilities, jamaat times, and accurate prayer times. No account, no tracking.",
 	"start_url": "/",
 	"display": "standalone",
