@@ -44,7 +44,7 @@ import {
 import { CalcOptions, computePrayerSchedule } from "@/lib/prayerTimes";
 import { submitNewPlaceSuggestion } from "@/lib/feedback";
 import { useTheme } from "@/context/ThemeContext";
-import { elevation } from "@/lib/elevation";
+import { cardEdge, elevation } from "@/lib/elevation";
 import { MIN_TARGET } from "@/lib/metrics";
 import { createThemedStyles } from "@/lib/themedStyles";
 import {
@@ -958,7 +958,7 @@ export default function HomeScreen() {
             // here, and it avoids clipping the view — which on Android
             // would take the elevation shadow with it.
             borderless
-            rippleRadius={24}
+            rippleRadius={26}
             scaleTo={0.92}
           >
             {/* Blue on purpose — it points at the blue you-are-here dot. */}
@@ -1022,22 +1022,19 @@ const useStyles = createThemedStyles((colors: ThemeColors, scheme: "light" | "da
     flex: 1,
     justifyContent: "center",
   },
+  // A floating pill, the redesign's signature control: no outline, just a
+  // soft lift off the map. Dark mode keeps its hairline via cardEdge — an
+  // unlit dark pill over dark map tiles has no edge at all.
   searchInput: {
-    minHeight: MIN_TARGET,
+    minHeight: 48,
     backgroundColor: colors.canvas,
-    borderRadius: radius.l,
-    borderWidth: 1,
-    borderColor: colors.border,
-    paddingLeft: spacing.l,
+    borderRadius: radius.pill,
+    ...cardEdge(scheme, colors),
+    paddingLeft: spacing.l + spacing.xs,
     paddingRight: spacing.xl + spacing.m, // room for the ✕ so text never runs under it
     ...type.callout,
+    fontWeight: "500",
     color: colors.text,
-    // The token, not a hand-rolled shadow. These values WERE `raised`
-    // byte-for-byte, but written out they also drew a black shadow in dark
-    // mode (where it is invisible) and tripped react-native-web's
-    // "shadow* style props are deprecated" warning on the web build. The
-    // helper handles all three platforms and both schemes.
-    ...elevation(scheme, "raised"),
   },
   clearButton: {
     position: "absolute",
@@ -1052,31 +1049,33 @@ const useStyles = createThemedStyles((colors: ThemeColors, scheme: "light" | "da
     overflow: "hidden",
   },
   filterButton: {
-    minHeight: MIN_TARGET,
+    minHeight: 48,
     justifyContent: "center",
     paddingHorizontal: spacing.l,
     backgroundColor: colors.canvas,
-    borderRadius: radius.l,
-    borderWidth: 1,
-    borderColor: colors.border,
-    ...elevation(scheme, "raised"),
+    borderRadius: radius.pill,
+    ...cardEdge(scheme, colors),
     // Android only: clip the press ripple to the rounded corners — without
     // this it flashes as a full rectangle behind them. The elevation shadow
     // survives clipping (it draws from the outline); iOS must NOT clip, or
     // clipsToBounds would erase the shadow* props above.
     ...Platform.select({ android: { overflow: "hidden" as const } }),
   },
+  // Filters on = the pill fills with the accent. Louder than the old tinted
+  // outline on purpose: an active filter silently hides places, which is
+  // exactly the state that must never be missable.
   filterButtonActive: {
-    backgroundColor: colors.accentSoft,
+    backgroundColor: colors.accent,
+    // Only meaningful in dark mode, where cardEdge drew a hairline.
     borderColor: colors.accent,
   },
   filterButtonLabel: {
     ...type.subhead,
-    fontWeight: "600",
+    fontWeight: "700",
     color: colors.textSecondary,
   },
   filterButtonLabelActive: {
-    color: colors.accent,
+    color: colors.canvas,
   },
   contextRow: {
     flexDirection: "row",
@@ -1101,12 +1100,10 @@ const useStyles = createThemedStyles((colors: ThemeColors, scheme: "light" | "da
     alignItems: "center",
     gap: spacing.m,
     backgroundColor: colors.canvas,
-    borderRadius: radius.m,
-    borderWidth: 1,
-    borderColor: colors.border,
-    paddingHorizontal: spacing.m,
+    borderRadius: radius.pill,
+    ...cardEdge(scheme, colors),
+    paddingHorizontal: spacing.l,
     paddingVertical: spacing.s,
-    ...elevation(scheme, "raised"),
   },
   legendItem: {
     flexDirection: "row",
@@ -1155,13 +1152,16 @@ const useStyles = createThemedStyles((colors: ThemeColors, scheme: "light" | "da
     gap: 2,
   },
   nextLabel: {
-    ...type.micro,
+    ...type.caption,
+    fontWeight: "600",
     color: colors.textSecondary,
     ...numeric,
   },
+  // The headline of the whole sheet: the next prayer's time, in the brand
+  // green at title weight. This is the number people open the app for.
   nextTime: {
-    ...type.title3,
-    fontWeight: "700",
+    ...type.title2,
+    fontWeight: "800",
     color: colors.accent,
     ...numeric,
   },
@@ -1185,13 +1185,13 @@ const useStyles = createThemedStyles((colors: ThemeColors, scheme: "light" | "da
     ...numeric,
   },
   progressTrack: {
-    height: 4,
-    borderRadius: 2,
+    height: 6,
+    borderRadius: 3,
     backgroundColor: colors.surfaceSecondary,
     overflow: "hidden",
   },
   progressFill: {
-    height: 4,
+    height: 6,
     width: "100%",
     backgroundColor: colors.accent,
     // Grow from the left edge, not the centre. The ARRAY form, not
@@ -1203,12 +1203,14 @@ const useStyles = createThemedStyles((colors: ThemeColors, scheme: "light" | "da
     // progress. The track's own radius + overflow does the rounding.
   },
   recenterButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
     backgroundColor: colors.canvas,
-    borderWidth: 1,
-    borderColor: colors.border,
+    // Hairline only in dark, where the shadow below is invisible.
+    ...(scheme === "dark"
+      ? { borderWidth: 1, borderColor: colors.border }
+      : null),
     alignItems: "center",
     justifyContent: "center",
     // `floating` is the level a FAB belongs on, and its Android elevation (6)
@@ -1241,16 +1243,22 @@ const useStyles = createThemedStyles((colors: ThemeColors, scheme: "light" | "da
     color: colors.textSecondary,
     textAlign: "center",
   },
+  // A real filled pill, not a text link: on an empty screen this button IS
+  // the way forward, so it dresses like the primary action it is.
   emptyButton: {
     alignItems: "center",
     justifyContent: "center",
     minHeight: MIN_TARGET,
     marginTop: spacing.s,
+    paddingHorizontal: spacing.xl,
+    borderRadius: radius.pill,
+    backgroundColor: colors.accent,
+    overflow: "hidden",
   },
   emptyButtonLabel: {
     ...type.subhead,
-    color: colors.accent,
-    fontWeight: "600",
+    color: colors.canvas,
+    fontWeight: "700",
   },
   listFooter: {
     alignItems: "center",

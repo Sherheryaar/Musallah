@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from "react";
 import { Animated, Easing, StyleSheet, View } from "react-native";
 
 import { useTheme } from "@/context/ThemeContext";
+import { cardEdge } from "@/lib/elevation";
 import { createThemedStyles } from "@/lib/themedStyles";
 import { radius, spacing, type ThemeColors } from "@/lib/theme";
 import { useReducedMotion } from "@/lib/useReducedMotion";
@@ -85,7 +86,7 @@ export default function PlacesSkeleton() {
   );
 }
 
-const useStyles = createThemedStyles((colors: ThemeColors) =>
+const useStyles = createThemedStyles((colors: ThemeColors, scheme) =>
   StyleSheet.create({
     wrap: {
       gap: spacing.m,
@@ -95,14 +96,13 @@ const useStyles = createThemedStyles((colors: ThemeColors) =>
       flexDirection: "row",
       gap: spacing.m,
       backgroundColor: colors.canvas,
-      borderRadius: radius.l,
-      borderWidth: 1,
-      borderColor: colors.border,
+      borderRadius: radius.xl,
+      ...cardEdge(scheme, colors),
       padding: spacing.l,
     },
     tile: {
-      width: 42,
-      height: 42,
+      width: 44,
+      height: 44,
       borderRadius: radius.l,
       backgroundColor: colors.surfaceSecondary,
       flexShrink: 0,

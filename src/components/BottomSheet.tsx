@@ -26,13 +26,14 @@ const ABOVE_SHEET_HEIGHT = 64;
 
 /**
  * What must stay on screen at the `peek` snap: the drag handle (16pt
- * padding either side of a 5pt bar = 37) plus the times bar (12 + 42 + 12
- * gap + 4 progress track + 1 border ~= 83), plus a little breathing room.
+ * padding either side of a 5pt bar = 37) plus the times bar (12 + ~46 of
+ * label + title2 time + 12 gap + 6 progress track + 1 border ~= 89), plus
+ * a little breathing room.
  *
  * This is measured against the sheet's OWN container, not the window --
  * see the onLayout below for why that distinction is the whole bug.
  */
-const PEEK_CONTENT_HEIGHT = 128;
+const PEEK_CONTENT_HEIGHT = 136;
 
 type Props = {
   children: React.ReactNode;

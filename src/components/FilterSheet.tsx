@@ -332,7 +332,7 @@ const useStyles = createThemedStyles((colors: ThemeColors, scheme: "light" | "da
   box: {
     width: 26,
     height: 26,
-    borderRadius: 8,
+    borderRadius: radius.m,
     borderWidth: 2,
     // controlBorder: unchecked, this box IS the checkbox — there is no label
     // inside it and no fill. In `border` it measured 1.26:1 on canvas, so all
@@ -347,8 +347,8 @@ const useStyles = createThemedStyles((colors: ThemeColors, scheme: "light" | "da
   },
   doneButton: {
     marginTop: spacing.m,
-    minHeight: 48,
-    borderRadius: radius.l,
+    minHeight: 52,
+    borderRadius: radius.pill,
     backgroundColor: colors.accent,
     alignItems: "center",
     justifyContent: "center",

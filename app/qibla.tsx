@@ -42,7 +42,7 @@ import {
   smoothAngle,
 } from "@/lib/qibla";
 import { hapticSuccess, hapticTick } from "@/lib/haptics";
-import { elevation } from "@/lib/elevation";
+import { cardEdge, elevation } from "@/lib/elevation";
 import { MIN_TARGET } from "@/lib/metrics";
 import { radius, spacing, type, type ThemeColors } from "@/lib/theme";
 import { useReducedMotion } from "@/lib/useReducedMotion";
@@ -1341,11 +1341,13 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark", dial: numbe
       alignItems: "flex-start",
       gap: spacing.s,
       backgroundColor: colors.canvas,
-      borderRadius: radius.l,
-      borderWidth: 1,
-      borderColor: colors.border,
+      borderRadius: radius.xl,
+      ...cardEdge(scheme, colors),
       padding: spacing.l,
     },
+    // The tinted fill carries the warning on its own now — the redesign
+    // dropped card outlines in light mode, and amber-on-amber-soft already
+    // clears AA for the icon and text inside.
     noteAttention: {
       backgroundColor: colors.attentionSoft,
       borderColor: colors.attention,
@@ -1371,10 +1373,11 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark", dial: numbe
     sunCard: {
       width: "100%",
       backgroundColor: colors.canvas,
-      borderRadius: radius.l,
-      borderWidth: 1,
-      borderColor: colors.border,
-      overflow: "hidden",
+      borderRadius: radius.xl,
+      ...cardEdge(scheme, colors),
+      // Android only: clips the header ripple. iOS must not clip, or
+      // masksToBounds erases the shadow.
+      ...Platform.select({ android: { overflow: "hidden" as const } }),
     },
     sunHeader: {
       flexDirection: "row",

@@ -1,5 +1,7 @@
 import { Platform } from "react-native";
 
+import type { ThemeColors } from "./theme";
+
 // Kept OUT of theme.ts on purpose: that module is unit-tested in a plain
 // node environment, and a runtime import of react-native there makes it
 // unloadable, which silently drops the palette contrast tests.
@@ -53,4 +55,20 @@ export function elevation(
       shadowOffset: { width: 0, height: spec.offsetY },
     },
   });
+}
+
+/**
+ * The redesign's card edge, in one place instead of ten.
+ *
+ * Light mode: NO border — cards float on a soft `raised` shadow, which is
+ * what makes the screen read as layered rather than outlined. Dark mode:
+ * the exact opposite, a hairline and no shadow, because a black shadow on a
+ * near-black screen is invisible and the border is what gives a card an
+ * edge there. Spread this into any card-like surface after its own
+ * backgroundColor/radius; it only supplies the edge treatment.
+ */
+export function cardEdge(scheme: "light" | "dark", colors: ThemeColors) {
+  return scheme === "dark"
+    ? { borderWidth: 1, borderColor: colors.border }
+    : elevation(scheme, "raised");
 }

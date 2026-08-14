@@ -121,7 +121,7 @@ function ThemedNavigator() {
           headerStyle: { backgroundColor: colors.canvas },
           headerTintColor: colors.text,
           headerShadowVisible: false,
-          headerTitleStyle: { fontWeight: "600" },
+          headerTitleStyle: { fontWeight: "700" },
           // Android left-aligns header titles by default; center to match iOS.
           headerTitleAlign: "center",
           // Unset, every push inherited react-native-screens' platform
@@ -207,7 +207,7 @@ const createStyles = (colors: ThemeColors) =>
       marginTop: spacing.s,
       minHeight: MIN_TARGET,
       paddingHorizontal: spacing.xl,
-      borderRadius: radius.l,
+      borderRadius: radius.pill,
       backgroundColor: colors.accent,
       alignItems: "center",
       justifyContent: "center",

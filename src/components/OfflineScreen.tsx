@@ -127,7 +127,7 @@ const useStyles = createThemedStyles((colors: ThemeColors) =>
     retryButton: {
       marginTop: spacing.m,
       backgroundColor: colors.accent,
-      borderRadius: radius.m,
+      borderRadius: radius.pill,
       paddingVertical: spacing.m,
       paddingHorizontal: spacing.xl,
       minWidth: 140,
@@ -157,7 +157,7 @@ const useStyles = createThemedStyles((colors: ThemeColors) =>
       gap: spacing.s,
       minHeight: MIN_TARGET,
       paddingHorizontal: spacing.l,
-      borderRadius: radius.l,
+      borderRadius: radius.pill,
       borderWidth: 1,
       borderColor: colors.border,
       backgroundColor: colors.canvas,

@@ -10,6 +10,7 @@ import {
   StyleSheet,
 } from "react-native";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import { LinearGradient } from "expo-linear-gradient";
 import { Stack, useLocalSearchParams } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -36,19 +37,19 @@ import { computePrayerTimes, PrayerTimes } from "@/lib/prayerTimes";
 import { createThemedStyles } from "@/lib/themedStyles";
 import {
   numeric,
-  placeTypeColors,
   spacing,
   radius,
   type,
   type ThemeColors,
 } from "@/lib/theme";
+import { cardEdge } from "@/lib/elevation";
 import { MIN_TARGET } from "@/lib/metrics";
 
-// The hero band is always the deep masjid green — the identity colour the
-// pins already use. Deliberately NOT per-type: white text fails contrast
-// on the amber musalla colour, and a header that changes colour per page
-// reads as inconsistency, not information (the type is stated in words).
-const HERO_BACKGROUND = placeTypeColors.masjid;
+// The hero band is always the brand gradient (emerald into deep teal — the
+// stops live in the palette and white text is contrast-asserted against
+// both). Deliberately NOT per-type: white text fails contrast on the amber
+// musalla colour, and a header that changes colour per page reads as
+// inconsistency, not information (the type is stated in words).
 const HERO_TEXT = "#FFFFFF";
 
 function mapsSearchUrl(place: Place): string {
@@ -253,7 +254,12 @@ export default function PlaceDetailScreen() {
     >
       <Stack.Screen options={ { title: PLACE_TYPE_LABELS[place.type] } } />
 
-      <View style={styles.hero}>
+      <LinearGradient
+        colors={[colors.heroGradientStart, colors.heroGradientEnd]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.hero}
+      >
         <View style={styles.heroMetaRow}>
           <MaterialCommunityIcons
             name={PLACE_TYPE_ICONS[place.type]}
@@ -277,7 +283,7 @@ export default function PlaceDetailScreen() {
         {place.address ? (
           <Text style={styles.heroAddress}>{place.address}</Text>
         ) : null}
-      </View>
+      </LinearGradient>
 
       <View style={styles.actionRow}>
         <Touchable
@@ -552,7 +558,7 @@ export default function PlaceDetailScreen() {
   );
 }
 
-const useStyles = createThemedStyles((colors: ThemeColors) =>
+const useStyles = createThemedStyles((colors: ThemeColors, scheme) =>
   StyleSheet.create({
   screen: {
     flex: 1,
@@ -566,9 +572,7 @@ const useStyles = createThemedStyles((colors: ThemeColors) =>
     gap: spacing.l,
     // No paddingBottom here — the inline style adds insets.bottom to it, so a
     // value in the stylesheet is always overridden and only misleads.
-    // Centered, phone-width column on desktop browsers.
     width: "100%",
-    maxWidth: 680,
     alignSelf: "center",
   },
   missing: {
@@ -581,11 +585,12 @@ const useStyles = createThemedStyles((colors: ThemeColors) =>
     color: colors.textSecondary,
   },
   hero: {
-    backgroundColor: HERO_BACKGROUND,
     borderRadius: radius.xl,
-    padding: spacing.l,
-    paddingVertical: spacing.xl - spacing.xs,
-    gap: spacing.xs,
+    padding: spacing.l + spacing.xs,
+    paddingVertical: spacing.xl,
+    gap: spacing.s - 2,
+    // Clips the gradient to the rounded corners on Android.
+    overflow: "hidden",
   },
   heroMetaRow: {
     flexDirection: "row",
@@ -607,12 +612,13 @@ const useStyles = createThemedStyles((colors: ThemeColors) =>
     color: HERO_TEXT,
   },
   heroName: {
-    ...type.title2,
-    fontWeight: "700",
+    ...type.title1,
+    fontWeight: "800",
     color: HERO_TEXT,
   },
   heroAddress: {
     ...type.subhead,
+    fontWeight: "500",
     color: HERO_TEXT,
   },
   actionRow: {
@@ -624,24 +630,25 @@ const useStyles = createThemedStyles((colors: ThemeColors) =>
     flexDirection: "row",
     gap: spacing.s,
     backgroundColor: colors.accent,
-    borderRadius: radius.l,
+    borderRadius: radius.pill,
     paddingVertical: spacing.m,
     alignItems: "center",
-    minHeight: 48,
+    minHeight: 52,
     justifyContent: "center",
     // Clips the Android ripple to the rounded corners.
     overflow: "hidden",
   },
-  // canvas, not white: the dark theme's accent is light green.
+  // canvas, not white: the dark theme's accent is a bright green under
+  // near-black labels.
   directionsLabel: {
     color: colors.canvas,
     ...type.body,
-    fontWeight: "600",
+    fontWeight: "700",
   },
   quickAction: {
-    width: 48,
-    minHeight: 48,
-    borderRadius: radius.l,
+    width: 52,
+    minHeight: 52,
+    borderRadius: radius.pill,
     backgroundColor: colors.accentSoft,
     alignItems: "center",
     justifyContent: "center",
@@ -650,9 +657,8 @@ const useStyles = createThemedStyles((colors: ThemeColors) =>
   },
   section: {
     backgroundColor: colors.canvas,
-    borderRadius: radius.l,
-    borderWidth: 1,
-    borderColor: colors.border,
+    borderRadius: radius.xl,
+    ...cardEdge(scheme, colors),
     padding: spacing.l,
     gap: spacing.m,
   },

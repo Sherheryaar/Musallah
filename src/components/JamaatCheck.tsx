@@ -236,20 +236,20 @@ const useStyles = createThemedStyles((colors: ThemeColors) =>
       flexDirection: "row",
       gap: spacing.s,
     },
+    // Soft-filled pills: the accent tint says "tappable" where the old
+    // hairline outline was nearly invisible on the card it sits in.
     checkChip: {
       minHeight: MIN_TARGET,
       justifyContent: "center",
-      paddingHorizontal: spacing.m,
+      paddingHorizontal: spacing.l,
       borderRadius: radius.pill,
-      borderWidth: 1,
-      borderColor: colors.border,
-      backgroundColor: colors.surface,
+      backgroundColor: colors.accentSoft,
       // Clips the Android ripple to the rounded corners.
       overflow: "hidden",
     },
     checkChipLabel: {
       ...type.footnote,
-      fontWeight: "600",
+      fontWeight: "700",
       color: colors.accent,
     },
     thanksRow: {

@@ -174,9 +174,10 @@ const useStyles = createThemedStyles((colors: ThemeColors, scheme: "light" | "da
     },
     card: {
       backgroundColor: colors.surface,
-      borderRadius: radius.l,
-      borderWidth: 1,
-      borderColor: colors.border,
+      borderRadius: radius.xl,
+      ...(scheme === "dark"
+        ? { borderWidth: 1, borderColor: colors.border }
+        : null),
       padding: spacing.l,
       gap: spacing.m,
       marginTop: spacing.l,

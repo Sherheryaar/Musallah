@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo } from "react";
-import { Text, View, StyleSheet } from "react-native";
+import { Platform, Text, View, StyleSheet } from "react-native";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
 import Touchable from "./Touchable";
@@ -12,6 +12,7 @@ import {
 } from "@/data/places";
 import { FACILITY_ICONS, PLACE_TYPE_ICONS } from "@/lib/icons";
 import { useTheme } from "@/context/ThemeContext";
+import { cardEdge } from "@/lib/elevation";
 import { createThemedStyles } from "@/lib/themedStyles";
 import {
   numeric,
@@ -61,8 +62,15 @@ function PlaceCard({ place, distanceLabel, onPress }: Props) {
         distanceLabel ?? "distance unknown"
       }${place.confidence === "verified" ? ", verified" : ""}. ${facilitiesLabel}`}
     >
-      {/* Tile colour matches the place's map pin and the map legend. */}
-      <View style={styles.typeTile}>
+      {/* Tile colour matches the place's map pin and the map legend — the
+          fill is the same hue at 14% alpha, so each row carries its type's
+          colour without shouting it. */}
+      <View
+        style={[
+          styles.typeTile,
+          { backgroundColor: placeTypeColors[place.type] + "24" },
+        ]}
+      >
         <MaterialCommunityIcons
           name={PLACE_TYPE_ICONS[place.type]}
           size={22}
@@ -124,23 +132,25 @@ function PlaceCard({ place, distanceLabel, onPress }: Props) {
 // not on every keystroke, GPS tick, or unrelated screen state change.
 export default React.memo(PlaceCard);
 
-const useStyles = createThemedStyles((colors: ThemeColors) =>
+const useStyles = createThemedStyles((colors: ThemeColors, scheme) =>
   StyleSheet.create({
   card: {
     flexDirection: "row",
     gap: spacing.m,
     backgroundColor: colors.canvas,
-    borderRadius: radius.l,
-    borderWidth: 1,
-    borderColor: colors.border,
+    borderRadius: radius.xl,
+    ...cardEdge(scheme, colors),
     padding: spacing.l,
-    // Keeps Android's ripple inside the card's rounded corners.
-    overflow: "hidden",
+    // Android only: keeps the ripple inside the rounded corners (the
+    // elevation shadow survives — it draws from the outline). iOS must NOT
+    // clip, or masksToBounds erases the card's shadow.
+    ...Platform.select({ android: { overflow: "hidden" as const } }),
   },
   typeTile: {
-    width: 42,
-    height: 42,
+    width: 44,
+    height: 44,
     borderRadius: radius.l,
+    // Fill comes per-type at the call site; this is the fallback.
     backgroundColor: colors.surfaceSecondary,
     alignItems: "center",
     justifyContent: "center",
@@ -159,7 +169,7 @@ const useStyles = createThemedStyles((colors: ThemeColors) =>
   name: {
     flex: 1,
     ...type.body,
-    fontWeight: "600",
+    fontWeight: "700",
     color: colors.text,
   },
   // Pill chip: reads as "at a glance" info rather than body text.

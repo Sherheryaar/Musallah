@@ -1,6 +1,7 @@
 import React, { useMemo } from "react";
 import {
   Linking,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -15,6 +16,7 @@ import ThemedSwitch from "@/components/ThemedSwitch";
 import { useNotifications } from "@/context/NotificationsContext";
 import { useSettings } from "@/context/SettingsContext";
 import { useTheme } from "@/context/ThemeContext";
+import { cardEdge } from "@/lib/elevation";
 import { PRAYER_KEYS, PRAYER_LABELS } from "@/lib/notificationPlan";
 import { createThemedStyles } from "@/lib/themedStyles";
 import { radius, spacing, type, type ThemeColors } from "@/lib/theme";
@@ -94,11 +96,9 @@ function SectionHeader({
   const { colors } = useTheme();
   return (
     <View style={[styles.sectionHeader, first && styles.firstSectionHeader]}>
-      <MaterialCommunityIcons
-        name={icon}
-        size={16}
-        color={colors.textSecondary}
-      />
+      {/* Accent, not textSecondary: the icons are the one place the brand
+          colour can run down this page without shouting. */}
+      <MaterialCommunityIcons name={icon} size={16} color={colors.accent} />
       <Text style={styles.sectionTitle}>{title}</Text>
     </View>
   );
@@ -483,7 +483,7 @@ export default function SettingsScreen() {
   );
 }
 
-const useStyles = createThemedStyles((colors: ThemeColors) =>
+const useStyles = createThemedStyles((colors: ThemeColors, scheme) =>
   StyleSheet.create({
   screen: {
     flex: 1,
@@ -491,10 +491,7 @@ const useStyles = createThemedStyles((colors: ThemeColors) =>
   },
   content: {
     padding: spacing.l,
-    // Centered, phone-width column on desktop browsers — matches the
-    // place-detail screen.
     width: "100%",
-    maxWidth: 680,
     alignSelf: "center",
   },
   sectionHeader: {
@@ -518,10 +515,11 @@ const useStyles = createThemedStyles((colors: ThemeColors) =>
   },
   card: {
     backgroundColor: colors.canvas,
-    borderRadius: radius.l,
-    borderWidth: 1,
-    borderColor: colors.border,
-    overflow: "hidden",
+    borderRadius: radius.xl,
+    ...cardEdge(scheme, colors),
+    // Android only: clips row ripples/selected fills to the corners. iOS
+    // must NOT clip — masksToBounds would erase the card's shadow.
+    ...Platform.select({ android: { overflow: "hidden" as const } }),
   },
   rowDivider: {
     borderTopWidth: 1,
@@ -539,7 +537,7 @@ const useStyles = createThemedStyles((colors: ThemeColors) =>
     justifyContent: "center",
     gap: spacing.s - 2,
     minHeight: MIN_TARGET,
-    borderRadius: radius.m,
+    borderRadius: radius.pill,
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.surface,

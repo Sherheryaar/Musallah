@@ -1,12 +1,14 @@
 import React, { useEffect, useMemo, useState } from "react";
 import {
   AppState,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
   View,
 } from "react-native";
 import { Link } from "expo-router";
+import { LinearGradient } from "expo-linear-gradient";
 import * as Location from "expo-location";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -14,11 +16,12 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Touchable from "@/components/Touchable";
 import { useSettings } from "@/context/SettingsContext";
 import { useTheme } from "@/context/ThemeContext";
+import { cardEdge } from "@/lib/elevation";
 import { FALLBACK_LOCATION } from "@/lib/geo";
 import { formatHijri } from "@/lib/hijri";
 import { computePrayerSchedule, PrayerScheduleEntry } from "@/lib/prayerTimes";
 import { createThemedStyles } from "@/lib/themedStyles";
-import { radius, spacing, type, type ThemeColors } from "@/lib/theme";
+import { numeric, radius, spacing, type, type ThemeColors } from "@/lib/theme";
 
 const WEEKDAYS = [
   "Sunday",
@@ -225,14 +228,19 @@ export default function PrayerScreen() {
       ]}
     >
       {status ? (
-        <View style={styles.heroCard}>
+        <LinearGradient
+          colors={[colors.heroGradientStart, colors.heroGradientEnd]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.heroCard}
+        >
           <Text style={styles.heroKicker}>
             {`Now \u00B7 ${status.currentLabel}`}
           </Text>
           <Text style={styles.heroTitle}>
             {`${status.nextLabel} in ${formatCountdown(status.msUntilNext)}`}
           </Text>
-        </View>
+        </LinearGradient>
       ) : null}
 
       <View style={styles.dateNav}>
@@ -348,7 +356,7 @@ export default function PrayerScreen() {
   );
 }
 
-const useStyles = createThemedStyles((colors: ThemeColors) =>
+const useStyles = createThemedStyles((colors: ThemeColors, scheme) =>
   StyleSheet.create({
   screen: {
     flex: 1,
@@ -359,23 +367,24 @@ const useStyles = createThemedStyles((colors: ThemeColors) =>
     paddingBottom: spacing.xxl,
     gap: spacing.l,
   },
-  // Accent-tinted hero so the countdown reads as the screen's focal point.
+  // The brand-gradient hero: the countdown is the screen's focal point and
+  // now looks like it. White clears AA on both stops (theme.test.ts).
   heroCard: {
-    backgroundColor: colors.accentSoft,
-    borderRadius: radius.l,
-    borderWidth: 1,
-    borderColor: colors.accentSoft,
+    borderRadius: radius.xl,
     padding: spacing.xl,
-    gap: spacing.xs,
+    gap: spacing.s - 2,
+    // Clips the gradient to the rounded corners on Android.
+    overflow: "hidden",
   },
   heroKicker: {
     ...type.eyebrow,
-    color: colors.accent,
+    color: "#FFFFFF",
   },
   heroTitle: {
     ...type.title1,
-    fontWeight: "700",
-    color: colors.text,
+    fontWeight: "800",
+    color: "#FFFFFF",
+    ...numeric,
   },
   dateNav: {
     flexDirection: "row",
@@ -385,14 +394,14 @@ const useStyles = createThemedStyles((colors: ThemeColors) =>
   chevronButton: {
     width: 44,
     height: 44,
-    borderRadius: radius.l,
+    borderRadius: 22,
     backgroundColor: colors.canvas,
-    borderWidth: 1,
-    borderColor: colors.border,
+    ...cardEdge(scheme, colors),
     alignItems: "center",
     justifyContent: "center",
-    // Clips the Android ripple to the rounded corners.
-    overflow: "hidden",
+    // Android only: clips the ripple to the circle. iOS must not clip, or
+    // masksToBounds erases the shadow.
+    ...Platform.select({ android: { overflow: "hidden" as const } }),
   },
   dateCenter: {
     flex: 1,
@@ -420,10 +429,9 @@ const useStyles = createThemedStyles((colors: ThemeColors) =>
   },
   card: {
     backgroundColor: colors.canvas,
-    borderRadius: radius.l,
-    borderWidth: 1,
-    borderColor: colors.border,
-    padding: spacing.xs,
+    borderRadius: radius.xl,
+    ...cardEdge(scheme, colors),
+    padding: spacing.s,
   },
   row: {
     flexDirection: "row",
@@ -431,7 +439,7 @@ const useStyles = createThemedStyles((colors: ThemeColors) =>
     alignItems: "center",
     minHeight: 52,
     paddingHorizontal: spacing.m,
-    borderRadius: radius.m,
+    borderRadius: radius.l,
   },
   rowCurrent: {
     backgroundColor: colors.accentSoft,

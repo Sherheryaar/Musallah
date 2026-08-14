@@ -210,9 +210,10 @@ const useStyles = createThemedStyles((colors: ThemeColors, scheme: "light" | "da
       width: "100%",
       maxWidth: 460,
       backgroundColor: colors.canvas,
-      borderRadius: radius.l,
-      borderWidth: 1,
-      borderColor: colors.border,
+      borderRadius: radius.xl,
+      ...(scheme === "dark"
+        ? { borderWidth: 1, borderColor: colors.border }
+        : null),
       padding: spacing.xl,
       gap: spacing.m,
       alignItems: "flex-start",
@@ -291,10 +292,10 @@ const useStyles = createThemedStyles((colors: ThemeColors, scheme: "light" | "da
     },
     primary: {
       alignSelf: "stretch",
-      minHeight: 48,
+      minHeight: 52,
       alignItems: "center",
       justifyContent: "center",
-      borderRadius: radius.l,
+      borderRadius: radius.pill,
       backgroundColor: colors.accent,
       overflow: "hidden",
     },
@@ -309,7 +310,7 @@ const useStyles = createThemedStyles((colors: ThemeColors, scheme: "light" | "da
       minHeight: MIN_TARGET,
       alignItems: "center",
       justifyContent: "center",
-      borderRadius: radius.l,
+      borderRadius: radius.pill,
       overflow: "hidden",
     },
     secondaryLabel: {
