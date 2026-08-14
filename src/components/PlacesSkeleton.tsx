@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { Animated, Easing, Platform, StyleSheet, View } from "react-native";
+import { Animated, Easing, StyleSheet, View } from "react-native";
 
 import { useTheme } from "@/context/ThemeContext";
 import { createThemedStyles } from "@/lib/themedStyles";
@@ -42,7 +42,7 @@ export default function PlacesSkeleton() {
         toValue,
         duration: 750,
         easing: Easing.inOut(Easing.quad),
-        useNativeDriver: Platform.OS !== "web",
+        useNativeDriver: true,
       });
     const loop = Animated.loop(Animated.sequence([step(1), step(0)]));
     loop.start();

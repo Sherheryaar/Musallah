@@ -21,10 +21,6 @@
         "backgroundColor": "#2E7D57"
       }
     },
-    "web": {
-      "output": "single",
-      "favicon": "./public/icon-192.png"
-    },
     "plugins": [
       "expo-router",
       "expo-font",

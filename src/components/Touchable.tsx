@@ -123,14 +123,14 @@ export default function Touchable({
           toValue,
           duration: 90,
           easing: Easing.out(Easing.quad),
-          useNativeDriver: Platform.OS !== "web",
+          useNativeDriver: true,
         }).start();
       } else {
         Animated.spring(scale, {
           toValue,
           speed: 20,
           bounciness: 6,
-          useNativeDriver: Platform.OS !== "web",
+          useNativeDriver: true,
         }).start();
       }
     },

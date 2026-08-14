@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Platform, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import * as Location from "expo-location";
@@ -173,36 +173,23 @@ export default function Onboarding({ onDone }: Props) {
         </Text>
         </ScrollView>
 
-        {Platform.OS === "web" ? (
-          <Touchable
-            style={styles.primary}
-            onPress={finish}
-            accessibilityRole="button"
-            accessibilityLabel="Continue"
-          >
-            <Text style={styles.primaryLabel}>Continue</Text>
-          </Touchable>
-        ) : (
-          <>
-            <Touchable
-              style={styles.primary}
-              onPress={allow}
-              disabled={busy}
-              accessibilityRole="button"
-              accessibilityLabel="Allow location access"
-            >
-              <Text style={styles.primaryLabel}>Allow location</Text>
-            </Touchable>
-            <Touchable
-              style={styles.secondary}
-              onPress={finish}
-              accessibilityRole="button"
-              accessibilityLabel="Continue without location"
-            >
-              <Text style={styles.secondaryLabel}>Not now</Text>
-            </Touchable>
-          </>
-        )}
+        <Touchable
+          style={styles.primary}
+          onPress={allow}
+          disabled={busy}
+          accessibilityRole="button"
+          accessibilityLabel="Allow location access"
+        >
+          <Text style={styles.primaryLabel}>Allow location</Text>
+        </Touchable>
+        <Touchable
+          style={styles.secondary}
+          onPress={finish}
+          accessibilityRole="button"
+          accessibilityLabel="Continue without location"
+        >
+          <Text style={styles.secondaryLabel}>Not now</Text>
+        </Touchable>
       </View>
     </View>
   );

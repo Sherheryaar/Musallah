@@ -10,9 +10,7 @@
 // and translateY.
 
 import { useEffect, useRef, useState } from "react";
-import { Animated, Easing, Platform } from "react-native";
-
-const NATIVE_DRIVER = Platform.OS !== "web";
+import { Animated, Easing } from "react-native";
 
 export function useSheetAnimation(visible: boolean, reduceMotion: boolean) {
   const [mounted, setMounted] = useState(visible);
@@ -25,7 +23,7 @@ export function useSheetAnimation(visible: boolean, reduceMotion: boolean) {
         toValue: 1,
         duration: reduceMotion ? 0 : 220,
         easing: Easing.out(Easing.cubic),
-        useNativeDriver: NATIVE_DRIVER,
+        useNativeDriver: true,
       }).start();
       return;
     }
@@ -34,7 +32,7 @@ export function useSheetAnimation(visible: boolean, reduceMotion: boolean) {
       // Out is quicker than in: a dismissal should get out of the way.
       duration: reduceMotion ? 0 : 180,
       easing: Easing.in(Easing.cubic),
-      useNativeDriver: NATIVE_DRIVER,
+      useNativeDriver: true,
     }).start(({ finished }) => {
       // Only unmount if the animation actually ran to the end — an exit
       // interrupted by the sheet being reopened must not then unmount it.

@@ -16,8 +16,7 @@ import { Platform } from "react-native";
  *
  * Dark mode gets no shadow at all: a black shadow on a near-black surface
  * is mathematically invisible, so depth there is carried by the border and
- * surface luminance instead. The web branch also avoids react-native-web's
- * deprecation warning for the shadow* props.
+ * surface luminance instead.
  */
 export function elevation(
   scheme: "light" | "dark",
@@ -42,15 +41,12 @@ export function elevation(
     });
   }
   return Platform.select({
-    ios: {
+    android: { elevation: spec.android },
+    default: {
       shadowColor: "#000",
       shadowOpacity: spec.opacity,
       shadowRadius: spec.radius,
       shadowOffset: { width: 0, height: spec.offsetY },
-    },
-    android: { elevation: spec.android },
-    default: {
-      boxShadow: `0px ${spec.offsetY}px ${spec.radius}px rgba(0,0,0,${spec.opacity})`,
     },
   });
 }

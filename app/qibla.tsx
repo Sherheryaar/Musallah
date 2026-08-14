@@ -149,14 +149,12 @@ const KAABA_SIZE = 26;
 type HeadingState =
   | { kind: "loading" }
   | { kind: "live"; heading: number; accuracy: number | null }
-  // No compass available (web, denied permission, no magnetometer): the
+  // No compass available (denied permission, no magnetometer): the
   // bearing is still useful, so show it as a static number.
   | { kind: "static"; reason: string };
 
 const PLATFORM: "ios" | "android" | "other" =
   Platform.OS === "ios" ? "ios" : Platform.OS === "android" ? "android" : "other";
-/** react-native-web has no native animated module and warns if asked. */
-const NATIVE_DRIVER = Platform.OS !== "web";
 
 /**
  * Hoisted, not `Number.prototype.toLocaleString()` at the call site: the
@@ -283,15 +281,6 @@ export default function QiblaScreen() {
         });
         return;
       }
-      if (Platform.OS === "web") {
-        setHeading({
-          kind: "static",
-          reason:
-            "The live compass needs a phone's magnetometer, which browsers don't reliably expose. Use the bearing above with any compass — or the sun, which needs no compass at all.",
-        });
-        return;
-      }
-
       try {
         const newSub = await Location.watchHeadingAsync((data) => {
           if (cancelled) return;
@@ -323,7 +312,7 @@ export default function QiblaScreen() {
               toValue: unwrapped.current,
               duration,
               easing: Easing.out(Easing.quad),
-              useNativeDriver: NATIVE_DRIVER,
+              useNativeDriver: true,
             }).start();
           }
 
@@ -332,7 +321,7 @@ export default function QiblaScreen() {
             toValue: nextTurn,
             duration,
             easing: Easing.out(Easing.quad),
-            useNativeDriver: NATIVE_DRIVER,
+            useNativeDriver: true,
           }).start();
 
           const accuracy =
@@ -381,7 +370,6 @@ export default function QiblaScreen() {
   // tilted phone. Both are advisory sensors only; the heading itself still
   // comes from watchHeadingAsync.
   useEffect(() => {
-    if (Platform.OS === "web") return;
     let mag: { remove: () => void } | null = null;
     let acc: { remove: () => void } | null = null;
     try {
@@ -496,7 +484,7 @@ export default function QiblaScreen() {
       toValue: locked ? 1 : 0,
       duration,
       easing: Easing.out(Easing.cubic),
-      useNativeDriver: NATIVE_DRIVER,
+      useNativeDriver: true,
     }).start();
     Animated.timing(ring, {
       toValue: locked ? 1 : 0,
@@ -1045,16 +1033,14 @@ export default function QiblaScreen() {
       {heading.kind === "static" ? (
         <View style={styles.note}>
           <Text style={styles.noteText}>{heading.reason}</Text>
-          {Platform.OS !== "web" ? (
-            <Touchable
-              onPress={requestLocation}
-              accessibilityRole="button"
-              accessibilityLabel="Allow location access"
-              style={styles.noteButton}
-            >
-              <Text style={styles.noteButtonLabel}>Allow location</Text>
-            </Touchable>
-          ) : null}
+          <Touchable
+            onPress={requestLocation}
+            accessibilityRole="button"
+            accessibilityLabel="Allow location access"
+            style={styles.noteButton}
+          >
+            <Text style={styles.noteButtonLabel}>Allow location</Text>
+          </Touchable>
         </View>
       ) : null}
 

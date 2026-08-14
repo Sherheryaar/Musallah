@@ -362,7 +362,6 @@ export default function HomeScreen() {
     const text = query.trim();
     if (!text) return;
     Keyboard.dismiss();
-    if (Platform.OS === "web") return; // typing already filters names on web
     // A slower search started earlier must never overwrite a newer one's
     // result: bump a generation counter, and only apply this run's outcome
     // if nothing newer started while it was awaiting the geocoder.
@@ -699,12 +698,7 @@ export default function HomeScreen() {
       <View style={styles.searchInputWrap}>
         <TextInput
           style={styles.searchInput}
-          // Area search is native-only (no geocoder on web) -- don't promise it.
-          placeholder={
-            Platform.OS === "web"
-              ? "Search by name or address..."
-              : 'Try "Stratford" or a masjid name...'
-          }
+          placeholder={'Try "Stratford" or a masjid name...'}
           placeholderTextColor={colors.textSecondary}
           value={query}
           onChangeText={setQuery}
@@ -932,69 +926,53 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.screen}>
-      {Platform.OS !== "web" ? (
-        <>
-          {/* Map-first: the map fills the screen; the list floats above it. */}
-          <View style={StyleSheet.absoluteFill}>
-            <PlacesMap
-              results={results}
-              userLocation={location}
-              focus={searchOrigin}
-              recenterNonce={recenterNonce}
-              onSelect={openPlace}
-            />
-          </View>
-          <View style={styles.overlayTop}>
-            {searchRow}
-            {searchNoteRow}
-            {mapLegend}
-            {usingFallback ? (
-              <Text style={styles.fallbackNote}>
-                Using central London {"\u2014"} enable location for accurate
-                results.
-              </Text>
-            ) : null}
-          </View>
-          <BottomSheet
-            aboveSheet={
-              <Touchable
-                style={styles.recenterButton}
-                onPress={recenter}
-                accessibilityRole="button"
-                accessibilityLabel="Back to my location"
-                // Circular FAB: a borderless ripple is the Material idiom
-                // here, and it avoids clipping the view — which on Android
-                // would take the elevation shadow with it.
-                borderless
-                rippleRadius={24}
-                scaleTo={0.92}
-              >
-                {/* Blue on purpose — it points at the blue you-are-here dot. */}
-                <MaterialCommunityIcons
-                  name="crosshairs-gps"
-                  size={24}
-                  color={colors.youAreHere}
-                />
-              </Touchable>
-            }
+      {/* Map-first: the map fills the screen; the list floats above it. */}
+      <View style={StyleSheet.absoluteFill}>
+        <PlacesMap
+          results={results}
+          userLocation={location}
+          focus={searchOrigin}
+          recenterNonce={recenterNonce}
+          onSelect={openPlace}
+        />
+      </View>
+      <View style={styles.overlayTop}>
+        {searchRow}
+        {searchNoteRow}
+        {mapLegend}
+        {usingFallback ? (
+          <Text style={styles.fallbackNote}>
+            Using central London {"\u2014"} enable location for accurate
+            results.
+          </Text>
+        ) : null}
+      </View>
+      <BottomSheet
+        aboveSheet={
+          <Touchable
+            style={styles.recenterButton}
+            onPress={recenter}
+            accessibilityRole="button"
+            accessibilityLabel="Back to my location"
+            // Circular FAB: a borderless ripple is the Material idiom
+            // here, and it avoids clipping the view — which on Android
+            // would take the elevation shadow with it.
+            borderless
+            rippleRadius={24}
+            scaleTo={0.92}
           >
-            {timesBar}
-            {list}
-          </BottomSheet>
-        </>
-      ) : (
-        <View style={styles.container}>
-          {searchRow}
-          {timesBar}
-          {usingFallback ? (
-            <Text style={styles.fallbackNoteWeb}>
-              Showing distances and prayer times for central London {"\u2014"}
-              enable location for accurate results.
-            </Text>
-          ) : null}
-          {list}
-        </View>
-      )}
+            {/* Blue on purpose — it points at the blue you-are-here dot. */}
+            <MaterialCommunityIcons
+              name="crosshairs-gps"
+              size={24}
+              color={colors.youAreHere}
+            />
+          </Touchable>
+        }
+      >
+        {timesBar}
+        {list}
+      </BottomSheet>
       <FilterSheet
         visible={showFilters}
         savedOnly={settings.savedOnly}
@@ -1024,21 +1002,6 @@ const useStyles = createThemedStyles((colors: ThemeColors, scheme: "light" | "da
     flex: 1,
     backgroundColor: colors.surface,
   },
-  // Keeps content phone-width on desktop browsers instead of stretching
-  // edge-to-edge (the app is mobile-first; web gets a centered column).
-  container: {
-    flex: 1,
-    width: "100%",
-    maxWidth: 680,
-    alignSelf: "center",
-    ...Platform.select({
-      web: {
-        borderLeftWidth: 1,
-        borderRightWidth: 1,
-        borderColor: colors.border,
-      },
-    }),
-  },
   overlayTop: {
     position: "absolute",
     top: 0,
@@ -1054,9 +1017,6 @@ const useStyles = createThemedStyles((colors: ThemeColors, scheme: "light" | "da
   searchRow: {
     flexDirection: "row",
     gap: spacing.s,
-    ...Platform.select({
-      web: { padding: spacing.m },
-    }),
   },
   searchInputWrap: {
     flex: 1,
@@ -1174,12 +1134,6 @@ const useStyles = createThemedStyles((colors: ThemeColors, scheme: "light" | "da
     paddingVertical: spacing.s,
     borderRadius: radius.m,
     overflow: "hidden",
-  },
-  fallbackNoteWeb: {
-    ...type.subhead,
-    color: colors.textSecondary,
-    paddingHorizontal: spacing.l,
-    paddingBottom: spacing.s,
   },
   timesBar: {
     flexShrink: 0,

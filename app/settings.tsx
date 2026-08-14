@@ -1,7 +1,6 @@
 import React, { useMemo } from "react";
 import {
   Linking,
-  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -296,128 +295,120 @@ export default function SettingsScreen() {
       ) : null}
 
       {/* ------------------------------------------------------------------
-          FEEDBACK & NOTIFICATIONS (native only)
+          FEEDBACK & NOTIFICATIONS
           ------------------------------------------------------------------ */}
-      {Platform.OS !== "web" ? (
-        <>
-          <SectionHeader icon="vibrate" title="Vibration" />
-          <Text style={styles.sectionIntro}>
-            The Qibla compass buzzes once when you face the qibla, and ticks
-            lightly every 15° as you turn {"—"} so you can follow it without
-            watching the screen.
-          </Text>
-          <View style={styles.card}>
-            <View style={styles.switchRow}>
-              <Text style={styles.optionLabel}>Vibration</Text>
-              <ThemedSwitch
-                value={settings.hapticFeedback}
-                onValueChange={(on) => updateSettings({ hapticFeedback: on })}
-                accessibilityLabel="Vibration feedback"
-              />
-            </View>
-          </View>
-        </>
-      ) : null}
+      <SectionHeader icon="vibrate" title="Vibration" />
+      <Text style={styles.sectionIntro}>
+        The Qibla compass buzzes once when you face the qibla, and ticks
+        lightly every 15° as you turn {"—"} so you can follow it without
+        watching the screen.
+      </Text>
+      <View style={styles.card}>
+        <View style={styles.switchRow}>
+          <Text style={styles.optionLabel}>Vibration</Text>
+          <ThemedSwitch
+            value={settings.hapticFeedback}
+            onValueChange={(on) => updateSettings({ hapticFeedback: on })}
+            accessibilityLabel="Vibration feedback"
+          />
+        </View>
+      </View>
 
-      {Platform.OS !== "web" ? (
-        <>
-          <SectionHeader icon="bell-outline" title="Prayer notifications" />
-          <Text style={styles.sectionIntro}>
-            Reminders are scheduled on your phone from your location {"—"} no
-            server is involved and nothing leaves your device. Open the app
-            every week or so to keep the schedule topped up.
-          </Text>
-          <View style={styles.card}>
-            <View style={styles.switchRow}>
-              <Text style={styles.optionLabel}>Notify me at prayer times</Text>
-              <ThemedSwitch
-                value={notifications.prefs.enabled}
-                onValueChange={toggleNotifications}
-                accessibilityLabel="Prayer time notifications"
-              />
-            </View>
-            {notifications.permissionGranted === false ? (
-              <View style={[styles.rowDivider, styles.permissionNote]}>
-                <Text style={styles.permissionNoteText}>
-                  Notifications are blocked at the system level {"—"} allow
-                  them for this app in your phone&apos;s Settings, then try
-                  again.
-                </Text>
-              </View>
-            ) : null}
-            {notifications.prefs.enabled ? (
-              <>
-                {PRAYER_KEYS.map((key) => (
-                  <View key={key} style={[styles.switchRow, styles.rowDivider]}>
-                    <Text style={styles.optionLabel}>{PRAYER_LABELS[key]}</Text>
-                    <ThemedSwitch
-                      value={notifications.prefs.prayers[key]}
-                      onValueChange={(on) =>
-                        notifications.updatePrefs({
-                          prayers: {
-                            ...notifications.prefs.prayers,
-                            [key]: on,
-                          },
-                        })
-                      }
-                      accessibilityLabel={`Notify for ${PRAYER_LABELS[key]}`}
-                    />
-                  </View>
-                ))}
-                <View style={[styles.reminderRow, styles.rowDivider]}>
-                  <Text style={styles.optionLabel}>Remind me</Text>
-                  <View style={styles.reminderChips}>
-                    {REMINDER_OPTIONS.map((mins) => {
-                      const selected =
-                        notifications.prefs.minutesBefore === mins;
-                      return (
-                        <Touchable
-                          key={mins}
-                          style={[
-                            styles.reminderChip,
-                            selected && styles.reminderChipActive,
-                          ]}
-                          onPress={() =>
-                            notifications.updatePrefs({ minutesBefore: mins })
-                          }
-                          accessibilityRole="radio"
-                          accessibilityState={{ selected }}
-                        >
-                          <Text
-                            style={[
-                              styles.reminderChipLabel,
-                              selected && styles.reminderChipLabelActive,
-                            ]}
-                          >
-                            {mins === 0 ? "On time" : `${mins} min early`}
-                          </Text>
-                        </Touchable>
-                      );
-                    })}
-                  </View>
-                </View>
-                {__DEV__ ? (
-                  // Development builds only: verify delivery without waiting
-                  // for the next prayer. Never shown in production.
-                  <Touchable
-                    style={[styles.switchRow, styles.rowDivider]}
-                    onPress={() => void notifications.sendTest()}
-                    accessibilityRole="button"
-                    accessibilityLabel="Send a test notification"
-                  >
-                    <Text style={styles.optionLabel}>
-                      Send test notification
-                    </Text>
-                    <Text style={styles.optionDetail}>
-                      fires in 5 s {"—"} lock the phone
-                    </Text>
-                  </Touchable>
-                ) : null}
-              </>
-            ) : null}
+      <SectionHeader icon="bell-outline" title="Prayer notifications" />
+      <Text style={styles.sectionIntro}>
+        Reminders are scheduled on your phone from your location {"—"} no
+        server is involved and nothing leaves your device. Open the app
+        every week or so to keep the schedule topped up.
+      </Text>
+      <View style={styles.card}>
+        <View style={styles.switchRow}>
+          <Text style={styles.optionLabel}>Notify me at prayer times</Text>
+          <ThemedSwitch
+            value={notifications.prefs.enabled}
+            onValueChange={toggleNotifications}
+            accessibilityLabel="Prayer time notifications"
+          />
+        </View>
+        {notifications.permissionGranted === false ? (
+          <View style={[styles.rowDivider, styles.permissionNote]}>
+            <Text style={styles.permissionNoteText}>
+              Notifications are blocked at the system level {"—"} allow
+              them for this app in your phone&apos;s Settings, then try
+              again.
+            </Text>
           </View>
-        </>
-      ) : null}
+        ) : null}
+        {notifications.prefs.enabled ? (
+          <>
+            {PRAYER_KEYS.map((key) => (
+              <View key={key} style={[styles.switchRow, styles.rowDivider]}>
+                <Text style={styles.optionLabel}>{PRAYER_LABELS[key]}</Text>
+                <ThemedSwitch
+                  value={notifications.prefs.prayers[key]}
+                  onValueChange={(on) =>
+                    notifications.updatePrefs({
+                      prayers: {
+                        ...notifications.prefs.prayers,
+                        [key]: on,
+                      },
+                    })
+                  }
+                  accessibilityLabel={`Notify for ${PRAYER_LABELS[key]}`}
+                />
+              </View>
+            ))}
+            <View style={[styles.reminderRow, styles.rowDivider]}>
+              <Text style={styles.optionLabel}>Remind me</Text>
+              <View style={styles.reminderChips}>
+                {REMINDER_OPTIONS.map((mins) => {
+                  const selected =
+                    notifications.prefs.minutesBefore === mins;
+                  return (
+                    <Touchable
+                      key={mins}
+                      style={[
+                        styles.reminderChip,
+                        selected && styles.reminderChipActive,
+                      ]}
+                      onPress={() =>
+                        notifications.updatePrefs({ minutesBefore: mins })
+                      }
+                      accessibilityRole="radio"
+                      accessibilityState={{ selected }}
+                    >
+                      <Text
+                        style={[
+                          styles.reminderChipLabel,
+                          selected && styles.reminderChipLabelActive,
+                        ]}
+                      >
+                        {mins === 0 ? "On time" : `${mins} min early`}
+                      </Text>
+                    </Touchable>
+                  );
+                })}
+              </View>
+            </View>
+            {__DEV__ ? (
+              // Development builds only: verify delivery without waiting
+              // for the next prayer. Never shown in production.
+              <Touchable
+                style={[styles.switchRow, styles.rowDivider]}
+                onPress={() => void notifications.sendTest()}
+                accessibilityRole="button"
+                accessibilityLabel="Send a test notification"
+              >
+                <Text style={styles.optionLabel}>
+                  Send test notification
+                </Text>
+                <Text style={styles.optionDetail}>
+                  fires in 5 s {"—"} lock the phone
+                </Text>
+              </Touchable>
+            ) : null}
+          </>
+        ) : null}
+      </View>
 
       {/* ------------------------------------------------------------------
           PRIVACY

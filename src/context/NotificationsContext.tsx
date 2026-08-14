@@ -207,7 +207,6 @@ export function NotificationsProvider({
   /** Rebuild the OS notification queue from the current plan. */
   const reschedule = useCallback(
     async (reason: "change" | "topup") => {
-      if (Platform.OS === "web") return; // no local notifications on web
       const run = async () => {
         // A user who has NEVER enabled notifications must never cause the
         // module to load (see getNotifier — the import itself is noisy in
@@ -296,7 +295,7 @@ export function NotificationsProvider({
       // off. Only re-check once we've actually asked before (permission
       // starts `null`), so a user who's never touched the feature still
       // never triggers the expo-notifications import on every foreground.
-      if (permissionGranted !== null && Platform.OS !== "web") {
+      if (permissionGranted !== null) {
         void getNotifier()
           .then((N) => N.getPermissionsAsync().then((status) => [N, status] as const))
           .then(([N, status]) => setPermissionGranted(isGranted(N, status)))
@@ -325,7 +324,6 @@ export function NotificationsProvider({
   }, [reschedule]);
 
   const enable = useCallback(async (): Promise<boolean> => {
-    if (Platform.OS === "web") return false;
     const N = await getNotifier();
     const current = await N.getPermissionsAsync();
     let granted = isGranted(N, current);
@@ -345,17 +343,14 @@ export function NotificationsProvider({
 
   const disable = useCallback(() => {
     updatePrefs({ enabled: false });
-    if (Platform.OS !== "web") {
-      void getNotifier()
-        .then((N) => N.cancelAllScheduledNotificationsAsync())
-        .catch(() => {});
-    }
+    void getNotifier()
+      .then((N) => N.cancelAllScheduledNotificationsAsync())
+      .catch(() => {});
   }, [updatePrefs]);
 
   // Dev-only verification: fire a sample a few seconds out, so delivery can
   // be checked in Expo Go without waiting for the next prayer.
   const sendTest = useCallback(async () => {
-    if (Platform.OS === "web") return;
     const N = await getNotifier();
     await N.scheduleNotificationAsync({
       content: {

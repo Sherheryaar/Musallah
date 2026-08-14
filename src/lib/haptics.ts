@@ -1,24 +1,16 @@
-// Vibration feedback, guarded in the two ways it always needs guarding.
+// Vibration feedback, guarded by THE USER'S CHOICE: callers pass the
+// `hapticFeedback` setting through — a phone that buzzes during salah needs
+// an off switch.
 //
-// 1. WEB. expo-haptics throws UnavailabilityError on web — it does not
-//    silently no-op — so every call site would otherwise need its own
-//    Platform check.
-// 2. THE USER'S CHOICE. Callers pass the `hapticFeedback` setting through;
-//    a phone that buzzes during salah needs an off switch.
-//
-// Loaded lazily so the native module isn't pulled in on web at all, and
-// every call is fire-and-forget: feedback that fails is never worth an
-// error path, and haptics can legitimately fail (Android permission,
-// low-power mode, no vibrator hardware).
-
-import { Platform } from "react-native";
+// Loaded lazily, and every call is fire-and-forget: feedback that fails is
+// never worth an error path, and haptics can legitimately fail (Android
+// permission, low-power mode, no vibrator hardware).
 
 type HapticsModule = typeof import("expo-haptics");
 
 let modulePromise: Promise<HapticsModule> | null = null;
 
-function load(): Promise<HapticsModule> | null {
-  if (Platform.OS === "web") return null;
+function load(): Promise<HapticsModule> {
   if (!modulePromise) modulePromise = import("expo-haptics");
   return modulePromise;
 }
@@ -27,7 +19,7 @@ function load(): Promise<HapticsModule> | null {
 export function hapticSuccess(enabled: boolean): void {
   if (!enabled) return;
   void load()
-    ?.then((H) => H.notificationAsync(H.NotificationFeedbackType.Success))
+    .then((H) => H.notificationAsync(H.NotificationFeedbackType.Success))
     .catch(() => {});
 }
 
@@ -35,6 +27,6 @@ export function hapticSuccess(enabled: boolean): void {
 export function hapticTick(enabled: boolean): void {
   if (!enabled) return;
   void load()
-    ?.then((H) => H.impactAsync(H.ImpactFeedbackStyle.Light))
+    .then((H) => H.impactAsync(H.ImpactFeedbackStyle.Light))
     .catch(() => {});
 }

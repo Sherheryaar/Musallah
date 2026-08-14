@@ -1,11 +1,11 @@
 # Masjid & Prayer Space Locator
 
-An Expo (React Native + TypeScript) app for iOS, Android **and** web from one codebase: find the nearest masjid or prayer space, check facilities, and see accurate prayer times — no account, no tracking. Covers 2,200+ places across the UK & Ireland (data from [MuslimsInBritain.org](https://muslimsinbritain.org), with permission).
+An Expo (React Native + TypeScript) app for iOS and Android: find the nearest masjid or prayer space, check facilities, and see accurate prayer times — no account, no tracking. Covers 2,200+ places across the UK & Ireland (data from [MuslimsInBritain.org](https://muslimsinbritain.org), with permission).
 
 ## What's in the app
 
-- **Map-first home screen** (iOS/Android): every matching place pinned on a map, with a draggable bottom sheet listing the nearest places. Web falls back to a list-only layout.
-- **Area search**: type "Stratford" and press search — distances re-anchor to that area (on-device geocoding). Ambiguous names resolve to the hit nearest you, and hits outside the UK & Ireland are rejected. Typing also live-filters by name/address, which is what web uses (no geocoder there).
+- **Map-first home screen**: every matching place pinned on a map, with a draggable bottom sheet listing the nearest places.
+- **Area search**: type "Stratford" and press search — distances re-anchor to that area (on-device geocoding). Ambiguous names resolve to the hit nearest you, and hits outside the UK & Ireland are rejected. Typing also live-filters by name/address.
 - **Facility filters**: sisters' space, wudu, disabled access, parking, jumu'ah, janazah — persisted across launches.
 - **Place detail page**: get directions, call/website/social links, jumu'ah times, jamaat times next to calculated start times, facility checklist, verification status + source, and "suggest an edit".
 - **Prayer times calculated on-device** (`src/lib/prayerCalc.ts` — no API): Moonsighting Committee (UK-appropriate) or Muslim World League, Asr at 1 or 2 mithl, and a Shafaq (Isha twilight) choice for the Moonsighting method. A dedicated prayer screen shows the full schedule with current/next prayer countdown, previous/next day navigation and the Hijri date.
@@ -24,7 +24,6 @@ An Expo (React Native + TypeScript) app for iOS, Android **and** web from one co
     npx expo start
 
 4. Scan the QR code in the terminal with your phone (Camera app on iPhone, Expo Go on Android). The app opens in Expo Go.
-5. For a browser version, press `w` in the terminal.
 
 Every time you save a file, the app reloads instantly on your phone.
 
@@ -73,7 +72,7 @@ The prayer-time tests pin golden values that were cross-checked against publishe
       settings.tsx           Calculation method, Asr mithl, privacy notes
     src/
       components/
-        PlacesMap.native.tsx / .tsx   Map (react-native-maps) + web fallback
+        PlacesMap.tsx        Map (react-native-maps)
         BottomSheet.tsx      Draggable sheet over the map
         FilterSheet.tsx      Facility filter modal
         PlaceCard.tsx        List row
@@ -173,24 +172,9 @@ Builds run in Expo's cloud — no Android Studio, no Xcode, no Mac. One-time set
 
 First run asks to generate a keystore — say yes (EAS stores it). ~15 minutes later you get a download link; send it to testers, they open it on the phone and install (Android prompts to allow installs from the browser). That's it.
 
-**iOS** — Apple allows no APK equivalent. Installing on someone's iPhone requires the [Apple Developer Program](https://developer.apple.com/programs/) (£79/year), then either **TestFlight** (`eas build -p ios`, `eas submit -p ios`, invite testers by email — best experience) or ad-hoc builds registered to specific device UDIDs (`eas device:create`). Until then, iPhone testers can use Expo Go or the web app.
+**iOS** — Apple allows no APK equivalent. Installing on someone's iPhone requires the [Apple Developer Program](https://developer.apple.com/programs/) (£79/year), then either **TestFlight** (`eas build -p ios`, `eas submit -p ios`, invite testers by email — best experience) or ad-hoc builds registered to specific device UDIDs (`eas device:create`). Until then, iPhone testers can use Expo Go.
 
 The `preview` profile builds an installable APK; `production` builds the store formats (AAB / signed IPA) with auto-incrementing build numbers.
-
-## Deploying the web app
-
-The web build is a single-page app, installable as a PWA (manifest + icons in `public/`; `scripts/postbuild-web.mjs` injects the head tags after export, because SPA output ignores `+html.tsx`).
-
-    npm run build:web    # writes the site to dist/
-
-**Netlify** (config already in `netlify.toml`):
-
-1. [app.netlify.com](https://app.netlify.com) → Add new site → Import an existing project → pick this GitHub repo.
-2. Build settings are read from `netlify.toml` automatically (command `npx expo export --platform web`, publish directory `dist`).
-3. Site settings → Environment variables → add `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_ANON_KEY` (the same values as your local `.env` — the anon key is public by design).
-4. Deploy. Every push to `main` redeploys automatically.
-
-Or without linking the repo: `npm run build:web`, then drag the `dist/` folder onto [app.netlify.com/drop](https://app.netlify.com/drop) (env vars come from your local `.env` in that case).
 
 ## Notes
 
