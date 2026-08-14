@@ -22,16 +22,20 @@ export function elevation(
   scheme: "light" | "dark",
   level: "raised" | "floating" | "ambient" | "sheet",
 ) {
+  // Redesign: shadows got softer and larger-radius — cards float on a wash
+  // of shadow instead of sitting behind a hairline. Android `elevation`
+  // values are UNCHANGED: their relative order is a contract (the sheet at
+  // 12 must keep sliding over the recenter FAB at 6 — see BottomSheet).
   const spec = {
-    raised: { opacity: 0.08, radius: 6, offsetY: 2, android: 3 },
-    floating: { opacity: 0.12, radius: 12, offsetY: 4, android: 6 },
+    raised: { opacity: 0.1, radius: 12, offsetY: 4, android: 3 },
+    floating: { opacity: 0.14, radius: 18, offsetY: 8, android: 6 },
     // A wide, faint lift for one LARGE surface — the 320px qibla dial. The
     // same opacity as `raised` under a 320px disc reads as a hard edge; this
     // trades darkness for spread so the instrument sits on the page instead
     // of being outlined on it. Added as a level rather than hand-rolled at
     // the call site, which is what this module exists to prevent.
-    ambient: { opacity: 0.06, radius: 18, offsetY: 8, android: 3 },
-    sheet: { opacity: 0.15, radius: 16, offsetY: -4, android: 12 },
+    ambient: { opacity: 0.07, radius: 24, offsetY: 10, android: 3 },
+    sheet: { opacity: 0.16, radius: 24, offsetY: -6, android: 12 },
   }[level];
 
   if (scheme === "dark") {

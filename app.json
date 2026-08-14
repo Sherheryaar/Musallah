@@ -43,9 +43,9 @@
           "image": "./assets/icon.png",
           "imageWidth": 180,
           "resizeMode": "contain",
-          "backgroundColor": "#F9F8F7",
+          "backgroundColor": "#F6F5F1",
           "dark": {
-            "backgroundColor": "#141312"
+            "backgroundColor": "#121211"
           }
         }
       ]

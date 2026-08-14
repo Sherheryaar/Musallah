@@ -145,19 +145,12 @@ describe.each([
  * If you add an `opacity` to a Text style anywhere, add it here too.
  */
 describe("dimmed text", () => {
-  // app/place/[id].tsx — the hero band is always the masjid green.
-  const HERO_BG = placeTypeColors.masjid;
-  const HERO_TEXT = "#FFFFFF";
-
   const CASES: {
     where: string;
     fg: string;
     bg: string;
     alpha: number;
   }[] = [
-    { where: "place hero meta", fg: HERO_TEXT, bg: HERO_BG, alpha: 0.95 },
-    { where: "place hero address", fg: HERO_TEXT, bg: HERO_BG, alpha: 1 },
-    { where: "place hero name", fg: HERO_TEXT, bg: HERO_BG, alpha: 1 },
     {
       where: "qibla privacy line (light)",
       fg: lightColors.textSecondary,
@@ -177,14 +170,35 @@ describe("dimmed text", () => {
       contrastRatio(composite(fg, bg, alpha), bg),
     ).toBeGreaterThanOrEqual(AA_NORMAL);
   });
+});
 
-  // Guards the reasoning, not just the values: white on the hero green has
-  // only 5.02:1 to spend, so there is very little room to dim it before AA
-  // breaks. 0.9 — what the address shipped with — is already under.
-  it("leaves almost no headroom to dim white on the hero green", () => {
-    expect(contrastRatio(HERO_TEXT, HERO_BG)).toBeLessThan(5.5);
+/**
+ * The hero gradient (place detail, prayer countdown) carries WHITE text at
+ * full opacity. A gradient has no single background, so AA is asserted
+ * against BOTH stops — text over any point between two passing stops also
+ * passes, because the blend's luminance sits between theirs.
+ */
+describe("hero gradient", () => {
+  const HERO_TEXT = "#FFFFFF";
+
+  it.each([
+    ["light", lightColors],
+    ["dark", darkColors],
+  ] as const)("white text clears AA on every %s stop", (_name, colors) => {
+    for (const stop of [colors.heroGradientStart, colors.heroGradientEnd]) {
+      expect(contrastRatio(HERO_TEXT, stop)).toBeGreaterThanOrEqual(AA_NORMAL);
+    }
+  });
+
+  // White-on-gradient has limited headroom — anyone reaching for `opacity`
+  // to build hierarchy on the hero should hit this comment instead. Use
+  // size and weight; alpha is the one tool the gradient cannot afford.
+  it("leaves almost no headroom to dim white on the lightest stop", () => {
     expect(
-      contrastRatio(composite(HERO_TEXT, HERO_BG, 0.9), HERO_BG),
+      contrastRatio(
+        composite(HERO_TEXT, lightColors.heroGradientStart, 0.8),
+        lightColors.heroGradientStart,
+      ),
     ).toBeLessThan(AA_NORMAL);
   });
 });

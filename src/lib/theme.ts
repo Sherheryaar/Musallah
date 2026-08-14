@@ -14,66 +14,79 @@ import type { TextStyle } from "react-native";
 
 // Every text/background pairing below clears WCAG AA (4.5:1) — enforced by
 // theme.test.ts, which will fail the build if a future tweak drops one
-// under. The light palette needed real work to get there: textSecondary is
-// the app's most-used colour and was 4.03:1 on surface, and the ink of all
-// three status colours was between 2.6 and 3.2:1. Contrast is the reason
-// these are not the "nicer" lighter values.
+// under. Contrast is the reason these are not the "nicer" lighter values.
+//
+// The 2026-08 redesign: a deeper, more saturated emerald identity in light
+// mode; a near-black, luminance-layered dark mode with a genuinely vibrant
+// accent (dark ink on bright green, the way music apps do their play
+// buttons). Same roles as before — only the values moved, and every one of
+// them re-cleared the contrast suite.
 export const lightColors = {
-  text: "#2C2C2B",
-  textSecondary: "#6F6C68",
+  text: "#1C1B18",
+  textSecondary: "#605E57",
   canvas: "#FFFFFF",
-  surface: "#F9F8F7",
-  surfaceSecondary: "#F0EFED",
-  border: "#E6E5E3",
+  surface: "#F6F5F1",
+  surfaceSecondary: "#ECEAE4",
+  border: "#E6E4DE",
   // `border` is a DIVIDER: it separates things that are already legible on
-  // their own, and at 1.26:1 on canvas that is exactly the right weight for
+  // their own, and at ~1.25:1 on canvas that is exactly the right weight for
   // one. It is the wrong colour for the OUTLINE OF A CONTROL, which WCAG
   // 1.4.11 requires to clear 3:1 whenever that outline is the only thing
-  // identifying the control. Three places were relying on it that way — the
-  // sheet's drag handle, the unselected radio rings in Settings, and the
-  // qibla turn tape's graduations — and all three were effectively invisible.
-  // This is the weakest value that clears 3:1 on canvas, surface,
-  // surfaceSecondary AND accentSoft, so it stays a hairline instead of
-  // becoming a second tier of ink. Enforced by theme.test.ts.
-  controlBorder: "#8A8784",
-  // The identity colour: the same deep masjid green as the map pins.
-  // (Was a generic blue; green is the app's most meaningful colour.)
-  accent: "#2E7D57",
-  accentSoft: "#EEF5F1",
-  positive: "#357955",
-  positiveSoft: "#E8F1EC",
-  // NOT placeTypeColors.musalla any more, though it used to be byte
-  // identical. That value is baked into assets/pins/*.png and must not
-  // move; this one is ink for caution text and had to darken to be
-  // legible. The legend amber and the caution amber now differ slightly,
-  // deliberately — they were never the same role.
-  attention: "#A2612D",
-  attentionSoft: "#FDF4ED",
+  // identifying the control (the sheet's drag handle, the unselected radio
+  // rings in Settings, the qibla turn tape's graduations). This is the
+  // weakest value that clears 3:1 on canvas, surface, surfaceSecondary AND
+  // accentSoft, so it stays a hairline instead of becoming a second tier of
+  // ink. Enforced by theme.test.ts.
+  controlBorder: "#88857E",
+  // The identity colour: a vivid emerald, one notch deeper and more
+  // saturated than the map pins' green so it can carry filled buttons and
+  // still clear 4.5:1 as ink on white.
+  accent: "#067647",
+  accentSoft: "#E2F5EA",
+  positive: "#1B7742",
+  positiveSoft: "#E3F4E8",
+  // NOT placeTypeColors.musalla. That value is baked into assets/pins/*.png
+  // and must not move; this one is ink for caution text and has to stay
+  // legible on white.
+  attention: "#9E5310",
+  attentionSoft: "#FBEFE0",
   // Blue is reserved for ONE meaning: the you-are-here dot the map draws
   // on both platforms. Anything pointing at the user (the recenter button)
   // uses this, and nothing else does.
   youAreHere: "#2783DE",
+  // The hero gradient (place detail, prayer countdown): emerald falling
+  // into deep teal. White text must clear AA on BOTH stops — asserted in
+  // theme.test.ts — which is why the stops are this dark. Identical in both
+  // palettes on purpose: the hero is the brand moment, not a surface, so it
+  // does not re-theme.
+  heroGradientStart: "#0B7A4B",
+  heroGradientEnd: "#0B5E58",
 };
 
 export type ThemeColors = typeof lightColors;
 
-// Dark palette: same roles, tuned for contrast on near-black. The accent is
-// lightened — the light-mode green fails contrast on dark surfaces.
+// Dark palette: same roles on true near-black. Surfaces separate by
+// LUMINANCE (cards sit lighter than the screen), and the accent brightens
+// to a saturated green that reads as the brand rather than a pastel echo
+// of it — button labels on it are near-black canvas, which is what clears
+// contrast there.
 export const darkColors: ThemeColors = {
-  text: "#ECEAE6",
-  textSecondary: "#A29E96",
-  canvas: "#201F1D",
-  surface: "#141312",
-  surfaceSecondary: "#2C2B28",
-  border: "#3A3835",
-  controlBorder: "#7C7973",
-  accent: "#6FC59B",
-  accentSoft: "#1C332A",
-  positive: "#63B98D",
-  positiveSoft: "#1D2F26",
-  attention: "#E09A5C",
-  attentionSoft: "#37281B",
+  text: "#F4F3EF",
+  textSecondary: "#A9A79F",
+  canvas: "#1E1E1C",
+  surface: "#121211",
+  surfaceSecondary: "#2C2C29",
+  border: "#33332F",
+  controlBorder: "#807E76",
+  accent: "#3BC98A",
+  accentSoft: "#173A2A",
+  positive: "#4CC286",
+  positiveSoft: "#16331F",
+  attention: "#EDA45F",
+  attentionSoft: "#3A2A16",
   youAreHere: "#6FB1EF",
+  heroGradientStart: "#0B7A4B",
+  heroGradientEnd: "#0B5E58",
 };
 
 /**
@@ -108,14 +121,16 @@ export const spacing = {
   xxl: 32,
 };
 
+// One notch chunkier across the board (the redesign's shape language):
+// friendly, thumb-round corners rather than utility rounding.
 export const radius = {
-  m: 8,
-  l: 12,
+  m: 10,
+  l: 14,
   /** Cards that carry a whole screen's identity — the place-detail hero. */
-  xl: 16,
+  xl: 20,
   /** The bottom sheet's top corners. */
-  xxl: 20,
-  /** Fully rounded: distance chips, reminder chips. */
+  xxl: 28,
+  /** Fully rounded: distance chips, reminder chips, the search bar. */
   pill: 999,
 };
 
@@ -157,12 +172,13 @@ export const type = {
   display: { fontSize: 52, lineHeight: 60, letterSpacing: -1.5 },
   /** The qibla lock-on word ("Aligned"). */
   hero: { fontSize: 34, lineHeight: 40, letterSpacing: -0.5 },
-  /** Screen-level headline: the prayer countdown. */
-  title1: { fontSize: 26, lineHeight: 32 },
+  /** Screen-level headline: the prayer countdown. Tracked tight — large
+      bold type at default tracking reads loose and dated. */
+  title1: { fontSize: 26, lineHeight: 32, letterSpacing: -0.5 },
   /** A place's name on its own page. */
-  title2: { fontSize: 22, lineHeight: 28 },
+  title2: { fontSize: 22, lineHeight: 28, letterSpacing: -0.4 },
   /** Card and dialog titles. */
-  title3: { fontSize: 20, lineHeight: 26 },
+  title3: { fontSize: 20, lineHeight: 26, letterSpacing: -0.3 },
   title4: { fontSize: 18, lineHeight: 24 },
   title5: { fontSize: 17, lineHeight: 22 },
   /** Default reading size: list rows, table cells, prose. */
