@@ -16,8 +16,7 @@ const ThemeContext = createContext<ThemeValue>({
 
 /**
  * Resolves the app's colour scheme from the theme SETTING: "system" follows
- * the OS live (useColorScheme re-renders on change, including
- * react-native-web's prefers-color-scheme on the web), while "light"/"dark"
+ * the OS live (useColorScheme re-renders on change), while "light"/"dark"
  * pin it regardless of the OS.
  *
  * Must be rendered INSIDE SettingsProvider — see RootLayout, where the

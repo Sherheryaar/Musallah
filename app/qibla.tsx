@@ -742,12 +742,9 @@ export default function QiblaScreen() {
         <View style={styles.dial}>
           {/* Screen-fixed overlay: the capture window and the confirmation
               ring belong to the GATE, not to the rose, so they must not
-              rotate with the heading.
-
-              pointerEvents goes in the style array rather than on the prop: on
-              react-native-web the prop form reaches the DOM through an RNW View
-              and warns. This layer's parent is the dial itself, which is NOT
-              inert, so unlike the two Svgs below it needs its own. */}
+              rotate with the heading. This layer's parent is the dial
+              itself, which is NOT inert, so unlike the two Svgs below it
+              needs its own pointerEvents. */}
           {instrument ? (
             <Svg
               width={dial}
@@ -1154,12 +1151,11 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark", dial: numbe
   // screen is mathematically invisible, so dark mode expresses lift by
   // luminance (a lighter well, a lit top edge) instead.
   //
-  // The shadow half now comes from elevation(scheme, "ambient") rather than
+  // The shadow half comes from elevation(scheme, "ambient") rather than
   // being written out here. Hand-rolled, this declared iOS 0.06/18/8 while the
   // recenter button declared 0.15/6/2 and both landed on Android elevation 3–4
   // — the two surfaces matched on one platform and not the other, which is the
-  // precise drift elevation.ts's own docstring describes. It also emitted
-  // react-native-web's "shadow* style props are deprecated" warning.
+  // precise drift elevation.ts's own docstring describes.
   const lift =
     scheme === "dark"
       ? { borderColor: colors.surfaceSecondary }
@@ -1216,10 +1212,9 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark", dial: numbe
       width: dial,
       alignItems: "center",
     },
-    // pointerEvents lives in these styles rather than as a prop on each
-    // element: react-native-web deprecated the prop form. The dial's layers
-    // all need the same treatment — they are a rendered instrument, not
-    // controls, and must never intercept a touch meant for the scroll view.
+    // The dial's layers all need the same treatment — they are a rendered
+    // instrument, not controls, and must never intercept a touch meant for
+    // the scroll view.
     /** Any decorative layer that must never intercept a touch. */
     inert: {
       pointerEvents: "none",

@@ -87,10 +87,6 @@ export default function FilterSheet({
       style={[
         styles.backdrop,
         { opacity: progress },
-        // In `style`, not as a prop: react-native-web deprecated the prop
-        // form ("props.pointerEvents is deprecated. Use style.pointerEvents"),
-        // and the style form is supported on both platforms.
-        //
         // Without this the fading-out scrim keeps eating taps for the whole
         // 180ms exit.
         { pointerEvents: visible ? "auto" : "none" },

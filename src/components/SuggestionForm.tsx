@@ -10,6 +10,7 @@ import {
 import Touchable from "./Touchable";
 import { type SubmissionResult } from "@/lib/feedback";
 import { useTheme } from "@/context/ThemeContext";
+import { cardEdge } from "@/lib/elevation";
 import { createThemedStyles } from "@/lib/themedStyles";
 import { spacing, radius, type, type ThemeColors } from "@/lib/theme";
 import { MIN_TARGET } from "@/lib/metrics";
@@ -189,13 +190,12 @@ export default function SuggestionForm({
   );
 }
 
-const useStyles = createThemedStyles((colors: ThemeColors) =>
+const useStyles = createThemedStyles((colors: ThemeColors, scheme) =>
   StyleSheet.create({
     card: {
       backgroundColor: colors.canvas,
-      borderRadius: radius.l,
-      borderWidth: 1,
-      borderColor: colors.border,
+      borderRadius: radius.xl,
+      ...cardEdge(scheme, colors),
       padding: spacing.l,
       gap: spacing.m,
     },
@@ -246,11 +246,13 @@ const useStyles = createThemedStyles((colors: ThemeColors) =>
     },
     sendButton: {
       backgroundColor: colors.accent,
-      borderRadius: radius.m,
+      borderRadius: radius.pill,
       paddingVertical: spacing.m,
       alignItems: "center",
       minHeight: MIN_TARGET,
       justifyContent: "center",
+      // Clips the Android ripple to the pill.
+      overflow: "hidden",
     },
     sendButtonDisabled: {
       opacity: 0.6,
@@ -259,7 +261,7 @@ const useStyles = createThemedStyles((colors: ThemeColors) =>
     sendLabel: {
       color: colors.canvas,
       ...type.body,
-      fontWeight: "600",
+      fontWeight: "700",
     },
     successText: {
       ...type.subhead,

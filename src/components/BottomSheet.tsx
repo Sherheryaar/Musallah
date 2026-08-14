@@ -266,8 +266,6 @@ export default function BottomSheet({ children, aboveSheet }: Props) {
 
 const useStyles = createThemedStyles((colors: ThemeColors, scheme: "light" | "dark") =>
   StyleSheet.create({
-  // pointerEvents in `style`, not as a prop — react-native-web deprecated the
-  // prop form, and the style form works on both platforms.
   /** Measuring layer: must never intercept a touch. */
   inert: {
     pointerEvents: "none",

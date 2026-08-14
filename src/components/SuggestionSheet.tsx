@@ -90,8 +90,7 @@ export default function SuggestionSheet({
       style={[
         styles.backdrop,
         { opacity: progress },
-        // In `style`, not as a prop: the prop form is deprecated on
-        // react-native-web. Stops the fading-out scrim eating taps.
+        // Stops the fading-out scrim eating taps during the exit.
         { pointerEvents: visible ? "auto" : "none" },
       ]}
       onLayout={(e) => setContainerHeight(e.nativeEvent.layout.height)}

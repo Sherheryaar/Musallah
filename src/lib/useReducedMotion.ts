@@ -6,11 +6,6 @@
 // motion the setting exists to suppress. The value still CHANGES; it just
 // stops sweeping.
 //
-// react-native-web backs both calls with
-// `window.matchMedia('(prefers-reduced-motion: reduce)')`, so the browser
-// honours it too — but when matchMedia is unavailable RNW resolves the
-// promise to `true` and returns `undefined` from addEventListener, hence
-// the optional-chained cleanup below.
 
 import { useEffect, useState } from "react";
 import { AccessibilityInfo } from "react-native";

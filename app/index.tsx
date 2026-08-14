@@ -1009,8 +1009,7 @@ const useStyles = createThemedStyles((colors: ThemeColors, scheme: "light" | "da
     right: 0,
     padding: spacing.m,
     gap: spacing.s,
-    // In `style` rather than as a prop: react-native-web deprecated the prop
-    // form. "box-none" is what lets map gestures through the gaps between the
+    // "box-none" is what lets map gestures through the gaps between the
     // search row and the legend while those stay tappable.
     pointerEvents: "box-none",
   },
@@ -1194,10 +1193,8 @@ const useStyles = createThemedStyles((colors: ThemeColors, scheme: "light" | "da
     height: 6,
     width: "100%",
     backgroundColor: colors.accent,
-    // Grow from the left edge, not the centre. The ARRAY form, not
-    // "left center": react-native-web passes the string straight through as
-    // a `transform-origin` DOM attribute, which React rejects. Native
-    // requires all three values [x, y, z] — two crashes the renderer.
+    // Grow from the left edge, not the centre. The ARRAY form with all
+    // three values [x, y, z] — two crashes the renderer.
     transformOrigin: ["0%", "50%", 0],
     // No borderRadius: scaling X squashes it to a sub-pixel smear at low
     // progress. The track's own radius + overflow does the rounding.
