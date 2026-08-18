@@ -4,7 +4,10 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import * as Location from "expo-location";
 
+import { useHeaderHeight } from "@react-navigation/elements";
+
 import Touchable from "./Touchable";
+import { useOverlayLock } from "@/context/OverlayContext";
 import { useSettings } from "@/context/SettingsContext";
 import { useTheme } from "@/context/ThemeContext";
 import { elevation } from "@/lib/elevation";
@@ -30,14 +33,22 @@ import { radius, spacing, type, type ThemeColors } from "@/lib/theme";
 
 const STORAGE_KEY = "onboarding:v1";
 
+// Shared with the header strip this overlay cannot reach on its own, so the
+// two halves of the scrim are the same colour. See OverlayContext — on this
+// screen the header is how a first-run user reached Qibla, which asks for
+// location on mount and spends the one prompt iOS ever gives.
+const scrim = (scheme: "light" | "dark") =>
+  scheme === "dark" ? "rgba(0,0,0,0.6)" : "rgba(0,0,0,0.45)";
+
 type Props = {
   /** Called once the user has finished — the caller then reads location. */
   onDone: () => void;
 };
 
 export default function Onboarding({ onDone }: Props) {
-  const { colors } = useTheme();
+  const { colors, scheme } = useTheme();
   const styles = useStyles();
+  const headerHeight = useHeaderHeight();
   const { settings, updateSettings } = useSettings();
   // `null` = storage not read yet. Gating on "has hydrated" rather than on
   // "the flag is absent" is what stops first-run users seeing a flash of
@@ -95,6 +106,13 @@ export default function Onboarding({ onDone }: Props) {
     void finish();
   };
 
+  // Dim and disarm the header while this owns the screen. No progress value:
+  // this card has no entry animation to stay in step with.
+  useOverlayLock(seen === false, {
+    headerHeight,
+    color: scrim(scheme),
+  });
+
   if (seen !== false) return null;
 
   return (
@@ -121,8 +139,8 @@ export default function Onboarding({ onDone }: Props) {
         <Text style={styles.title}>Find your nearest place to pray</Text>
         <Text style={styles.body}>
           Your location is used on your phone to sort places by distance and
-          to work out prayer times. It never leaves your device {"—"}
-          there is no account, no tracking, and nothing is uploaded.
+          to work out prayer times. It never leaves your device — there is no
+          account, no tracking, and nothing is uploaded.
         </Text>
 
         <View style={styles.divider} />
@@ -199,7 +217,7 @@ const useStyles = createThemedStyles((colors: ThemeColors, scheme: "light" | "da
   StyleSheet.create({
     backdrop: {
       ...StyleSheet.absoluteFillObject,
-      backgroundColor: scheme === "dark" ? "rgba(0,0,0,0.6)" : "rgba(0,0,0,0.45)",
+      backgroundColor: scrim(scheme),
       alignItems: "center",
       justifyContent: "center",
       padding: spacing.l,

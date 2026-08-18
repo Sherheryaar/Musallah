@@ -12,6 +12,7 @@
 // Pure functions: the expo-notifications calls live in the context; this
 // module just decides WHAT to schedule and is fully testable.
 
+import { formatCountdown } from "./duration";
 import { computePrayerSchedule, type CalcOptions } from "./prayerTimes";
 
 export const PRAYER_KEYS = [
@@ -110,7 +111,10 @@ export function planNotifications(
         prayerAt: entry.time,
         title:
           prefs.minutesBefore > 0
-            ? `${entry.label} in ${prefs.minutesBefore} min`
+            ? // Same words as the two screens that count down to this
+              // moment, so a notification and the app never disagree about
+              // how a gap is spelled.
+              `${entry.label} in ${formatCountdown(prefs.minutesBefore * 60_000)}`
             : `${entry.label} time`,
         body:
           prefs.minutesBefore > 0

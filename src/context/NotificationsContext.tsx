@@ -30,10 +30,39 @@ import {
 const PREFS_KEY = "notificationPrefs:v1";
 const STATE_KEY = "notificationState:v1";
 
+/**
+ * How old the last location we scheduled from may be and still be planned
+ * from again.
+ *
+ * `location` below is a ref that starts empty on every launch and is only
+ * ever filled by a live GPS fix, so the persisted coordinates are what keeps
+ * the rolling window topped up for someone whose fix never arrives — a user
+ * who granted location once and later revoked it, or who simply hasn't
+ * opened the home screen yet this session. Reuse is right for prayer times
+ * (they shift about a minute per 25 km) but not forever: a phone unopened
+ * for a month may be on another continent, and times for the wrong city are
+ * worse than none.
+ *
+ * Measured from when the COORDINATES were fixed, not from the last schedule.
+ * Scheduling refreshes `lastScheduledAt` — including when it plans from
+ * reused coordinates — so bounding on that slid the window forward forever:
+ * someone who granted location once in London, moved, and kept opening the
+ * app would be given London's times indefinitely, hours out and never
+ * expiring. Ageing the fix itself is what makes the bound real; when it
+ * lapses, `locationAvailable` goes false and Settings says so out loud.
+ */
+const LOCATION_REUSE_MS = 30 * 24 * 60 * 60 * 1000;
+
 type ScheduleState = {
   lastScheduledAt: number | null;
   lastLat: number | null;
   lastLng: number | null;
+  /**
+   * When lastLat/lastLng came off a live GPS fix. Null in state persisted
+   * before this field existed, where lastScheduledAt is the closest estimate
+   * available.
+   */
+  lastFixAt: number | null;
   lastPrefsFingerprint: string | null;
 };
 
@@ -41,6 +70,7 @@ const EMPTY_STATE: ScheduleState = {
   lastScheduledAt: null,
   lastLat: null,
   lastLng: null,
+  lastFixAt: null,
   lastPrefsFingerprint: null,
 };
 
@@ -48,6 +78,13 @@ type NotificationsContextValue = {
   prefs: NotificationPrefs;
   /** null = not asked yet; false = denied at the OS level. */
   permissionGranted: boolean | null;
+  /**
+   * Whether the scheduler has coordinates to plan from — this session's fix,
+   * or a persisted one still inside LOCATION_REUSE_MS. False means nothing
+   * can be scheduled however the prefs read, which the Settings screen says
+   * out loud rather than leaving an enabled toggle looking productive.
+   */
+  locationAvailable: boolean;
   updatePrefs: (patch: Partial<NotificationPrefs>) => void;
   /** Enable notifications, requesting OS permission if needed. */
   enable: () => Promise<boolean>;
@@ -61,6 +98,7 @@ type NotificationsContextValue = {
 const NotificationsContext = createContext<NotificationsContextValue>({
   prefs: DEFAULT_NOTIFICATION_PREFS,
   permissionGranted: null,
+  locationAvailable: false,
   updatePrefs: () => {},
   enable: async () => false,
   disable: () => {},
@@ -144,6 +182,7 @@ export function NotificationsProvider({
   const [permissionGranted, setPermissionGranted] = useState<boolean | null>(
     null,
   );
+  const [locationAvailable, setLocationAvailable] = useState(false);
   const location = useRef<{ lat: number; lng: number } | null>(null);
   const scheduleState = useRef<ScheduleState>(EMPTY_STATE);
   const hydrated = useRef(false);
@@ -204,6 +243,24 @@ export function NotificationsProvider({
     void AsyncStorage.setItem(PREFS_KEY, JSON.stringify(next)).catch(() => {});
   }, []);
 
+  /**
+   * Coordinates to plan from: this session's fix when the home screen has
+   * reported one, otherwise the location the last schedule was built from.
+   * The central-London fallback the home screen shows places from is
+   * deliberately NOT a candidate — it is a browsing convenience, and prayer
+   * times for a city the user isn't in would be worse than silence.
+   */
+  const planCoords = useCallback((): { lat: number; lng: number } | null => {
+    if (location.current) return location.current;
+    const { lastLat, lastLng, lastScheduledAt, lastFixAt } =
+      scheduleState.current;
+    if (lastLat === null || lastLng === null) return null;
+    const fixedAt = lastFixAt ?? lastScheduledAt;
+    if (fixedAt === null) return null;
+    if (Date.now() - fixedAt > LOCATION_REUSE_MS) return null;
+    return { lat: lastLat, lng: lastLng };
+  }, []);
+
   /** Rebuild the OS notification queue from the current plan. */
   const reschedule = useCallback(
     async (reason: "change" | "topup") => {
@@ -214,7 +271,11 @@ export function NotificationsProvider({
         if (!prefs.enabled && scheduleState.current.lastScheduledAt === null) {
           return;
         }
-        const coords = location.current;
+        const coords = planCoords();
+        // Publish this before bailing: with no coordinates the toggle can be
+        // on and permission granted while nothing whatsoever is scheduled,
+        // and Settings needs to be able to say so.
+        setLocationAvailable(coords !== null);
         if (!coords) return;
         const fingerprint = prefsFingerprint(prefs, calcOptions);
         if (
@@ -260,10 +321,18 @@ export function NotificationsProvider({
             });
           }
         }
+        const previous = scheduleState.current;
         scheduleState.current = {
           lastScheduledAt: Date.now(),
           lastLat: coords.lat,
           lastLng: coords.lng,
+          // planCoords prefers the live fix, so this is exactly when these
+          // coordinates were measured. Reused coordinates keep their original
+          // age — pinned to the best estimate we have for legacy state, so
+          // topping up cannot quietly reset the clock on itself.
+          lastFixAt: location.current
+            ? Date.now()
+            : (previous.lastFixAt ?? previous.lastScheduledAt),
           lastPrefsFingerprint: fingerprint,
         };
         void AsyncStorage.setItem(
@@ -278,7 +347,7 @@ export function NotificationsProvider({
       rescheduling.current = next;
       await next;
     },
-    [prefs, calcOptions],
+    [prefs, calcOptions, planCoords],
   );
 
   // Top up the rolling window on foreground and on relevant changes.
@@ -369,6 +438,10 @@ export function NotificationsProvider({
   const reportLocation = useCallback(
     (lat: number, lng: number) => {
       location.current = { lat, lng };
+      // Set here as well as in reschedule so the notice in Settings never
+      // flashes on for the frame between enabling alerts and the queue being
+      // rebuilt.
+      setLocationAvailable(true);
       void reschedule("topup");
     },
     [reschedule],
@@ -378,6 +451,7 @@ export function NotificationsProvider({
     () => ({
       prefs,
       permissionGranted,
+      locationAvailable,
       updatePrefs,
       enable,
       disable,
@@ -387,6 +461,7 @@ export function NotificationsProvider({
     [
       prefs,
       permissionGranted,
+      locationAvailable,
       updatePrefs,
       enable,
       disable,

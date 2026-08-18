@@ -84,7 +84,10 @@ function PlaceCard({ place, distanceLabel, onPress }: Props) {
             {place.name}
             {place.confidence === "verified" ? (
               <>
-                {" "}
+                {/* A non-breaking space: a name that exactly fills the line
+                    otherwise pushed the rosette onto a line of its own. It
+                    now wraps together with the last word. */}
+                {"\u00A0"}
                 <MaterialCommunityIcons
                   name="check-decagram"
                   size={15}
@@ -112,7 +115,16 @@ function PlaceCard({ place, distanceLabel, onPress }: Props) {
         ) : null}
 
         {available.length > 0 ? (
-          <View style={styles.facilityRow}>
+          // Decorative, and hidden from screen readers on both platforms:
+          // these glyphs carry no text of their own, so a reader announces
+          // them as raw icon-font characters. The words are already in the
+          // card's own accessibilityLabel (facilitiesLabel above), which is
+          // the one place they should be spoken.
+          <View
+            style={styles.facilityRow}
+            accessibilityElementsHidden
+            importantForAccessibility="no-hide-descendants"
+          >
             {available.map((key) => (
               <MaterialCommunityIcons
                 key={key}

@@ -14,6 +14,29 @@ import {
   type Slot,
 } from "@/lib/mapPins";
 
+// Google's own POI markers are drawn LARGER and bolder than this app's place
+// dots, in the same colour language the map legend claims for place types — so
+// a purple "entertainment" pin beside a legend saying purple = Multi-faith
+// reads as one of the app's places, and tapping it does nothing. There is no
+// prop for this; suppressing the POI label layer (icon AND text) through the
+// map style is the only way to stop the base map impersonating the data.
+//
+// Park names come back afterwards: `labels.text` without `labels.icon` is a
+// name with no pin, which is orientation rather than a competing marker.
+// Transit is a separate featureType and is untouched for the same reason.
+const NO_POI_STYLE = [
+  {
+    featureType: "poi",
+    elementType: "labels",
+    stylers: [{ visibility: "off" }],
+  },
+  {
+    featureType: "poi.park",
+    elementType: "labels.text",
+    stylers: [{ visibility: "on" }],
+  },
+];
+
 // Google Maps (Android) needs an explicit style array for dark mode; Apple
 // Maps (iOS) follows the userInterfaceStyle prop instead and ignores this.
 const DARK_MAP_STYLE = [
@@ -50,6 +73,8 @@ const DARK_MAP_STYLE = [
     elementType: "geometry",
     stylers: [{ color: "#17263c" }],
   },
+  // Last, so the visibility rules win over the poi text colour above.
+  ...NO_POI_STYLE,
 ];
 
 const FALLBACK_REGION = {
@@ -269,17 +294,16 @@ export default function PlacesMap({
       onRegionChangeComplete={(r) => setRegion(r)}
       showsUserLocation={userLocation !== null}
       userInterfaceStyle={scheme}
-      // An EMPTY ARRAY for light, NOT undefined. MapView.java's setMapStyle
-      // is `if (map != null && customMapStyleString != null)`, so a null
-      // style is not "reset" — it is "do nothing", and the dark style stayed
-      // applied for the rest of the session. `[]` works precisely because an
-      // empty array is truthy in JS: the library's own
-      // `customMapStyle ? JSON.stringify(...) : undefined` turns it into the
-      // string "[]", which reaches Android as a style declaring no overrides,
-      // i.e. the default map. Anything falsy here silently does nothing.
-      // (Apple Maps ignores this prop and follows userInterfaceStyle above,
-      // which is why only Android was stuck.)
-      customMapStyle={scheme === "dark" ? DARK_MAP_STYLE : []}
+      // BOTH branches must be a real, non-empty array, and never undefined or
+      // null. MapView.java's setMapStyle is
+      // `if (map != null && customMapStyleString != null)`, so a falsy style
+      // is not "reset" — it is "do nothing", and the dark style stays applied
+      // for the rest of the session. The library turns whatever it is handed
+      // into JSON (`customMapStyle ? JSON.stringify(...) : undefined`), so the
+      // light branch has to carry its own declarations to replace the dark
+      // ones. (Apple Maps ignores this prop and follows userInterfaceStyle
+      // above, which is why only Android was ever stuck.)
+      customMapStyle={scheme === "dark" ? DARK_MAP_STYLE : NO_POI_STYLE}
       // Google Maps ships its own chrome, and all of it fought the app's --
       // on Android only, which is exactly the sort of divergence that goes
       // unnoticed when testing on an iPhone. All three are inert on Apple

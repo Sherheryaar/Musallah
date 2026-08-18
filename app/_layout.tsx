@@ -1,8 +1,10 @@
 import { Link, Stack, type ErrorBoundaryProps } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import {
+  Animated,
   I18nManager,
+  Platform,
   Text,
   StyleSheet,
   TouchableOpacity,
@@ -14,6 +16,7 @@ import Touchable from "../src/components/Touchable";
 import { useReducedMotion } from "../src/lib/useReducedMotion";
 import { FavouritesProvider } from "../src/context/FavouritesContext";
 import { NotificationsProvider } from "../src/context/NotificationsContext";
+import { OverlayProvider, useOverlay } from "../src/context/OverlayContext";
 import { PlacesProvider } from "../src/context/PlacesContext";
 import { SettingsProvider } from "../src/context/SettingsContext";
 import { ThemeProvider, useTheme } from "../src/context/ThemeContext";
@@ -86,8 +89,21 @@ const NAV_ACTIONS = [
 
 function HeaderButtons() {
   const { colors } = useTheme();
+  const { lock } = useOverlay();
   return (
-    <View style={staticStyles.headerButtons}>
+    // Inert while a sheet owns the screen. The scrim above already covers
+    // these, so this is the belt to its braces — on first run especially,
+    // where reaching Qibla spends the single location prompt that onboarding
+    // exists to explain first.
+    <View
+      style={staticStyles.headerButtons}
+      pointerEvents={lock ? "none" : "auto"}
+      // Hidden from assistive tech too, not just from fingers: pointerEvents
+      // does nothing for a screen reader, which could still activate Qibla
+      // through the scrim and spend that one prompt.
+      accessibilityElementsHidden={lock !== null}
+      importantForAccessibility={lock ? "no-hide-descendants" : "auto"}
+    >
       {NAV_ACTIONS.map(({ href, icon, label }) => (
         // asChild: expo-router's Link wraps its children in a <Text>, so
         // without it there is no Touchable in the tree at all and tapping
@@ -109,12 +125,60 @@ function HeaderButtons() {
   );
 }
 
+/**
+ * The strip of scrim a sheet cannot paint for itself.
+ *
+ * See OverlayContext for the why: the sheets are deliberately not native
+ * modals, so their own scrim stops at the bottom of the header and the header
+ * stayed bright and tappable above them.
+ */
+function HeaderScrim() {
+  const { lock } = useOverlay();
+  if (!lock || lock.headerHeight <= 0) return null;
+  return (
+    <Animated.View
+      // Deliberately NOT pointerEvents="none": swallowing taps meant for the
+      // back arrow and the nav actions is half of what this is for.
+      style={[
+        staticStyles.headerScrim,
+        { height: lock.headerHeight, backgroundColor: lock.color },
+        lock.progress ? { opacity: lock.progress } : null,
+      ]}
+      accessibilityElementsHidden
+      importantForAccessibility="no-hide-descendants"
+    />
+  );
+}
+
 /** Inside ThemeProvider, so the navigation chrome follows the theme too. */
 function ThemedNavigator() {
   const { scheme, colors } = useTheme();
   const reduceMotion = useReducedMotion();
+
+  // Android's navigation bar is native chrome and follows the SYSTEM theme,
+  // so pinning the app to Light or Dark in Settings left the bar styled for
+  // the other one — dark buttons on a white contrast band at the foot of a
+  // near-black app, or the reverse. The style argument describes the BAR, not
+  // the buttons, so it takes the scheme directly.
+  //
+  // Only takes effect in a real build: app.json turns off the platform's
+  // enforced contrast scrim, which this needs, and Expo Go ships its own
+  // native config where that stays on.
+  useEffect(() => {
+    if (Platform.OS !== "android") return;
+    // Loaded lazily, and failure is swallowed: the package resolves its
+    // native module at IMPORT time, so a static import would take this file
+    // — and the ErrorBoundary exported below it — down in any binary
+    // built before the dependency existed, with no fallback UI. Tinting the
+    // nav bar is never worth the whole app.
+    void import("expo-navigation-bar")
+      .then((NavigationBar) => NavigationBar.setStyle(scheme))
+      .catch(() => {});
+  }, [scheme]);
+
   return (
-    <>
+    <OverlayProvider>
+      <View style={staticStyles.root}>
       <StatusBar style={scheme === "dark" ? "light" : "dark"} />
       <Stack
         screenOptions={{
@@ -145,7 +209,9 @@ function ThemedNavigator() {
         <Stack.Screen name="qibla" options={{ title: "Qibla" }} />
         <Stack.Screen name="settings" options={{ title: "Settings" }} />
       </Stack>
-    </>
+      <HeaderScrim />
+      </View>
+    </OverlayProvider>
   );
 }
 
@@ -169,6 +235,19 @@ export default function RootLayout() {
 }
 
 const staticStyles = StyleSheet.create({
+  root: {
+    flex: 1,
+  },
+  headerScrim: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    // Both halves are needed to sit above the native header: iOS honours
+    // zIndex, Android orders siblings by elevation before child order.
+    zIndex: 100,
+    elevation: 100,
+  },
   headerButtons: {
     flexDirection: "row",
     alignItems: "center",

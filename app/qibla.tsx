@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import {
   AccessibilityInfo,
   Animated,
+  AppState,
   Easing,
   Linking,
   Platform,
@@ -150,8 +151,11 @@ type HeadingState =
   | { kind: "loading" }
   | { kind: "live"; heading: number; accuracy: number | null }
   // No compass available (denied permission, no magnetometer): the
-  // bearing is still useful, so show it as a static number.
-  | { kind: "static"; reason: string };
+  // bearing is still useful, so show it as a static number. `cause` separates
+  // the two, because a denied permission can be retried from the note while
+  // re-requesting an already-granted one resolves instantly with no prompt —
+  // so the sensor failure must not offer that button.
+  | { kind: "static"; cause: "permission" | "sensor"; reason: string };
 
 const PLATFORM: "ios" | "android" | "other" =
   Platform.OS === "ios" ? "ios" : Platform.OS === "android" ? "android" : "other";
@@ -199,6 +203,15 @@ export default function QiblaScreen() {
   );
   const [usingFallback, setUsingFallback] = useState(false);
   const [heading, setHeading] = useState<HeadingState>({ kind: "loading" });
+  /**
+   * Bumped when the user grants location from the in-screen button.
+   *
+   * The setup effect below keys on this, so a grant re-runs the ONE path that
+   * reads the permission, fetches coordinates and subscribes to the heading:
+   * mount and retry cannot drift apart, and the effect's own cleanup removes
+   * the previous subscription before the next one starts.
+   */
+  const [setupAttempt, setSetupAttempt] = useState(0);
   // Sensor-quality inputs, sampled continuously while the screen is open.
   const [fieldStrength, setFieldStrength] = useState<number | null>(null);
   const [tiltDeg, setTiltDeg] = useState<number | null>(null);
@@ -276,11 +289,18 @@ export default function QiblaScreen() {
       if (!granted) {
         setHeading({
           kind: "static",
+          cause: "permission",
           reason:
             "Allow location access to use the live compass. The bearing above is still correct for your area.",
         });
         return;
       }
+      // On a retry the note explaining the denial is still on screen; the
+      // permission is in hand now, so clear it here rather than leaving it
+      // contradicting the app until the first heading sample lands.
+      setHeading((prevState) =>
+        prevState.kind === "loading" ? prevState : { kind: "loading" },
+      );
       try {
         const newSub = await Location.watchHeadingAsync((data) => {
           if (cancelled) return;
@@ -350,8 +370,13 @@ export default function QiblaScreen() {
           sub = newSub;
         }
       } catch {
+        // Guarded like the callback above: the rejection can land after this
+        // run was torn down, and a stale failure must not overwrite the state
+        // belonging to the run that replaced it.
+        if (cancelled) return;
         setHeading({
           kind: "static",
+          cause: "sensor",
           reason:
             "This device didn't report a compass heading. Use the bearing above with a compass app.",
         });
@@ -362,7 +387,10 @@ export default function QiblaScreen() {
       cancelled = true;
       sub?.remove();
     };
-  }, [spin, turn]);
+    // setupAttempt is what makes the in-screen "Allow location" button work:
+    // it re-runs this whole path, and the cleanup above tears the old
+    // subscription down first so there is never more than one.
+  }, [spin, turn, setupAttempt]);
 
   // Sensor-quality feeds: magnetometer field strength catches magnets and
   // metal (an interfered compass reads confidently and WRONG — the single
@@ -458,6 +486,30 @@ export default function QiblaScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [point.lat, point.lng, dayKey],
   );
+  // A crossing that has already happened is not advice, so it is dropped:
+  // everything below either names an instant the user can still act on, or
+  // says nothing at all.
+  const stillToCome =
+    crossings.towards !== null && crossings.towards.getTime() > Date.now();
+  // Once today's crossing is behind us the next usable one is tomorrow's, from
+  // the same scan a day on. `stillToCome` flips at most once a day, so keying
+  // the memo on it — rather than on the clock — keeps the day-long scan off
+  // the minute tick. Still null at latitudes where the sun never reaches the
+  // qibla azimuth, which the copy has to survive.
+  const tomorrowCrossing = useMemo(() => {
+    if (stillToCome) return null;
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    return qiblaSunCrossings(point.lat, point.lng, tomorrow).towards;
+    // dayKey is the clock this is sampled against, as above.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stillToCome, point.lat, point.lng, dayKey]);
+  const nextCrossing =
+    crossings.towards && stillToCome
+      ? { at: crossings.towards, tomorrow: false }
+      : tomorrowCrossing
+        ? { at: tomorrowCrossing, tomorrow: true }
+        : null;
 
   // The sun method stops being a footnote the moment the compass can't be
   // trusted — that is precisely when it becomes the answer.
@@ -552,12 +604,38 @@ export default function QiblaScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [announceBucket]);
 
+  // Granting in system Settings — which is exactly where requestLocation
+  // sends the user once Android has stopped prompting — does NOT restart the
+  // app on Android, so without this the screen sits on the fallback bearing
+  // with its "Allow location" note until it is left and reopened, even though
+  // the permission is now in hand. Held in a ref so the listener is installed
+  // once and still reads current state; the retry is skipped unless the
+  // permission is what is actually blocking the compass, so coming back to a
+  // working screen never restarts its subscription.
+  const permissionBlocked =
+    heading.kind === "static" && heading.cause === "permission";
+  const permissionBlockedRef = useRef(permissionBlocked);
+  permissionBlockedRef.current = permissionBlocked;
+  useEffect(() => {
+    const sub = AppState.addEventListener("change", (next) => {
+      if (next === "active" && permissionBlockedRef.current) {
+        setSetupAttempt((n) => n + 1);
+      }
+    });
+    return () => sub.remove();
+  }, []);
+
   const requestLocation = useCallback(async () => {
     const { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== "granted") {
-      // Once the OS stops prompting, the only route left is Settings.
-      Linking.openSettings().catch(() => {});
+    if (status === "granted") {
+      // Re-runs the one setup path straight away rather than waiting on the
+      // AppState listener above: this prompt is answered without the app ever
+      // leaving the foreground, so no "active" transition arrives.
+      setSetupAttempt((n) => n + 1);
+      return;
     }
+    // Once the OS stops prompting, the only route left is Settings.
+    Linking.openSettings().catch(() => {});
   }, []);
 
   // --- Dial geometry, in SVG user units ----------------------------------
@@ -1030,14 +1108,20 @@ export default function QiblaScreen() {
       {heading.kind === "static" ? (
         <View style={styles.note}>
           <Text style={styles.noteText}>{heading.reason}</Text>
-          <Touchable
-            onPress={requestLocation}
-            accessibilityRole="button"
-            accessibilityLabel="Allow location access"
-            style={styles.noteButton}
-          >
-            <Text style={styles.noteButtonLabel}>Allow location</Text>
-          </Touchable>
+          {/* Only the permission case has anything to act on. A device that
+              reported no compass has already granted location, so this button
+              would re-request a granted permission and visibly do nothing —
+              the bearing above is the answer there. */}
+          {heading.cause === "permission" ? (
+            <Touchable
+              onPress={requestLocation}
+              accessibilityRole="button"
+              accessibilityLabel="Allow location access"
+              style={styles.noteButton}
+            >
+              <Text style={styles.noteButtonLabel}>Allow location</Text>
+            </Touchable>
+          ) : null}
         </View>
       ) : null}
 
@@ -1081,8 +1165,8 @@ export default function QiblaScreen() {
               <Text style={styles.sunSummary} numberOfLines={2}>
                 {sunNow.sunUp
                   ? sunNow.instruction
-                  : crossings.towards
-                    ? `Sun sits on the qibla line at ${formatClock(crossings.towards)}`
+                  : nextCrossing
+                    ? `Sun sits on the qibla line ${nextCrossing.tomorrow ? "tomorrow " : ""}at ${formatClock(nextCrossing.at)}`
                     : "Available in daylight"}
               </Text>
             )}
@@ -1103,9 +1187,9 @@ export default function QiblaScreen() {
             {sunNow.sunUp ? (
               <Text style={styles.sunInstruction}>{sunNow.instruction}</Text>
             ) : null}
-            {crossings.towards ? (
+            {nextCrossing ? (
               <Text style={styles.sunBody}>
-                {`At ${formatClock(crossings.towards)} today the sun sits exactly on the qibla line — face your shadow's opposite direction and that is the qibla, to a fraction of a degree.`}
+                {`At ${formatClock(nextCrossing.at)} ${nextCrossing.tomorrow ? "tomorrow" : "today"} the sun sits exactly on the qibla line — face your shadow's opposite direction and that is the qibla, to a fraction of a degree.`}
               </Text>
             ) : null}
           </View>

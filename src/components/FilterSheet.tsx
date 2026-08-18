@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
   BackHandler,
+  Keyboard,
   ScrollView,
   StyleSheet,
   Text,
@@ -9,8 +10,11 @@ import {
 } from "react-native";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useHeaderHeight } from "@react-navigation/elements";
+import { usePreventRemove } from "@react-navigation/native";
 
 import Touchable from "./Touchable";
+import { useOverlayLock } from "@/context/OverlayContext";
 import { FACILITY_KEYS, FACILITY_LABELS, FacilityKey } from "@/data/places";
 import { useTheme } from "@/context/ThemeContext";
 import { elevation } from "@/lib/elevation";
@@ -18,6 +22,10 @@ import { createThemedStyles } from "@/lib/themedStyles";
 import { radius, spacing, type, type ThemeColors } from "@/lib/theme";
 import { useReducedMotion } from "@/lib/useReducedMotion";
 import { useSheetAnimation } from "@/lib/useSheetAnimation";
+
+// Shared with the header strip this overlay cannot reach on its own, so the
+// two halves of the scrim are the same colour. See OverlayContext.
+const SCRIM = "rgba(0,0,0,0.4)";
 
 type Props = {
   visible: boolean;
@@ -55,6 +63,7 @@ export default function FilterSheet({
   const insets = useSafeAreaInsets();
   const reduceMotion = useReducedMotion();
   const { mounted, progress } = useSheetAnimation(visible, reduceMotion);
+  const headerHeight = useHeaderHeight();
   // Cached in a ref, with a sensible fallback: measuring is only possible
   // AFTER the first layout, and without the fallback the very first open
   // would slide from 0 and appear not to move at all.
@@ -69,6 +78,22 @@ export default function FilterSheet({
     });
     return () => sub.remove();
   }, [visible, onClose]);
+
+  // The Filters button sits beside the search field, so this sheet routinely
+  // opens with the keyboard up — and it is bottom-anchored, which put the
+  // last filters and the Done button behind the keyboard with no way to
+  // scroll them out.
+  useEffect(() => {
+    if (visible) Keyboard.dismiss();
+  }, [visible]);
+
+  // The header's back arrow and nav actions are native chrome this overlay
+  // cannot cover; without this they navigated away over an open sheet.
+  usePreventRemove(visible, onClose);
+
+  // Dim and disarm the header for as long as this is on screen. `mounted`
+  // rather than `visible`, so the strip fades out with the sheet.
+  useOverlayLock(mounted, { headerHeight, color: SCRIM, progress });
 
   if (!mounted) return null;
 
@@ -248,7 +273,7 @@ const useStyles = createThemedStyles((colors: ThemeColors, scheme: "light" | "da
   StyleSheet.create({
   backdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.4)",
+    backgroundColor: SCRIM,
     justifyContent: "flex-end",
     zIndex: 50,
     elevation: 50,

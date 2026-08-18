@@ -3,6 +3,7 @@ import {
   Animated,
   BackHandler,
   PanResponder,
+  Platform,
   StyleSheet,
   View,
   useWindowDimensions,
@@ -299,7 +300,13 @@ const useStyles = createThemedStyles((colors: ThemeColors, scheme: "light" | "da
     borderTopWidth: 1,
     borderColor: colors.border,
     ...elevation(scheme, "sheet"),
-    overflow: "hidden",
+    // Android only: clips the list's ripples to the rounded top corners (the
+    // elevation shadow survives — it draws from the outline). iOS must NOT
+    // clip, or masksToBounds erases the shadow above, which in light mode is
+    // the ONLY thing separating the sheet from the map. Nothing needs
+    // clipping there anyway: handleArea is 37pt tall, so every child below it
+    // starts clear of the 28pt corner curve.
+    ...Platform.select({ android: { overflow: "hidden" as const } }),
   },
   handleArea: {
     alignItems: "center",

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Linking,
@@ -8,6 +8,8 @@ import {
   Text,
   View,
   StyleSheet,
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
 } from "react-native";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -32,6 +34,7 @@ import SuggestionSheet from "@/components/SuggestionSheet";
 import { submitEditSuggestion, submitJamaatTimes } from "@/lib/feedback";
 import { JAMAAT_SOURCE_TOPICS } from "@/lib/jamaatContribution";
 import { FACILITY_ICONS, PLACE_TYPE_ICONS, type IconName } from "@/lib/icons";
+import { formatAddress } from "@/lib/formatAddress";
 import { isLikelyIreland } from "@/lib/geo";
 import { computePrayerTimes, PrayerTimes } from "@/lib/prayerTimes";
 import { createThemedStyles } from "@/lib/themedStyles";
@@ -126,6 +129,27 @@ export default function PlaceDetailScreen() {
   const [showEditForm, setShowEditForm] = useState(false);
   const [showTimesForm, setShowTimesForm] = useState(false);
 
+  // The header carries the place TYPE until the hero card scrolls away, then
+  // the place NAME — otherwise nothing on screen says which place this is.
+  // The crossing is tracked in a ref as well as state so the scroll handler
+  // only touches state at the threshold rather than on every frame; the
+  // native header title is a single ellipsized line on both platforms, so a
+  // long name truncates instead of wrapping.
+  const [headerShowsName, setHeaderShowsName] = useState(false);
+  const pastHero = useRef(false);
+  // Until the hero has laid itself out, no offset counts as past it.
+  const heroBottom = useRef(Number.POSITIVE_INFINITY);
+  const handleScroll = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      const past = event.nativeEvent.contentOffset.y > heroBottom.current;
+      if (past !== pastHero.current) {
+        pastHero.current = past;
+        setHeaderShowsName(past);
+      }
+    },
+    [],
+  );
+
   // Computed on-device for this place's exact coordinates -- instant,
   // offline, and it follows the mithl/method chosen in Settings. Only the
   // calculation-relevant settings are dependencies.
@@ -167,6 +191,7 @@ export default function PlaceDetailScreen() {
   }
 
   const saved = isFavourite(place.id);
+  const address = formatAddress(place.address);
 
   const openDirections = () => {
     const query = encodeURIComponent(place.name + ", " + place.address);
@@ -186,7 +211,7 @@ export default function PlaceDetailScreen() {
   const sharePlace = () => {
     // A maps link, not an app link: the recipient may not have the app.
     Share.share({
-      message: `${place.name}\n${place.address}\n${mapsSearchUrl(place)}`,
+      message: `${place.name}\n${address}\n${mapsSearchUrl(place)}`,
     }).catch(() => {});
   };
 
@@ -240,6 +265,14 @@ export default function PlaceDetailScreen() {
     ? "checked " + place.lastVerified
     : "";
 
+  // ...and only ONCE per screen. The hero already stamps "Verified" on a
+  // verified record, so the banner earns its space only when it carries
+  // something the hero doesn't: a last-checked date, or a status the hero
+  // never shows. Those are the statuses that matter most here — a traveller
+  // relying on an unverified record needs to be told.
+  const showVerificationBanner =
+    place.confidence !== "verified" || verificationDetail !== "";
+
   return (
     // Root View, not bare ScrollView: the suggestion sheet overlays with
     // absolute positioning, which must anchor to the screen — inside the
@@ -251,14 +284,28 @@ export default function PlaceDetailScreen() {
         styles.content,
         { paddingBottom: spacing.xxl + insets.bottom },
       ]}
+      onScroll={handleScroll}
+      scrollEventThrottle={16}
     >
-      <Stack.Screen options={ { title: PLACE_TYPE_LABELS[place.type] } } />
+      <Stack.Screen
+        options={{
+          title: headerShowsName
+            ? place.name
+            : PLACE_TYPE_LABELS[place.type],
+        }}
+      />
 
       <LinearGradient
         colors={[colors.heroGradientStart, colors.heroGradientEnd]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.hero}
+        // Measured rather than assumed: the hero's height depends on how many
+        // lines the name and address take at the user's font size.
+        onLayout={(event) => {
+          const { y, height } = event.nativeEvent.layout;
+          heroBottom.current = y + height;
+        }}
       >
         <View style={styles.heroMetaRow}>
           <MaterialCommunityIcons
@@ -280,9 +327,7 @@ export default function PlaceDetailScreen() {
           ) : null}
         </View>
         <Text style={styles.heroName}>{place.name}</Text>
-        {place.address ? (
-          <Text style={styles.heroAddress}>{place.address}</Text>
-        ) : null}
+        {address ? <Text style={styles.heroAddress}>{address}</Text> : null}
       </LinearGradient>
 
       <View style={styles.actionRow}>
@@ -464,10 +509,15 @@ export default function PlaceDetailScreen() {
             const available = place.facilities[key];
             return (
               <View key={key} style={styles.facilityRow}>
+                {/* Dimmed, not erased. `colors.border` is a divider —
+                    ~1.3:1 on this card in both themes — so an absent
+                    facility rendered a blank gap where the others show a
+                    glyph, which reads as a broken icon. textSecondary is the
+                    same ink as the dimmed label beside it. */}
                 <MaterialCommunityIcons
                   name={FACILITY_ICONS[key]}
                   size={19}
-                  color={available ? colors.accent : colors.border}
+                  color={available ? colors.accent : colors.textSecondary}
                 />
                 <Text
                   style={[
@@ -496,23 +546,25 @@ export default function PlaceDetailScreen() {
         </View>
       ) : null}
 
-      <View style={styles.verification}>
-        <Text style={styles.verificationText}>
-          {isCorroborated(place) ? (
-            <>
-              <MaterialCommunityIcons
-                name="check-decagram"
-                size={14}
-                color={colors.positive}
-              />{" "}
-            </>
-          ) : null}
-          <Text style={styles.verificationStatus}>
-            {confidenceLabel(place.confidence)}
+      {showVerificationBanner ? (
+        <View style={styles.verification}>
+          <Text style={styles.verificationText}>
+            {isCorroborated(place) ? (
+              <>
+                <MaterialCommunityIcons
+                  name="check-decagram"
+                  size={14}
+                  color={colors.positive}
+                />{" "}
+              </>
+            ) : null}
+            <Text style={styles.verificationStatus}>
+              {confidenceLabel(place.confidence)}
+            </Text>
+            {verificationDetail ? " · " + verificationDetail : ""}
           </Text>
-          {verificationDetail ? " · " + verificationDetail : ""}
-        </Text>
-      </View>
+        </View>
+      ) : null}
 
       <Touchable
         style={styles.suggestEditButton}

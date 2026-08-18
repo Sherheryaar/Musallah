@@ -85,10 +85,14 @@ export default function SuggestionForm({
     setSending(true);
     setNote(null);
     try {
+      // Trimmed on the way out, not just when measuring: the length check
+      // below already ignores surrounding whitespace, so a draft that starts
+      // with three spaces sends and reaches triage with them still attached.
+      const body = message.trim();
       const full =
         selectedTopics.length > 0
-          ? `[${selectedTopics.join(", ")}] ${message}`
-          : message;
+          ? `[${selectedTopics.join(", ")}] ${body}`
+          : body;
       const result = await onSend(full);
       if (result === "stored") {
         setSent(true);
@@ -208,6 +212,11 @@ const useStyles = createThemedStyles((colors: ThemeColors, scheme) =>
       // 44pt: both platforms' guidelines want 44/48 for a tap target,
       // and these chips were 32.
       minHeight: MIN_TARGET,
+      // The longest of these labels ("Noticeboard at the masjid") already
+      // takes most of the card's width, so at large system font sizes a chip
+      // has to be allowed to wrap inside itself rather than run off the edge.
+      flexShrink: 1,
+      maxWidth: "100%",
       justifyContent: "center",
       paddingHorizontal: spacing.m,
       paddingVertical: spacing.xs,

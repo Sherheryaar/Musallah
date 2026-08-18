@@ -36,7 +36,26 @@ import { radius, spacing, type, type ThemeColors } from "@/lib/theme";
 // attendee is exactly who we want a monthly pulse from, and no one gets
 // nagged on every visit.
 
-type Phase = "idle" | "sending" | "confirmed" | "outdated" | "failed";
+/**
+ * "noted" is the out-of-date report shown as filed but not yet sent — see
+ * UNDO_WINDOW_MS; "outdated" is the same report once it has gone through.
+ */
+type Phase =
+  | "idle"
+  | "sending"
+  | "confirmed"
+  | "noted"
+  | "outdated"
+  | "failed";
+
+/**
+ * How long an "out of date" report waits behind an Undo before it is sent.
+ * These chips sit directly under the times a user is reading, so a mis-tap is
+ * likely enough that filing instantly — silently, into a moderation queue the
+ * user never sees — is the wrong trade. Long enough to notice and react, short
+ * enough that the report still lands while the screen is open.
+ */
+const UNDO_WINDOW_MS = 5000;
 
 type Props = {
   place: Place;
@@ -54,11 +73,29 @@ export default function JamaatCheck({ place, onAddTimes }: Props) {
   // The tap outlives the screen (user answers and immediately leaves), so
   // the write must not be applied to state after unmount.
   const mounted = useRef(true);
+  // The held-back "out of date" report, if one is waiting out its Undo
+  // window. A ref rather than state because the unmount cleanup must reach
+  // the CURRENT pending report, and `send` is captured at scheduling time so
+  // the report describes the times the user was actually looking at.
+  const pending = useRef<{
+    timer: ReturnType<typeof setTimeout>;
+    send: () => void;
+  } | null>(null);
 
   useEffect(() => {
     mounted.current = true;
     return () => {
       mounted.current = false;
+      const held = pending.current;
+      if (!held) return;
+      pending.current = null;
+      clearTimeout(held.timer);
+      // Leaving the screen commits rather than cancels: the user was already
+      // shown "Noted", so dropping it would make that a lie, and there is no
+      // second chance to tell them otherwise. Only Undo cancels. `send`
+      // touches state solely behind the `mounted` guard, so nothing here
+      // updates a gone component.
+      held.send();
     };
   }, []);
 
@@ -78,26 +115,64 @@ export default function JamaatCheck({ place, onAddTimes }: Props) {
     };
   }, [place.id]);
 
-  const send = async (verdict: "confirmed" | "outdated") => {
-    if (phase === "sending" || !place.jamaat) return;
-    setPhase("sending");
+  /**
+   * The actual delivery. Safe to call after unmount — every state write is
+   * behind the `mounted` guard, and the cooldown deliberately is not, so an
+   * answer that lands on the way out of the screen still counts.
+   */
+  const deliver = async (verdict: "confirmed" | "outdated") => {
+    const jamaat = place.jamaat;
+    if (!jamaat) return;
     const message =
       verdict === "confirmed"
-        ? buildConfirmationMessage(place.jamaat, new Date())
-        : buildOutdatedMessage(place.jamaat, new Date());
+        ? buildConfirmationMessage(jamaat, new Date())
+        : buildOutdatedMessage(jamaat, new Date());
     const result = await submitJamaatCheck(place, message);
-    if (!mounted.current) return;
     if (result === "stored") {
-      setPhase(verdict);
       // Cooldown only starts on a DELIVERED answer; a failed send must
       // leave the question available to try again.
       void AsyncStorage.setItem(
         confirmStorageKey(place.id),
         new Date().toISOString(),
       ).catch(() => {});
-    } else {
-      setPhase("failed");
     }
+    if (!mounted.current) return;
+    setPhase(result === "stored" ? verdict : "failed");
+  };
+
+  const confirm = () => {
+    if (phase === "sending" || pending.current || !place.jamaat) return;
+    setPhase("sending");
+    void deliver("confirmed");
+  };
+
+  /**
+   * Shows the report as filed straight away but holds the submit, so a
+   * mis-tap has somewhere to go. Nothing has been sent while `pending` is
+   * set.
+   */
+  const reportOutdated = () => {
+    if (phase === "sending" || pending.current || !place.jamaat) return;
+    setPhase("noted");
+    const send = () => void deliver("outdated");
+    pending.current = {
+      send,
+      timer: setTimeout(() => {
+        pending.current = null;
+        // Off "noted" before the network call so the Undo cannot be tapped
+        // against a report that is already on its way.
+        if (mounted.current) setPhase("outdated");
+        send();
+      }, UNDO_WINDOW_MS),
+    };
+  };
+
+  const undoReport = () => {
+    const held = pending.current;
+    if (!held) return;
+    pending.current = null;
+    clearTimeout(held.timer);
+    setPhase("idle");
   };
 
   if (!canContributeJamaat(place)) return null;
@@ -141,6 +216,28 @@ export default function JamaatCheck({ place, onAddTimes }: Props) {
     );
   }
 
+  // Filed as far as the user is concerned, but still recallable.
+  if (phase === "noted") {
+    return (
+      <View style={styles.thanksRow}>
+        <MaterialCommunityIcons
+          name="check-circle-outline"
+          size={16}
+          color={colors.positive}
+        />
+        <Text style={styles.thanksText}>Noted {"—"} thank you.</Text>
+        <Touchable
+          style={styles.undoButton}
+          onPress={undoReport}
+          accessibilityRole="button"
+          accessibilityLabel="Undo the out-of-date report"
+        >
+          <Text style={styles.inviteLink}>Undo</Text>
+        </Touchable>
+      </View>
+    );
+  }
+
   if (phase === "outdated") {
     return (
       <View style={styles.thanksRow}>
@@ -169,7 +266,7 @@ export default function JamaatCheck({ place, onAddTimes }: Props) {
         <View style={styles.checkActions}>
           <Touchable
             style={styles.checkChip}
-            onPress={() => send("confirmed")}
+            onPress={confirm}
             disabled={phase === "sending"}
             accessibilityRole="button"
             accessibilityLabel="Yes, the jamaat times are still right"
@@ -178,7 +275,7 @@ export default function JamaatCheck({ place, onAddTimes }: Props) {
           </Touchable>
           <Touchable
             style={styles.checkChip}
-            onPress={() => send("outdated")}
+            onPress={reportOutdated}
             disabled={phase === "sending"}
             accessibilityRole="button"
             accessibilityLabel="No, the jamaat times are out of date"
@@ -262,6 +359,17 @@ const useStyles = createThemedStyles((colors: ThemeColors) =>
     thanksText: {
       ...type.footnote,
       color: colors.textSecondary,
+    },
+    // Sized like a chip rather than an inline link: it is the only way back
+    // from a mis-tap, and it is live for five seconds.
+    undoButton: {
+      minHeight: MIN_TARGET,
+      minWidth: MIN_TARGET,
+      alignItems: "center",
+      justifyContent: "center",
+      paddingHorizontal: spacing.s,
+      borderRadius: radius.pill,
+      overflow: "hidden",
     },
     failText: {
       ...type.footnote,

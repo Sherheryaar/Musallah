@@ -109,21 +109,30 @@ function OptionRow({
   detail,
   selected,
   divider,
+  last,
   onPress,
 }: {
   label: string;
   detail: string;
   selected: boolean;
   divider?: boolean;
+  /** Bottom row of its card — see styles.optionRowLast. */
+  last?: boolean;
   onPress: () => void;
 }) {
   const styles = useStyles();
+  // A divider is the "there is a row above me" signal, so its absence is
+  // exactly what makes a row the first in its card. Being at the bottom edge
+  // is the one position nothing else already encodes.
+  const first = !divider;
   return (
     <Touchable
       style={[
         styles.optionRow,
         divider && styles.rowDivider,
         selected && styles.optionRowSelected,
+        selected && first && styles.optionRowFirst,
+        selected && last && styles.optionRowLast,
       ]}
       onPress={onPress}
       accessibilityRole="radio"
@@ -234,6 +243,7 @@ export default function SettingsScreen() {
           detail="Hanafi: Asr begins when an object's shadow is twice its length."
           selected={settings.madhab === "hanafi"}
           divider
+          last
           onPress={() => updateSettings({ madhab: "hanafi" })}
         />
       </View>
@@ -256,6 +266,7 @@ export default function SettingsScreen() {
           detail="Fixed 18° / 17° twilight angles with a high-latitude fallback."
           selected={settings.method === "mwl"}
           divider
+          last
           onPress={() => updateSettings({ method: "mwl" })}
         />
       </View>
@@ -288,6 +299,7 @@ export default function SettingsScreen() {
               detail="Isha when the white glow fades — the later, more cautious opinion."
               selected={settings.shafaq === "abyad"}
               divider
+              last
               onPress={() => updateSettings({ shafaq: "abyad" })}
             />
           </View>
@@ -335,6 +347,19 @@ export default function SettingsScreen() {
               Notifications are blocked at the system level {"—"} allow
               them for this app in your phone&apos;s Settings, then try
               again.
+            </Text>
+          </View>
+        ) : null}
+        {notifications.prefs.enabled && !notifications.locationAvailable ? (
+          // Reminders are computed from coordinates, so with none known
+          // nothing is scheduled however this card reads. Saying so is the
+          // only honest option: the toggle is genuinely on, and silently
+          // flipping it back off would leave the user with no explanation.
+          <View style={[styles.rowDivider, styles.permissionNote]}>
+            <Text style={styles.permissionNoteText}>
+              Reminders are worked out from your location, and none is
+              known yet {"—"} enable location for this app, then open the
+              home screen once so the schedule can be built.
             </Text>
           </View>
         ) : null}
@@ -570,6 +595,21 @@ const useStyles = createThemedStyles((colors: ThemeColors, scheme) =>
   optionRowSelected: {
     backgroundColor: colors.accentSoft,
   },
+  // The selected fill spans the whole row, so a row at a card's top or bottom
+  // edge has to carry the card's radius itself: `card` clips only on Android
+  // (clipping on iOS would erase its shadow), which otherwise leaves iOS
+  // painting a square fill over the rounded corner — and over the card's
+  // hairline border in dark mode. Every one of these groups ships with an
+  // edge row already selected, so it is visible by default, not on a corner
+  // case.
+  optionRowFirst: {
+    borderTopLeftRadius: radius.xl,
+    borderTopRightRadius: radius.xl,
+  },
+  optionRowLast: {
+    borderBottomLeftRadius: radius.xl,
+    borderBottomRightRadius: radius.xl,
+  },
   optionTextWrap: {
     flex: 1,
     paddingRight: spacing.m,
@@ -633,6 +673,11 @@ const useStyles = createThemedStyles((colors: ThemeColors, scheme) =>
     gap: spacing.s,
   },
   reminderChip: {
+    // Footnote text inside this padding is only ~36dp tall, so the tap
+    // target comes from the floor and the label is centred within it — the
+    // same treatment as themeChip above.
+    minHeight: MIN_TARGET,
+    justifyContent: "center",
     paddingHorizontal: spacing.m,
     paddingVertical: spacing.s,
     borderRadius: radius.pill,

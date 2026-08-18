@@ -12,6 +12,9 @@
       "supportsTablet": false,
       "bundleIdentifier": "com.sheheryaarbaber.masjidlocator"
     },
+    "androidNavigationBar": {
+      "enforceContrast": false
+    },
     "android": {
       "edgeToEdgeEnabled": true,
       "package": "com.sheheryaarbaber.masjidlocator",

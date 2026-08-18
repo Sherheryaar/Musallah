@@ -136,6 +136,9 @@ const useStyles = createThemedStyles((colors: ThemeColors) =>
       minHeight: MIN_TARGET,
       alignItems: "center",
       justifyContent: "center",
+      // Clips the Android ripple to the pill; without it the press flashes as
+      // a full rectangle over the rounded corners.
+      overflow: "hidden",
     },
     retryButtonBusy: {
       opacity: 0.6,

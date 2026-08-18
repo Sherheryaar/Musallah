@@ -16,6 +16,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Touchable from "@/components/Touchable";
 import { useSettings } from "@/context/SettingsContext";
 import { useTheme } from "@/context/ThemeContext";
+import { formatCountdown } from "@/lib/duration";
 import { cardEdge } from "@/lib/elevation";
 import { FALLBACK_LOCATION } from "@/lib/geo";
 import { formatHijri } from "@/lib/hijri";
@@ -58,15 +59,6 @@ function addDays(date: Date, days: number): Date {
   const next = new Date(date);
   next.setDate(next.getDate() + days);
   return next;
-}
-
-function formatCountdown(msLeft: number): string {
-  const mins = Math.max(1, Math.ceil(msLeft / 60_000));
-  if (mins < 60) return `${mins} min${mins === 1 ? "" : "s"}`;
-  const hours = Math.floor(mins / 60);
-  const rest = mins % 60;
-  const h = `${hours} hr${hours === 1 ? "" : "s"}`;
-  return rest === 0 ? h : `${h} ${rest} min${rest === 1 ? "" : "s"}`;
 }
 
 type Status = { currentLabel: string; nextLabel: string; msUntilNext: number };

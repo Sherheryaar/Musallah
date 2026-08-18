@@ -35,6 +35,7 @@ import PlacesMap from "@/components/PlacesMap";
 import PlacesSkeleton from "@/components/PlacesSkeleton";
 import SuggestionSheet from "@/components/SuggestionSheet";
 import { distanceFrom, distanceKm, formatDistance } from "@/lib/distance";
+import { formatCountdown } from "@/lib/duration";
 import { fuzzyMatchesTokens, tokenize } from "@/lib/fuzzy";
 import {
   FALLBACK_LOCATION,
@@ -142,10 +143,7 @@ const NextPrayerBar = React.memo(function NextPrayerBar({
     if (idx < 0) return null; // polar conditions
     const next = all[idx];
     const prev = idx > 0 ? all[idx - 1] : null;
-    const minutes = Math.max(
-      1,
-      Math.ceil((next.time.getTime() - now) / 60_000),
-    );
+    const msUntilNext = next.time.getTime() - now;
     const progress = prev
       ? Math.min(
           1,
@@ -156,15 +154,17 @@ const NextPrayerBar = React.memo(function NextPrayerBar({
           ),
         )
       : 0;
-    return { next, upcoming: all.slice(idx + 1, idx + 3), minutes, progress };
+    return {
+      next,
+      upcoming: all.slice(idx + 1, idx + 3),
+      msUntilNext,
+      progress,
+    };
   }, [lat, lng, options, now]);
 
   if (!info) return null;
 
-  const countdown =
-    info.minutes >= 60
-      ? `${Math.floor(info.minutes / 60)} h ${info.minutes % 60} min`
-      : `${info.minutes} min`;
+  const countdown = formatCountdown(info.msUntilNext);
 
   return (
     <Touchable
@@ -175,7 +175,15 @@ const NextPrayerBar = React.memo(function NextPrayerBar({
     >
       <View style={styles.timesTopRow}>
         <View style={styles.nextBlock}>
-          <Text style={styles.nextLabel}>
+          {/* Two lines and a capped multiplier: this row sits inside the
+              sheet's `overflow: hidden`, so anything it cannot fit is not
+              scrolled — it is cut off. Wrapping here is what keeps the
+              chevron and the upcoming times whole at large font scales. */}
+          <Text
+            style={styles.nextLabel}
+            numberOfLines={2}
+            maxFontSizeMultiplier={1.5}
+          >
             Next {"·"} {info.next.label} in {countdown}
           </Text>
           <Text style={styles.nextTime}>{info.next.display}</Text>
@@ -242,8 +250,9 @@ export default function HomeScreen() {
   const [query, setQuery] = useState("");
   const [searchOrigin, setSearchOrigin] = useState<SearchOrigin | null>(null);
   const [searchNote, setSearchNote] = useState<string | null>(null);
-  // Bumped on every searchArea() call so a slower, out-of-order geocode
-  // response can tell it's been superseded and skip applying its result.
+  // Bumped whenever the search state changes — a new searchArea() call or a
+  // clearSearch() — so a slower, out-of-order geocode response can tell it's
+  // been superseded and skip applying its result.
   const searchGeneration = useRef(0);
   const [recenterNonce, setRecenterNonce] = useState(0);
   // The location read waits for onboarding to resolve. iOS allows exactly
@@ -432,6 +441,11 @@ export default function HomeScreen() {
   }, [query, gpsOrigin.lat, gpsOrigin.lng]);
 
   const clearSearch = useCallback(() => {
+    // Clearing is itself a newer search state, so it must supersede any
+    // geocode still awaiting the network — otherwise that response passes its
+    // own staleness check, re-anchors every distance to the abandoned area,
+    // flies the map back to it, and puts the ✕ beside an empty box.
+    searchGeneration.current++;
     setQuery("");
     setSearchOrigin(null);
     setSearchNote(null);
@@ -715,13 +729,19 @@ export default function HomeScreen() {
             onPress={clearSearch}
             accessibilityRole="button"
             accessibilityLabel="Clear search"
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            // The target box is deliberately wider than the ✕ it draws, so a
+            // bounded ripple would flash a square of empty input. A circular
+            // one lands on the glyph, which is what the finger aimed at.
+            borderless
+            rippleRadius={20}
           >
-            <MaterialCommunityIcons
-              name="close"
-              size={14}
-              color={colors.textSecondary}
-            />
+            <View style={styles.clearBadge}>
+              <MaterialCommunityIcons
+                name="close"
+                size={14}
+                color={colors.textSecondary}
+              />
+            </View>
           </Touchable>
         ) : null}
       </View>
@@ -767,9 +787,11 @@ export default function HomeScreen() {
       // entirely and reads the three loose words instead — so the one place
       // the pin colours are explained in WORDS never reached the people who
       // can only use words. Grouping costs one long focus stop; that is the
-      // right trade here.
+      // right trade here. Android's twin of `accessible` is "yes" on the group
+      // ITSELF — "no-hide-descendants" drops this view and everything under it
+      // from the tree, label included, which is the one outcome to avoid.
       accessible
-      importantForAccessibility="no-hide-descendants"
+      importantForAccessibility="yes"
       accessibilityLabel="Map key: green is a masjid, amber is a prayer room, purple is a multi-faith room. The blue dot is your location. A numbered circle groups several places — tap it to zoom in."
     >
       {LEGEND_ITEMS.map(({ type, label }) => (
@@ -874,12 +896,18 @@ export default function HomeScreen() {
             <Text style={styles.emptyTitle}>
               {settings.savedOnly ? "No saved places" : "No places match"}
             </Text>
+            {/* Advice about a control that isn't on is worse than none: with
+                no filter narrowing the list, the only thing that can be
+                hiding places is what was typed. */}
             <Text style={styles.emptyText}>
               {settings.savedOnly
                 ? "Tap the heart on a place to save it \u2014 or turn off " +
                   "the saved-places filter."
-                : "Try removing a filter \u2014 or this is a gap in the " +
-                  "data worth fixing."}
+                : filterCount > 0
+                  ? "Try removing a filter \u2014 or this is a gap in the " +
+                    "data worth fixing."
+                  : "Try a shorter search, or a nearby town \u2014 or this " +
+                    "is a gap in the data worth fixing."}
             </Text>
             <Touchable
               style={styles.emptyButton}
@@ -1030,22 +1058,34 @@ const useStyles = createThemedStyles((colors: ThemeColors, scheme: "light" | "da
     borderRadius: radius.pill,
     ...cardEdge(scheme, colors),
     paddingLeft: spacing.l + spacing.xs,
-    paddingRight: spacing.xl + spacing.m, // room for the ✕ so text never runs under it
+    // Room for the ✕ so text never runs under it — this clears the whole
+    // clearBadge below, not just the glyph, and must move with it.
+    paddingRight: spacing.xxl + spacing.l,
     ...type.callout,
     fontWeight: "500",
     color: colors.text,
   },
+  // MIN_TARGET lives on the BOX, not on hitSlop: Touchable hoists width and
+  // height onto its outer wrapper while hitSlop lands on the Pressable inside
+  // it, and neither platform dispatches a touch that already missed the
+  // wrapper — so slop around a 24pt box is unreachable, and a near miss lands
+  // in the TextInput and raises the keyboard instead of clearing the search.
+  // The box is transparent; clearBadge is the part that is seen.
   clearButton: {
     position: "absolute",
-    right: spacing.m,
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+    right: spacing.xs,
+    width: MIN_TARGET,
+    height: MIN_TARGET,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  clearBadge: {
+    width: 32,
+    height: 32,
+    borderRadius: radius.pill,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: colors.surfaceSecondary,
-    // Clips the Android ripple to the rounded corners.
-    overflow: "hidden",
   },
   filterButton: {
     minHeight: 48,
@@ -1147,7 +1187,11 @@ const useStyles = createThemedStyles((colors: ThemeColors, scheme: "light" | "da
     alignItems: "center",
     gap: spacing.l,
   },
+  // The block that gives up width when the row runs out of it (Yoga's default
+  // flexShrink is 0, so without this the row simply overflows). The headline
+  // time still lays out at its full size; only the label above it wraps.
   nextBlock: {
+    flexShrink: 1,
     gap: 2,
   },
   nextLabel: {
@@ -1167,6 +1211,9 @@ const useStyles = createThemedStyles((colors: ThemeColors, scheme: "light" | "da
   upcomingRow: {
     flexDirection: "row",
     alignItems: "center",
+    // Never squeezed: the chevron at its end is the only thing saying the
+    // whole bar is tappable, and a half-cropped "21:1" is worse than no time.
+    flexShrink: 0,
     gap: spacing.l,
   },
   timeItem: {
