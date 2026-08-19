@@ -39,39 +39,51 @@ const NO_POI_STYLE = [
 
 // Google Maps (Android) needs an explicit style array for dark mode; Apple
 // Maps (iOS) follows the userInterfaceStyle prop instead and ignores this.
+//
+// Lifted a couple of steps out of Google's stock night palette, which sits at
+// roughly 18% lightness and reads as a black hole beside the sheet rather than
+// as a map — streets you cannot follow and water you cannot tell from land.
+// These are deliberately NOT theme tokens: this is Google's basemap
+// vocabulary, not the app's surfaces, and the app's own markers and the blue
+// location dot have to stay legible on top of it. Still firmly a night style —
+// every value here is far below the light basemap — just readable.
+//
+// Land sits below the sheet's own #1E1E1C so the map still reads as the
+// outside; roads and labels carry most of the lift, since they are what
+// someone is actually trying to read.
 const DARK_MAP_STYLE = [
-  { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
-  { elementType: "labels.text.fill", stylers: [{ color: "#8f9bab" }] },
-  { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
+  { elementType: "geometry", stylers: [{ color: "#333f52" }] },
+  { elementType: "labels.text.fill", stylers: [{ color: "#aab4c4" }] },
+  { elementType: "labels.text.stroke", stylers: [{ color: "#333f52" }] },
   {
     featureType: "poi",
     elementType: "labels.text.fill",
-    stylers: [{ color: "#93817c" }],
+    stylers: [{ color: "#a99a95" }],
   },
   {
     featureType: "road",
     elementType: "geometry",
-    stylers: [{ color: "#38414e" }],
+    stylers: [{ color: "#4a5566" }],
   },
   {
     featureType: "road",
     elementType: "geometry.stroke",
-    stylers: [{ color: "#212a37" }],
+    stylers: [{ color: "#3a4353" }],
   },
   {
     featureType: "road",
     elementType: "labels.text.fill",
-    stylers: [{ color: "#9ca5b3" }],
+    stylers: [{ color: "#b8c0cc" }],
   },
   {
     featureType: "transit",
     elementType: "geometry",
-    stylers: [{ color: "#2f3948" }],
+    stylers: [{ color: "#414c5e" }],
   },
   {
     featureType: "water",
     elementType: "geometry",
-    stylers: [{ color: "#17263c" }],
+    stylers: [{ color: "#22354f" }],
   },
   // Last, so the visibility rules win over the poi text colour above.
   ...NO_POI_STYLE,
