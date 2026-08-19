@@ -11,6 +11,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Constants from "expo-constants";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
+import ReminderReliabilityNotice from "@/components/ReminderReliabilityNotice";
 import Touchable from "@/components/Touchable";
 import ThemedSwitch from "@/components/ThemedSwitch";
 import { useNotifications } from "@/context/NotificationsContext";
@@ -431,6 +432,9 @@ export default function SettingsScreen() {
                 </Text>
               </Touchable>
             ) : null}
+            {/* Last in the card: the times are already correct, this is only
+                about Android being allowed to deliver them punctually. */}
+            <ReminderReliabilityNotice enabled={notifications.prefs.enabled} />
           </>
         ) : null}
       </View>
