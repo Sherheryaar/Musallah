@@ -524,6 +524,14 @@
     "matchedDistanceM": 42
   },
   {
+    "placeId": "aylesbury-faizan-e-siddeeq-e-akbar-mib-1690",
+    "source": "sirat",
+    "placeName": "Aylesbury Faizan-e-Siddeeq-e-Akbar",
+    "siratId": "mosque-000471",
+    "siratName": "Aylesbury Vale Islamic Centre",
+    "matchedDistanceM": 44
+  },
+  {
     "placeId": "aylesbury-vale-islamic-centre-mib-1689",
     "source": "sirat",
     "placeName": "Aylesbury Vale Islamic Centre",
@@ -2064,6 +2072,14 @@
     "lat": 53.776818955797,
     "lng": -1.7589738356216,
     "matchedDistanceM": 4
+  },
+  {
+    "placeId": "jamiyat-tabligh-ul-islam-mib-417",
+    "source": "sirat",
+    "placeName": "Jamiyat Tabligh ul Islam",
+    "siratId": "mosque-000176",
+    "siratName": "Jamia Masjid Shan-e-Islam",
+    "matchedDistanceM": 131
   },
   {
     "placeId": "jamiyat-tabligh-ul-islam-mib-434",

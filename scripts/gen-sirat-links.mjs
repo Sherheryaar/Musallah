@@ -41,20 +41,26 @@ const outPath = join(root, "scripts", "timetable-links.json");
 const existing = existsSync(outPath)
   ? JSON.parse(readFileSync(outPath, "utf8"))
   : [];
-const others = existing.filter((l) => l.source !== "sirat");
-
-// A place already registered to another source keeps it — Sirat.uk only
-// fills places that had nothing (harvest-sirat.mjs already restricts
-// candidates this way, but a registry entry could have been added by hand
-// since that harvest ran, so re-check here too).
-const otherPlaceIds = new Set(others.map((l) => l.placeId));
-const newLinks = links.filter((l) => !otherPlaceIds.has(l.placeId));
+// ADDITIVE, deliberately. This used to rebuild the sirat rows from scratch
+// (`existing.filter(l => l.source !== "sirat")` plus this harvest's matches),
+// which is only safe if a harvest can see every sirat candidate — and it
+// cannot: harvest-sirat.mjs restricts itself to places that have NO source
+// yet, so anything already registered is invisible to it. A second run
+// therefore wrote back only the handful of newly-found matches and dropped
+// the rest, taking the registry from 523 entries to 165 and leaving those
+// mosques to freeze at whatever times were last written.
+//
+// A place already registered — to Sirat or anything else — keeps what it has.
+// Re-pointing an existing link is a deliberate act, not a side effect of
+// re-running discovery.
+const existingPlaceIds = new Set(existing.map((l) => l.placeId));
+const newLinks = links.filter((l) => !existingPlaceIds.has(l.placeId));
 const skipped = links.length - newLinks.length;
 
-const merged = [...others, ...newLinks].sort((a, b) =>
+const merged = [...existing, ...newLinks].sort((a, b) =>
   a.placeId.localeCompare(b.placeId),
 );
 writeFileSync(outPath, JSON.stringify(merged, null, 2) + "\n");
 console.log(
-  `Wrote ${merged.length} registry entries to ${outPath} (${newLinks.length} sirat, ${others.length} from other sources kept${skipped ? `, ${skipped} sirat match(es) skipped — already registered elsewhere` : ""}).`,
+  `Wrote ${merged.length} registry entries to ${outPath} (${newLinks.length} new sirat, ${existing.length} kept${skipped ? `, ${skipped} sirat match(es) skipped — already registered` : ""}).`,
 );
