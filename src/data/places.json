@@ -46185,9 +46185,9 @@
 		"id": "taunton-central-masjid-and-islamic-centre-mib-261",
 		"name": "Taunton Central Masjid and Islamic Centre",
 		"type": "masjid",
-		"address": "Ivor House, Tower Lane, Taunton Deane, TA1 4AR",
-		"lat": 51.0146929,
-		"lng": -3.1069583,
+		"address": "113a East Reach, Taunton, TA1 3HL",
+		"lat": 51.0153143,
+		"lng": -3.0932555,
 		"facilities": {
 			"sistersSpace": true,
 			"wudu": false,
