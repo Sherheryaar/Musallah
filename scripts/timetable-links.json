@@ -236,6 +236,13 @@
     "matchedDistanceM": 23
   },
   {
+    "placeId": "al-hidaya-academy-way-1428001236",
+    "source": "daily-iqamah",
+    "placeName": "Al Hidaya Academy",
+    "url": "https://alhidayaacademy.org/",
+    "credit": "alhidayaacademy.org (published timetable)"
+  },
+  {
     "placeId": "al-hira-educational-centre-mib-2235",
     "source": "sirat",
     "placeName": "Al-Hira Educational Centre",
@@ -564,6 +571,13 @@
     "siratId": "mosque-000472",
     "siratName": "Assunnah Islamic Centre",
     "matchedDistanceM": 42
+  },
+  {
+    "placeId": "at-taqwa-academy-mib-1086",
+    "source": "daily-iqamah",
+    "placeName": "At-Taqwa Academy",
+    "url": "https://attaqwa.org/",
+    "credit": "attaqwa.org (published timetable)"
   },
   {
     "placeId": "aylesbury-vale-islamic-centre-mib-1689",
@@ -1677,11 +1691,10 @@
   },
   {
     "placeId": "harrow-central-mosque-mib-1187",
-    "source": "sirat",
+    "source": "daily-iqamah",
     "placeName": "Harrow Central Mosque",
-    "siratId": "mosque-000265",
-    "siratName": "Harrow Central Mosque",
-    "matchedDistanceM": 20
+    "url": "https://harrowmosque.org.uk/",
+    "credit": "harrowmosque.org.uk (published timetable)"
   },
   {
     "placeId": "havering-islamic-cultural-centre-mib-2642",
@@ -2035,6 +2048,13 @@
     "lat": 51.5454724,
     "lng": 0.0496465,
     "matchedDistanceM": 16
+  },
+  {
+    "placeId": "islamic-education-cultural-society-mib-1204",
+    "source": "daily-iqamah",
+    "placeName": "Islamic Education & Cultural Society",
+    "url": "https://hayesmuslimcentre.org.uk/",
+    "credit": "hayesmuslimcentre.org.uk (published timetable)"
   },
   {
     "placeId": "islamic-education-trust-of-cumbernauld-mib-800",
@@ -2553,6 +2573,13 @@
     "matchedDistanceM": 109
   },
   {
+    "placeId": "kokni-community-centre-masjid-and-madressa-mib-939",
+    "source": "daily-iqamah",
+    "placeName": "Kokni Community Centre Masjid and Madressa",
+    "url": "https://masjid.kokniluton.co.uk",
+    "credit": "masjid.kokniluton.co.uk (published timetable)"
+  },
+  {
     "placeId": "kotku-mosque-mib-1927",
     "source": "sirat",
     "placeName": "Kotku Mosque",
@@ -2988,6 +3015,13 @@
     "matchedDistanceM": 35
   },
   {
+    "placeId": "manchester-jame-masjid-way-204657583",
+    "source": "daily-iqamah",
+    "placeName": "Manchester Jame Masjid",
+    "url": "https://manchesterjamemasjid.com/",
+    "credit": "manchesterjamemasjid.com (published timetable)"
+  },
+  {
     "placeId": "markaz-at-tawheed-mib-2792",
     "source": "sirat",
     "placeName": "Markaz at-Tawheed",
@@ -3125,6 +3159,13 @@
     "matchedDistanceM": 28
   },
   {
+    "placeId": "masjid-abu-bakr-and-islamic-education-centre-trust-mib-1394",
+    "source": "daily-iqamah",
+    "placeName": "Masjid Abu Bakr and Islamic Education Centre (Trust)",
+    "url": "https://masjidabubakr.co.uk/",
+    "credit": "masjidabubakr.co.uk (published timetable)"
+  },
+  {
     "placeId": "masjid-abu-bakr-siddique-mib-1618",
     "source": "sirat",
     "placeName": "Masjid Abu Bakr Siddique",
@@ -3186,6 +3227,13 @@
     "matchedDistanceM": 11
   },
   {
+    "placeId": "masjid-al-ameen-mib-1015",
+    "source": "daily-iqamah",
+    "placeName": "Masjid-al-Ameen",
+    "url": "https://owma.org.uk/",
+    "credit": "owma.org.uk (published timetable)"
+  },
+  {
     "placeId": "masjid-al-bilal-mib-937",
     "source": "sirat",
     "placeName": "Masjid Al Bilal",
@@ -3241,6 +3289,13 @@
     "siratId": "mosque-000576",
     "siratName": "Masjid Al-Humera",
     "matchedDistanceM": 77
+  },
+  {
+    "placeId": "masjid-al-ikhlas-mib-1138",
+    "source": "daily-iqamah",
+    "placeName": "Masjid Al Ikhlas",
+    "url": "https://cambridgeislamiccentre.org/",
+    "credit": "cambridgeislamiccentre.org (published timetable)"
   },
   {
     "placeId": "masjid-al-jannah-mib-16062301",
@@ -4346,6 +4401,13 @@
     "matchedDistanceM": 29
   },
   {
+    "placeId": "oldham-muslim-centre-mib-316",
+    "source": "daily-iqamah",
+    "placeName": "Oldham Muslim Centre",
+    "url": "https://westwoodmosque.org/",
+    "credit": "westwoodmosque.org (published timetable)"
+  },
+  {
     "placeId": "omar-faruque-mosque-and-cultural-centre-mib-2539",
     "source": "sirat",
     "placeName": "Omar Faruque Mosque and Cultural Centre",
@@ -4617,6 +4679,13 @@
     "matchedDistanceM": 8
   },
   {
+    "placeId": "shah-jalal-masjid-mib-1100",
+    "source": "daily-iqamah",
+    "placeName": "Shah Jalal Masjid",
+    "url": "https://shahjalaljamemasjid.com/",
+    "credit": "shahjalaljamemasjid.com (published timetable)"
+  },
+  {
     "placeId": "shah-jalal-masjid-mib-1359",
     "source": "sirat",
     "placeName": "Shah Jalal Masjid",
@@ -4724,6 +4793,13 @@
     "siratId": "mosque-000276",
     "siratName": "Sheppey Islamic Cultural Centre",
     "matchedDistanceM": 111
+  },
+  {
+    "placeId": "shoreditch-masjid-trust-mib-1370",
+    "source": "daily-iqamah",
+    "placeName": "Shoreditch Masjid Trust",
+    "url": "https://shoreditchmosque.com/prayer-times",
+    "credit": "shoreditchmosque.com (published timetable)"
   },
   {
     "placeId": "shropshire-islamic-foundation-mib-2683",

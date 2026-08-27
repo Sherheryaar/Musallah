@@ -430,6 +430,29 @@ describe("parseDailyIqamahTable", () => {
     expect(parseDailyIqamahTable(rows, "2026-08-27")).toEqual({ fajr: "05:00" });
   });
 
+  it("ignores prose that merely mentions iqamah before the real header", () => {
+    // Real rows from harrowmosque.org.uk. The first cell is a banner, not a
+    // header; reading it as one made every data row unparseable and left a
+    // major mosque's times stale.
+    const harrow = [
+      ["IQAMAH CHANGES: Fajr: 5:30 AM Isha: 9:30 PM"],
+      ["27 August 2026 Fajr Jamaat 05:30 5:30 AM"],
+      ["Prayer", "Begins", "Jamaat"],
+      ["Fajr", "4:25 AM", "5:15 AM"],
+      ["Sunrise", "6:05 AM", "Zuhr", "1:07 AM", "1:30 PM"],
+      ["Asr**", "5:50 PM", "6:15 PM"],
+      ["Maghrib", "7:58 PM", "8:03 PM"],
+      ["Isha", "9:10 PM", "9:45 PM"],
+    ];
+    expect(parseDailyIqamahTable(harrow, "2026-08-27")).toEqual({
+      fajr: "05:15",
+      dhuhr: "13:30",
+      asr: "18:15",
+      maghrib: "20:03",
+      isha: "21:45",
+    });
+  });
+
   it("returns null for a table with no rows or no date", () => {
     expect(parseDailyIqamahTable([], "2026-08-27")).toBeNull();
     expect(

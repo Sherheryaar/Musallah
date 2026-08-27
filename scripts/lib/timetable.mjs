@@ -281,6 +281,14 @@ export function parseDailyIqamahTable(rows, isoDate) {
   for (const row of rows) {
     const labels = row.filter((c) => !isTimeCell(c));
     if (labels.length !== row.length) continue; // a data row, not a header
+    // A header names at least a row-label column and one time column, and its
+    // cells are short labels rather than sentences. Both checks exist because
+    // these pages carry prose that mentions the very words a header does:
+    // Harrow Central Mosque opens with a one-cell banner reading "IQAMAH
+    // CHANGES: Fajr: 5:30 AM Isha: 9:30 PM", which was being read as a
+    // single-column header and made every real row unparseable.
+    if (row.length < 2) continue;
+    if (labels.some((c) => String(c).trim().length > 30)) continue;
     const named = labels.filter((c) =>
       /iqam|iqaa?ma|jama|jamaah|jama'ah|congregation/i.test(c),
     );

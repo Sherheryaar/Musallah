@@ -35,13 +35,19 @@ import {
 const BROWSERISH_UA =
   "Mozilla/5.0 (compatible; MasjidLocatorBot/0.1; UK masjid directory; +https://github.com/Sherheryaar/Musallah)";
 
+// Fine for an API. Not fine for a mosque's own website: those sit on shared
+// hosting and a first, uncached hit can take well over 15 s — Harrow Central
+// Mosque times out at 15 s every run and would simply never be readable. The
+// HTML sources below raise it, which costs nothing since they make one request
+// per registered place and there are few of them.
 const TIMEOUT_MS = 15_000;
+const SLOW_SITE_TIMEOUT_MS = 45_000;
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-async function getText(url, headers) {
+async function getText(url, headers, timeoutMs = TIMEOUT_MS) {
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
     const res = await fetch(url, { headers, signal: controller.signal });
     if (res.status === 429) return { rateLimited: true };
@@ -54,8 +60,8 @@ async function getText(url, headers) {
   }
 }
 
-async function getJson(url, headers) {
-  const result = await getText(url, headers);
+async function getJson(url, headers, timeoutMs) {
+  const result = await getText(url, headers, timeoutMs);
   if (!result.text) return result;
   try {
     return { json: JSON.parse(result.text) };
@@ -184,7 +190,11 @@ const masjidbox = {
   async fetchOne(link) {
     let lastError = null;
     for (const url of this.urlsFor(link)) {
-      const { text, error, rateLimited } = await getText(url, this.headers);
+      const { text, error, rateLimited } = await getText(
+        url,
+        this.headers,
+        SLOW_SITE_TIMEOUT_MS,
+      );
       if (rateLimited) return { rateLimited };
       if (error) {
         lastError = error;
@@ -263,7 +273,11 @@ const datedTable = {
   },
 
   async fetchOne(link) {
-    const { text, error, rateLimited } = await getText(link.url, this.headers);
+    const { text, error, rateLimited } = await getText(
+      link.url,
+      this.headers,
+      SLOW_SITE_TIMEOUT_MS,
+    );
     if (error || rateLimited) return { error, rateLimited };
     // Every mosque on this source is UK-based (the registry only carries
     // UK dated-table pages), so "today" means today in the UK, not UTC —
@@ -307,7 +321,11 @@ const dailyIqamahTable = {
   },
 
   async fetchOne(link) {
-    const { text, error, rateLimited } = await getText(link.url, this.headers);
+    const { text, error, rateLimited } = await getText(
+      link.url,
+      this.headers,
+      SLOW_SITE_TIMEOUT_MS,
+    );
     if (error || rateLimited) return { error, rateLimited };
     // UK-local date, for the same reason as the dated-table source above.
     const isoDate = todayInZone("Europe/London");
