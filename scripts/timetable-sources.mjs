@@ -1,11 +1,12 @@
 // Timetable PROVIDERS. One module-shaped entry per system that mosques use
 // to publish their own times.
 //
-// DESIGN RULE: no provider is privileged. Mawaqit reaches 131 of 2,244
-// places and none of London's largest mosques are on it, so a pipeline
-// built around any single provider would leave the most-used masjids
-// permanently stale. Each source below fetches for the places registered to
-// it in scripts/timetable-links.json and returns the same shape:
+// DESIGN RULE: no provider is privileged. Mawaqit publishes only ~235 UK
+// mosques and reaches 151 of our 2,239 places, with none of London's largest
+// mosques among them, so a pipeline built around any single provider would
+// leave the most-used masjids permanently stale. Each source below fetches
+// for the places registered to it in scripts/timetable-links.json and
+// returns the same shape:
 //
 //   { jamaat?: {fajr,dhuhr,asr,maghrib,isha}, jumuah?: string[] }
 //
@@ -20,12 +21,13 @@ import {
   cellText,
   htmlTableRows,
   iqamaToJamaat,
-  JAMAAT_KEYS,
   masjidboxDay,
   masjidboxJamaat,
   masjidboxState,
   masjidboxTimezone,
+  parseDailyIqamahTable,
   parseDatedJamaatTable,
+  siratDayTimes,
   toHHMM,
   todayInZone,
 } from "./lib/timetable.mjs";
@@ -278,6 +280,49 @@ const datedTable = {
   },
 };
 
+// --- Daily iqāmah table ------------------------------------------------------
+// The other half of the "mosque publishes its own HTML table" case: instead of
+// a year of dated rows, the page shows TODAY only, one row per prayer, with a
+// column named Iqamah or Jamā'ah (Belfast Islamic Centre is the first of
+// these). parseDailyIqamahTable insists the page is actually showing today's
+// date before it reads anything, because a page of this shape carries no other
+// way to tell a live timetable from a cached one.
+//
+// Same deal as dated-table: one parser serves every mosque on this shape, so
+// registering another is a registry row rather than new code.
+
+const dailyIqamahTable = {
+  id: "daily-iqamah",
+  label: "Mosque website (daily iqāmah table)",
+  credit: null, // per-place: the mosque's own site (see link.credit)
+  throttleMs: 1500,
+  headers: { "User-Agent": BROWSERISH_UA, Accept: "text/html" },
+
+  plan(links) {
+    return links.map((link) => ({
+      key: link.placeId,
+      links: [link],
+      run: () => this.fetchOne(link),
+    }));
+  },
+
+  async fetchOne(link) {
+    const { text, error, rateLimited } = await getText(link.url, this.headers);
+    if (error || rateLimited) return { error, rateLimited };
+    // UK-local date, for the same reason as the dated-table source above.
+    const isoDate = todayInZone("Europe/London");
+    const jamaat = parseDailyIqamahTable(htmlTableRows(text), isoDate);
+    if (!jamaat) {
+      return {
+        error: `no iqāmah table showing ${isoDate} (page stale, or layout changed?)`,
+      };
+    }
+    const results = new Map();
+    results.set(link.placeId, { jamaat, skipped: [] });
+    return { results };
+  },
+};
+
 // --- Sirat.uk -----------------------------------------------------------------
 // A third-party UK mosque-times directory (https://sirat.uk/mosques/developers),
 // used only for places that had NO other source — see scripts/harvest-sirat.mjs
@@ -290,56 +335,78 @@ const sirat = {
   id: "sirat",
   label: "Sirat.uk",
   credit: "Sirat.uk (UK mosque directory, ODC-By 1.0)",
-  // The API documents a shared 120 requests/minute-per-origin limit; this
-  // stays comfortably under it.
+  // Only one request is made per run now (see plan), so the pace only
+  // matters if that request has to be retried.
   throttleMs: 600,
   headers: { "User-Agent": BROWSERISH_UA, Accept: "application/json" },
 
+  /**
+   * ONE request serves every registered place. `/v1/snapshot` returns every
+   * eligible mosque with the next 45 days of times, which replaced a
+   * per-mosque `/times` call each — 422 requests, several minutes, and 422
+   * chances to fail, against a documented 120-requests-per-minute limit.
+   *
+   * The snapshot is also the only way we see JUMU'AH reliably. A mosque's
+   * Jumu'ah sits on FRIDAY's record, not on every day's, so asking only for
+   * today (as the per-mosque call did) returned an empty `jumuah` array on
+   * six days in seven and Jumu'ah could only ever be picked up if a run
+   * happened to land on a Friday.
+   *
+   * The trade-off is that one failure now costs the whole source rather than
+   * one place. That is acceptable here because the orchestrator keeps
+   * whatever times it already had when a source goes quiet, and tomorrow's
+   * run retries — the same outcome as 422 individual failures, minus the
+   * load on Sirat.
+   */
   plan(links) {
-    return links.map((link) => ({
-      key: link.placeId,
-      links: [link],
-      run: () => this.fetchOne(link),
-    }));
+    return [{ key: "snapshot", links, run: () => this.fetchSnapshot(links) }];
   },
 
-  async fetchOne(link) {
-    // Sirat.uk is UK-only, so "today" must be the UK-local date, not UTC
-    // (see the identical fix on the dated-table source above).
-    const isoDate = todayInZone("Europe/London");
+  async fetchSnapshot(links) {
     const { json, error, rateLimited } = await getJson(
-      `${SIRAT_API}/mosques/${encodeURIComponent(link.siratId)}/times?from=${isoDate}&to=${isoDate}`,
+      `${SIRAT_API}/snapshot`,
       this.headers,
     );
     if (error || rateLimited) return { error, rateLimited };
-    const day = Array.isArray(json)
-      ? json.find((d) => d?.date === isoDate)
-      : null;
-    if (!day) return { error: `no record for ${isoDate}` };
+    const entries = Array.isArray(json?.mosques) ? json.mosques : [];
+    if (entries.length === 0) return { error: "snapshot contained no mosques" };
+    const byId = new Map(
+      entries.filter((e) => e?.mosque?.id).map((e) => [e.mosque.id, e]),
+    );
 
-    const jamaat = {};
-    const skipped = [];
-    for (const key of JAMAAT_KEYS) {
-      const time = toHHMM(day[key]);
-      if (time) jamaat[key] = time;
-      else skipped.push(key);
-    }
-    const jumuah = [
-      ...new Set(
-        (Array.isArray(day.jumuah) ? day.jumuah : [])
-          .map((j) => toHHMM(j?.time))
-          .filter(Boolean),
-      ),
-    ].sort();
-
+    // Sirat.uk is UK-only, so "today" means the UK-local date, not UTC (see
+    // the identical fix on the dated-table source above).
+    const isoDate = todayInZone("Europe/London");
     const results = new Map();
-    results.set(link.placeId, {
-      jamaat: Object.keys(jamaat).length > 0 ? jamaat : undefined,
-      jumuah: jumuah.length > 0 ? jumuah : undefined,
-      skipped,
-    });
+
+    for (const link of links) {
+      const entry = byId.get(link.siratId);
+      // Absent from the snapshot: leave it out entirely so the orchestrator
+      // reports it as "not returned by its source" and keeps what we had.
+      if (!entry) continue;
+      const { jamaat, jumuah, skipped } = siratDayTimes(entry.times, isoDate);
+
+      // In the snapshot but carrying nothing for today: Sirat holds an
+      // identity for this mosque and no times. Left out rather than returned
+      // empty, so the run counts it as "not returned by its source" instead
+      // of quietly as "already current" — 111 of the 605 mosques are in this
+      // state, and that number should stay visible.
+      if (Object.keys(jamaat).length === 0 && jumuah.length === 0) continue;
+
+      results.set(link.placeId, {
+        jamaat: Object.keys(jamaat).length > 0 ? jamaat : undefined,
+        jumuah: jumuah.length > 0 ? jumuah : undefined,
+        skipped,
+      });
+    }
     return { results };
   },
 };
 
-export const SOURCES = { mawaqit, masjidbox, "dated-table": datedTable, sirat };
+export const SOURCES = {
+  mawaqit,
+  masjidbox,
+  "dated-table": datedTable,
+  "daily-iqamah": dailyIqamahTable,
+  sirat,
+};

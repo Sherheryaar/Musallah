@@ -22,6 +22,7 @@
     "mawaqitUuid": "4a5c4e68-c484-418a-b85f-78205baf30e8",
     "mawaqitSlug": "aberfeldy-masjid-london-e14-0nu-united-kingdom",
     "mawaqitName": "Aberfeldy Masjid",
+    "matchedOn": "name+postcode",
     "lat": 51.513403605854,
     "lng": -0.0050411694557373,
     "matchedDistanceM": 53
@@ -49,6 +50,7 @@
     "mawaqitUuid": "cbf44142-569a-440b-8705-efc7dba042b8",
     "mawaqitSlug": "adam-mosque-dawah-academy-birmingham-b12-8np-united-kingdom-1",
     "mawaqitName": "Adam Mosque & Dawah Academy",
+    "matchedOn": "name+postcode",
     "lat": 52.4571396,
     "lng": -1.8816212,
     "matchedDistanceM": 3
@@ -60,6 +62,7 @@
     "mawaqitUuid": "7943ab2f-e9f6-4f46-a0f4-9e67a7ffc9dc",
     "mawaqitSlug": "afghan-islamic-cultural-centre-london",
     "mawaqitName": "Afghan Islamic Cultural Centre",
+    "matchedOn": "name+postcode",
     "lat": 51.548229874959,
     "lng": -0.24792194366455,
     "matchedDistanceM": 2
@@ -87,6 +90,7 @@
     "mawaqitUuid": "a2ace75f-fbca-4c86-b94e-8944f7529867",
     "mawaqitSlug": "amanah-masjid-birmingham-b11-1jb-united-kingdom",
     "mawaqitName": "Amanah Masjid",
+    "matchedOn": "name",
     "lat": 52.467148453971,
     "lng": -1.8765163421631,
     "matchedDistanceM": 42
@@ -106,6 +110,7 @@
     "mawaqitUuid": "c747c857-0f98-478c-86c5-e046901c1988",
     "mawaqitSlug": "masjid-ansar-london-ig3-8td-united-kingdom",
     "mawaqitName": "Masjid Ansar",
+    "matchedOn": "name+postcode",
     "lat": 51.566845643747,
     "lng": 0.10928634061741,
     "matchedDistanceM": 32
@@ -117,6 +122,7 @@
     "mawaqitUuid": "ad7a3511-531a-4d22-9ed9-4372968852e3",
     "mawaqitSlug": "al-baseera-bristol-centre-bristol",
     "mawaqitName": "Al-Baseera Bristol Centre",
+    "matchedOn": "name+postcode",
     "lat": 51.45921,
     "lng": -2.579925,
     "matchedDistanceM": 9
@@ -128,6 +134,15 @@
     "siratId": "mosque-000117",
     "siratName": "Al-Birr Community Centre and Mosque",
     "matchedDistanceM": 45
+  },
+  {
+    "placeId": "al-birr-masjid-mib-41",
+    "source": "sirat",
+    "placeName": "Al Birr Masjid",
+    "siratId": "mosque-000275",
+    "siratName": "Masjid Albirr",
+    "matchedDistanceM": 7,
+    "matchedOn": "postcode"
   },
   {
     "placeId": "al-emaan-centre-mib-1123",
@@ -144,6 +159,7 @@
     "mawaqitUuid": "154c9e6d-82ad-4fa7-84be-be550f747690",
     "mawaqitSlug": "alfalah-braintree",
     "mawaqitName": "مركز الفلاح الإسلامي-Al Falah Braintree",
+    "matchedOn": "name",
     "lat": 51.8776805,
     "lng": 0.5501436,
     "matchedDistanceM": 209
@@ -163,6 +179,7 @@
     "mawaqitUuid": "59caad85-e706-4810-9804-92f6a6f71742",
     "mawaqitSlug": "al-falah-community-support-centre-birmingham-b12-9qu-united-kingdom",
     "mawaqitName": "Al Falah Community Support Centre",
+    "matchedOn": "name+postcode",
     "lat": 52.4554274,
     "lng": -1.8899398,
     "matchedDistanceM": 25
@@ -181,6 +198,7 @@
     "mawaqitUuid": "99f42b22-ee0e-4005-83ef-19d31e9572c6",
     "mawaqitSlug": "al-furqan-mosque-19-carrington-street-glasgow-g4-9aj-united-kingdom",
     "mawaqitName": "Al-Furqan Mosque",
+    "matchedOn": "name+postcode",
     "lat": 55.871635506808,
     "lng": -4.2717046233135,
     "matchedDistanceM": 6
@@ -226,6 +244,15 @@
     "matchedDistanceM": 74
   },
   {
+    "placeId": "al-hira-islamic-centre-mib-463",
+    "source": "sirat",
+    "placeName": "Al Hira Islamic Centre",
+    "siratId": "mosque-000127",
+    "siratName": "Alhira Islamic Centre",
+    "matchedDistanceM": 41,
+    "matchedOn": "postcode"
+  },
+  {
     "placeId": "al-huda-preston-mib-15041902",
     "source": "sirat",
     "placeName": "Al Huda Preston",
@@ -240,6 +267,7 @@
     "mawaqitUuid": "12d38a00-8a53-469e-a30e-adfa32d2004a",
     "mawaqitSlug": "al-ikhlas-centre-cardiff-cf24-1nh-united-kingdom",
     "mawaqitName": "Al-Ikhlas Centre",
+    "matchedOn": "name+postcode",
     "lat": 51.4880917,
     "lng": -3.1548601,
     "matchedDistanceM": 15
@@ -317,6 +345,15 @@
     "matchedDistanceM": 115
   },
   {
+    "placeId": "al-madina-mosque-mib-505",
+    "source": "sirat",
+    "placeName": "Al Madina Mosque",
+    "siratId": "mosque-000389",
+    "siratName": "Al-Medinah Mosque",
+    "matchedDistanceM": 26,
+    "matchedOn": "postcode"
+  },
+  {
     "placeId": "al-madinah-masjid-mib-1737",
     "source": "sirat",
     "placeName": "Al Madinah Masjid",
@@ -355,6 +392,7 @@
     "mawaqitUuid": "f96b87eb-5a30-4746-a369-81bd2a1999d7",
     "mawaqitSlug": "al-nehar-mosque-london-n1-9dn-united-kingdom",
     "mawaqitName": "Al-Nehar Mosque",
+    "matchedOn": "name+postcode",
     "lat": 51.5326935,
     "lng": -0.1195728,
     "matchedDistanceM": 4
@@ -382,6 +420,7 @@
     "mawaqitUuid": "c9830e0e-94a5-40c3-b745-c865f93dab25",
     "mawaqitSlug": "al-rahman-mosque-education-centre-london-nw1-1nw-united-kingdom",
     "mawaqitName": "Al-Rahman Mosque & Education Centre",
+    "matchedOn": "name+postcode",
     "lat": 51.5351079,
     "lng": -0.1348751,
     "matchedDistanceM": 8
@@ -393,6 +432,7 @@
     "mawaqitUuid": "2f8535f2-a62e-44e1-82e2-4881af27bde2",
     "mawaqitSlug": "al-risaalah-mosque-london-n7-0lp-united-kingdom",
     "mawaqitName": "Al-Risaalah Mosque",
+    "matchedOn": "name+postcode",
     "lat": 51.5575979,
     "lng": -0.1202918,
     "matchedDistanceM": 26
@@ -404,6 +444,7 @@
     "mawaqitUuid": "aa3836c3-0842-4433-afe8-e5587f990885",
     "mawaqitSlug": "al-sunnah-mosque-manchester-manchester-m8-9pb-united-kingdom",
     "mawaqitName": "Al-Sunnah Mosque Manchester",
+    "matchedOn": "name+postcode",
     "lat": 53.506493564611,
     "lng": -2.2446795619713,
     "matchedDistanceM": 9
@@ -511,6 +552,7 @@
     "mawaqitUuid": "0c1ad409-ebf8-4de1-9afc-e71629ae6e31",
     "mawaqitSlug": "ashton-jame-mosque-ashton-under-lyne-ol6-7dd-united-kingdom",
     "mawaqitName": "Ashton Jam'e Mosque",
+    "matchedOn": "name",
     "lat": 53.4894622,
     "lng": -2.1011453,
     "matchedDistanceM": 8
@@ -522,14 +564,6 @@
     "siratId": "mosque-000472",
     "siratName": "Assunnah Islamic Centre",
     "matchedDistanceM": 42
-  },
-  {
-    "placeId": "aylesbury-faizan-e-siddeeq-e-akbar-mib-1690",
-    "source": "sirat",
-    "placeName": "Aylesbury Faizan-e-Siddeeq-e-Akbar",
-    "siratId": "mosque-000471",
-    "siratName": "Aylesbury Vale Islamic Centre",
-    "matchedDistanceM": 44
   },
   {
     "placeId": "aylesbury-vale-islamic-centre-mib-1689",
@@ -554,9 +588,19 @@
     "mawaqitUuid": "1c5dfe11-92a2-4736-9441-a4b18fead64d",
     "mawaqitSlug": "azhar-academy-bolton-bolton-bl1-4pg-united-kingdom",
     "mawaqitName": "Azhar Academy Bolton",
+    "matchedOn": "name+postcode",
     "lat": 53.5814843,
     "lng": -2.4600135,
     "matchedDistanceM": 12
+  },
+  {
+    "placeId": "azizia-mosque-mib-1160",
+    "source": "sirat",
+    "placeName": "Azizia Mosque",
+    "siratId": "mosque-000181",
+    "siratName": "Aziziye Mosque",
+    "matchedDistanceM": 24,
+    "matchedOn": "postcode"
   },
   {
     "placeId": "azmat-e-islam-masjid-mib-2023",
@@ -623,12 +667,22 @@
     "matchedDistanceM": 25
   },
   {
+    "placeId": "bangladeshi-cultural-centre-mib-1374",
+    "source": "sirat",
+    "placeName": "Bangladeshi Cultural Centre",
+    "siratId": "mosque-000083",
+    "siratName": "Limehouse Masjid",
+    "matchedDistanceM": 1,
+    "matchedOn": "postcode"
+  },
+  {
     "placeId": "bath-islamic-centre-and-mosque-mib-44",
     "source": "mawaqit",
     "placeName": "Bath Islamic Centre and Mosque",
     "mawaqitUuid": "ac138bdf-9b1a-4985-a5e3-ad6747b00d2b",
     "mawaqitSlug": "bath-islamic-society-mosque-bath-ba1-1la-united-kingdom",
     "mawaqitName": "Bath Mosque",
+    "matchedOn": "name+postcode",
     "lat": 51.3800892,
     "lng": -2.3573188,
     "matchedDistanceM": 7
@@ -640,6 +694,7 @@
     "mawaqitUuid": "8a1e3375-541d-446f-aad8-be1dd8fe8b2b",
     "mawaqitSlug": "beckton-muslim-centre-warwall-e6-6wg-london",
     "mawaqitName": "Beckton Muslim Centre",
+    "matchedOn": "name+postcode",
     "lat": 51.5129791,
     "lng": 0.0682856,
     "matchedDistanceM": 5
@@ -651,9 +706,26 @@
     "mawaqitUuid": "8d7c44be-7885-417d-b17b-a7faa51f27eb",
     "mawaqitSlug": "ghousia-masjid-nottingham-ng-2eu-united-kingdom",
     "mawaqitName": "Beeston Muslim Centre",
+    "matchedOn": "name",
     "lat": 52.92792264801,
     "lng": -1.2048035,
     "matchedDistanceM": 21
+  },
+  {
+    "placeId": "belfast-islamic-centre-mib-67",
+    "source": "daily-iqamah",
+    "placeName": "Belfast Islamic Centre",
+    "url": "https://belfastislamiccentre.org.uk/",
+    "credit": "belfastislamiccentre.org.uk (published timetable)"
+  },
+  {
+    "placeId": "bethnal-green-north-community-focus-mib-373",
+    "source": "sirat",
+    "placeName": "Bethnal Green North Community Focus",
+    "siratId": "mosque-000438",
+    "siratName": "Bishops Way Mosque",
+    "matchedDistanceM": 13,
+    "matchedOn": "postcode"
   },
   {
     "placeId": "bilal-jamia-masjid-and-muslim-community-centre-mib-2404",
@@ -662,6 +734,7 @@
     "mawaqitUuid": "2870ad8a-63af-408b-be08-a586c1773db4",
     "mawaqitSlug": "jamia-masjid-bilal-wolverhampton-wv6-0ru-united-kingdom",
     "mawaqitName": "Jamia Masjid Bilal",
+    "matchedOn": "name+postcode",
     "lat": 52.5935582,
     "lng": -2.1465594,
     "matchedDistanceM": 36
@@ -689,6 +762,7 @@
     "mawaqitUuid": "b7af2488-add5-4efb-8d9a-77c3c899a400",
     "mawaqitSlug": "bishopbriggs-islamic-community-centre-bishopbriggs-g64-1ng-united-kingdom",
     "mawaqitName": "Bishopbriggs Islamic Community Centre",
+    "matchedOn": "name",
     "lat": 55.8978197,
     "lng": -4.2115236,
     "matchedDistanceM": 165
@@ -724,6 +798,7 @@
     "mawaqitUuid": "e52002f6-0f22-4f9a-bfcf-ccba03526da8",
     "mawaqitSlug": "sbmca-birmingham-b30-1qd-united-kingdom",
     "mawaqitName": "Bournville Masjid & Community Centre",
+    "matchedOn": "name+postcode",
     "lat": 52.4250446,
     "lng": -1.9500744,
     "matchedDistanceM": 7
@@ -743,6 +818,7 @@
     "mawaqitUuid": "a53755e8-a53c-4f57-84fc-97fb0a8df169",
     "mawaqitSlug": "bow-masjid-london-e3-5el-united-kingdom",
     "mawaqitName": "Bow Muslim Community Centre",
+    "matchedOn": "name+postcode",
     "lat": 51.5325259,
     "lng": -0.0317094,
     "matchedDistanceM": 6
@@ -770,6 +846,7 @@
     "mawaqitUuid": "03e426d3-4557-4540-be5a-fe8474aafb5c",
     "mawaqitSlug": "bristol-diyanet-mosque-bristol-united-kingdom",
     "mawaqitName": "Bristol Diyanet Mosque",
+    "matchedOn": "name",
     "lat": 51.481,
     "lng": -2.589,
     "matchedDistanceM": 44
@@ -861,6 +938,7 @@
     "mawaqitUuid": "01750ebe-8d6e-4589-9a4b-b922fb1a14e2",
     "mawaqitSlug": "cavan-islmic-community-centre-cavan-h12-we88-ireland",
     "mawaqitName": "Cavan Islamic Community & Edu Centre",
+    "matchedOn": "name",
     "lat": 53.975138272337,
     "lng": -7.3529760931847,
     "matchedDistanceM": 80
@@ -872,6 +950,7 @@
     "mawaqitUuid": "01bc812d-9e4a-4498-8e47-ae8f8936b1bf",
     "mawaqitSlug": "jamia-masjid-madni-halifax-hx1-5le-united-kingdom",
     "mawaqitName": "Jamia Masjid Madni",
+    "matchedOn": "name+postcode",
     "lat": 53.7232985,
     "lng": -1.8721692,
     "matchedDistanceM": 19
@@ -899,6 +978,7 @@
     "mawaqitUuid": "9a36bb11-7085-4c13-b3f4-1704af7ae0cc",
     "mawaqitSlug": "chelsea-muslim-community-hub-london-sw100ds-united-kingdom",
     "mawaqitName": "Chelsea Muslim Community Hub",
+    "matchedOn": "name+postcode",
     "lat": 51.481081030825,
     "lng": -0.17885868465577,
     "matchedDistanceM": 106
@@ -926,6 +1006,7 @@
     "mawaqitUuid": "7645d234-4466-47fd-92c9-bd046afafe7b",
     "mawaqitSlug": "city-mosque-preston-preston-pr11yq-united-kingdom",
     "mawaqitName": "City Mosque",
+    "matchedOn": "name+postcode",
     "lat": 53.763116073165,
     "lng": -2.6983666368197,
     "matchedDistanceM": 13
@@ -945,6 +1026,7 @@
     "mawaqitUuid": "6a7a6799-8fd5-4a4d-8497-28a3153c7e5a",
     "mawaqitSlug": "colchester-jamiah-masjid-colchester-co1-2py-united-kingdom",
     "mawaqitName": "Colchester Central Masjid",
+    "matchedOn": "name+postcode",
     "lat": 51.8877135,
     "lng": 0.9050246,
     "matchedDistanceM": 8
@@ -988,6 +1070,7 @@
     "mawaqitUuid": "a50d73a3-12bf-4996-aa4f-37dfd30d7cfc",
     "mawaqitSlug": "craigavon-masjid-craigavon-bt65-5be-united-kingdom",
     "mawaqitName": "Craigavon Masjid | مسجد كريقافن",
+    "matchedOn": "name+postcode",
     "lat": 54.4478326,
     "lng": -6.3711607,
     "matchedDistanceM": 95
@@ -999,6 +1082,7 @@
     "mawaqitUuid": "63ad9016-a655-4a71-b136-92c35e3698e7",
     "mawaqitSlug": "cranfield-islamic-society-mosque-cranfield-bedford",
     "mawaqitName": "Cranfield Islamic Society Mosque",
+    "matchedOn": "name+postcode",
     "lat": 52.074515460864,
     "lng": -0.62705727034881,
     "matchedDistanceM": 4
@@ -1026,6 +1110,7 @@
     "mawaqitUuid": "4326f582-1bb7-4807-bce0-a72f300fe6a7",
     "mawaqitSlug": "cm-middlesbrough",
     "mawaqitName": "MIDDLESBROUGH CENTRAL MASJID",
+    "matchedOn": "name+postcode",
     "lat": 54.5704816,
     "lng": -1.2311383,
     "matchedDistanceM": 9
@@ -1085,6 +1170,7 @@
     "mawaqitUuid": "fe553db6-f038-4492-b3ff-9ba90ee9d1b5",
     "mawaqitSlug": "dawatul-islam-glasgow-glasgow-g12-8ll-united-kingdom",
     "mawaqitName": "Dawatul Islam",
+    "matchedOn": "name+postcode",
     "lat": 55.874458961852,
     "lng": -4.2844143411045,
     "matchedDistanceM": 2
@@ -1185,12 +1271,25 @@
     "matchedDistanceM": 104
   },
   {
+    "placeId": "edmonton-islamic-centre-mib-2630",
+    "source": "mawaqit",
+    "placeName": "Edmonton Islamic Centre",
+    "mawaqitUuid": "c587b585-5f2b-48b7-a519-5e94ce085b10",
+    "mawaqitSlug": "edmonton-mosque",
+    "mawaqitName": "Eic Al Masjid",
+    "matchedOn": "postcode",
+    "lat": 51.6138471,
+    "lng": -0.062842,
+    "matchedDistanceM": 14
+  },
+  {
     "placeId": "elland-mosque-association-mib-819",
     "source": "mawaqit",
     "placeName": "Elland Mosque Association",
     "mawaqitUuid": "6ad098ee-b484-439c-ab91-84524df65d53",
     "mawaqitSlug": "elland-masjid-elland-hx5-0jh-united-kingdom",
     "mawaqitName": "Elland Masjid",
+    "matchedOn": "name+postcode",
     "lat": 53.6827273,
     "lng": -1.8383437,
     "matchedDistanceM": 3
@@ -1220,12 +1319,22 @@
     "slug": "epsom-and-ewell-islamic-centre"
   },
   {
+    "placeId": "eritrean-muslim-community-association-mib-2782",
+    "source": "sirat",
+    "placeName": "Eritrean Muslim Community Association",
+    "siratId": "mosque-000229",
+    "siratName": "Al-Nagashi Masjid",
+    "matchedDistanceM": 7,
+    "matchedOn": "postcode"
+  },
+  {
     "placeId": "faizan-e-islam-mib-1479",
     "source": "mawaqit",
     "placeName": "Faizan-e-Islam",
     "mawaqitUuid": "bb4065b5-42b8-443b-98c6-b46d5b1fe1b1",
     "mawaqitSlug": "faizan-e-islam-coventry-cv6-5nj-united-kingdom",
     "mawaqitName": "Faizan-e-Islam",
+    "matchedOn": "name+postcode",
     "lat": 52.4311241,
     "lng": -1.5034999,
     "matchedDistanceM": 14
@@ -1237,6 +1346,7 @@
     "mawaqitUuid": "c09c6480-e9d7-439b-b4b7-69e1a9311c4e",
     "mawaqitSlug": "faizane-madina-burnley-burnley-bb10-1xa-united-kingdom",
     "mawaqitName": "Faizan e Madina Burnley",
+    "matchedOn": "name+postcode",
     "lat": 53.802840812126,
     "lng": -2.2322139531316,
     "matchedDistanceM": 5
@@ -1248,6 +1358,7 @@
     "mawaqitUuid": "bb24660a-0a66-4a18-ae47-cbe1b68bb9f5",
     "mawaqitSlug": "faizan-e-madina-halifax-hx1-4jx-united-kingdom",
     "mawaqitName": "Faizan E Madina",
+    "matchedOn": "name+postcode",
     "lat": 53.7224783,
     "lng": -1.8812652,
     "matchedDistanceM": 21
@@ -1259,6 +1370,7 @@
     "mawaqitUuid": "7ad64daf-99d6-41be-be42-d51b174994ae",
     "mawaqitSlug": "faizan-e-madina-stechford",
     "mawaqitName": "Faizan e Madina Stechford",
+    "matchedOn": "name+postcode",
     "lat": 52.4783958,
     "lng": -1.814082,
     "matchedDistanceM": 45
@@ -1270,6 +1382,7 @@
     "mawaqitUuid": "b4f4831c-f0e4-451a-89b2-567158cf3bef",
     "mawaqitSlug": "faizan-e-madina-huddersfield-huddersfield-hd1-5nd-united-kingdom",
     "mawaqitName": "Faizan-e-Madinah Huddersfield",
+    "matchedOn": "name+postcode",
     "lat": 53.6511932,
     "lng": -1.7929918,
     "matchedDistanceM": 3
@@ -1281,6 +1394,7 @@
     "mawaqitUuid": "fb1b298c-7ebe-49c3-a87a-3e9d10d031af",
     "mawaqitSlug": "faizan-e-makkah-bradford-bd9-5ab-united-kingdom-1",
     "mawaqitName": "Faizan-e-Makkah",
+    "matchedOn": "name+postcode",
     "lat": 53.807151482163,
     "lng": -1.7815124988556,
     "matchedDistanceM": 17
@@ -1300,6 +1414,7 @@
     "mawaqitUuid": "9f26288b-4bd4-4e22-9bc8-e0a0581f030c",
     "mawaqitSlug": "falkirk-islamic-centre-falkirk-fk1-1ug-united-kingdom",
     "mawaqitName": "Falkirk Islamic Centre",
+    "matchedOn": "name+postcode",
     "lat": 55.9981743,
     "lng": -3.7810202,
     "matchedDistanceM": 3
@@ -1311,6 +1426,7 @@
     "mawaqitUuid": "33e549e1-6cd7-4d54-b863-f78e4b038a79",
     "mawaqitSlug": "farooq-e-azam-mosque-islamic-centre-stockton-on-tees-ts18-3eb-united-kingdom",
     "mawaqitName": "Stockton Masjid - Farooq E Azam Mosque",
+    "matchedOn": "name+postcode",
     "lat": 54.559625144966,
     "lng": -1.318462261377,
     "matchedDistanceM": 8
@@ -1330,6 +1446,7 @@
     "mawaqitUuid": "eadb45ba-adf0-41bf-87bc-a30129772779",
     "mawaqitSlug": "finsbury-park-mosque-london-n4-2qh-united-kingdom",
     "mawaqitName": "Finsbury Park Mosque",
+    "matchedOn": "name+postcode",
     "lat": 51.5635867,
     "lng": -0.1056592,
     "matchedDistanceM": 5
@@ -1349,6 +1466,7 @@
     "mawaqitUuid": "a0660659-09c1-411a-9160-31b513a8e659",
     "mawaqitSlug": "gambian-islamic-community-centre-smethwick-b66-3eu-united-kingdom",
     "mawaqitName": "Gambian Islamic Community Centre",
+    "matchedOn": "name+postcode",
     "lat": 52.490133466215,
     "lng": -1.9581493735313,
     "matchedDistanceM": 59
@@ -1360,6 +1478,27 @@
     "siratId": "mosque-000179",
     "siratName": "Gloucester Ghousia Masjid",
     "matchedDistanceM": 12
+  },
+  {
+    "placeId": "ghousia-mosque-mib-892",
+    "source": "mawaqit",
+    "placeName": "Ghousia Mosque",
+    "mawaqitUuid": "a7c44886-e2ea-48b1-8f90-13560d30c50c",
+    "mawaqitSlug": "ghosiyah-masjid-keighley-bd21-2ta-united-kingdom",
+    "mawaqitName": "Ghosiyah Masjid",
+    "matchedOn": "postcode",
+    "lat": 53.8744104,
+    "lng": -1.9090385,
+    "matchedDistanceM": 3
+  },
+  {
+    "placeId": "gillingham-mosque-mib-774",
+    "source": "sirat",
+    "placeName": "Gillingham Mosque",
+    "siratId": "mosque-000003",
+    "siratName": "Kent Muslim Welfare Association",
+    "matchedDistanceM": 5,
+    "matchedOn": "postcode"
   },
   {
     "placeId": "glasgow-islamic-centre-and-central-mosque-mib-790",
@@ -1376,6 +1515,7 @@
     "mawaqitUuid": "dd26d179-d5b3-40e4-a81d-960f9d74480a",
     "mawaqitSlug": "glasgow-mena-trust-glasgow-g4-0bz-united-kingdom",
     "mawaqitName": "Mena Trust",
+    "matchedOn": "name+postcode",
     "lat": 55.8674962,
     "lng": -4.2427165,
     "matchedDistanceM": 18
@@ -1387,9 +1527,17 @@
     "mawaqitUuid": "6c662c9d-48d4-495d-b635-faf8bf3a81b3",
     "mawaqitSlug": "globe-town-mosque-london-e2-0rn-united-kingdom",
     "mawaqitName": "Globe Town Mosque",
+    "matchedOn": "name+postcode",
     "lat": 51.528686725348,
     "lng": -0.048320695106505,
     "matchedDistanceM": 4
+  },
+  {
+    "placeId": "golden-masjid-mib-2126",
+    "source": "daily-iqamah",
+    "placeName": "Golden Masjid",
+    "url": "https://goldenmosque.org/",
+    "credit": "goldenmosque.org (published timetable)"
   },
   {
     "placeId": "goldington-islamic-centre-way-925372524",
@@ -1398,6 +1546,18 @@
     "url": "https://masjidbox.com/prayer-times/goldington-islamic-centre",
     "masjidboxName": "Goldington Islamic Centre",
     "slug": "goldington-islamic-centre"
+  },
+  {
+    "placeId": "grangetown-muslim-cultural-centre-mib-2618",
+    "source": "mawaqit",
+    "placeName": "Grangetown Muslim Cultural Centre",
+    "mawaqitUuid": "1cf1f00c-5153-40dc-9d32-4a8ec651a7a1",
+    "mawaqitSlug": "masjid-abubakr-cardiff-cf11-7af-united-kingdom",
+    "mawaqitName": "Masjid AbuBakr",
+    "matchedOn": "postcode",
+    "lat": 51.468,
+    "lng": -3.182,
+    "matchedDistanceM": 57
   },
   {
     "placeId": "gravesend-muslim-cultural-centre-mib-1439",
@@ -1454,17 +1614,22 @@
     "mawaqitUuid": "21efa9ab-0352-462e-b7d9-919583200bcf",
     "mawaqitSlug": "masjid-e-hidayah-manchester-m16-9dd-united-kingdom",
     "mawaqitName": "Masjid-E-Hidayah",
+    "matchedOn": "name",
     "lat": 53.461177720959,
     "lng": -2.2751191564487,
     "matchedDistanceM": 2
   },
   {
     "placeId": "halesowen-dudley-yemeni-community-association-mib-1654",
-    "source": "sirat",
+    "source": "mawaqit",
     "placeName": "Halesowen Dudley Yemeni Community Association",
-    "siratId": "mosque-000308",
-    "siratName": "Halesowen/Dudley Yemeni Community Association",
-    "matchedDistanceM": 72
+    "mawaqitUuid": "42a93b0e-4a00-467c-9e98-953d98e156ce",
+    "mawaqitSlug": "masjid-al-warith-halesowen",
+    "mawaqitName": "Masjid Al-Warith - (مسجد الوارث)",
+    "matchedOn": "postcode",
+    "lat": 52.448624289027,
+    "lng": -2.0605105161667,
+    "matchedDistanceM": 21
   },
   {
     "placeId": "hanafi-sunni-jamia-masjid-e-raza-mib-354",
@@ -1505,6 +1670,7 @@
     "mawaqitUuid": "27cff5b3-2683-4376-a072-ac2344f7e7ff",
     "mawaqitSlug": "harrogate-islamic-centre-hg1-1ja-united-kingdom",
     "mawaqitName": "Harrogate Islamic Centre",
+    "matchedOn": "name+postcode",
     "lat": 53.9896196,
     "lng": -1.5383429,
     "matchedDistanceM": 7
@@ -1534,6 +1700,15 @@
     "matchedDistanceM": 63
   },
   {
+    "placeId": "hazrat-shah-jalal-mosque-mib-2646",
+    "source": "sirat",
+    "placeName": "Hazrat Shah Jalal Mosque",
+    "siratId": "mosque-000185",
+    "siratName": "SHAJALAL CENTRAL MOSQUE",
+    "matchedDistanceM": 52,
+    "matchedOn": "postcode"
+  },
+  {
     "placeId": "hazrat-sultan-bahu-trust-jamiah-islamiyah-mosque-mib-220",
     "source": "sirat",
     "placeName": "Hazrat Sultan Bahu Trust Jamiah Islamiyah Mosque",
@@ -1548,6 +1723,7 @@
     "mawaqitUuid": "d45c48e5-27c1-4c12-970c-48df46e1ea7b",
     "mawaqitSlug": "hedon-mosque-islamic-london-united-kingdom",
     "mawaqitName": "Hendon Mosque & Islamic Centre",
+    "matchedOn": "name+postcode",
     "lat": 51.5775793,
     "lng": -0.2383841,
     "matchedDistanceM": 51
@@ -1575,6 +1751,7 @@
     "mawaqitUuid": "c2155b10-dbd0-4134-8597-4a521e5225b7",
     "mawaqitSlug": "hillside-mosque-london-nw10-8li-united-kingdom",
     "mawaqitName": "Hillside Islamic Cultural Centre",
+    "matchedOn": "name",
     "lat": 51.5425993,
     "lng": -0.26837,
     "matchedDistanceM": 13
@@ -1626,6 +1803,7 @@
     "mawaqitUuid": "1881cf42-a4b8-4b00-9445-da16aa0bc313",
     "mawaqitSlug": "huda-birmingham",
     "mawaqitName": "HUDA MASJID",
+    "matchedOn": "name",
     "lat": 52.4916923,
     "lng": -1.9056951,
     "matchedDistanceM": 8
@@ -1653,6 +1831,18 @@
     "siratId": "mosque-000573",
     "siratName": "Hyde Jamia Mosque & Islamic Centre",
     "matchedDistanceM": 12
+  },
+  {
+    "placeId": "idara-trust-mib-759",
+    "source": "mawaqit",
+    "placeName": "Idara Trust",
+    "mawaqitUuid": "16e302ad-a162-4755-a7e8-a8865e888960",
+    "mawaqitSlug": "idarataleem-ul-quran-trust-polwarth-mosq-edinburgh-eh11-1ht-united-kingdom",
+    "mawaqitName": "IdaraTaleem-ul-Quran Polwarth Mosque",
+    "matchedOn": "postcode",
+    "lat": 55.938319428194,
+    "lng": -3.2184034697351,
+    "matchedDistanceM": 3
   },
   {
     "placeId": "ilford-islamic-centre-mib-1307",
@@ -1717,9 +1907,19 @@
     "mawaqitUuid": "e66a103c-9a42-44d4-9045-2fedf15a2fd1",
     "mawaqitSlug": "iqraa-foundation-masjid-london-nw10-4ae-united-kingdom",
     "mawaqitName": "Iqraa Foundation Masjid",
+    "matchedOn": "name+postcode",
     "lat": 51.539343301042,
     "lng": -0.25073327116267,
     "matchedDistanceM": 18
+  },
+  {
+    "placeId": "islambradford-centre-ibc-mib-1306",
+    "source": "sirat",
+    "placeName": "IslamBradford Centre (IBC)",
+    "siratId": "mosque-000433",
+    "siratName": "Islam Bradford",
+    "matchedDistanceM": 49,
+    "matchedOn": "postcode"
   },
   {
     "placeId": "islamia-alouia-zawia-mib-183",
@@ -1728,6 +1928,7 @@
     "mawaqitUuid": "2e45df47-0de7-41fd-80b7-3d12f5fb1bf7",
     "mawaqitSlug": "zawia-mosque-birmingham-b5-7ph-united-kingdom",
     "mawaqitName": "Zawia Mosque",
+    "matchedOn": "name+postcode",
     "lat": 52.4590212,
     "lng": -1.9009364,
     "matchedDistanceM": 5
@@ -1757,6 +1958,27 @@
     "matchedDistanceM": 57
   },
   {
+    "placeId": "islamic-community-centre-mib-2704",
+    "source": "sirat",
+    "placeName": "Islamic Community Centre",
+    "siratId": "mosque-000136",
+    "siratName": "Grimsby Islamic Cultural Centre",
+    "matchedDistanceM": 22,
+    "matchedOn": "postcode"
+  },
+  {
+    "placeId": "islamic-cultural-and-community-centre-mib-2472",
+    "source": "mawaqit",
+    "placeName": "Islamic Cultural and Community Centre",
+    "mawaqitUuid": "4a00e579-a3ee-4ef7-82b1-62051b6aa9d7",
+    "mawaqitSlug": "piety-plymouth-pl4-8ps-united-kingdom",
+    "mawaqitName": "Piety",
+    "matchedOn": "postcode",
+    "lat": 50.3735704,
+    "lng": -4.1268775,
+    "matchedDistanceM": 9
+  },
+  {
     "placeId": "islamic-cultural-centre-and-al-rahma-mosque-mib-1029",
     "source": "sirat",
     "placeName": "Islamic Cultural Centre and Al-Rahma Mosque",
@@ -1771,9 +1993,19 @@
     "mawaqitUuid": "61de0c11-b432-4403-b2b5-3ae79fe4dfff",
     "mawaqitSlug": "islamic-cultural-centre-london-united-kingdom",
     "mawaqitName": "Islamic Cultural Centre (Wembley)",
+    "matchedOn": "name+postcode",
     "lat": 51.547045084432,
     "lng": -0.2745966883606,
     "matchedDistanceM": 9
+  },
+  {
+    "placeId": "islamic-cultural-centre-mib-1824",
+    "source": "sirat",
+    "placeName": "Islamic Cultural Centre",
+    "siratId": "mosque-000544",
+    "siratName": "Altrincham Mosque",
+    "matchedDistanceM": 47,
+    "matchedOn": "postcode"
   },
   {
     "placeId": "islamic-cultural-centre-mib-2115",
@@ -1784,12 +2016,22 @@
     "matchedDistanceM": 19
   },
   {
+    "placeId": "islamic-cultural-education-centre-mosjid-mib-288",
+    "source": "sirat",
+    "placeName": "Islamic Cultural & Education Centre (Mosjid)",
+    "siratId": "mosque-000318",
+    "siratName": "Somers Town Mosque",
+    "matchedDistanceM": 9,
+    "matchedOn": "postcode"
+  },
+  {
     "placeId": "islamic-dawah-centre-mib-1284",
     "source": "mawaqit",
     "placeName": "Islamic Dawah Centre",
     "mawaqitUuid": "8c658b95-d857-4a3c-8b7f-56932d0f7d71",
     "mawaqitSlug": "islamic-dawah-centre-islamia-london-e12-6rh-united-kingdom",
     "mawaqitName": "Islamic Dawah Centre",
+    "matchedOn": "name",
     "lat": 51.5454724,
     "lng": 0.0496465,
     "matchedDistanceM": 16
@@ -1849,6 +2091,7 @@
     "mawaqitUuid": "1c59d348-462f-41fb-a76c-0e17a0242a4f",
     "mawaqitSlug": "jalalia-mosque-cardiff-cf11-6er-united-kingdom",
     "mawaqitName": "Jalalia Masjid",
+    "matchedOn": "name+postcode",
     "lat": 51.4782353,
     "lng": -3.1904134,
     "matchedDistanceM": 22
@@ -1860,6 +2103,15 @@
     "siratId": "mosque-000286",
     "siratName": "Jalalia Sunni Jami Masjid & Islamic Education Centre",
     "matchedDistanceM": 71
+  },
+  {
+    "placeId": "jame-masjid-bangladesh-islamic-centre-mib-2261",
+    "source": "sirat",
+    "placeName": "Jame Masjid & Bangladesh Islamic Centre",
+    "siratId": "mosque-000359",
+    "siratName": "St. Albans Jamie Masjid",
+    "matchedDistanceM": 28,
+    "matchedOn": "postcode"
   },
   {
     "placeId": "jame-masjid-e-noor-mib-1859",
@@ -1892,9 +2144,19 @@
     "mawaqitUuid": "b2cec319-fe5c-4d65-a321-777088ff28e5",
     "mawaqitSlug": "faizan-e-madina-bradford-bd3-9le-united-kingdom",
     "mawaqitName": "Faizan-e-Madina",
+    "matchedOn": "name+postcode",
     "lat": 53.7941299,
     "lng": -1.7331154,
     "matchedDistanceM": 56
+  },
+  {
+    "placeId": "jami-masjid-and-islamic-centre-mib-232",
+    "source": "sirat",
+    "placeName": "Jami Masjid and Islamic Centre",
+    "siratId": "mosque-000213",
+    "siratName": "West Bromwich Jami Masjid & Islamic Centre",
+    "matchedDistanceM": 14,
+    "matchedOn": "postcode"
   },
   {
     "placeId": "jamia-al-karam-masjid-mib-2659",
@@ -1937,6 +2199,18 @@
     "matchedDistanceM": 56
   },
   {
+    "placeId": "jamia-masjid-ahl-e-hadith-mib-827",
+    "source": "mawaqit",
+    "placeName": "Jamia Masjid Ahl-e-Hadith",
+    "mawaqitUuid": "75b4f5b8-11c7-4944-abbc-1db7b446a844",
+    "mawaqitSlug": "jmah-halifax-west-yorkshire-hx1-4et-united-kingdom",
+    "mawaqitName": "JMAH Halifax",
+    "matchedOn": "postcode",
+    "lat": 53.719989104168,
+    "lng": -1.8858259932541,
+    "matchedDistanceM": 15
+  },
+  {
     "placeId": "jamia-masjid-al-furqan-mib-2133",
     "source": "sirat",
     "placeName": "Jamia Masjid al-Furqan",
@@ -1953,12 +2227,34 @@
     "matchedDistanceM": 128
   },
   {
+    "placeId": "jamia-masjid-and-usmania-education-centre-mib-2195",
+    "source": "mawaqit",
+    "placeName": "Jamia Masjid and Usmania Education Centre",
+    "mawaqitUuid": "53669a9a-2cbb-49c4-b12e-925e445cc5ce",
+    "mawaqitSlug": "jamia-masjid-and-usmania-education-centre-sheffield-s8-0xa-united-kingdom",
+    "mawaqitName": "Jamia Masjid & Usmania Education Centre",
+    "matchedOn": "name+postcode",
+    "lat": 53.3573675,
+    "lng": -1.482057,
+    "matchedDistanceM": 21
+  },
+  {
+    "placeId": "jamia-masjid-aston-mib-252",
+    "source": "sirat",
+    "placeName": "Jamia Masjid Aston",
+    "siratId": "mosque-000285",
+    "siratName": "Birmingham Jame Masjid",
+    "matchedDistanceM": 48,
+    "matchedOn": "postcode"
+  },
+  {
     "placeId": "jamia-masjid-bilal-mib-587",
     "source": "mawaqit",
     "placeName": "Jamia Masjid Bilal",
     "mawaqitUuid": "498b73ef-5c4f-4836-93c0-8ded892e4d36",
     "mawaqitSlug": "bilal-mosque-cardiff-cf11-9ea-united-kingdom-1",
     "mawaqitName": "Jamia Masjid Bilal",
+    "matchedOn": "name+postcode",
     "lat": 51.4836385,
     "lng": -3.200401,
     "matchedDistanceM": 24
@@ -1978,6 +2274,15 @@
     "url": "https://masjidbox.com/prayer-times/wfialondon",
     "masjidboxName": "Waltham Forest Islamic Association",
     "slug": "wfialondon"
+  },
+  {
+    "placeId": "jamia-masjid-ghousiya-mib-2233",
+    "source": "sirat",
+    "placeName": "Jamia Masjid Ghousiya",
+    "siratId": "mosque-000382",
+    "siratName": "Montem Lane Mosque",
+    "matchedDistanceM": 19,
+    "matchedOn": "postcode"
   },
   {
     "placeId": "jamia-masjid-ibrahim-mib-536",
@@ -2012,6 +2317,15 @@
     "matchedDistanceM": 10
   },
   {
+    "placeId": "jamia-mosque-mib-1942",
+    "source": "sirat",
+    "placeName": "Jamia Mosque",
+    "siratId": "mosque-000572",
+    "siratName": "Jamia Masjid",
+    "matchedDistanceM": 39,
+    "matchedOn": "postcode"
+  },
+  {
     "placeId": "jamia-mosque-noor-ul-islam-mib-2011",
     "source": "sirat",
     "placeName": "Jamia Mosque Noor-ul-Islam",
@@ -2026,6 +2340,7 @@
     "mawaqitUuid": "7406f786-4a78-4adb-9670-b55dfa2e3097",
     "mawaqitSlug": "jamia-masjid-sultania-brierfield-bb9-5le-united-kingdom",
     "mawaqitName": "Jamia Masjid Sultania",
+    "matchedOn": "name+postcode",
     "lat": 53.8228071,
     "lng": -2.2360093,
     "matchedDistanceM": 55
@@ -2063,23 +2378,25 @@
     "matchedDistanceM": 21
   },
   {
+    "placeId": "jamiyat-ahl-e-hadith-mib-443",
+    "source": "sirat",
+    "placeName": "Jamiyat Ahl-e-Hadith",
+    "siratId": "mosque-000559",
+    "siratName": "BD5 Masjid",
+    "matchedDistanceM": 55,
+    "matchedOn": "postcode"
+  },
+  {
     "placeId": "jamiyat-tabligh-ul-islam-madressa-mib-474",
     "source": "mawaqit",
     "placeName": "Jamiyat Tabligh ul Islam Madressa",
     "mawaqitUuid": "1a366163-93ab-41f9-88d9-688a89e35242",
     "mawaqitSlug": "jamiyat-tabligh-ul-islam-bradford-bd5-7te-united-kingdom",
     "mawaqitName": "Jamia Masjid Tabligh-Ul-Islam Ryan St",
+    "matchedOn": "name",
     "lat": 53.776818955797,
     "lng": -1.7589738356216,
     "matchedDistanceM": 4
-  },
-  {
-    "placeId": "jamiyat-tabligh-ul-islam-mib-417",
-    "source": "sirat",
-    "placeName": "Jamiyat Tabligh ul Islam",
-    "siratId": "mosque-000176",
-    "siratName": "Jamia Masjid Shan-e-Islam",
-    "matchedDistanceM": 131
   },
   {
     "placeId": "jamiyat-tabligh-ul-islam-mib-434",
@@ -2088,6 +2405,7 @@
     "mawaqitUuid": "3cb085ed-6bc3-44ce-b78e-5fd244d577e7",
     "mawaqitSlug": "jamiyat-tablighul-islam-bradford-bd4-7hx-united-kingdom",
     "mawaqitName": "Jamiyat Tablighul Islam",
+    "matchedOn": "name+postcode",
     "lat": 53.7825494,
     "lng": -1.7355987,
     "matchedDistanceM": 6
@@ -2109,6 +2427,24 @@
     "matchedDistanceM": 18
   },
   {
+    "placeId": "jumu-ah-salaah-mib-1559",
+    "source": "sirat",
+    "placeName": "Jumu'ah Salaah",
+    "siratId": "mosque-000216",
+    "siratName": "Umar Islamic Centre",
+    "matchedDistanceM": 59,
+    "matchedOn": "postcode"
+  },
+  {
+    "placeId": "jumu-ah-salaah-mib-1627",
+    "source": "sirat",
+    "placeName": "Jumu'ah Salaah",
+    "siratId": "mosque-000343",
+    "siratName": "The Shade",
+    "matchedDistanceM": 24,
+    "matchedOn": "postcode"
+  },
+  {
     "placeId": "jumu-ah-salaah-mib-17080604",
     "source": "sirat",
     "placeName": "Jumu'ah Salaah",
@@ -2117,12 +2453,51 @@
     "matchedDistanceM": 37
   },
   {
+    "placeId": "jumu-ah-salaah-mib-1713",
+    "source": "sirat",
+    "placeName": "Jumu'ah Salaah",
+    "siratId": "mosque-000219",
+    "siratName": "Hedgecock Community Centre",
+    "matchedDistanceM": 41,
+    "matchedOn": "postcode"
+  },
+  {
     "placeId": "jumu-ah-salaah-mib-2588",
     "source": "sirat",
     "placeName": "Jumu'ah Salaah",
     "siratId": "mosque-000323",
     "siratName": "New Malden Jummah",
     "matchedDistanceM": 66
+  },
+  {
+    "placeId": "jumu-ah-salaah-mib-595",
+    "source": "mawaqit",
+    "placeName": "Jumu'ah Salaah",
+    "mawaqitUuid": "6de5e409-74ea-4242-a5cf-5bafc6b5cc95",
+    "mawaqitSlug": "tamworth-community-hub-tamworth-b77-1dl-united-kingdom",
+    "mawaqitName": "TCH تامورث مسجد",
+    "matchedOn": "postcode",
+    "lat": 52.619005578935,
+    "lng": -1.6862079900742,
+    "matchedDistanceM": 7
+  },
+  {
+    "placeId": "jumu-ah-salaah-mib-729",
+    "source": "sirat",
+    "placeName": "Jumu'ah salaah",
+    "siratId": "mosque-000529",
+    "siratName": "Taiba Welfare Foundation",
+    "matchedDistanceM": 49,
+    "matchedOn": "postcode"
+  },
+  {
+    "placeId": "karimia-institute-mib-1368",
+    "source": "sirat",
+    "placeName": "Karimia Institute",
+    "siratId": "mosque-000317",
+    "siratName": "Masjid Al-Aqsa",
+    "matchedDistanceM": 19,
+    "matchedOn": "postcode"
   },
   {
     "placeId": "karimia-mosque-and-institute-mib-1965",
@@ -2139,6 +2514,15 @@
     "siratId": "mosque-000262",
     "siratName": "Chatham Hill Mosque & Kent Islamic Centre",
     "matchedDistanceM": 25
+  },
+  {
+    "placeId": "kettering-muslim-community-centre-mib-2676",
+    "source": "sirat",
+    "placeName": "Kettering Muslim Community Centre",
+    "siratId": "mosque-000194",
+    "siratName": "Al-Arqam",
+    "matchedDistanceM": 15,
+    "matchedOn": "postcode"
   },
   {
     "placeId": "khanqah-naqshbandia-mujaddidia-mib-1839",
@@ -2163,6 +2547,7 @@
     "mawaqitUuid": "af45fe38-949f-4a71-afdd-44096df8195e",
     "mawaqitSlug": "kings-cross-mosque-islamic-cultural-london-wc1h-8du-united-kingdom",
     "mawaqitName": "Kings Cross Mosque & Islamic Cultural",
+    "matchedOn": "name+postcode",
     "lat": 51.5283828,
     "lng": -0.119813,
     "matchedDistanceM": 109
@@ -2206,6 +2591,7 @@
     "mawaqitUuid": "e30e4cde-6f48-430d-9b0f-59127a4d2303",
     "mawaqitSlug": "leeds-grand-mosque-leeds-ls6-1sn-united-kingdom",
     "mawaqitName": "Leeds Grand Mosque",
+    "matchedOn": "name+postcode",
     "lat": 53.8065442,
     "lng": -1.5679982,
     "matchedDistanceM": 23
@@ -2217,6 +2603,15 @@
     "siratId": "mosque-000614",
     "siratName": "Leeds Islamic Centre",
     "matchedDistanceM": 74
+  },
+  {
+    "placeId": "leeds-swahili-cultural-community-mib-1497",
+    "source": "sirat",
+    "placeName": "Leeds Swahili Cultural Community",
+    "siratId": "mosque-000055",
+    "siratName": "Osmondthorpe Lane Islamic Centre",
+    "matchedDistanceM": 41,
+    "matchedOn": "postcode"
   },
   {
     "placeId": "leicester-central-mosque-mib-965",
@@ -2265,6 +2660,7 @@
     "mawaqitUuid": "cf2f02d3-0caf-4f31-9c98-f65231800f05",
     "mawaqitSlug": "lincolncentralmosque",
     "mawaqitName": "Lincoln Central Mosque & Cultural Centre",
+    "matchedOn": "name",
     "lat": 53.218734715242,
     "lng": -0.55181086063385,
     "matchedDistanceM": 36
@@ -2324,9 +2720,22 @@
     "mawaqitUuid": "efb52799-a109-4b09-90d0-2188746c4eba",
     "mawaqitSlug": "luton-islamic-centre-luton-lu1-1he-united-kingdom",
     "mawaqitName": "Luton Islamic Centre",
+    "matchedOn": "name+postcode",
     "lat": 51.8866343,
     "lng": -0.4285811,
     "matchedDistanceM": 7
+  },
+  {
+    "placeId": "mab-centre-mib-804",
+    "source": "mawaqit",
+    "placeName": "MAB Centre",
+    "mawaqitUuid": "5bb580db-d0ee-41fd-a602-5ac9738a72cf",
+    "mawaqitSlug": "31937",
+    "mawaqitName": "Al Rahmah Centre",
+    "matchedOn": "postcode",
+    "lat": 55.87512357545,
+    "lng": -4.2680544460327,
+    "matchedDistanceM": 47
   },
   {
     "placeId": "madina-islamic-mission-and-islamic-centre-mib-862",
@@ -2401,6 +2810,15 @@
     "matchedDistanceM": 2
   },
   {
+    "placeId": "madina-mosque-mib-92",
+    "source": "sirat",
+    "placeName": "Madina Mosque",
+    "siratId": "mosque-000065",
+    "siratName": "Kings Heath Masjid",
+    "matchedDistanceM": 54,
+    "matchedOn": "postcode"
+  },
+  {
     "placeId": "madinatul-ilm-way-1413120285",
     "source": "masjidbox",
     "placeName": "Madinatul Ilm",
@@ -2423,6 +2841,7 @@
     "mawaqitUuid": "bec1975a-4369-45fd-99e3-8db2658fc3b2",
     "mawaqitSlug": "madni-masjid-nottingham-ng7-6hx-united-kingdom",
     "mawaqitName": "Madni Masjid",
+    "matchedOn": "name+postcode",
     "lat": 52.9714903,
     "lng": -1.1614023,
     "matchedDistanceM": 8
@@ -2434,6 +2853,7 @@
     "mawaqitUuid": "7411c125-0c76-4a44-9242-152f184547ab",
     "mawaqitSlug": "madni-masjid-cardiff-cf24-4se-united-kingdom",
     "mawaqitName": "Madni Masjid",
+    "matchedOn": "name+postcode",
     "lat": 51.495828,
     "lng": -3.1717169,
     "matchedDistanceM": 27
@@ -2445,6 +2865,7 @@
     "mawaqitUuid": "39c24ceb-a9fe-4b3d-93ef-1ca20c4ce90b",
     "mawaqitSlug": "banbury-madni-masjid-banbury-ox16-4rx-united-kingdom",
     "mawaqitName": "Banbury Madni Masjid",
+    "matchedOn": "name",
     "lat": 52.061759118416,
     "lng": -1.3251024484634,
     "matchedDistanceM": 12
@@ -2456,6 +2877,27 @@
     "siratId": "mosque-000356",
     "siratName": "Masjid Mujadidia",
     "matchedDistanceM": 40
+  },
+  {
+    "placeId": "madrassa-talimul-islam-mib-1285",
+    "source": "sirat",
+    "placeName": "Madrassa Talimul Islam",
+    "siratId": "mosque-000278",
+    "siratName": "Anjuman-e-Islamia Newham",
+    "matchedDistanceM": 33,
+    "matchedOn": "postcode"
+  },
+  {
+    "placeId": "madrassa-tul-madina-mib-1591",
+    "source": "mawaqit",
+    "placeName": "Madrassa-tul-Madina",
+    "mawaqitUuid": "770b7599-2fca-4cde-9843-35ed9751d4a9",
+    "mawaqitSlug": "faizan-e-raza-bradford-bd6-3et-united-kingdom",
+    "mawaqitName": "Faizan E Raza",
+    "matchedOn": "postcode",
+    "lat": 53.768,
+    "lng": -1.788,
+    "matchedDistanceM": 55
   },
   {
     "placeId": "madressa-taleem-ul-islam-mib-320",
@@ -2480,6 +2922,7 @@
     "mawaqitUuid": "e0f3a4eb-1f7b-4a73-b4bd-4b4a2dd8605c",
     "mawaqitSlug": "makki-masjid-halifax",
     "mawaqitName": "Makki Masjid",
+    "matchedOn": "name",
     "lat": 53.718834,
     "lng": -1.878147,
     "matchedDistanceM": 7
@@ -2515,6 +2958,7 @@
     "mawaqitUuid": "0cf1d5ad-0d73-4573-8440-7863d021b66e",
     "mawaqitSlug": "makki-masjid-burton-on-trent-burton-on-trent-de14-2qj-united-kingdom",
     "mawaqitName": "Makki Masjid",
+    "matchedOn": "name",
     "lat": 52.814580450844,
     "lng": -1.6425486675585,
     "matchedDistanceM": 9
@@ -2566,6 +3010,7 @@
     "mawaqitUuid": "65806698-b191-491e-acf6-44c875b6314a",
     "mawaqitSlug": "markaz-muaadh-bin-jabal-slough-sl1-2sa-united-kingdom",
     "mawaqitName": "Markaz Mu'aadh bin Jabal",
+    "matchedOn": "name+postcode",
     "lat": 51.5043821,
     "lng": -0.6090463,
     "matchedDistanceM": 7
@@ -2577,9 +3022,22 @@
     "mawaqitUuid": "5e449217-3cdf-48f3-8041-bcf8eeb8b42d",
     "mawaqitSlug": "markaz-quba-islamic-centre-leicester-le2-0nq-united-kingdom",
     "mawaqitName": "Markaz Quba (Islamic Centre)",
+    "matchedOn": "name+postcode",
     "lat": 52.6285706,
     "lng": -1.1187947,
     "matchedDistanceM": 7
+  },
+  {
+    "placeId": "markaz-ud-dawat-wal-irshad-islamic-centre-mib-1294",
+    "source": "mawaqit",
+    "placeName": "Markaz ud Dawat wal Irshad Islamic Centre",
+    "mawaqitUuid": "ef4309bc-b7a8-4427-9817-42c21ac2817e",
+    "mawaqitSlug": "plashet-grove-masjid-london-e6-1bx-united-kingdom",
+    "mawaqitName": "Plashet Grove Masjid",
+    "matchedOn": "postcode",
+    "lat": 51.5385537,
+    "lng": 0.0425807,
+    "matchedDistanceM": 8
   },
   {
     "placeId": "markaz-us-sunnah-mib-1725",
@@ -2612,6 +3070,7 @@
     "mawaqitUuid": "99c104f9-f595-46f4-84be-deeadaf9e2fe",
     "mawaqitSlug": "markazi-jamia-masjid-ghausia-huddersfield-hd1-3rt-united-kingdom",
     "mawaqitName": "Markazi Jamia Masjid Ghausia",
+    "matchedOn": "name+postcode",
     "lat": 53.6372984,
     "lng": -1.7918438,
     "matchedDistanceM": 10
@@ -2639,6 +3098,15 @@
     "siratId": "mosque-000035",
     "siratName": "Markazi Jamia Masjid Ghousia (Ahle Sunnat Wa Jamaat)",
     "matchedDistanceM": 48
+  },
+  {
+    "placeId": "markazi-masjid-mib-1950",
+    "source": "sirat",
+    "placeName": "Markazi Masjid",
+    "siratId": "mosque-000215",
+    "siratName": "Northampton Central Mosque",
+    "matchedDistanceM": 55,
+    "matchedOn": "postcode"
   },
   {
     "placeId": "masjid-abdul-aziz-bin-baz-mib-199",
@@ -2671,6 +3139,7 @@
     "mawaqitUuid": "dd3df547-7d71-4df2-aff3-1b65298c383b",
     "mawaqitSlug": "masjid-abu-bakr-sheffield-s9-1wa-united-kingdom",
     "mawaqitName": "Masjid Abu Bakr",
+    "matchedOn": "name",
     "lat": 53.411085898617,
     "lng": -1.3960790634155,
     "matchedDistanceM": 12
@@ -2684,12 +3153,22 @@
     "matchedDistanceM": 69
   },
   {
+    "placeId": "masjid-adam-mib-1706",
+    "source": "sirat",
+    "placeName": "Masjid Adam",
+    "siratId": "mosque-000196",
+    "siratName": "MasjidAdam",
+    "matchedDistanceM": 49,
+    "matchedOn": "postcode"
+  },
+  {
     "placeId": "masjid-adam-way-1322886232",
     "source": "mawaqit",
     "placeName": "Masjid Adam",
     "mawaqitUuid": "01239c6c-ec3a-427d-b077-9c38921386c8",
     "mawaqitSlug": "majid-adam-a-s-leicester-le2-5qf-united-kingdom",
     "mawaqitName": "Masjid Adam (A.S)",
+    "matchedOn": "name",
     "lat": 52.5969295,
     "lng": -1.0811693,
     "matchedDistanceM": 1
@@ -2701,6 +3180,7 @@
     "mawaqitUuid": "76a8d4a4-b1a5-4045-9fd1-1bfe70a55514",
     "mawaqitSlug": "masjid-aisha-leicester-le5-5an-united-kingdom",
     "mawaqitName": "Masjid Aisha",
+    "matchedOn": "name+postcode",
     "lat": 52.6309431,
     "lng": -1.1097167,
     "matchedDistanceM": 11
@@ -2720,6 +3200,7 @@
     "mawaqitUuid": "c604cd94-5f40-42c8-9228-9baa72c73e2f",
     "mawaqitSlug": "al-falah-centre-cardiff",
     "mawaqitName": "AL-FALAH MASJID",
+    "matchedOn": "name+postcode",
     "lat": 51.4730138,
     "lng": -3.2512241,
     "matchedDistanceM": 51
@@ -2731,9 +3212,19 @@
     "mawaqitUuid": "df9ca896-4473-4fa3-af6d-15244e5cc50e",
     "mawaqitSlug": "alfalah-london",
     "mawaqitName": "Masjid Alfalah",
+    "matchedOn": "name+postcode",
     "lat": 51.5638231,
     "lng": 0.0573474,
     "matchedDistanceM": 10
+  },
+  {
+    "placeId": "masjid-al-haq-mib-837",
+    "source": "sirat",
+    "placeName": "Masjid Al Haq",
+    "siratId": "mosque-000271",
+    "siratName": "Hastings Mosque",
+    "matchedDistanceM": 28,
+    "matchedOn": "postcode"
   },
   {
     "placeId": "masjid-al-hikmah-mib-1302",
@@ -2758,6 +3249,7 @@
     "mawaqitUuid": "32b83d5d-bf86-4bd1-b088-a7b60c57a638",
     "mawaqitSlug": "masjid-al-jannah-slough-sl2-5ah-united-kingdom",
     "mawaqitName": "Masjid Al Jannah",
+    "matchedOn": "name+postcode",
     "lat": 51.512874856372,
     "lng": -0.5940818041563,
     "matchedDistanceM": 4
@@ -2785,6 +3277,27 @@
     "siratId": "mosque-000541",
     "siratName": "Masjid Al Noor",
     "matchedDistanceM": 31
+  },
+  {
+    "placeId": "masjid-al-quds-mib-508",
+    "source": "sirat",
+    "placeName": "Masjid Al Quds",
+    "siratId": "mosque-000422",
+    "siratName": "Brighton Mosque",
+    "matchedDistanceM": 11,
+    "matchedOn": "postcode"
+  },
+  {
+    "placeId": "masjid-al-risaalah-islington-islamic-centre-mib-494",
+    "source": "mawaqit",
+    "placeName": "Masjid Al-Risaalah & Islington Islamic Centre",
+    "mawaqitUuid": "ecb4bd0b-6692-4f42-936f-0cc649e793fe",
+    "mawaqitSlug": "york-way-mosque-camden-n7-9qh-united-kingdom",
+    "mawaqitName": "York Way Muslim Community Centre",
+    "matchedOn": "postcode",
+    "lat": 51.5433839,
+    "lng": -0.1256552,
+    "matchedDistanceM": 12
   },
   {
     "placeId": "masjid-al-ummah-mib-1740",
@@ -2849,6 +3362,7 @@
     "mawaqitUuid": "d7638790-70c4-4683-960e-daa4fe6aa96d",
     "mawaqitSlug": "masjid-ar-rashideen-batley-wf17-8lt-united-kingdom",
     "mawaqitName": "Masjid Ar-Rashideen",
+    "matchedOn": "name+postcode",
     "lat": 53.7197933,
     "lng": -1.6445806,
     "matchedDistanceM": 91
@@ -2892,6 +3406,7 @@
     "mawaqitUuid": "8fd4c7cd-c102-492a-94a9-d98d443fc4a1",
     "mawaqitSlug": "masjed-al-taqwa-newport-np20-2gy-united-kingdom",
     "mawaqitName": "Masjed Al Taqwa",
+    "matchedOn": "name+postcode",
     "lat": 51.5749096,
     "lng": -2.9884931,
     "matchedDistanceM": 5
@@ -2911,6 +3426,7 @@
     "mawaqitUuid": "34792373-46b0-419f-b5c7-1f6ce7768cdb",
     "mawaqitSlug": "masjid-at-tawheed-cardiff-cf11-6jw-united-kingdom-1",
     "mawaqitName": "Masjid At Tawheed",
+    "matchedOn": "name+postcode",
     "lat": 51.4703452,
     "lng": -3.1854521,
     "matchedDistanceM": 6
@@ -2954,6 +3470,7 @@
     "mawaqitUuid": "f33ebcf3-3eb6-4879-a9a2-8b1b6f03cf9e",
     "mawaqitSlug": "masjid-e-bilaal-nottingham-ng7-2et-united-kingdom",
     "mawaqitName": "Masjid e Bilaal",
+    "matchedOn": "name+postcode",
     "lat": 52.9473905,
     "lng": -1.1744496,
     "matchedDistanceM": 19
@@ -2975,12 +3492,39 @@
     "matchedDistanceM": 107
   },
   {
+    "placeId": "masjid-e-bait-ul-iman-mib-1632",
+    "source": "sirat",
+    "placeName": "Masjid-e-Bait ul Iman",
+    "siratId": "mosque-000079",
+    "siratName": "Masjid Baitul Amaan",
+    "matchedDistanceM": 12,
+    "matchedOn": "postcode"
+  },
+  {
     "placeId": "masjid-e-hamza-islamic-centre-mib-164",
     "source": "sirat",
     "placeName": "Masjid-e-Hamza & Islamic Centre",
     "siratId": "mosque-000319",
     "siratName": "Masjid e Hamza",
     "matchedDistanceM": 6
+  },
+  {
+    "placeId": "masjid-e-heera-mib-703",
+    "source": "sirat",
+    "placeName": "Masjid-e-Heera",
+    "siratId": "mosque-000515",
+    "siratName": "Masjid E Hira",
+    "matchedDistanceM": 6,
+    "matchedOn": "postcode"
+  },
+  {
+    "placeId": "masjid-e-noor-mib-1043",
+    "source": "sirat",
+    "placeName": "Masjid-e-Noor",
+    "siratId": "mosque-000121",
+    "siratName": "Lancaster Islamic Society",
+    "matchedDistanceM": 25,
+    "matchedOn": "postcode"
   },
   {
     "placeId": "masjid-e-noorul-islam-mib-314",
@@ -3045,6 +3589,7 @@
     "mawaqitUuid": "6d2ac9b8-dd3b-4288-94ce-127c8d1c0a66",
     "mawaqitSlug": "masjid-umar-cardiff-cf24-3px-united-kingdom",
     "mawaqitName": "Masjid Umar",
+    "matchedOn": "name+postcode",
     "lat": 51.4924146,
     "lng": -3.1618779,
     "matchedDistanceM": 4
@@ -3064,6 +3609,7 @@
     "mawaqitUuid": "1472e8b7-039a-4c05-b6c7-7babd3de5418",
     "mawaqitSlug": "masjid-yusuf-london-n19-4eb-united-kingdom",
     "mawaqitName": "Masjid Yusuf",
+    "matchedOn": "name+postcode",
     "lat": 51.5659172,
     "lng": -0.1207514,
     "matchedDistanceM": 7
@@ -3091,9 +3637,19 @@
     "mawaqitUuid": "5e57a082-bba7-4bdc-88ad-b26c20056af4",
     "mawaqitSlug": "hazrat-mujaddid-alf-e-sani-trust-masjid-birmingham-b12-8bg-united-kingdom",
     "mawaqitName": "Hazrat Mujaddid Alf-e-Sani Trust Masjid",
+    "matchedOn": "name+postcode",
     "lat": 52.452,
     "lng": -1.875,
     "matchedDistanceM": 32
+  },
+  {
+    "placeId": "masjid-ibnu-taymeeyah-mib-1251",
+    "source": "sirat",
+    "placeName": "Masjid Ibnu Taymeeyah",
+    "siratId": "mosque-000577",
+    "siratName": "Brixton Mosque & Islamic Cultural Centre",
+    "matchedDistanceM": 6,
+    "matchedOn": "postcode"
   },
   {
     "placeId": "masjid-ibraheem-mib-664",
@@ -3102,9 +3658,19 @@
     "mawaqitUuid": "d30c0ea4-2950-4428-b75b-340deaba2412",
     "mawaqitSlug": "miec",
     "mawaqitName": "Masjid Ibraheem & Education Centre",
+    "matchedOn": "name+postcode",
     "lat": 53.7966076,
     "lng": -1.7105742,
     "matchedDistanceM": 45
+  },
+  {
+    "placeId": "masjid-ibrahim-mib-1145",
+    "source": "sirat",
+    "placeName": "Masjid Ibrahim",
+    "siratId": "mosque-000006",
+    "siratName": "Masjid Ibraheem",
+    "matchedDistanceM": 19,
+    "matchedOn": "postcode"
   },
   {
     "placeId": "masjid-ibrahim-mib-1273",
@@ -3145,6 +3711,7 @@
     "mawaqitUuid": "7d8f50ce-befd-4b9c-aa3f-bd419c00a154",
     "mawaqitSlug": "masjid-muadh-ibn-jabal-leicester-le5-6tb-united-kingdom",
     "mawaqitName": "Masjid Mu'adh Ibn Jabal",
+    "matchedOn": "name+postcode",
     "lat": 52.6328031,
     "lng": -1.0722415,
     "matchedDistanceM": 9
@@ -3188,6 +3755,7 @@
     "mawaqitUuid": "10e9ceb4-c07f-46aa-a0e9-b19045d980e7",
     "mawaqitSlug": "masjidramadan",
     "mawaqitName": "Masjid Ramadan",
+    "matchedOn": "name+postcode",
     "lat": 51.5509809,
     "lng": -0.0740086,
     "matchedDistanceM": 15
@@ -3241,6 +3809,15 @@
     "matchedDistanceM": 89
   },
   {
+    "placeId": "masjid-ul-qudus-mib-1247",
+    "source": "sirat",
+    "placeName": "Masjid-ul-Qudus",
+    "siratId": "mosque-000005",
+    "siratName": "North Brixton Islamic Cultural Centre",
+    "matchedDistanceM": 9,
+    "matchedOn": "postcode"
+  },
+  {
     "placeId": "masjid-umar-mib-974",
     "source": "sirat",
     "placeName": "Masjid Umar",
@@ -3257,12 +3834,20 @@
     "slug": "masjid-ar-rahmah-1735569516980"
   },
   {
+    "placeId": "masjid-us-sunnah-mib-1011",
+    "source": "daily-iqamah",
+    "placeName": "Masjid us Sunnah",
+    "url": "https://masjid-us-sunnah.com/services/main-prayer-hall/",
+    "credit": "masjid-us-sunnah.com (published timetable)"
+  },
+  {
     "placeId": "masjid-usman-mib-1031",
     "source": "mawaqit",
     "placeName": "Masjid Usman",
     "mawaqitUuid": "ffe058e0-362c-4591-9910-a1eca9589400",
     "mawaqitSlug": "masjid-usman-arrehman-trust-birminghan-b23-7jg-united-kingdom",
     "mawaqitName": "Masjid Usman Ar RahmanTrust",
+    "matchedOn": "name+postcode",
     "lat": 52.5242061,
     "lng": -1.8589892,
     "matchedDistanceM": 5
@@ -3276,12 +3861,22 @@
     "matchedDistanceM": 127
   },
   {
+    "placeId": "masjid-uthman-mib-1109",
+    "source": "sirat",
+    "placeName": "Masjid Uthman",
+    "siratId": "mosque-000130",
+    "siratName": "South Norwood Islamic Community Centre (SNICC)",
+    "matchedDistanceM": 58,
+    "matchedOn": "postcode"
+  },
+  {
     "placeId": "masjid-uthman-mib-584",
     "source": "mawaqit",
     "placeName": "Masjid Uthman",
     "mawaqitUuid": "10c5cbc7-77fa-4f5a-96a7-4fb920d0b5c1",
     "mawaqitSlug": "masjid-uthman-riverside-islamic-school-cardiff-cf11-6as-united-kingdom",
     "mawaqitName": "Masjid Uthman - Riverside Islamic School",
+    "matchedOn": "name+postcode",
     "lat": 51.477911,
     "lng": -3.1860662,
     "matchedDistanceM": 28
@@ -3293,6 +3888,7 @@
     "mawaqitUuid": "ec86c7e4-8c75-43f2-b9bf-bb5cbf9c2847",
     "mawaqitSlug": "jamia-masjid-usman-ghani-brierfield-bb95aw-united-kingdom",
     "mawaqitName": "Jamia Masjid Usman Ghani",
+    "matchedOn": "name+postcode",
     "lat": 53.824337009457,
     "lng": -2.2315934966555,
     "matchedDistanceM": 7
@@ -3346,6 +3942,15 @@
     "matchedDistanceM": 17
   },
   {
+    "placeId": "mile-end-bengali-muslim-association-mib-15041901",
+    "source": "sirat",
+    "placeName": "Mile End Bengali Muslim Association",
+    "siratId": "mosque-000330",
+    "siratName": "Hamlets Way Masjid",
+    "matchedDistanceM": 5,
+    "matchedOn": "postcode"
+  },
+  {
     "placeId": "mitcham-islamic-centre-mib-496",
     "source": "sirat",
     "placeName": "Mitcham Islamic Centre",
@@ -3362,12 +3967,34 @@
     "matchedDistanceM": 24
   },
   {
+    "placeId": "mosque-and-islamic-centre-for-the-south-west-mib-763",
+    "source": "sirat",
+    "placeName": "Mosque and Islamic Centre for the South West",
+    "siratId": "mosque-000588",
+    "siratName": "Exeter Mosque",
+    "matchedDistanceM": 53,
+    "matchedOn": "postcode"
+  },
+  {
+    "placeId": "mosque-and-islamic-community-centre-mib-758",
+    "source": "mawaqit",
+    "placeName": "Mosque And Islamic Community Centre",
+    "mawaqitUuid": "5052d674-5852-495d-91ce-d410bc8cfb9e",
+    "mawaqitSlug": "medina-mosque-trust-eh8-9ta-edinburgh-united-kingdom",
+    "mawaqitName": "Roxburgh Street Masjid",
+    "matchedOn": "postcode",
+    "lat": 55.947553214504,
+    "lng": -3.1830538105799,
+    "matchedDistanceM": 23
+  },
+  {
     "placeId": "mosque-islamic-centre-of-brent-mib-1072",
     "source": "mawaqit",
     "placeName": "Mosque & Islamic Centre of Brent",
     "mawaqitUuid": "7e60536c-cf81-4b7b-bccb-3093aec77bfe",
     "mawaqitSlug": "the-mosque-islamic-centre-of-brent-london-nw2-6ds-united-kingdom",
     "mawaqitName": "The Mosque & Islamic Centre of Brent",
+    "matchedOn": "name+postcode",
     "lat": 51.5557341,
     "lng": -0.216654,
     "matchedDistanceM": 6
@@ -3405,6 +4032,15 @@
     "matchedDistanceM": 30
   },
   {
+    "placeId": "muslim-community-centre-and-mosque-mib-1372",
+    "source": "sirat",
+    "placeName": "Muslim Community Centre and Mosque",
+    "siratId": "mosque-000373",
+    "siratName": "Shadwell Gardens Masjid",
+    "matchedDistanceM": 29,
+    "matchedOn": "postcode"
+  },
+  {
     "placeId": "muslim-community-trust-jamia-masjid-mib-1389",
     "source": "masjidbox",
     "placeName": "Muslim Community Trust (Jamia Masjid)",
@@ -3413,12 +4049,22 @@
     "slug": "mctleyton"
   },
   {
+    "placeId": "muslim-cultural-and-welfare-association-mib-1335",
+    "source": "sirat",
+    "placeName": "Muslim Cultural and Welfare Association",
+    "siratId": "mosque-000141",
+    "siratName": "Muslim Cultural & Welfare Association of Sutton (MCWAS)",
+    "matchedDistanceM": 24,
+    "matchedOn": "postcode"
+  },
+  {
     "placeId": "muslim-cultural-centre-wollaton-way-356861004",
     "source": "mawaqit",
     "placeName": "Muslim Cultural Centre Wollaton",
     "mawaqitUuid": "8fe886bf-4735-457d-8dcc-b39662d58b05",
     "mawaqitSlug": "muslim-cultural-centre-wollaton-nottingham-ng8-1nb-united-kingdom",
     "mawaqitName": "Muslim Cultural Centre Wollaton",
+    "matchedOn": "name+postcode",
     "lat": 52.9564886,
     "lng": -1.1938555,
     "matchedDistanceM": 9
@@ -3432,12 +4078,25 @@
     "matchedDistanceM": 17
   },
   {
+    "placeId": "muslim-students-house-masjid-mib-366",
+    "source": "mawaqit",
+    "placeName": "Muslim Students House Masjid",
+    "mawaqitUuid": "6ef55c47-c762-4ca7-afc8-2a3ccb85dca1",
+    "mawaqitSlug": "msh-birmingham",
+    "mawaqitName": "M.S.H.M.C.C. |  مسجد دار الطلبة المسلمين",
+    "matchedOn": "postcode",
+    "lat": 52.457,
+    "lng": -1.886,
+    "matchedDistanceM": 29
+  },
+  {
     "placeId": "muslim-welfare-house-mib-1225",
     "source": "mawaqit",
     "placeName": "Muslim Welfare House",
     "mawaqitUuid": "44dfa98e-a742-4686-97cd-b4f858fa9a7c",
     "mawaqitSlug": "muslim-welfare-house-london-n4-2da-united-kingdom",
     "mawaqitName": "Muslim Welfare House",
+    "matchedOn": "name+postcode",
     "lat": 51.5635681,
     "lng": -0.1071701,
     "matchedDistanceM": 4
@@ -3465,6 +4124,7 @@
     "mawaqitUuid": "b8bab985-4134-4cc2-954c-b2c8f56e3dab",
     "mawaqitSlug": "muslim-youth-foundation-manchester-m4-1dy-united-kingdom",
     "mawaqitName": "Muslim Youth Foundation",
+    "matchedOn": "name+postcode",
     "lat": 53.483942994746,
     "lng": -2.2373977159386,
     "matchedDistanceM": 10
@@ -3492,6 +4152,15 @@
     "siratId": "mosque-000535",
     "siratName": "Neath Islamic Cultural Centre",
     "matchedDistanceM": 113
+  },
+  {
+    "placeId": "netherton-islamic-trust-mib-727",
+    "source": "sirat",
+    "placeName": "Netherton Islamic Trust",
+    "siratId": "mosque-000184",
+    "siratName": "NIT Masjid",
+    "matchedDistanceM": 18,
+    "matchedOn": "postcode"
   },
   {
     "placeId": "new-abu-bakr-mosque-node-13128419079",
@@ -3542,12 +4211,31 @@
     "matchedDistanceM": 62
   },
   {
+    "placeId": "newham-north-islamic-association-mib-1282",
+    "source": "sirat",
+    "placeName": "Newham North Islamic Association",
+    "siratId": "mosque-000157",
+    "siratName": "Green Street Masjid",
+    "matchedDistanceM": 8,
+    "matchedOn": "postcode"
+  },
+  {
+    "placeId": "newmarket-islamic-cultural-centre-mib-1717",
+    "source": "sirat",
+    "placeName": "Newmarket Islamic Cultural Centre",
+    "siratId": "mosque-000432",
+    "siratName": "Five Bells – Modern Islamic Centre",
+    "matchedDistanceM": 60,
+    "matchedOn": "postcode"
+  },
+  {
     "placeId": "newport-central-mosque-mib-1948",
     "source": "mawaqit",
     "placeName": "Newport Central Mosque",
     "mawaqitUuid": "cc3cbae2-eb98-48c4-b331-f485fde1ba02",
     "mawaqitSlug": "newport-central-jame-masjid-newport-np20-4dx-united-kingdom",
     "mawaqitName": "Newport Central Jam'e Masjid (NCJM)",
+    "matchedOn": "name",
     "lat": 51.5848789,
     "lng": -2.996878,
     "matchedDistanceM": 5
@@ -3559,6 +4247,7 @@
     "mawaqitUuid": "f3094657-582a-481a-baf4-7bc480614fc8",
     "mawaqitSlug": "newport-diyanet-newport-np20-2je-united-kingdom",
     "mawaqitName": "Newport Diyanet",
+    "matchedOn": "name+postcode",
     "lat": 51.5728119,
     "lng": -2.9904984,
     "matchedDistanceM": 3
@@ -3578,6 +4267,7 @@
     "mawaqitUuid": "45238082-c95f-4d4d-9846-d59d8452cd74",
     "mawaqitSlug": "cardiffmosque",
     "mawaqitName": "Noor-El-Islam Masjid",
+    "matchedOn": "name+postcode",
     "lat": 51.472789502772,
     "lng": -3.1731602793242,
     "matchedDistanceM": 11
@@ -3629,6 +4319,15 @@
     "url": "https://masjidbox.com/prayer-times/nnma",
     "masjidboxName": "NNMA",
     "slug": "nnma"
+  },
+  {
+    "placeId": "nurani-jami-masjid-mib-1970",
+    "source": "sirat",
+    "placeName": "Nurani Jami Masjid",
+    "siratId": "mosque-000232",
+    "siratName": "Islamic Centre Nottingham",
+    "matchedDistanceM": 2,
+    "matchedOn": "postcode"
   },
   {
     "placeId": "old-kent-road-mosque-islamic-cultural-centre-mib-1326",
@@ -3685,6 +4384,7 @@
     "mawaqitUuid": "58062161-7222-4010-b7d3-2cf9e5a82466",
     "mawaqitSlug": "peacehaven-mosque-bn107hy-united-kingdom",
     "mawaqitName": "Peacehaven Mosque",
+    "matchedOn": "name+postcode",
     "lat": 50.792337220556,
     "lng": -0.0076764883605951,
     "matchedDistanceM": 8
@@ -3696,6 +4396,7 @@
     "mawaqitUuid": "afcd8a4a-245f-4e03-9ed4-8c00cc015b9b",
     "mawaqitSlug": "islamic-centre-of-plymouth-and-cornwall-plymouth-pl4-6an-united-kingdom",
     "mawaqitName": "Islamic Centre of Plymouth and Cornwall",
+    "matchedOn": "name",
     "lat": 50.376910036718,
     "lng": -4.1412634038981,
     "matchedDistanceM": 7
@@ -3779,6 +4480,7 @@
     "mawaqitUuid": "134b3032-3298-43d3-a8d3-02c550e21718",
     "mawaqitSlug": "rabbaniah-islamic-cultural-centre-cardiff-cf11-6qp-united-kingdom",
     "mawaqitName": "Rabbaniah Islamic Cultural Centre",
+    "matchedOn": "name+postcode",
     "lat": 51.4748984,
     "lng": -3.1870847,
     "matchedDistanceM": 22
@@ -3798,6 +4500,7 @@
     "mawaqitUuid": "0e5653ef-418c-455e-9359-813376048eef",
     "mawaqitSlug": "darul-ummah-redbridge-ilford-ig2-6uh-united-kingdom",
     "mawaqitName": "DARUL UMMAH REDBRIDGE",
+    "matchedOn": "name",
     "lat": 51.5778716,
     "lng": 0.0640834,
     "matchedDistanceM": 85
@@ -3835,6 +4538,27 @@
     "matchedDistanceM": 47
   },
   {
+    "placeId": "salahuddin-mosque-and-islamic-centre-mib-802",
+    "source": "mawaqit",
+    "placeName": "Salahuddin Mosque and Islamic Centre",
+    "mawaqitUuid": "8e8c8e95-31a6-402f-b977-03d8fd8d1364",
+    "mawaqitSlug": "masjid-salahudin-glasgow-g40-3sa-united-kingdom",
+    "mawaqitName": "Masjid Bilal",
+    "matchedOn": "postcode",
+    "lat": 55.85,
+    "lng": -4.219,
+    "matchedDistanceM": 50
+  },
+  {
+    "placeId": "sarajia-islamic-studies-centre-mib-45",
+    "source": "sirat",
+    "placeName": "Sarajia Islamic Studies Centre",
+    "siratId": "mosque-000589",
+    "siratName": "Bathgate Mosque",
+    "matchedDistanceM": 8,
+    "matchedOn": "postcode"
+  },
+  {
     "placeId": "scarborough-islamic-society-mib-1107",
     "source": "sirat",
     "placeName": "Scarborough Islamic Society",
@@ -3859,12 +4583,30 @@
     "slug": "shadwell-jame-masjid"
   },
   {
+    "placeId": "shah-jalal-al-jumm-ah-masjid-mib-598",
+    "source": "sirat",
+    "placeName": "Shah Jalal Al-Jumm'ah Masjid",
+    "siratId": "mosque-000338",
+    "siratName": "Carlisle Islamic Centre",
+    "matchedDistanceM": 21,
+    "matchedOn": "postcode"
+  },
+  {
     "placeId": "shah-jalal-islamic-centre-mib-15042501",
     "source": "sirat",
     "placeName": "Shah Jalal Islamic Centre",
     "siratId": "mosque-000032",
     "siratName": "SHAH-JALAL | ISLAMIC CENTRE",
     "matchedDistanceM": 126
+  },
+  {
+    "placeId": "shah-jalal-islamic-centre-mib-2692",
+    "source": "sirat",
+    "placeName": "Shah Jalal Islamic Centre",
+    "siratId": "mosque-000557",
+    "siratName": "Sutton Central Masjid",
+    "matchedDistanceM": 7,
+    "matchedOn": "postcode"
   },
   {
     "placeId": "shah-jalal-jame-masjid-mib-224",
@@ -3875,15 +4617,41 @@
     "matchedDistanceM": 8
   },
   {
+    "placeId": "shah-jalal-masjid-mib-1359",
+    "source": "sirat",
+    "placeName": "Shah Jalal Masjid",
+    "siratId": "mosque-000188",
+    "siratName": "Poplar Shahjalal Jame Masjid",
+    "matchedDistanceM": 10,
+    "matchedOn": "postcode"
+  },
+  {
+    "placeId": "shah-jalal-mosque-and-islamic-centre-mib-2253",
+    "source": "sirat",
+    "placeName": "Shah Jalal Mosque and Islamic Centre",
+    "siratId": "mosque-000204",
+    "siratName": "Shahjalal Mosque & Islamic Centre",
+    "matchedDistanceM": 16,
+    "matchedOn": "postcode"
+  },
+  {
     "placeId": "shah-jalal-mosque-and-islamic-cultural-centre-mib-573",
     "source": "mawaqit",
     "placeName": "Shah Jalal Mosque and Islamic Cultural Centre",
     "mawaqitUuid": "dd99ba06-a5a1-43ae-a3a2-333799534d0e",
     "mawaqitSlug": "shah-jalal-mosque-cardiff-cf24-4nj-united-kingdom",
     "mawaqitName": "Shah Jalal Mosque",
+    "matchedOn": "name+postcode",
     "lat": 51.4931384,
     "lng": -3.1736001,
     "matchedDistanceM": 6
+  },
+  {
+    "placeId": "shah-jalal-mosque-mib-1301",
+    "source": "daily-iqamah",
+    "placeName": "Shah Jalal Mosque",
+    "url": "https://www.mpicc.org.uk/",
+    "credit": "mpicc.org.uk (published timetable)"
   },
   {
     "placeId": "shah-poran-bangladeshi-jame-mosque-mib-1946",
@@ -3892,17 +4660,22 @@
     "mawaqitUuid": "86d2fd66-52cb-4616-8132-3b1b3dd9359b",
     "mawaqitSlug": "shah-poran-mosque-newport-np9-8dt-united-kingdom",
     "mawaqitName": "Shah Poran Mosque",
+    "matchedOn": "name+postcode",
     "lat": 51.5909457,
     "lng": -2.9835106,
     "matchedDistanceM": 15
   },
   {
     "placeId": "shah-poran-islamic-centre-mib-2837",
-    "source": "sirat",
+    "source": "mawaqit",
     "placeName": "Shah Poran Islamic Centre",
-    "siratId": "mosque-000007",
-    "siratName": "Shah Poran Islamic Centre",
-    "matchedDistanceM": 59
+    "mawaqitUuid": "0b1f9876-fc81-4be9-9d08-ca714bfe7ca3",
+    "mawaqitSlug": "baitul-jabbar-mosque-hyson-green-ng7-6bg-united-kingdom",
+    "mawaqitName": "Masjid Baitul Jabbar",
+    "matchedOn": "postcode",
+    "lat": 52.9655984,
+    "lng": -1.168059,
+    "matchedDistanceM": 5
   },
   {
     "placeId": "shah-poran-masjid-and-islamic-centre-trust-mib-1153",
@@ -3919,6 +4692,7 @@
     "mawaqitUuid": "8ad51fa1-d971-4a0f-a2de-8f338ca869ba",
     "mawaqitSlug": "madina-masjid-sheffield-sheffield-s8-0zu-united-kingdom",
     "mawaqitName": "Madina Masjid Sheffield",
+    "matchedOn": "name+postcode",
     "lat": 53.3640525,
     "lng": -1.4733266,
     "matchedDistanceM": 9
@@ -3930,6 +4704,7 @@
     "mawaqitUuid": "8fd66087-5eeb-4757-b39a-8be4ad485976",
     "mawaqitSlug": "banbury-sheikh-bin-baaz-mosque-banbury-oxfordshire-ox16-0dh-united-kingdom",
     "mawaqitName": "Banbury Sheikh Bin Baaz Masjid",
+    "matchedOn": "name+postcode",
     "lat": 52.0619905,
     "lng": -1.3497962,
     "matchedDistanceM": 12
@@ -3965,6 +4740,7 @@
     "mawaqitUuid": "de0e0a50-0bff-4502-8bbf-66d911a434c0",
     "mawaqitSlug": "sketty-mosque-and-community-centre-sketty-swansea-sa2-9as-united-kingdom",
     "mawaqitName": "Sketty Mosque & Community Centre",
+    "matchedOn": "name",
     "lat": 51.6160588,
     "lng": -3.990131,
     "matchedDistanceM": 186
@@ -4000,6 +4776,7 @@
     "mawaqitUuid": "b4e05c26-dd3b-4444-9ff5-e5a243424173",
     "mawaqitSlug": "south-wales-cardiff",
     "mawaqitName": "South Wales Islamic Centre",
+    "matchedOn": "name+postcode",
     "lat": 51.468097969879,
     "lng": -3.1694751977921,
     "matchedDistanceM": 2
@@ -4019,6 +4796,15 @@
     "siratId": "mosque-000115",
     "siratName": "Southend Mosque",
     "matchedDistanceM": 110
+  },
+  {
+    "placeId": "sri-lankan-muslim-centre-mib-2015090102",
+    "source": "sirat",
+    "placeName": "Sri Lankan Muslim Centre",
+    "siratId": "mosque-000350",
+    "siratName": "Masjid Darul Ilm",
+    "matchedDistanceM": 31,
+    "matchedOn": "postcode"
   },
   {
     "placeId": "st-albans-islamic-centre-mib-2262",
@@ -4059,6 +4845,7 @@
     "mawaqitUuid": "25df1ebf-201d-4fc3-98d5-90dd0af122ed",
     "mawaqitSlug": "stratford-islamic-association-london-e15-1na-united-kingdom-1",
     "mawaqitName": "Stratford Islamic Association",
+    "matchedOn": "name+postcode",
     "lat": 51.549,
     "lng": 0.002,
     "matchedDistanceM": 33
@@ -4070,6 +4857,7 @@
     "mawaqitUuid": "d65ebe22-95f6-405d-9598-e108b60964e9",
     "mawaqitSlug": "strathclyde-muslim-student-association-bristol-g1-2tb-united-kingdom",
     "mawaqitName": "Strathclyde Muslim Student Association",
+    "matchedOn": "name",
     "lat": 55.862,
     "lng": -4.247,
     "matchedDistanceM": 40
@@ -4081,6 +4869,7 @@
     "mawaqitUuid": "68f2b9de-61ed-4ffa-bd87-ecd7aed405a6",
     "mawaqitSlug": "sultan-bahu-centre-birmingham-b8-2ls-united-kingdom",
     "mawaqitName": "Sultan Bahu Centre",
+    "matchedOn": "name+postcode",
     "lat": 52.492097727352,
     "lng": -1.8231934455078,
     "matchedDistanceM": 47
@@ -4100,6 +4889,7 @@
     "mawaqitUuid": "295ea355-0a00-4390-8c13-13d00da635b5",
     "mawaqitSlug": "swansea-mosque-swansea-sa1-4dg-united-kingdom-1",
     "mawaqitName": "Swansea Mosque",
+    "matchedOn": "name",
     "lat": 51.6184973,
     "lng": -3.9527661,
     "matchedDistanceM": 13
@@ -4119,6 +4909,7 @@
     "mawaqitUuid": "8aaade48-958b-4633-b789-3a721e6fce78",
     "mawaqitSlug": "taiba-welfare-foundation-greater-london-ha8-7lg-united-kingdom",
     "mawaqitName": "Taiba Welfare Foundation",
+    "matchedOn": "name+postcode",
     "lat": 51.614489626778,
     "lng": -0.27675272215957,
     "matchedDistanceM": 33
@@ -4138,6 +4929,7 @@
     "mawaqitUuid": "48cb2841-9479-4ea1-9419-9121d9dfd963",
     "mawaqitSlug": "taleem-mosque-and-community-centre-grays-rm17-6qa-united-kingdom",
     "mawaqitName": "Taleem Mosque & Community Centre",
+    "matchedOn": "name+postcode",
     "lat": 51.477864894959,
     "lng": 0.32483368186331,
     "matchedDistanceM": 1
@@ -4149,6 +4941,7 @@
     "mawaqitUuid": "750596a5-90f9-4291-8741-6cd6bcbb5ac6",
     "mawaqitSlug": "talimul-quran-uk-london-e15-1ja-united-kingdom",
     "mawaqitName": "Talimul Quran UK",
+    "matchedOn": "name+postcode",
     "lat": 51.546903,
     "lng": 0.0060327,
     "matchedDistanceM": 5
@@ -4178,7 +4971,8 @@
     "placeName": "Tawfiq Masjid",
     "mawaqitUuid": "c139397c-8c58-4b3f-8171-2d66e0d8862f",
     "mawaqitSlug": "tawfiq-masjid-and-centre-bristol-bs5-9tg-united-kingdom",
-    "mawaqitName": "Tawfiq Masjid and Centre",
+    "mawaqitName": "TAWFIQ MASJID AND CENTRE",
+    "matchedOn": "name+postcode",
     "lat": 51.454,
     "lng": -2.563,
     "matchedDistanceM": 52
@@ -4190,6 +4984,7 @@
     "mawaqitUuid": "a3aed515-ca12-40fc-b73c-092dcfdb567a",
     "mawaqitSlug": "al-tawheed-islamic-education-center-maidenhead-sl6-8aj-united-kingdom",
     "mawaqitName": "Al-Tawheed Islamic Education Centre",
+    "matchedOn": "name+postcode",
     "lat": 51.5259661,
     "lng": -0.7201628,
     "matchedDistanceM": 14
@@ -4201,6 +4996,7 @@
     "mawaqitUuid": "c4d686d2-e0da-4f81-bc1b-6bf735076160",
     "mawaqitSlug": "taybah-educational-centre-leicester-le5-4hj-united-kingdom",
     "mawaqitName": "Taybah Educational Centre",
+    "matchedOn": "name+postcode",
     "lat": 52.6318526,
     "lng": -1.0942927,
     "matchedDistanceM": 28
@@ -4236,6 +5032,7 @@
     "mawaqitUuid": "4d0920b1-6463-4318-96f9-e5806e468177",
     "mawaqitSlug": "brayatee-mosque-birmingham-b18-7pw-united-kingdom",
     "mawaqitName": "BRAYATEE MOSQUE",
+    "matchedOn": "name+postcode",
     "lat": 52.487676,
     "lng": -1.9219111,
     "matchedDistanceM": 37
@@ -4257,12 +5054,25 @@
     "matchedDistanceM": 74
   },
   {
+    "placeId": "thurrock-jame-masjid-mib-813",
+    "source": "mawaqit",
+    "placeName": "Thurrock Jame Masjid",
+    "mawaqitUuid": "2dd6dbea-0049-4bad-90a9-cbc558799d65",
+    "mawaqitSlug": "graysmosque",
+    "mawaqitName": "Grays Park Masjid",
+    "matchedOn": "postcode",
+    "lat": 51.478262488977,
+    "lng": 0.32914727926254,
+    "matchedDistanceM": 3
+  },
+  {
     "placeId": "tilbury-mosque-mib-1748",
     "source": "mawaqit",
     "placeName": "Tilbury Mosque",
     "mawaqitUuid": "57fa91af-8129-4bb5-be53-2c96761e6de5",
     "mawaqitSlug": "abdulrasheed-tilbury-rm18-8lj-united-kingdom",
     "mawaqitName": "Tilbury Education & Cultural Association",
+    "matchedOn": "name+postcode",
     "lat": 51.4672976,
     "lng": 0.3640812,
     "matchedDistanceM": 6
@@ -4274,9 +5084,22 @@
     "mawaqitUuid": "4a1be0c2-78f7-4c86-b6a6-cfa964b3e07c",
     "mawaqitSlug": "trowbridge-mosque-trowbridge-ba147ad-united-kingdom",
     "mawaqitName": "TROWBRIDGE MOSQUE",
+    "matchedOn": "name+postcode",
     "lat": 51.3160129,
     "lng": -2.2026899,
     "matchedDistanceM": 3
+  },
+  {
+    "placeId": "tunbridge-wells-islamic-cultural-centre-mib-2325",
+    "source": "mawaqit",
+    "placeName": "Tunbridge Wells Islamic Cultural Centre",
+    "mawaqitUuid": "c5cebbed-7035-49d6-8dba-0de2aa790a84",
+    "mawaqitSlug": "masjid-al-noor-tunbridge-wells-tunbridge-wells-tn1-2qr-united-kingdom",
+    "mawaqitName": "Masjid Al Noor",
+    "matchedOn": "postcode",
+    "lat": 51.1363231,
+    "lng": 0.2689319,
+    "matchedDistanceM": 7
   },
   {
     "placeId": "turners-and-locksley-masjid-mib-15042401",
@@ -4285,6 +5108,18 @@
     "siratId": "mosque-000173",
     "siratName": "Turners Road Masjid",
     "matchedDistanceM": 13
+  },
+  {
+    "placeId": "uk-islamic-mission-mib-1793",
+    "source": "mawaqit",
+    "placeName": "UK Islamic Mission",
+    "mawaqitUuid": "c84a9aaa-6fd7-44c2-ad10-733fb069be9a",
+    "mawaqitSlug": "madina-masjid-levenshulme-manchester-m19-3dj-united-kingdom",
+    "mawaqitName": "Madina Masjid",
+    "matchedOn": "postcode",
+    "lat": 53.446218395191,
+    "lng": -2.1906217023959,
+    "matchedDistanceM": 34
   },
   {
     "placeId": "ukim-iqra-centre-mib-2627",
@@ -4389,6 +5224,7 @@
     "mawaqitUuid": "bda37edb-3579-448e-9cb1-84bdc4bd065f",
     "mawaqitSlug": "valide-sultan-mosque-london-n16-9ex-united-kingdom",
     "mawaqitName": "Valide Sultan Mosque",
+    "matchedOn": "name+postcode",
     "lat": 51.5572222,
     "lng": -0.0838785,
     "matchedDistanceM": 14
@@ -4408,6 +5244,7 @@
     "mawaqitUuid": "0c44d753-ce55-4e80-ad01-1ea40c7d8508",
     "mawaqitSlug": "waterford-muslim-society-viewmount-waterford-x91-pnr4-ireland",
     "mawaqitName": "Waterford Muslim Society Viewmount Park",
+    "matchedOn": "name",
     "lat": 52.246471657972,
     "lng": -7.0775094797623,
     "matchedDistanceM": 4
@@ -4419,6 +5256,15 @@
     "siratId": "mosque-000386",
     "siratName": "Wembley Central Masjid",
     "matchedDistanceM": 16
+  },
+  {
+    "placeId": "west-london-islamic-centre-jamia-masjid-mib-1122",
+    "source": "sirat",
+    "placeName": "West London Islamic Centre Jamia Masjid",
+    "siratId": "mosque-000156",
+    "siratName": "WLIC",
+    "matchedDistanceM": 26,
+    "matchedOn": "postcode"
   },
   {
     "placeId": "west-london-islamic-cultural-centre-mib-1161",
@@ -4475,6 +5321,7 @@
     "mawaqitUuid": "e7ddc5f7-ba13-414c-8878-6df345793ada",
     "mawaqitSlug": "wimbledon-masjid-london-sw19-8ds-united-kingdom",
     "mawaqitName": "Wimbledon Masjid",
+    "matchedOn": "name+postcode",
     "lat": 51.4359221,
     "lng": -0.1969466,
     "matchedDistanceM": 68
@@ -4502,6 +5349,7 @@
     "mawaqitUuid": "53227010-c064-4608-99f1-ba75efe53d2a",
     "mawaqitSlug": "woodfarm-education-centre-wec-g46-7hf-glasgow-united-kingdom",
     "mawaqitName": "Woodfarm Education Centre (WEC)",
+    "matchedOn": "name+postcode",
     "lat": 55.801772739131,
     "lng": -4.3079715373096,
     "matchedDistanceM": 176
@@ -4521,6 +5369,7 @@
     "mawaqitUuid": "22f1c67e-2980-4828-bbf0-3a460f527014",
     "mawaqitSlug": "yca-cultural-centre-west-bromwich-b70-9sj-united-kingdom",
     "mawaqitName": "YCA Cultural Centre Masjid",
+    "matchedOn": "name+postcode",
     "lat": 52.526134120312,
     "lng": -2.0071096538212,
     "matchedDistanceM": 34
@@ -4564,6 +5413,7 @@
     "mawaqitUuid": "2c9cc925-0fac-47d2-a5aa-678a8bcc873f",
     "mawaqitSlug": "zaytuna-masjid-birmingham-b32-1pj-united-kingdom",
     "mawaqitName": "ZAYTUNA MASJID مسجد الزيتونة",
+    "matchedOn": "name+postcode",
     "lat": 52.454499126901,
     "lng": -1.9996726512909,
     "matchedDistanceM": 2
@@ -4575,6 +5425,7 @@
     "mawaqitUuid": "8f9dc173-a523-4b3f-91c6-5387a0de8400",
     "mawaqitSlug": "zia-ul-quran-jamia-mosque-birmingham-b8-1er-united-kingdom",
     "mawaqitName": "Zia-Ul-Quran Jamia Mosque",
+    "matchedOn": "name+postcode",
     "lat": 52.484964,
     "lng": -1.8544928,
     "matchedDistanceM": 14
@@ -4586,6 +5437,7 @@
     "mawaqitUuid": "19f6cd95-a644-4ae9-849d-ae8658308dc9",
     "mawaqitSlug": "masjid-zamunta-birmingham-b192ss-united-kingdom",
     "mawaqitName": "Masjid Zumunta",
+    "matchedOn": "name+postcode",
     "lat": 52.497555402566,
     "lng": -1.8958451511032,
     "matchedDistanceM": 40
