@@ -229,9 +229,10 @@ const useStyles = createThemedStyles((colors: ThemeColors, scheme: "light" | "da
       maxWidth: 460,
       backgroundColor: colors.canvas,
       borderRadius: radius.xl,
-      ...(scheme === "dark"
-        ? { borderWidth: 1, borderColor: colors.border }
-        : null),
+      // Value-only across schemes — see cardEdge in elevation.ts for why a
+      // theme switch must never add or remove native props on a mounted view.
+      borderWidth: scheme === "dark" ? 1 : 0,
+      borderColor: colors.border,
       padding: spacing.xl,
       gap: spacing.m,
       alignItems: "flex-start",

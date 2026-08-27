@@ -1252,9 +1252,10 @@ const useStyles = createThemedStyles((colors: ThemeColors, scheme: "light" | "da
     borderRadius: 26,
     backgroundColor: colors.canvas,
     // Hairline only in dark, where the shadow below is invisible.
-    ...(scheme === "dark"
-      ? { borderWidth: 1, borderColor: colors.border }
-      : null),
+    // Value-only across schemes — see cardEdge in elevation.ts for why a
+      // theme switch must never add or remove native props on a mounted view.
+      borderWidth: scheme === "dark" ? 1 : 0,
+      borderColor: colors.border,
     alignItems: "center",
     justifyContent: "center",
     // `floating` is the level a FAB belongs on, and its Android elevation (6)
