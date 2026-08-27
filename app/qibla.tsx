@@ -1240,9 +1240,22 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark", dial: numbe
   // recenter button declared 0.15/6/2 and both landed on Android elevation 3–4
   // — the two surfaces matched on one platform and not the other, which is the
   // precise drift elevation.ts's own docstring describes.
+  // Value-only across schemes — see cardEdge in elevation.ts for why a theme
+  // switch must never add or remove native props on a mounted view.
   const lift =
     scheme === "dark"
-      ? { borderColor: colors.surfaceSecondary }
+      ? {
+          borderColor: colors.surfaceSecondary,
+          ...Platform.select({
+            android: { elevation: 0 },
+            default: {
+              shadowColor: "#000",
+              shadowOpacity: 0,
+              shadowRadius: 0,
+              shadowOffset: { width: 0, height: 0 },
+            },
+          }),
+        }
       : { borderColor: colors.border, ...elevation(scheme, "ambient") };
 
   return StyleSheet.create({
