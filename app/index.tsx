@@ -424,18 +424,18 @@ export default function HomeScreen() {
       const right = hit ? await looksRight(hit) : false;
       if (isStale()) return;
       if (hit && right) {
-        // The query stays in the box \u2014 it IS the search state ("Near X"
+        // The query stays in the box — it IS the search state ("Near X"
         // lives in the input, not a separate chip).
         setSearchOrigin({ lat: hit.latitude, lng: hit.longitude, label: text });
       } else {
         setSearchNote(
-          `Couldn't find "${text}" \u2014 showing name matches instead.`,
+          `Couldn't find "${text}" — showing name matches instead.`,
         );
       }
     } catch {
       if (isStale()) return;
       setSearchNote(
-        "Area search needs a connection \u2014 try a place name instead.",
+        "Area search needs a connection — try a place name instead.",
       );
     }
   }, [query, gpsOrigin.lat, gpsOrigin.lng]);
@@ -884,7 +884,7 @@ export default function HomeScreen() {
       }
       // "Nothing here" and "nothing YET" are different states and must not
       // share a component. Places load live on every launch (never bundled,
-      // never cached \u2014 see src/data/places.ts), so during the first fetch
+      // never cached — see src/data/places.ts), so during the first fetch
       // `listResults` is legitimately empty and the empty state used to fire
       // on 100% of cold starts, inviting the user to report the entire
       // dataset as a gap.
@@ -901,12 +901,12 @@ export default function HomeScreen() {
                 hiding places is what was typed. */}
             <Text style={styles.emptyText}>
               {settings.savedOnly
-                ? "Tap the heart on a place to save it \u2014 or turn off " +
+                ? "Tap the heart on a place to save it — or turn off " +
                   "the saved-places filter."
                 : filterCount > 0
-                  ? "Try removing a filter \u2014 or this is a gap in the " +
+                  ? "Try removing a filter — or this is a gap in the " +
                     "data worth fixing."
-                  : "Try a shorter search, or a nearby town \u2014 or this " +
+                  : "Try a shorter search, or a nearby town — or this " +
                     "is a gap in the data worth fixing."}
             </Text>
             <Touchable
@@ -970,8 +970,7 @@ export default function HomeScreen() {
         {mapLegend}
         {usingFallback ? (
           <Text style={styles.fallbackNote}>
-            Using central London {"\u2014"} enable location for accurate
-            results.
+            Using central London — enable location for accurate results.
           </Text>
         ) : null}
       </View>
