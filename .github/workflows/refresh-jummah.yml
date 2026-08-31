@@ -35,7 +35,14 @@ name: Refresh prayer times
 
 on:
   schedule:
-    - cron: "37 2 * * *" # 02:37 UTC daily — quiet hours, off the full-hour rush
+    # Twice daily, both off the full-hour rush (GitHub delays :00 crons the
+    # most). Cron is UTC; UK local time drifts an hour across BST.
+    #   02:37 UTC (~03:37 UK summer) — after every mosque site has rolled
+    #     over to the new day, so the app is right from Fajr onwards.
+    #   16:37 UTC (~17:37 UK summer) — catches same-day corrections a mosque
+    #     posts during the day, before Maghrib and Isha jama'ah.
+    - cron: "37 2 * * *"
+    - cron: "37 16 * * *"
   workflow_dispatch:
 
 concurrency:
