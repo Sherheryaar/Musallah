@@ -1204,11 +1204,24 @@ const useStyles = createThemedStyles((colors: ThemeColors, scheme: "light" | "da
   },
   quickFilterScroll: {
     flexGrow: 0,
-    marginHorizontal: -spacing.l,
+    // NO negative marginHorizontal here. That trick bleeds a strip out to
+    // the screen edges, but it only works when the parent HAS matching
+    // padding to cancel — and BottomSheet's body is a bare `flex: 1`. The
+    // -16 pushed the strip 16pt off-screen each side, so the content's +16
+    // landed the first chip at exactly x=0 with its rounded corner sliced
+    // flat against the sheet edge. Without it the first chip lines up with
+    // the cards below (list padding is also spacing.l), which is what the
+    // eye actually wants.
     marginBottom: spacing.xs,
   },
   quickFilterStrip: {
     paddingHorizontal: spacing.l,
+    // Room for the chips' own shadow. cardEdge gives these pills
+    // `elevation: 3` on Android, whose shadow draws OUTSIDE the view box,
+    // and an Android ScrollView clips its children — so with no vertical
+    // padding the content box hugged the pill exactly and the shadow was
+    // cut off in a straight line across every chip.
+    paddingVertical: spacing.s,
     gap: spacing.s,
     flexDirection: "row",
     alignItems: "center",

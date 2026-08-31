@@ -784,7 +784,15 @@ const useStyles = createThemedStyles((colors: ThemeColors, scheme) =>
     flexGrow: 0,
   },
   dayPillStrip: {
+    // The negative margin on dayPillScroll IS right here: this screen's
+    // `content` really does pad by spacing.l, so the strip bleeds to the
+    // edges and this brings the first pill back into line.
     paddingHorizontal: spacing.l,
+    // But the pills carry cardEdge's Android elevation, whose shadow draws
+    // outside the view box, and a ScrollView clips its children — so the
+    // date bubbles were being cut off flat top and bottom. This is the room
+    // that shadow needs.
+    paddingVertical: spacing.s,
     gap: spacing.s,
     flexDirection: "row",
     alignItems: "center",
