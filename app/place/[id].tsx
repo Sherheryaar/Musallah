@@ -1,6 +1,8 @@
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
+  AccessibilityInfo,
   ActivityIndicator,
+  AppState,
   Linking,
   Platform,
   ScrollView,
@@ -15,6 +17,8 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { LinearGradient } from "expo-linear-gradient";
 import { Stack, useLocalSearchParams } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import * as Clipboard from "expo-clipboard";
+import Svg, { Path } from "react-native-svg";
 
 import {
   FACILITY_LABELS,
@@ -28,6 +32,7 @@ import { useFavourites } from "@/context/FavouritesContext";
 import { usePlaces } from "@/context/PlacesContext";
 import { useSettings } from "@/context/SettingsContext";
 import { useTheme } from "@/context/ThemeContext";
+import { hapticSuccess } from "@/lib/haptics";
 import JamaatCheck from "@/components/JamaatCheck";
 import OfflineScreen from "@/components/OfflineScreen";
 import SuggestionSheet from "@/components/SuggestionSheet";
@@ -98,6 +103,32 @@ function phoneToTel(display: string, place: Place): string {
   return "tel:+44" + digits.slice(1);
 }
 
+/**
+ * Whole days since a "YYYY-MM-DD" recordedOn stamp, in the DEVICE's zone.
+ * Parsed by hand rather than `new Date(iso)`: a bare ISO date parses as UTC
+ * midnight, which for anyone west of Greenwich reads as "yesterday" and
+ * would age every stamp by a day. NaN-safe: an unparseable stamp returns 0,
+ * which shows the raw string rather than a false "N days ago".
+ */
+function jamaatAgeDays(recordedOn: string, now: Date): number {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(recordedOn);
+  if (!m) return 0;
+  const recorded = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  return Math.round((today.getTime() - recorded.getTime()) / 86_400_000);
+}
+
+/** "recorded today" / "yesterday" / "3 days ago" — a raw ISO date is for
+    machines; how stale the times are is the fact a reader needs. */
+function describeRecordedOn(recordedOn: string, now: Date): string {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(recordedOn);
+  if (!m) return recordedOn;
+  const days = jamaatAgeDays(recordedOn, now);
+  if (days <= 0) return "recorded today";
+  if (days === 1) return "recorded yesterday";
+  return `recorded ${days} days ago`;
+}
+
 function confidenceLabel(confidence?: "verified" | "community" | "unverified"): string {
   switch (confidence) {
     case "verified":
@@ -164,6 +195,73 @@ export default function PlaceDetailScreen() {
         : null,
     [place, settings.method, settings.madhab, settings.shafaq],
   );
+
+  const [now, setNow] = useState(() => new Date());
+
+  // Tick on each minute BOUNDARY so the upcoming prayer highlight stays current,
+  // and resync on foreground when returning to an already-open screen.
+  useEffect(() => {
+    let id: ReturnType<typeof setTimeout>;
+    const schedule = () =>
+      setTimeout(() => {
+        setNow(new Date());
+        id = schedule();
+      }, 60_000 - (Date.now() % 60_000));
+    id = schedule();
+    const sub = AppState.addEventListener("change", (state) => {
+      if (state === "active") setNow(new Date());
+    });
+    return () => {
+      clearTimeout(id);
+      sub.remove();
+    };
+  }, []);
+
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (toastTimer.current) clearTimeout(toastTimer.current);
+    };
+  }, []);
+
+  const copyToClipboard = useCallback(
+    async (text: string, label: string) => {
+      await Clipboard.setStringAsync(text);
+      hapticSuccess(settings.hapticFeedback);
+      AccessibilityInfo.announceForAccessibility(`${label} copied to clipboard`);
+      setToastMessage(`${label} copied`);
+      if (toastTimer.current) clearTimeout(toastTimer.current);
+      toastTimer.current = setTimeout(() => {
+        setToastMessage(null);
+        toastTimer.current = null;
+      }, 2500);
+    },
+    [settings.hapticFeedback],
+  );
+
+  const currentUpcomingKey = useMemo(() => {
+    if (!calculatedTimes) return null;
+    const nowMinutes = now.getHours() * 60 + now.getMinutes();
+
+    const parseMinutes = (timeStr?: string) => {
+      if (!timeStr) return null;
+      const parts = timeStr.split(":");
+      if (parts.length < 2) return null;
+      return parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+    };
+
+    for (const row of PRAYER_ROWS) {
+      const timeStr =
+        place?.jamaat?.[row.jamaatKey] ?? calculatedTimes[row.calculatedKey];
+      const mins = parseMinutes(timeStr);
+      if (mins !== null && mins > nowMinutes) {
+        return row.jamaatKey;
+      }
+    }
+    return "fajr";
+  }, [calculatedTimes, place?.jamaat, now]);
 
   if (!place) {
     // Distinguish "we have no data at all" from "this id genuinely doesn't
@@ -307,6 +405,24 @@ export default function PlaceDetailScreen() {
           heroBottom.current = y + height;
         }}
       >
+        <View style={styles.heroArchWatermark} pointerEvents="none">
+          <Svg width={130} height={150} viewBox="0 0 120 140">
+            <Path
+              d="M 10 140 L 10 70 C 10 30 60 10 60 10 C 60 10 110 30 110 70 L 110 140"
+              fill="none"
+              stroke="#FFFFFF"
+              strokeWidth={2}
+              opacity={0.09}
+            />
+            <Path
+              d="M 25 140 L 25 75 C 25 45 60 25 60 25 C 60 25 95 45 95 75 L 95 140"
+              fill="none"
+              stroke="#FFFFFF"
+              strokeWidth={1.5}
+              opacity={0.06}
+            />
+          </Svg>
+        </View>
         <View style={styles.heroMetaRow}>
           <MaterialCommunityIcons
             name={PLACE_TYPE_ICONS[place.type]}
@@ -327,7 +443,15 @@ export default function PlaceDetailScreen() {
           ) : null}
         </View>
         <Text style={styles.heroName}>{place.name}</Text>
-        {address ? <Text style={styles.heroAddress}>{address}</Text> : null}
+        {address ? (
+          <Touchable
+            onLongPress={() => copyToClipboard(address, "Address")}
+            accessibilityRole="text"
+            accessibilityLabel={`${address}. Long press to copy address`}
+          >
+            <Text style={styles.heroAddress}>{address}</Text>
+          </Touchable>
+        ) : null}
       </LinearGradient>
 
       <View style={styles.actionRow}>
@@ -419,8 +543,12 @@ export default function PlaceDetailScreen() {
                 onPress={() => {
                   Linking.openURL(row.url).catch(() => {});
                 }}
+                onLongPress={() => {
+                  const val = row.label === "Phone" ? place.phone : row.url;
+                  if (val) copyToClipboard(val, row.label);
+                }}
                 accessibilityRole="button"
-                accessibilityLabel={row.accessibilityLabel}
+                accessibilityLabel={`${row.accessibilityLabel}. Long press to copy`}
               >
                 <View style={styles.contactLabelWrap}>
                   <MaterialCommunityIcons
@@ -461,29 +589,68 @@ export default function PlaceDetailScreen() {
                 Start
               </Text>
             </View>
-            {PRAYER_ROWS.map((row) => (
-              <View key={row.label} style={styles.prayerRow}>
-                <Text style={styles.prayerNameCell}>
-                  {row.label === "Asr"
-                    ? `Asr (${settings.madhab === "hanafi" ? "2" : "1"} mithl)`
-                    : row.label}
-                </Text>
-                <Text style={styles.prayerJamaatCell}>
-                  {place.jamaat?.[row.jamaatKey] ?? "—"}
-                </Text>
-                <Text style={styles.prayerCalculatedCell}>
-                  {calculatedTimes?.[row.calculatedKey] ?? "—"}
-                </Text>
-              </View>
-            ))}
+            {PRAYER_ROWS.map((row) => {
+              const isUpcoming = row.jamaatKey === currentUpcomingKey;
+              return (
+                <View
+                  key={row.label}
+                  style={[
+                    styles.prayerRow,
+                    isUpcoming && styles.prayerRowUpcoming,
+                  ]}
+                >
+                  <View style={styles.prayerNameWrap}>
+                    <Text
+                      style={[
+                        styles.prayerNameCell,
+                        isUpcoming && styles.prayerNameCellUpcoming,
+                      ]}
+                    >
+                      {row.label === "Asr"
+                        ? `Asr (${settings.madhab === "hanafi" ? "2" : "1"} mithl)`
+                        : row.label}
+                    </Text>
+                    {isUpcoming ? (
+                      <View style={styles.nextPill}>
+                        <Text style={styles.nextPillText}>Next</Text>
+                      </View>
+                    ) : null}
+                  </View>
+                  <Text
+                    style={[
+                      styles.prayerJamaatCell,
+                      isUpcoming && styles.prayerJamaatCellUpcoming,
+                    ]}
+                  >
+                    {place.jamaat?.[row.jamaatKey] ?? "—"}
+                  </Text>
+                  <Text style={styles.prayerCalculatedCell}>
+                    {calculatedTimes?.[row.calculatedKey] ?? "—"}
+                  </Text>
+                </View>
+              );
+            })}
           </View>
           {place.jamaat ? (
             <Text style={styles.jamaatSource}>
-              {"Jamaat times: " +
-                place.jamaat.source +
-                " (" +
-                place.jamaat.recordedOn +
-                ")"}
+              {`Jamaat times: ${place.jamaat.source} · ${describeRecordedOn(
+                place.jamaat.recordedOn,
+                now,
+              )}`}
+            </Text>
+          ) : null}
+          {place.jamaat && jamaatAgeDays(place.jamaat.recordedOn, now) > 3 ? (
+            // Jamaat times drift with the sun — a Fajr time that hasn't been
+            // re-checked in days can be a quarter of an hour out. The pipeline
+            // deliberately keeps the last-known times when a mosque's page
+            // stops parsing (stale beats silently wrong), so the honesty has
+            // to happen here: say the age plainly instead of presenting a
+            // frozen time as today's.
+            <Text style={styles.jamaatCaution}>
+              {`These jamaat times were last checked ${jamaatAgeDays(
+                place.jamaat.recordedOn,
+                now,
+              )} days ago and may have moved since — confirm with the masjid.`}
             </Text>
           ) : null}
           {place.jamaat && place.confidence !== "verified" ? (
@@ -606,6 +773,18 @@ export default function PlaceDetailScreen() {
       onSend={(message) => submitJamaatTimes(place, message)}
       onClose={() => setShowTimesForm(false)}
     />
+    {toastMessage ? (
+      <View style={styles.toastWrap} pointerEvents="none">
+        <View style={styles.toast}>
+          <MaterialCommunityIcons
+            name="check-circle"
+            size={15}
+            color={colors.positive}
+          />
+          <Text style={styles.toastText}>{toastMessage}</Text>
+        </View>
+      </View>
+    ) : null}
     </View>
   );
 }
@@ -643,6 +822,12 @@ const useStyles = createThemedStyles((colors: ThemeColors, scheme) =>
     gap: spacing.s - 2,
     // Clips the gradient to the rounded corners on Android.
     overflow: "hidden",
+    position: "relative",
+  },
+  heroArchWatermark: {
+    position: "absolute",
+    right: -10,
+    bottom: -15,
   },
   heroMetaRow: {
     flexDirection: "row",
@@ -733,11 +918,37 @@ const useStyles = createThemedStyles((colors: ThemeColors, scheme) =>
     flexDirection: "row",
     alignItems: "center",
     minHeight: MIN_TARGET,
+    paddingHorizontal: spacing.s,
+    borderRadius: radius.m,
+  },
+  prayerRowUpcoming: {
+    backgroundColor: colors.accentSoft,
+  },
+  prayerNameWrap: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.s,
   },
   prayerNameCell: {
-    flex: 1,
     ...type.body,
     color: colors.text,
+  },
+  prayerNameCellUpcoming: {
+    color: colors.accent,
+    fontWeight: "700",
+  },
+  nextPill: {
+    backgroundColor: colors.accent,
+    borderRadius: radius.pill,
+    paddingHorizontal: spacing.xs + 2,
+    paddingVertical: 1,
+  },
+  nextPillText: {
+    ...type.caption,
+    color: colors.canvas,
+    fontWeight: "700",
+    fontSize: 10,
   },
   prayerTimeCell: {
     // minWidth, not width: at a large system font size a fixed 64pt box
@@ -760,6 +971,9 @@ const useStyles = createThemedStyles((colors: ThemeColors, scheme) =>
     textAlign: "center",
     ...numeric,
   },
+  prayerJamaatCellUpcoming: {
+    color: colors.accent,
+  },
   prayerCalculatedCell: {
     minWidth: 64,
     flexShrink: 0,
@@ -767,6 +981,28 @@ const useStyles = createThemedStyles((colors: ThemeColors, scheme) =>
     color: colors.textSecondary,
     textAlign: "center",
     ...numeric,
+  },
+  toastWrap: {
+    position: "absolute",
+    bottom: spacing.xxl + 20,
+    left: 0,
+    right: 0,
+    alignItems: "center",
+  },
+  toast: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.xs,
+    backgroundColor: colors.canvas,
+    paddingHorizontal: spacing.l,
+    paddingVertical: spacing.s,
+    borderRadius: radius.pill,
+    ...cardEdge(scheme, colors),
+  },
+  toastText: {
+    ...type.footnote,
+    fontWeight: "600",
+    color: colors.text,
   },
   jamaatSource: {
     ...type.subhead,

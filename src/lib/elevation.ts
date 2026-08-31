@@ -68,7 +68,33 @@ export function elevation(
  * backgroundColor/radius; it only supplies the edge treatment.
  */
 export function cardEdge(scheme: "light" | "dark", colors: ThemeColors) {
-  return scheme === "dark"
-    ? { borderWidth: 1, borderColor: colors.border }
-    : elevation(scheme, "raised");
+  // Both schemes return the SAME set of style keys, and only the values
+  // change. The earlier shape — border props in dark, elevation in light —
+  // meant a live theme switch ADDED and REMOVED native props on mounted
+  // views, and on Android (Fabric) that prop swap on an `overflow: "hidden"`
+  // card corrupted its canvas: every card on the mounted screen kept its
+  // white fill but stopped drawing its children until the screen was left
+  // and reopened. Zero-valued props render identically to absent ones, so
+  // pinning the set costs nothing visually and makes the diff value-only,
+  // which Android applies correctly.
+  if (scheme === "dark") {
+    return {
+      borderWidth: 1,
+      borderColor: colors.border,
+      ...Platform.select({
+        android: { elevation: 0 },
+        default: {
+          shadowColor: "#000",
+          shadowOpacity: 0,
+          shadowRadius: 0,
+          shadowOffset: { width: 0, height: 0 },
+        },
+      }),
+    };
+  }
+  return {
+    borderWidth: 0,
+    borderColor: colors.border,
+    ...elevation(scheme, "raised"),
+  };
 }

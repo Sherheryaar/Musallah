@@ -10,6 +10,7 @@ import {
   FlatList,
   Keyboard,
   Platform,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -47,6 +48,7 @@ import { submitNewPlaceSuggestion } from "@/lib/feedback";
 import { useTheme } from "@/context/ThemeContext";
 import { cardEdge, elevation } from "@/lib/elevation";
 import { MIN_TARGET } from "@/lib/metrics";
+import { hapticSelection } from "@/lib/haptics";
 import { createThemedStyles } from "@/lib/themedStyles";
 import {
   numeric,
@@ -213,6 +215,19 @@ const NextPrayerBar = React.memo(function NextPrayerBar({
     </Touchable>
   );
 });
+
+const QUICK_FILTERS: Array<{
+  key: string;
+  label: string;
+  icon: keyof typeof MaterialCommunityIcons.glyphMap;
+}> = [
+  { key: "womens_area", label: "Women's Area", icon: "human-female" },
+  { key: "wheelchair_accessible", label: "Wheelchair", icon: "wheelchair-accessibility" },
+  { key: "parking", label: "Parking", icon: "parking" },
+  { key: "wudu_facilities", label: "Wudu", icon: "water" },
+  { key: "jumuah", label: "Jumu'ah", icon: "clock-outline" },
+  { key: "saved", label: "Saved", icon: "heart" },
+];
 
 export default function HomeScreen() {
   const styles = useStyles();
@@ -424,18 +439,18 @@ export default function HomeScreen() {
       const right = hit ? await looksRight(hit) : false;
       if (isStale()) return;
       if (hit && right) {
-        // The query stays in the box \u2014 it IS the search state ("Near X"
+        // The query stays in the box — it IS the search state ("Near X"
         // lives in the input, not a separate chip).
         setSearchOrigin({ lat: hit.latitude, lng: hit.longitude, label: text });
       } else {
         setSearchNote(
-          `Couldn't find "${text}" \u2014 showing name matches instead.`,
+          `Couldn't find "${text}" — showing name matches instead.`,
         );
       }
     } catch {
       if (isStale()) return;
       setSearchNote(
-        "Area search needs a connection \u2014 try a place name instead.",
+        "Area search needs a connection — try a place name instead.",
       );
     }
   }, [query, gpsOrigin.lat, gpsOrigin.lng]);
@@ -696,6 +711,7 @@ export default function HomeScreen() {
       <PlaceCard
         place={item.place}
         distanceLabel={formatDistance(item.kmFromUser)}
+        distanceKm={item.kmFromUser}
         onPress={openPlace}
       />
     ),
@@ -769,6 +785,61 @@ export default function HomeScreen() {
         </Text>
       </Touchable>
     </View>
+  );
+
+  const toggleQuickFilter = useCallback(
+    (key: string) => {
+      hapticSelection(settings.hapticFeedback);
+      if (key === "saved") {
+        updateSettings({ savedOnly: !settings.savedOnly });
+        return;
+      }
+      toggleFilter(key as FacilityKey);
+    },
+    [settings.hapticFeedback, settings.savedOnly, toggleFilter, updateSettings],
+  );
+
+  const quickFilterStrip = (
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      contentContainerStyle={styles.quickFilterStrip}
+      style={styles.quickFilterScroll}
+    >
+      {QUICK_FILTERS.map(({ key, label, icon }) => {
+        const active =
+          key === "saved"
+            ? settings.savedOnly
+            : activeFilters.has(key as FacilityKey);
+        return (
+          <Touchable
+            key={key}
+            style={[
+              styles.quickFilterChip,
+              active && styles.quickFilterChipActive,
+            ]}
+            onPress={() => toggleQuickFilter(key)}
+            accessibilityRole="checkbox"
+            accessibilityState={{ checked: active }}
+            accessibilityLabel={`Filter: ${label}`}
+          >
+            <MaterialCommunityIcons
+              name={icon}
+              size={15}
+              color={active ? colors.accent : colors.textSecondary}
+            />
+            <Text
+              style={[
+                styles.quickFilterLabel,
+                active && styles.quickFilterLabelActive,
+              ]}
+            >
+              {label}
+            </Text>
+          </Touchable>
+        );
+      })}
+    </ScrollView>
   );
 
   const searchNoteRow = searchNote ? (
@@ -874,6 +945,7 @@ export default function HomeScreen() {
                   key={item.place.id}
                   place={item.place}
                   distanceLabel={formatDistance(item.kmFromUser)}
+                  distanceKm={item.kmFromUser}
                   onPress={openPlace}
                 />
               ))}
@@ -884,7 +956,7 @@ export default function HomeScreen() {
       }
       // "Nothing here" and "nothing YET" are different states and must not
       // share a component. Places load live on every launch (never bundled,
-      // never cached \u2014 see src/data/places.ts), so during the first fetch
+      // never cached — see src/data/places.ts), so during the first fetch
       // `listResults` is legitimately empty and the empty state used to fire
       // on 100% of cold starts, inviting the user to report the entire
       // dataset as a gap.
@@ -901,12 +973,12 @@ export default function HomeScreen() {
                 hiding places is what was typed. */}
             <Text style={styles.emptyText}>
               {settings.savedOnly
-                ? "Tap the heart on a place to save it \u2014 or turn off " +
+                ? "Tap the heart on a place to save it — or turn off " +
                   "the saved-places filter."
                 : filterCount > 0
-                  ? "Try removing a filter \u2014 or this is a gap in the " +
+                  ? "Try removing a filter — or this is a gap in the " +
                     "data worth fixing."
-                  : "Try a shorter search, or a nearby town \u2014 or this " +
+                  : "Try a shorter search, or a nearby town — or this " +
                     "is a gap in the data worth fixing."}
             </Text>
             <Touchable
@@ -970,8 +1042,7 @@ export default function HomeScreen() {
         {mapLegend}
         {usingFallback ? (
           <Text style={styles.fallbackNote}>
-            Using central London {"\u2014"} enable location for accurate
-            results.
+            Using central London — enable location for accurate results.
           </Text>
         ) : null}
       </View>
@@ -999,6 +1070,7 @@ export default function HomeScreen() {
         }
       >
         {timesBar}
+        {quickFilterStrip}
         {list}
       </BottomSheet>
       <FilterSheet
@@ -1132,6 +1204,41 @@ const useStyles = createThemedStyles((colors: ThemeColors, scheme: "light" | "da
     borderRadius: radius.m,
     overflow: "hidden",
   },
+  quickFilterScroll: {
+    flexGrow: 0,
+    marginHorizontal: -spacing.l,
+    marginBottom: spacing.xs,
+  },
+  quickFilterStrip: {
+    paddingHorizontal: spacing.l,
+    gap: spacing.s,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  quickFilterChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.xs + 2,
+    minHeight: 34,
+    paddingHorizontal: spacing.m,
+    paddingVertical: 6,
+    borderRadius: radius.pill,
+    backgroundColor: colors.canvas,
+    ...cardEdge(scheme, colors),
+  },
+  quickFilterChipActive: {
+    backgroundColor: colors.accentSoft,
+    borderColor: colors.accent,
+  },
+  quickFilterLabel: {
+    ...type.footnote,
+    fontWeight: "600",
+    color: colors.textSecondary,
+  },
+  quickFilterLabelActive: {
+    color: colors.accent,
+    fontWeight: "700",
+  },
   legend: {
     alignSelf: "flex-start",
     flexDirection: "row",
@@ -1252,9 +1359,10 @@ const useStyles = createThemedStyles((colors: ThemeColors, scheme: "light" | "da
     borderRadius: 26,
     backgroundColor: colors.canvas,
     // Hairline only in dark, where the shadow below is invisible.
-    ...(scheme === "dark"
-      ? { borderWidth: 1, borderColor: colors.border }
-      : null),
+    // Value-only across schemes — see cardEdge in elevation.ts for why a
+      // theme switch must never add or remove native props on a mounted view.
+      borderWidth: scheme === "dark" ? 1 : 0,
+      borderColor: colors.border,
     alignItems: "center",
     justifyContent: "center",
     // `floating` is the level a FAB belongs on, and its Android elevation (6)

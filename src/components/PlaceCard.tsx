@@ -10,8 +10,13 @@ import {
   Place,
   PLACE_TYPE_LABELS,
 } from "@/data/places";
-import { FACILITY_ICONS, PLACE_TYPE_ICONS } from "@/lib/icons";
+import {
+  FACILITY_ICONS,
+  PLACE_TYPE_ICONS,
+  TRAVEL_MODE_ICONS,
+} from "@/lib/icons";
 import { useTheme } from "@/context/ThemeContext";
+import { formatTravelEstimate } from "@/lib/distance";
 import { cardEdge } from "@/lib/elevation";
 import { createThemedStyles } from "@/lib/themedStyles";
 import {
@@ -26,6 +31,13 @@ import {
 type Props = {
   place: Place;
   distanceLabel?: string;
+  /**
+   * Kilometres from the user, for the travel-time chip. A number, not the
+   * computed estimate object: the list re-renders every 30s or 250m of
+   * movement, and a fresh object literal here would fail memo's shallow
+   * compare and re-render every row on every GPS tick.
+   */
+  distanceKm?: number;
   /** Called with the place id — keeps the prop stable so memo works. */
   onPress: (id: string) => void;
 };
@@ -36,7 +48,7 @@ type Props = {
  * only what a place HAS — a row of crossed-out absences is noise, and
  * "not listed" isn't the same as "not there".
  */
-function PlaceCard({ place, distanceLabel, onPress }: Props) {
+function PlaceCard({ place, distanceLabel, distanceKm, onPress }: Props) {
   const { colors } = useTheme();
   const styles = useStyles();
   // Memoized: recomputing per row on every list render adds up with
@@ -53,14 +65,23 @@ function PlaceCard({ place, distanceLabel, onPress }: Props) {
       ? `Facilities: ${available.map((key) => FACILITY_LABELS[key]).join(", ")}`
       : "";
 
+  const travel = useMemo(
+    () => (distanceKm === undefined ? null : formatTravelEstimate(distanceKm)),
+    [distanceKm],
+  );
+
+  const accessibilityDistance = travel
+    ? `${distanceLabel ?? "distance unknown"}, about ${travel.label}`
+    : (distanceLabel ?? "distance unknown");
+
   return (
     <Touchable
       style={styles.card}
       onPress={handlePress}
       accessibilityRole="button"
-      accessibilityLabel={`${place.name}, ${PLACE_TYPE_LABELS[place.type]}, ${
-        distanceLabel ?? "distance unknown"
-      }${place.confidence === "verified" ? ", verified" : ""}. ${facilitiesLabel}`}
+      accessibilityLabel={`${place.name}, ${PLACE_TYPE_LABELS[place.type]}, ${accessibilityDistance}${
+        place.confidence === "verified" ? ", verified" : ""
+      }. ${facilitiesLabel}`}
     >
       {/* Tile colour matches the place's map pin and the map legend — the
           fill is the same hue at 14% alpha, so each row carries its type's
@@ -96,20 +117,45 @@ function PlaceCard({ place, distanceLabel, onPress }: Props) {
               </>
             ) : null}
           </Text>
+          {/* "6 min", never "6m" — the chip sits beside formatDistance's own
+              "350 m", where an abbreviated minute reads as a distance. */}
           {distanceLabel ? (
-            <Text style={styles.distance}>{distanceLabel}</Text>
+            <Text style={styles.distance}>
+              {travel ? (
+                <>
+                  <MaterialCommunityIcons
+                    name={TRAVEL_MODE_ICONS[travel.mode]}
+                    size={12}
+                    color={colors.accent}
+                  />
+                  {` ${travel.minutes} min · `}
+                </>
+              ) : null}
+              {distanceLabel}
+            </Text>
           ) : null}
         </View>
 
         {place.jumuahTimes?.length ? (
-          <View style={styles.metaRow}>
+          <View style={styles.jumuahBadge}>
             <MaterialCommunityIcons
               name="clock-outline"
+              size={13}
+              color={colors.accent}
+            />
+            <Text style={styles.jumuahText}>
+              Jumu'ah {place.jumuahTimes.join(" & ")}
+            </Text>
+          </View>
+        ) : place.jamaat ? (
+          <View style={styles.metaRow}>
+            <MaterialCommunityIcons
+              name="calendar-clock"
               size={14}
               color={colors.textSecondary}
             />
             <Text style={styles.metaText}>
-              Jumu'ah {place.jumuahTimes.join(" & ")}
+              Jamaat timetable available
             </Text>
           </View>
         ) : null}
@@ -205,6 +251,22 @@ const useStyles = createThemedStyles((colors: ThemeColors, scheme) =>
   metaText: {
     ...type.footnote,
     color: colors.textSecondary,
+  },
+  jumuahBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.xs,
+    alignSelf: "flex-start",
+    backgroundColor: colors.accentSoft,
+    paddingHorizontal: spacing.s + 2,
+    paddingVertical: 2,
+    borderRadius: radius.pill,
+  },
+  jumuahText: {
+    ...type.caption,
+    fontWeight: "700",
+    color: colors.accent,
+    ...numeric,
   },
   facilityRow: {
     flexDirection: "row",

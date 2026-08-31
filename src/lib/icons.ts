@@ -29,3 +29,11 @@ export const PLACE_TYPE_ICONS: Record<PlaceType, IconName> = {
   musalla: "rug",
   multi_faith_room: "door",
 };
+
+// Travel mode glyphs for the estimated-duration chip on place cards. Lives
+// here with the rest of the vocabulary so the list card and the detail page
+// can never drift onto different symbols for "walk" and "drive".
+export const TRAVEL_MODE_ICONS: Record<"walk" | "drive", IconName> = {
+  walk: "walk",
+  drive: "car",
+};
