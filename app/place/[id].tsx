@@ -263,6 +263,25 @@ export default function PlaceDetailScreen() {
     return "fajr";
   }, [calculatedTimes, place?.jamaat, now]);
 
+  // One sentence covering both ways these times can mislead, so the card
+  // never stacks two near-identical warnings. The age is not repeated here:
+  // the source line above already carries "recorded N days ago".
+  const jamaatCaution = useMemo(() => {
+    if (!place?.jamaat) return null;
+    const stale = jamaatAgeDays(place.jamaat.recordedOn, now) > 3;
+    const unverified = place.confidence !== "verified";
+    if (stale && unverified) {
+      return "Unverified, and possibly out of date — confirm with the masjid before relying on these.";
+    }
+    if (stale) {
+      return "These may have moved since — confirm with the masjid.";
+    }
+    if (unverified) {
+      return "Unverified — confirm with the masjid before relying on these.";
+    }
+    return null;
+  }, [place?.jamaat, place?.confidence, now]);
+
   if (!place) {
     // Distinguish "we have no data at all" from "this id genuinely doesn't
     // exist" -- the first is an offline/connectivity problem with a retry,
@@ -581,7 +600,10 @@ export default function PlaceDetailScreen() {
           <Text style={styles.sectionTitle}>Prayer times</Text>
           <View style={styles.prayerTable}>
             <View style={styles.prayerHeaderRow}>
-              <Text style={[styles.prayerNameCell, styles.prayerHeaderCell]} />
+              {/* Same flex:1 spacer the data rows use for the name column —
+                  a bare zero-width Text here left the two column headings
+                  bunched at the left edge, nowhere near their numbers. */}
+              <View style={styles.prayerNameWrap} />
               <Text style={[styles.prayerTimeCell, styles.prayerHeaderCell]}>
                 Jamaat
               </Text>
@@ -639,27 +661,19 @@ export default function PlaceDetailScreen() {
               )}`}
             </Text>
           ) : null}
-          {place.jamaat && jamaatAgeDays(place.jamaat.recordedOn, now) > 3 ? (
+          {/* ONE caution, never a stack of them. The age is already stated
+              in the source line directly above, so repeating "4 days ago"
+              here just to append a warning read as two paragraphs saying
+              the same thing. Both reasons collapse into a single sentence
+              with a single "confirm with the masjid". */}
+          {jamaatCaution ? (
             // Jamaat times drift with the sun — a Fajr time that hasn't been
-            // re-checked in days can be a quarter of an hour out. The pipeline
-            // deliberately keeps the last-known times when a mosque's page
-            // stops parsing (stale beats silently wrong), so the honesty has
-            // to happen here: say the age plainly instead of presenting a
-            // frozen time as today's.
-            <Text style={styles.jamaatCaution}>
-              {`These jamaat times were last checked ${jamaatAgeDays(
-                place.jamaat.recordedOn,
-                now,
-              )} days ago and may have moved since — confirm with the masjid.`}
-            </Text>
-          ) : null}
-          {place.jamaat && place.confidence !== "verified" ? (
-            // Unverified jamaat times look exactly as authoritative as real
-            // ones -- for prayer times that's dangerous, so say it plainly.
-            <Text style={styles.jamaatCaution}>
-              These jamaat times are unverified — confirm with the masjid
-              before relying on them.
-            </Text>
+            // re-checked in days can be a quarter of an hour out, and the
+            // pipeline deliberately keeps the last-known times when a
+            // mosque's page stops parsing (stale beats silently wrong). An
+            // unverified time looks exactly as authoritative as a real one.
+            // Either way the honesty has to happen here.
+            <Text style={styles.jamaatCaution}>{jamaatCaution}</Text>
           ) : null}
           {/* The community loop for the Jamaat column: one-tap
               confirm/dispute when times exist, an invitation to add them
@@ -913,6 +927,8 @@ const useStyles = createThemedStyles((colors: ThemeColors, scheme) =>
   prayerHeaderRow: {
     flexDirection: "row",
     alignItems: "center",
+    // Matches prayerRow: without it the headings hang left of their columns.
+    paddingHorizontal: spacing.s,
   },
   prayerRow: {
     flexDirection: "row",
