@@ -20,6 +20,7 @@ import Touchable from "@/components/Touchable";
 import { useSettings } from "@/context/SettingsContext";
 import { useTheme } from "@/context/ThemeContext";
 import { formatCountdown } from "@/lib/duration";
+import { getPrayerStatus } from "@/lib/prayerStatus";
 import { cardEdge } from "@/lib/elevation";
 import { FALLBACK_LOCATION } from "@/lib/geo";
 import { formatHijri } from "@/lib/hijri";
@@ -78,33 +79,6 @@ function offsetFromToday(target: Date, now: Date): number {
   return Math.round(
     (startOfDay(target).getTime() - startOfDay(now).getTime()) / 86_400_000,
   );
-}
-
-type Status = { currentLabel: string; nextLabel: string; msUntilNext: number };
-
-function getStatus(
-  today: PrayerScheduleEntry[],
-  tomorrowFajr: Date | null,
-  now: Date,
-): Status | null {
-  const prayers = today.filter((entry) => entry.key !== "sunrise");
-  const next = prayers.find((entry) => entry.time.getTime() > now.getTime());
-  if (!next) {
-    // After Isha: the next prayer is tomorrow's Fajr.
-    if (!tomorrowFajr) return null;
-    return {
-      currentLabel: "Isha",
-      nextLabel: "Fajr",
-      msUntilNext: tomorrowFajr.getTime() - now.getTime(),
-    };
-  }
-  const i = prayers.indexOf(next);
-  return {
-    // Before Fajr the "current" prayer is still last night's Isha.
-    currentLabel: i === 0 ? "Isha" : prayers[i - 1].label,
-    nextLabel: next.label,
-    msUntilNext: next.time.getTime() - now.getTime(),
-  };
 }
 
 function SunTrajectoryArc({
@@ -493,12 +467,15 @@ export default function PrayerScreen() {
       addDays(now, 1),
     );
     const tomorrowFajr = tomorrow?.find((e) => e.key === "fajr")?.time ?? null;
-    return getStatus(today, tomorrowFajr, now);
+    return getPrayerStatus(today, tomorrowFajr, now);
   }, [schedule, dayOffset, location, calcOptions, now]);
 
-  // Only highlight a row when we are actually looking at today.
-  const highlightKey =
-    dayOffset === 0 && status ? status.currentLabel.toLowerCase() : null;
+  // Only highlight a row when we are actually looking at today — and only
+  // when a prayer is genuinely in progress. Between sunrise and Dhuhr
+  // currentKey is null, so nothing lights up. Comparing typed keys also
+  // drops the old label.toLowerCase() coupling, which quietly depended on
+  // every label being exactly its key.
+  const highlightKey = dayOffset === 0 && status ? status.currentKey : null;
 
   /** Today is the floor. A prayer time that has already passed is not
       information anyone needs — the screen is for "when do I pray next",
@@ -533,7 +510,7 @@ export default function PrayerScreen() {
           style={styles.heroCard}
         >
           <Text style={styles.heroKicker}>
-            {`Now \u00B7 ${status.currentLabel}`}
+            {status.nowLabel}
           </Text>
           <Text style={styles.heroTitle}>
             {`${status.nextLabel} in ${formatCountdown(status.msUntilNext)}`}
