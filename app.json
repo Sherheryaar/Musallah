@@ -2,7 +2,7 @@
   "expo": {
     "name": "Musallah",
     "slug": "masjid-locator",
-    "version": "0.1.7",
+    "version": "0.1.8",
     "scheme": "masjidlocator",
     "icon": "./assets/icon.png",
     "orientation": "portrait",
