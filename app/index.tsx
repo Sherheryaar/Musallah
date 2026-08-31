@@ -10,6 +10,7 @@ import {
   FlatList,
   Keyboard,
   Platform,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -47,6 +48,7 @@ import { submitNewPlaceSuggestion } from "@/lib/feedback";
 import { useTheme } from "@/context/ThemeContext";
 import { cardEdge, elevation } from "@/lib/elevation";
 import { MIN_TARGET } from "@/lib/metrics";
+import { hapticSelection } from "@/lib/haptics";
 import { createThemedStyles } from "@/lib/themedStyles";
 import {
   numeric,
@@ -213,6 +215,19 @@ const NextPrayerBar = React.memo(function NextPrayerBar({
     </Touchable>
   );
 });
+
+const QUICK_FILTERS: Array<{
+  key: string;
+  label: string;
+  icon: keyof typeof MaterialCommunityIcons.glyphMap;
+}> = [
+  { key: "womens_area", label: "Women's Area", icon: "human-female" },
+  { key: "wheelchair_accessible", label: "Wheelchair", icon: "wheelchair-accessibility" },
+  { key: "parking", label: "Parking", icon: "parking" },
+  { key: "wudu_facilities", label: "Wudu", icon: "water" },
+  { key: "jumuah", label: "Jumu'ah", icon: "clock-outline" },
+  { key: "saved", label: "Saved", icon: "heart" },
+];
 
 export default function HomeScreen() {
   const styles = useStyles();
@@ -771,6 +786,61 @@ export default function HomeScreen() {
     </View>
   );
 
+  const toggleQuickFilter = useCallback(
+    (key: string) => {
+      hapticSelection(settings.hapticFeedback);
+      if (key === "saved") {
+        updateSettings({ savedOnly: !settings.savedOnly });
+        return;
+      }
+      toggleFilter(key as FacilityKey);
+    },
+    [settings.hapticFeedback, settings.savedOnly, toggleFilter, updateSettings],
+  );
+
+  const quickFilterStrip = (
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      contentContainerStyle={styles.quickFilterStrip}
+      style={styles.quickFilterScroll}
+    >
+      {QUICK_FILTERS.map(({ key, label, icon }) => {
+        const active =
+          key === "saved"
+            ? settings.savedOnly
+            : activeFilters.has(key as FacilityKey);
+        return (
+          <Touchable
+            key={key}
+            style={[
+              styles.quickFilterChip,
+              active && styles.quickFilterChipActive,
+            ]}
+            onPress={() => toggleQuickFilter(key)}
+            accessibilityRole="checkbox"
+            accessibilityState={{ checked: active }}
+            accessibilityLabel={`Filter: ${label}`}
+          >
+            <MaterialCommunityIcons
+              name={icon}
+              size={15}
+              color={active ? colors.accent : colors.textSecondary}
+            />
+            <Text
+              style={[
+                styles.quickFilterLabel,
+                active && styles.quickFilterLabelActive,
+              ]}
+            >
+              {label}
+            </Text>
+          </Touchable>
+        );
+      })}
+    </ScrollView>
+  );
+
   const searchNoteRow = searchNote ? (
     <View style={styles.contextRow}>
       <Text style={styles.searchNote}>{searchNote}</Text>
@@ -998,6 +1068,7 @@ export default function HomeScreen() {
         }
       >
         {timesBar}
+        {quickFilterStrip}
         {list}
       </BottomSheet>
       <FilterSheet
@@ -1130,6 +1201,41 @@ const useStyles = createThemedStyles((colors: ThemeColors, scheme: "light" | "da
     paddingVertical: spacing.s,
     borderRadius: radius.m,
     overflow: "hidden",
+  },
+  quickFilterScroll: {
+    flexGrow: 0,
+    marginHorizontal: -spacing.l,
+    marginBottom: spacing.xs,
+  },
+  quickFilterStrip: {
+    paddingHorizontal: spacing.l,
+    gap: spacing.s,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  quickFilterChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.xs + 2,
+    minHeight: 34,
+    paddingHorizontal: spacing.m,
+    paddingVertical: 6,
+    borderRadius: radius.pill,
+    backgroundColor: colors.canvas,
+    ...cardEdge(scheme, colors),
+  },
+  quickFilterChipActive: {
+    backgroundColor: colors.accentSoft,
+    borderColor: colors.accent,
+  },
+  quickFilterLabel: {
+    ...type.footnote,
+    fontWeight: "600",
+    color: colors.textSecondary,
+  },
+  quickFilterLabelActive: {
+    color: colors.accent,
+    fontWeight: "700",
   },
   legend: {
     alignSelf: "flex-start",

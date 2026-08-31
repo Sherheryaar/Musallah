@@ -102,14 +102,25 @@ function PlaceCard({ place, distanceLabel, onPress }: Props) {
         </View>
 
         {place.jumuahTimes?.length ? (
-          <View style={styles.metaRow}>
+          <View style={styles.jumuahBadge}>
             <MaterialCommunityIcons
               name="clock-outline"
+              size={13}
+              color={colors.accent}
+            />
+            <Text style={styles.jumuahText}>
+              Jumu'ah {place.jumuahTimes.join(" & ")}
+            </Text>
+          </View>
+        ) : place.jamaat ? (
+          <View style={styles.metaRow}>
+            <MaterialCommunityIcons
+              name="calendar-clock"
               size={14}
               color={colors.textSecondary}
             />
             <Text style={styles.metaText}>
-              Jumu'ah {place.jumuahTimes.join(" & ")}
+              Jamaat timetable available
             </Text>
           </View>
         ) : null}
@@ -205,6 +216,22 @@ const useStyles = createThemedStyles((colors: ThemeColors, scheme) =>
   metaText: {
     ...type.footnote,
     color: colors.textSecondary,
+  },
+  jumuahBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.xs,
+    alignSelf: "flex-start",
+    backgroundColor: colors.accentSoft,
+    paddingHorizontal: spacing.s + 2,
+    paddingVertical: 2,
+    borderRadius: radius.pill,
+  },
+  jumuahText: {
+    ...type.caption,
+    fontWeight: "700",
+    color: colors.accent,
+    ...numeric,
   },
   facilityRow: {
     flexDirection: "row",

@@ -42,7 +42,7 @@ import {
   qiblaSunCrossings,
   smoothAngle,
 } from "@/lib/qibla";
-import { hapticSuccess, hapticTick } from "@/lib/haptics";
+import { hapticHeavy, hapticTick } from "@/lib/haptics";
 import { cardEdge, elevation } from "@/lib/elevation";
 import { MIN_TARGET } from "@/lib/metrics";
 import { radius, spacing, type, type ThemeColors } from "@/lib/theme";
@@ -234,11 +234,16 @@ export default function QiblaScreen() {
   const lastAnimatedTo = useRef(0);
   /** Signed turn to the qibla, ±180. Drives the tape. */
   const turn = useRef(new Animated.Value(0)).current;
+  /** Native driven spirit bubble level coordinates: zero JS re-renders. */
+  const bubbleX = useRef(new Animated.Value(0)).current;
+  const bubbleY = useRef(new Animated.Value(0)).current;
   /**
    * 0 → 1 as alignment is acquired. NATIVE driver: it only ever feeds
    * transform and opacity on plain views.
    */
   const lock = useRef(new Animated.Value(0)).current;
+  /** Radial ripple wave triggered on magnetic lock. */
+  const pulseWave = useRef(new Animated.Value(0)).current;
   /**
    * The same 0 → 1, but on the JS driver, because it feeds an SVG
    * strokeDashoffset — which the native driver cannot animate. Sharing one
@@ -409,6 +414,20 @@ export default function QiblaScreen() {
       });
       acc = Accelerometer.addListener((v) => {
         setTiltDeg(Math.round(tiltFromFlat(v)));
+        const targetX = Math.max(-5, Math.min(5, -v.x * 6));
+        const targetY = Math.max(-5, Math.min(5, v.y * 6));
+        Animated.spring(bubbleX, {
+          toValue: targetX,
+          useNativeDriver: true,
+          friction: 7,
+          tension: 40,
+        }).start();
+        Animated.spring(bubbleY, {
+          toValue: targetY,
+          useNativeDriver: true,
+          friction: 7,
+          tension: 40,
+        }).start();
       });
     } catch {
       // No sensors — quality checks simply stay unavailable.
@@ -417,7 +436,7 @@ export default function QiblaScreen() {
       mag?.remove();
       acc?.remove();
     };
-  }, []);
+  }, [bubbleX, bubbleY]);
 
   // Minute tick keeps the sun guidance current while the screen is open.
   useEffect(() => {
@@ -556,8 +575,19 @@ export default function QiblaScreen() {
   // Deps are `locked` ALONE: reading the preference through a ref keeps
   // toggling haptics off in Settings from itself triggering a buzz.
   useEffect(() => {
-    if (locked) hapticSuccess(hapticsRef.current);
-  }, [locked]);
+    if (locked) {
+      hapticHeavy(hapticsRef.current);
+      if (!reduceMotionRef.current) {
+        pulseWave.setValue(0);
+        Animated.timing(pulseWave, {
+          toValue: 1,
+          duration: 850,
+          easing: Easing.out(Easing.quad),
+          useNativeDriver: true,
+        }).start();
+      }
+    }
+  }, [locked, pulseWave]);
 
   // A light tick every 15° of turn, so the compass can be followed without
   // watching it. Skipped on the first render (there is no "turn" yet) and
@@ -993,12 +1023,47 @@ export default function QiblaScreen() {
             </Animated.View>
           </Animated.View>
 
-          <View
-            style={[
-              styles.hub,
-              { backgroundColor: locked ? colors.accent : colors.textSecondary },
-            ]}
-          />
+          <View style={styles.hub}>
+            <View style={styles.hubCenterTarget} />
+            <Animated.View
+              style={[
+                styles.spiritBubble,
+                {
+                  transform: [
+                    { translateX: bubbleX },
+                    { translateY: bubbleY },
+                  ],
+                  backgroundColor: locked
+                    ? colors.accent
+                    : colors.textSecondary,
+                },
+              ]}
+            />
+          </View>
+
+          {locked ? (
+            <Animated.View
+              style={[
+                styles.rippleWave,
+                {
+                  transform: [
+                    {
+                      scale: pulseWave.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [1, 1.25],
+                      }),
+                    },
+                  ],
+                  opacity: pulseWave.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0.6, 0],
+                  }),
+                  borderColor: colors.accent,
+                },
+              ]}
+              pointerEvents="none"
+            />
+          ) : null}
         </View>
       </View>
 
@@ -1360,13 +1425,44 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark", dial: numbe
     },
     hub: {
       position: "absolute",
-      top: dial / 2 - 9,
-      left: dial / 2 - 9,
-      width: 18,
-      height: 18,
-      borderRadius: 9,
-      borderWidth: 3,
-      borderColor: colors.canvas,
+      top: dial / 2 - 13,
+      left: dial / 2 - 13,
+      width: 26,
+      height: 26,
+      borderRadius: 13,
+      borderWidth: 2,
+      borderColor: colors.border,
+      backgroundColor: colors.surface,
+      alignItems: "center",
+      justifyContent: "center",
+      overflow: "hidden",
+    },
+    hubCenterTarget: {
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+      borderWidth: 1,
+      borderColor: colors.controlBorder,
+      opacity: 0.5,
+    },
+    spiritBubble: {
+      position: "absolute",
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.25,
+      shadowRadius: 1,
+    },
+    rippleWave: {
+      position: "absolute",
+      top: 0,
+      left: 0,
+      width: dial,
+      height: dial,
+      borderRadius: dial / 2,
+      borderWidth: 2,
     },
 
     tape: {
