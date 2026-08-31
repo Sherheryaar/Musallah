@@ -27,6 +27,16 @@
 //     is only trusted within NEAR_M, anything out to SAME_SITE_M also needs
 //     a name-token overlap. Proximity-only matches are held for manual
 //     review, never linked automatically — two mosques can sit metres apart.
+//   * corroborates identity with the FULL POSTCODE as well as the name, and
+//     a name match is not required when the postcodes agree. Very many
+//     mosques are known by two unrelated names ("Bangladeshi Cultural
+//     Centre" is "Limehouse Masjid"), which no string comparison can ever
+//     resolve; the postcode can. On its introduction this turned 62 matches
+//     that had been held for review into links, 49 of which produced real
+//     prayer times the same day. See scripts/lib/identity.mjs.
+//   * refuses to offer a Sirat mosque that already backs another place. One
+//     building cannot be two places, and successive additive runs had
+//     managed to register mosque-000176 to two of them.
 //
 // Nothing is written to the registry by this script. Review the report,
 // then run scripts/gen-sirat-links.mjs to turn confident matches into
@@ -39,6 +49,8 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+
+import { comparePostcodes } from "./lib/identity.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const args = process.argv.slice(2);
@@ -218,15 +230,30 @@ const registry = JSON.parse(
 );
 const alreadyRegistered = new Set(registry.map((l) => l.placeId));
 const candidates = places.filter((p) => !alreadyRegistered.has(p.id));
+// A Sirat mosque already backing one of our places is not available to back a
+// second: it is one building, and two places cannot both be it. Without this
+// the harvest happily re-offers a taken record to the next-nearest place, and
+// because the two are often on one site with a shared postcode, the postcode
+// signal agrees and it looks confident. That is how mosque-000471 came to be
+// registered to both Aylesbury places.
+const takenSiratIds = new Set(
+  registry.filter((l) => l.source === "sirat").map((l) => l.siratId),
+);
+const available = mosques.filter((m) => !takenSiratIds.has(m.id));
 console.log(
   `${places.length} places total, ${alreadyRegistered.size} already have a source, ${candidates.length} candidate(s) for Sirat.uk.`,
 );
+if (available.length < mosques.length) {
+  console.log(
+    `${mosques.length - available.length} Sirat mosque(s) already back a place — not offered again.`,
+  );
+}
 
 // --- match: for each Sirat mosque, the nearest eligible place ---------------
 const matches = [];
 const unmatchedMosques = [];
 
-for (const m of mosques) {
+for (const m of available) {
   const mLat = Number(m.lat);
   const mLng = Number(m.lng);
   if (!Number.isFinite(mLat) || !Number.isFinite(mLng) || !m.id || !m.name) {
@@ -260,6 +287,9 @@ for (const m of mosques) {
     siratAddress: m.address,
     distanceM: Math.round(best.distance),
     nameOverlap: best.overlap,
+    // Third signal, independent of both distance and name — see
+    // scripts/lib/identity.mjs for why it outranks a name-token overlap.
+    postcode: comparePostcodes(best.place.address, m.address),
   });
 }
 
@@ -272,12 +302,32 @@ for (const match of matches.sort((a, b) => a.distanceM - b.distanceM)) {
   else byPlace.set(match.placeId, match);
 }
 
+/**
+ * Is this match strong enough to register without a human deciding?
+ *
+ * Two independent routes to yes, because the two signals fail in different
+ * places (scripts/lib/identity.mjs explains both at length):
+ *   * the names agree — the original rule
+ *   * the full postcodes agree — catches every mosque known by a second
+ *     name, which no name matcher can ever resolve
+ *
+ * And one veto: a different postal DISTRICT blocks the match even when the
+ * names agree, because that is two different addresses rather than two
+ * spellings of one. Note it is only the district that vetoes — a
+ * same-district, different-unit pair is routine noise between two datasets
+ * describing one building, and treating that as a mismatch would demote 37
+ * of the 38 such links found when the existing registry was audited.
+ */
+const isConfident = (m) =>
+  m.postcode !== "differ-district" &&
+  (m.nameOverlap || m.postcode === "agree");
+
 // Only NAME-AGREEING matches are considered confident, same rule as
 // harvest-mawaqit.mjs and for the same reason: in dense areas two different
 // mosques can sit metres apart, and writing another mosque's jamā'ah time
 // onto a place would send someone to pray at the wrong time.
-const confident = [...byPlace.values()].filter((m) => m.nameOverlap);
-const needsReview = [...byPlace.values()].filter((m) => !m.nameOverlap);
+const confident = [...byPlace.values()].filter(isConfident);
+const needsReview = [...byPlace.values()].filter((m) => !isConfident(m));
 
 // --- output -------------------------------------------------------------------
 mkdirSync(OUT_DIR, { recursive: true });
@@ -287,7 +337,13 @@ writeFileSync(
     {
       mosquesFetched: mosques.length,
       candidatePlaces: candidates.length,
-      matches: [...byPlace.values()],
+      // `confident` is stamped here, not recomputed downstream: the rule that
+      // decides what gets registered lives in exactly one place (isConfident
+      // above), so gen-sirat-links.mjs cannot drift away from it.
+      matches: [...byPlace.values()].map((m) => ({
+        ...m,
+        confident: isConfident(m),
+      })),
       duplicates,
       unmatchedMosques,
     },
@@ -296,10 +352,20 @@ writeFileSync(
   ),
 );
 
+const POSTCODE_LABEL = {
+  agree: "same",
+  "differ-unit": "same district",
+  "differ-district": "**DIFFERENT district**",
+  unknown: "—",
+};
 const row = (m) =>
-  `| ${m.placeName.slice(0, 40)} | ${m.distanceM} m | ${m.nameOverlap ? "yes" : "no"} | ${m.siratName.slice(0, 34)} | \`${m.siratId}\` |`;
+  `| ${m.placeName.slice(0, 40)} | ${m.distanceM} m | ${m.nameOverlap ? "yes" : "no"} | ${POSTCODE_LABEL[m.postcode]} | ${m.siratName.slice(0, 34)} | \`${m.siratId}\` |`;
 const header =
-  "| Place | Gap | Name match | Sirat.uk record | id |\n|---|---|---|---|---|";
+  "| Place | Gap | Name match | Postcode | Sirat.uk record | id |\n|---|---|---|---|---|---|";
+
+const vetoed = needsReview.filter(
+  (m) => m.postcode === "differ-district" && m.nameOverlap,
+);
 
 const report = `# Sirat.uk mosque matches
 
@@ -315,8 +381,8 @@ sourced from it.
 - ${mosques.length} mosques fetched from Sirat.uk
 - ${candidates.length} of our places had no timetable source at all (the only ones considered)
 - ${byPlace.size} matched to one of our places
-- **${confident.length} confident match(es)** (name agrees) — these are what \`gen-sirat-links.mjs\` will register
-- ${needsReview.length} matched on PROXIMITY ONLY with different names — held back, not registered
+- **${confident.length} confident match(es)** (the name agrees, or the full postcode does) — these are what \`gen-sirat-links.mjs\` will register
+- ${needsReview.length} held back, not registered${vetoed.length ? ` — including ${vetoed.length} whose NAMES agree but which sit in a different postal district, vetoed on purpose` : ""}
 - ${duplicates.length} ambiguous (two Sirat.uk records near one place) — review by hand
 - ${unmatchedMosques.length} Sirat.uk mosques matched none of our places — possible gaps in our dataset (or already covered by another source)
 
@@ -325,10 +391,12 @@ sourced from it.
 ${header}
 ${confident.map(row).join("\n") || "_none_"}
 
-## Proximity-only matches — NOT registered, confirm by hand (${needsReview.length})
+## Held back — NOT registered, confirm by hand (${needsReview.length})
 
-The pins are close but the names don't agree, so these could be two
-different mosques near each other.
+Either the pins are close but neither the names nor the postcodes agree (so
+these could be two different mosques near each other), or the postcodes
+positively disagree — which vetoes the match even when the names look right,
+because two different full postcodes are two different addresses.
 
 ${header}
 ${needsReview.map(row).join("\n") || "_none_"}

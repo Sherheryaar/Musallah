@@ -1,11 +1,14 @@
 # Daily refresh of jamaat and Jumu'ah times from each mosque's OWN published
 # timetable (scripts/refresh-times.mjs + scripts/timetable-sources.mjs).
 #
-# Sources are pluggable and no provider is privileged: Mawaqit covers 131 of
-# the 2,244 places and none of London's largest mosques are on it, so places
+# Sources are pluggable and no provider is privileged: Mawaqit covers 151 of
+# the 2,239 places and none of London's largest mosques are on it, so places
 # are registered to whichever system their own mosque publishes through
 # (scripts/timetable-links.json). Every source must be credited in the app's
 # About screen.
+#
+# A mosque's OWN publication outranks a third-party directory, so where both
+# offer a place the aggregator row is replaced — see gen-mawaqit-links.mjs.
 #
 # WHY DAILY: jamaat times track the sun. East London Mosque's Fajr jamā'ah
 # moves ~2 minutes a day, so a weekly snapshot would be a quarter of an hour

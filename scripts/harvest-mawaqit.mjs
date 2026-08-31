@@ -22,6 +22,14 @@
 //   * facility flags / closed -> reported as corroboration for the place
 //     audit, never auto-applied.
 //
+// HOW A MATCH IS TRUSTED: distance, plus EITHER a name-token overlap or an
+// agreeing full postcode (Mawaqit publishes one on every record, in
+// `localisation` and again inside the slug). The postcode is what settles the
+// many mosques known by two unrelated names, which no string comparison can;
+// a differing postal DISTRICT vetoes a match even when the names agree. See
+// scripts/lib/identity.mjs for why the district, and not the unit, is the
+// part that counts.
+//
 // ATTRIBUTION: anything imported must be credited to Mawaqit in the app's
 // About screen, and this script identifies itself honestly. Check Mawaqit's
 // terms before shipping an import, and consider asking them directly —
@@ -37,6 +45,8 @@ import {
 } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+
+import { comparePostcodes, postcodeOf } from "./lib/identity.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const args = process.argv.slice(2);
@@ -78,6 +88,18 @@ const GRID_DEG = 0.02;
 // a place, so these are deliberately tight.
 const NEAR_M = 60; // this close: accept on distance alone
 const SAME_SITE_M = 250; // within this: require a name-token overlap
+
+/**
+ * Mawaqit records the postcode twice: in `localisation` ("Unit C Waterside
+ * park RG12 1RB Bracknell United Kingdom") and, hyphen-separated, inside the
+ * slug ("bracknell-masjid-bracknell-rg12-1rb-united-kingdom"). Prefer the
+ * address field; fall back to the slug, which is present even when
+ * localisation is blank. Hyphens become spaces so the postcode reads normally.
+ */
+function mawaqitAddress(mosque) {
+  if (postcodeOf(mosque?.localisation)) return mosque.localisation;
+  return String(mosque?.slug ?? "").replace(/-/g, " ");
+}
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 function distanceM(lat1, lng1, lat2, lng2) {
@@ -395,6 +417,8 @@ for (const m of mosques.values()) {
     mawaqitSlug: m.slug,
     distanceM: Math.round(best.distance),
     nameOverlap: best.overlap,
+    // Independent of both distance and name — see scripts/lib/identity.mjs.
+    postcode: comparePostcodes(best.place.address, mawaqitAddress(m)),
     jumuahTimes,
     closed: m.closed === true,
     // Recorded for a future live-fetch feature, deliberately not imported.
@@ -422,11 +446,21 @@ for (const match of matches.sort((a, b) => a.distanceM - b.distanceM)) {
 // 50 m "Salahuddin Mosque" / "Masjid Bilal" pairing in testing was two
 // separate places on one street), and writing another mosque's Jumu'ah time
 // onto a place would make someone miss the prayer.
+// A match is trusted when EITHER the names agree or the full postcodes do.
+// Mawaqit publishes the postcode on every record, and it settles the case the
+// names cannot: a mosque known by two names ("Bangladeshi Cultural Centre" /
+// "Limehouse Masjid") is one building no string comparison will ever match.
+// A different postal DISTRICT vetoes the match even when the names agree —
+// but a different unit within one district does not, since two datasets
+// routinely record neighbouring unit codes for the same site.
+const isConfident = (m) =>
+  m.postcode !== "differ-district" && (m.nameOverlap || m.postcode === "agree");
+
 const confident = [...byPlace.values()].filter(
-  (m) => m.jumuahTimes.length > 0 && !m.closed && m.nameOverlap,
+  (m) => m.jumuahTimes.length > 0 && !m.closed && isConfident(m),
 );
 const needsReview = [...byPlace.values()].filter(
-  (m) => m.jumuahTimes.length > 0 && !m.closed && !m.nameOverlap,
+  (m) => m.jumuahTimes.length > 0 && !m.closed && !isConfident(m),
 );
 const newTimes = confident.filter((m) => m.existingTimes.length === 0);
 
@@ -439,7 +473,15 @@ writeFileSync(
       cellsDone: doneCells.size,
       cellsTotal: cells.size,
       uniqueMosques: mosques.size,
-      matches: [...byPlace.values()],
+      // `identityConfident` says only "this really is the same mosque" — it
+      // is deliberately independent of whether a Jumu'ah time is published
+      // today, because gen-mawaqit-links.mjs registers a trusted identity
+      // either way and lets the daily refresh pick times up later. Stamped
+      // here so that rule lives in one place and the generator cannot drift.
+      matches: [...byPlace.values()].map((m) => ({
+        ...m,
+        identityConfident: isConfident(m),
+      })),
       duplicates,
       unmatchedMosques,
     },
@@ -448,10 +490,16 @@ writeFileSync(
   ),
 );
 
+const POSTCODE_LABEL = {
+  agree: "same",
+  "differ-unit": "same district",
+  "differ-district": "**DIFFERENT district**",
+  unknown: "—",
+};
 const row = (m) =>
-  `| ${m.placeName.slice(0, 38)} | ${m.jumuahTimes.join(", ")} | ${m.distanceM} m | ${m.nameOverlap ? "yes" : "no"} | ${m.mawaqitName.slice(0, 34)} |`;
+  `| ${m.placeName.slice(0, 38)} | ${m.jumuahTimes.join(", ")} | ${m.distanceM} m | ${m.nameOverlap ? "yes" : "no"} | ${POSTCODE_LABEL[m.postcode]} | ${m.mawaqitName.slice(0, 34)} |`;
 const header =
-  "| Place | Jumu'ah | Gap | Name match | Mawaqit record |\n|---|---|---|---|---|";
+  "| Place | Jumu'ah | Gap | Name match | Postcode | Mawaqit record |\n|---|---|---|---|---|---|";
 
 const report = `# Jumu'ah times from Mawaqit
 
@@ -467,7 +515,7 @@ the About screen for anything imported.
 - ${byPlace.size} matched to our places
 - **${newTimes.length} places would gain a Jumu'ah time** (we currently have ${places.filter((p) => p.jumuahTimes?.length).length} in total)
 - ${confident.length - newTimes.length} matched places already had times (cross-check these)
-- ${needsReview.length} matched on PROXIMITY ONLY with different names — held back for review, not in the SQL
+- ${needsReview.length} held back for review, not in the SQL — neither the names nor the postcodes agree, or the postal districts positively disagree
 - ${duplicates.length} ambiguous (two Mawaqit records near one place) — review by hand
 - ${unmatchedMosques.length} Mawaqit mosques matched nothing in our data — possible gaps in our dataset
 - ${[...byPlace.values()].filter((m) => m.closed).length} matched records are flagged CLOSED on Mawaqit — check these
@@ -485,7 +533,7 @@ ${confident
   .map((m) => `${row(m)} (ours: ${m.existingTimes.join(", ")})`)
   .join("\n")}
 
-## Proximity-only matches — NOT imported, confirm by hand (${needsReview.length})
+## Held back — NOT imported, confirm by hand (${needsReview.length})
 
 The pins are close but the names don't agree, so these could be two
 different mosques near each other. Confirm each before using the time.

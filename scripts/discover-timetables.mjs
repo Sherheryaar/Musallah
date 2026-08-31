@@ -41,6 +41,7 @@ import {
   htmlTableRows,
   masjidboxSlugs,
   mawaqitSlugs,
+  parseDailyIqamahTable,
   parseDatedJamaatTable,
 } from "./lib/timetable.mjs";
 
@@ -78,6 +79,33 @@ const alreadyRegistered = new Set(registry.map((l) => l.placeId));
 const candidates = places.filter(
   (p) => p.website && !alreadyRegistered.has(p.id),
 );
+
+// Which places share a website host? A timetable on a shared site cannot be
+// attributed to one of them without deciding WHICH, and getting that wrong
+// puts another mosque's times on the page. Two real cases from this dataset:
+//
+//   * islamiccentre.org is recorded for both Leicester Central Mosque
+//     (Conduit Street) and Leicester Mosque (Sutherland Street). The site is
+//     Central Mosque's, so its table belongs to the former only.
+//   * belfastislamiccentre.org.uk is recorded for two Belfast Islamic Centre
+//     records 700 m apart; the site publishes BT7 1NA, which settles it.
+//
+// Flagged rather than skipped: the finding is still worth reporting, it just
+// must not be registered without a human resolving the ambiguity.
+const websiteHost = (url) => {
+  try {
+    return new URL(url).hostname.replace(/^www\./i, "").toLowerCase();
+  } catch {
+    return null;
+  }
+};
+const placesByHost = new Map();
+for (const place of places) {
+  const host = place.website ? websiteHost(place.website) : null;
+  if (!host) continue;
+  if (!placesByHost.has(host)) placesByHost.set(host, []);
+  placesByHost.get(host).push(place);
+}
 
 const checkpointPath = join(OUT_DIR, "timetable-discovery.json");
 /** placeId -> finding */
@@ -138,6 +166,34 @@ function timetableLinks(html, baseUrl) {
   return [...urls].slice(0, 3);
 }
 
+// Platforms this pipeline has no provider for YET. Fingerprinted so the
+// report shows which of them would pay for a new provider — report-only,
+// same rule as everything else here: nothing is registered from a
+// fingerprint alone.
+const OTHER_PLATFORMS = [
+  ["mylocalmasjid", /mylocalmasjid\.com\/(?:masjid\/)?([a-z0-9][a-z0-9-]{2,79})/gi],
+  ["masjidal", /(?:masjidal\.com|api\.masjidal\.com)[^"'\s]*/gi],
+  ["masjidnow", /masjidnow\.com\/(?:widgets?|masjids?)\/([a-z0-9-]{1,80})/gi],
+  ["mymasjid", /mymasjid\.ca\/[^"'\s]*/gi],
+  ["islamicfinder-widget", /islamicfinder\.org\/prayer-widget[^"'\s]*/gi],
+  ["mohid", /mohid\.co\/[^"'\s]*/gi],
+  ["salahtimes", /salahtimes\.com\/[^"'\s]*/gi],
+  ["londonprayertimes", /londonprayertimes\.com[^"'\s]*/gi],
+  ["mosqueos", /mosqueos\.com[^"'\s]*/gi],
+  ["elmify", /elmify\.com[^"'\s]*/gi],
+];
+
+function otherPlatformHits(html) {
+  const hits = [];
+  for (const [platform, re] of OTHER_PLATFORMS) {
+    const matches = [...html.matchAll(re)].map((m) => m[1] ?? m[0]);
+    if (matches.length) {
+      hits.push({ platform, sample: [...new Set(matches)].slice(0, 3) });
+    }
+  }
+  return hits;
+}
+
 function fingerprint(html) {
   const platforms = [];
   const mb = masjidboxSlugs(html);
@@ -162,12 +218,26 @@ function fingerprint(html) {
   return platforms;
 }
 
-/** Does this HTML contain a dated jamā'ah table we can read TODAY? */
+/**
+ * Does this HTML contain a jamā'ah table we can read TODAY, in either of the
+ * two shapes the pipeline handles — a year of dated rows, or today's own
+ * one-row-per-prayer iqāmah table?
+ */
 function tryDatedTable(html) {
   const rows = htmlTableRows(html);
   if (rows.length === 0) return null;
   const jamaat = parseDatedJamaatTable(rows, isoDate);
-  if (jamaat) return { jamaat, prayers: Object.keys(jamaat).length };
+  if (jamaat) {
+    return { jamaat, prayers: Object.keys(jamaat).length, kind: "dated-table" };
+  }
+  const daily = parseDailyIqamahTable(rows, isoDate);
+  if (daily) {
+    return {
+      jamaat: daily,
+      prayers: Object.keys(daily).length,
+      kind: "daily-iqamah",
+    };
+  }
   // Distinguish "has a dated table but not for today / not named columns"
   // from "no table at all" — the first is worth a human look.
   const looksDated = rows.some((r) => /^\d{2}\/\d{2}\/\d{4}$/.test(r[0] ?? ""));
@@ -188,12 +258,24 @@ process.on("SIGINT", () => {
 
 for (const place of queue) {
   const finding = { placeId: place.id, placeName: place.name, website: place.website };
+  const sharing = (placesByHost.get(websiteHost(place.website)) ?? []).filter(
+    (p) => p.id !== place.id,
+  );
+  if (sharing.length > 0) {
+    finding.sharedWebsiteWith = sharing.map((p) => ({
+      placeId: p.id,
+      placeName: p.name,
+      address: p.address,
+    }));
+  }
   const home = await getText(place.website);
   if (home.error) {
     finding.error = home.error;
   } else {
     const platforms = fingerprint(home.text);
     if (platforms.length) finding.platforms = platforms;
+    const others = otherPlatformHits(home.text);
+    if (others.length) finding.otherPlatforms = others;
 
     // Home page first, then up to 3 likely timetable pages.
     let hit = tryDatedTable(home.text);
@@ -218,10 +300,19 @@ for (const place of queue) {
         if (subPlatforms.length && !finding.platforms) {
           finding.platforms = subPlatforms;
         }
+        const subOthers = otherPlatformHits(page.text);
+        if (subOthers.length && !finding.otherPlatforms) {
+          finding.otherPlatforms = subOthers;
+        }
       }
     }
     if (hit?.jamaat) {
-      finding.datedTable = { url: hitUrl, prayers: hit.prayers, jamaat: hit.jamaat };
+      finding.datedTable = {
+        url: hitUrl,
+        prayers: hit.prayers,
+        jamaat: hit.jamaat,
+        kind: hit.kind,
+      };
     } else if (hit?.datedButUnparsed) {
       finding.datedTableUnparsed = { url: hitUrl };
     }
@@ -252,6 +343,27 @@ const mawaqitHits = all.filter((f) =>
 const unparsed = all.filter((f) => f.datedTableUnparsed);
 const errors = all.filter((f) => f.error);
 
+// Places on a platform this pipeline cannot read yet, counted per platform so
+// the report answers "which provider is worth writing next?" with a number.
+const otherByPlatform = new Map();
+for (const f of all) {
+  for (const hit of f.otherPlatforms ?? []) {
+    if (!otherByPlatform.has(hit.platform)) otherByPlatform.set(hit.platform, []);
+    otherByPlatform.get(hit.platform).push(f);
+  }
+}
+const otherRanked = [...otherByPlatform.entries()].sort(
+  (a, b) => b[1].length - a[1].length,
+);
+
+/** A loud note when this site belongs to more than one of our places. */
+const sharedWarning = (f) =>
+  f.sharedWebsiteWith
+    ? `\n- ⚠️ this website is ALSO recorded for ${f.sharedWebsiteWith
+        .map((p) => `${p.placeName} (\`${p.placeId}\`, ${p.address})`)
+        .join("; ")} — decide which mosque the timetable actually belongs to before registering, or it will show another mosque's times`
+    : "";
+
 const entry = (f, source, extra) =>
   JSON.stringify({
     placeId: f.placeId,
@@ -274,6 +386,7 @@ mosque's prayer times.
 - ${masjidboxHits.length} site(s) embed Masjidbox
 - ${mawaqitHits.length} site(s) embed Mawaqit
 - ${unparsed.length} site(s) have a dated table we could NOT parse (needs a look)
+- ${otherByPlatform.size} other prayer-times platform(s) seen, on ${new Set(otherRanked.flatMap(([, fs]) => fs.map((f) => f.placeId))).size} site(s) — no provider for these yet
 - ${errors.length} site(s) unreachable (offline, blocked, or not HTML)
 
 ## Parsed a real timetable today (${ready.length})
@@ -282,9 +395,9 @@ ${
   ready
     .map(
       (f) =>
-        `### ${f.placeName}\n- \`${f.placeId}\`\n- ${f.datedTable.url}\n- today: ${Object.entries(f.datedTable.jamaat)
+        `### ${f.placeName}\n- \`${f.placeId}\`\n- ${f.datedTable.url}\n- shape: ${f.datedTable.kind ?? "dated-table"}${sharedWarning(f)}\n- today: ${Object.entries(f.datedTable.jamaat)
           .map(([k, v]) => `${k} ${v}`)
-          .join(", ")}\n\n\`\`\`json\n${entry(f, "dated-table", {
+          .join(", ")}\n\n\`\`\`json\n${entry(f, f.datedTable.kind ?? "dated-table", {
           url: f.datedTable.url,
           credit: `${new URL(f.datedTable.url).hostname} (published timetable)`,
         })}\n\`\`\``,
@@ -301,7 +414,7 @@ ${
       const ambiguousNote = platform.ambiguous
         ? `\n- ⚠️ page also named ${platform.ambiguous.length - 1} other masjidbox slug(s): ${platform.ambiguous.filter((s) => s !== platform.slug).map((s) => `\`${s}\``).join(", ")} — confirm which mosque this page is actually for before registering`
         : "";
-      return `### ${f.placeName}\n- \`${f.placeId}\` — slug \`${platform.slug}\`${ambiguousNote}\n\n\`\`\`json\n${entry(f, "masjidbox", { url: `https://masjidbox.net/${platform.slug}` })}\n\`\`\``;
+      return `### ${f.placeName}\n- \`${f.placeId}\` — slug \`${platform.slug}\`${ambiguousNote}${sharedWarning(f)}\n\n\`\`\`json\n${entry(f, "masjidbox", { url: `https://masjidbox.net/${platform.slug}` })}\n\`\`\``;
     })
     .join("\n\n") || "_none_"
 }
@@ -331,6 +444,37 @@ check whether the heading wording is just unusual.
 
 ${unparsed.map((f) => `- ${f.placeName} — ${f.datedTableUnparsed.url}`).join("\n") || "_none_"}
 
+## Platforms with no provider yet (${otherByPlatform.size})
+
+Each of these is a system some mosques publish through that
+scripts/timetable-sources.mjs cannot read. Ranked by how many places it
+would reach, so the biggest number is the next provider worth writing.
+These are FINGERPRINTS ONLY — a hit means the site mentions the platform,
+not that the mosque is confirmed on it, so nothing here may be registered
+without checking the actual timetable page first.
+
+${
+  otherRanked
+    .map(
+      ([platform, hits]) =>
+        `### ${platform} — ${hits.length} place(s)\n${hits
+          .map(
+            (f) =>
+              `- ${f.placeName} (\`${f.placeId}\`) — ${f.website}${
+                f.otherPlatforms.find((h) => h.platform === platform)?.sample
+                  ?.length
+                  ? ` · seen: ${f.otherPlatforms
+                      .find((h) => h.platform === platform)
+                      .sample.map((s) => `\`${s}\``)
+                      .join(", ")}`
+                  : ""
+              }`,
+          )
+          .join("\n")}`,
+    )
+    .join("\n\n") || "_none_"
+}
+
 ## Unreachable (${errors.length})
 
 ${
@@ -349,5 +493,5 @@ ${
 mkdirSync(OUT_DIR, { recursive: true });
 writeFileSync(join(OUT_DIR, "timetable-discovery-report.md"), report);
 console.log(`
-Probed ${all.length} site(s): ${ready.length} parseable table(s), ${masjidboxHits.length} masjidbox, ${mawaqitHits.length} mawaqit, ${unparsed.length} unparsed, ${errors.length} unreachable.
+Probed ${all.length} site(s): ${ready.length} parseable table(s), ${masjidboxHits.length} masjidbox, ${mawaqitHits.length} mawaqit, ${unparsed.length} unparsed, ${otherByPlatform.size} other platform(s), ${errors.length} unreachable.
 Report: ${join(OUT_DIR, "timetable-discovery-report.md")}`);

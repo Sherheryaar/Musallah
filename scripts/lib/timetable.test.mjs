@@ -12,9 +12,11 @@ import {
   masjidboxState,
   masjidboxTimezone,
   mawaqitSlugs,
+  parseDailyIqamahTable,
   parseDatedJamaatTable,
   prayerKeyFromLabel,
   sameJamaat,
+  siratDayTimes,
   to24Hour,
   toDMY,
   toHHMM,
@@ -225,6 +227,240 @@ describe("htmlTableRows + parseDatedJamaatTable", () => {
       dhuhr: "13:30",
       isha: "22:15",
     });
+  });
+});
+
+describe("siratDayTimes", () => {
+  // Shape taken from a real /v1/snapshot entry: Thursday carries the day's
+  // jamā'ah and an empty jumuah, Friday carries the sittings.
+  const days = [
+    {
+      date: "2026-08-27",
+      fajr: "05:15",
+      dhuhr: "13:30",
+      asr: "18:30",
+      maghrib: "20:02",
+      isha: "21:30",
+      jumuah: [],
+    },
+    {
+      date: "2026-08-28",
+      fajr: "05:17",
+      dhuhr: "13:30",
+      asr: "18:28",
+      maghrib: "20:00",
+      isha: "21:28",
+      jumuah: [
+        { label: "1st Jumu'ah", time: "13:30" },
+        { label: "2nd Jumu'ah", time: "14:30" },
+      ],
+    },
+  ];
+
+  it("takes jamaah from today and jumuah from the coming Friday", () => {
+    const got = siratDayTimes(days, "2026-08-27");
+    expect(got.jamaat).toEqual({
+      fajr: "05:15",
+      dhuhr: "13:30",
+      asr: "18:30",
+      maghrib: "20:02",
+      isha: "21:30",
+    });
+    // Thursday's own record has none; Friday's must be found instead.
+    expect(got.jumuah).toEqual(["13:30", "14:30"]);
+    expect(got.skipped).toEqual([]);
+  });
+
+  it("never reads another day's jamaah times", () => {
+    // Friday's Fajr is 05:17; asking for Thursday must not return it.
+    expect(siratDayTimes(days, "2026-08-27").jamaat.fajr).toBe("05:15");
+    expect(siratDayTimes(days, "2026-08-28").jamaat.fajr).toBe("05:17");
+  });
+
+  it("uses today's own sittings on a Friday", () => {
+    expect(siratDayTimes(days, "2026-08-28").jumuah).toEqual(["13:30", "14:30"]);
+  });
+
+  it("ignores a Jumu'ah that has already passed", () => {
+    // Asking about the Saturday after: last Friday's sitting is behind us and
+    // must not be presented as upcoming.
+    expect(siratDayTimes(days, "2026-08-29").jumuah).toEqual([]);
+  });
+
+  it("reports prayers with no time today rather than dropping them", () => {
+    const partial = [{ date: "2026-08-27", dhuhr: "13:30", jumuah: [] }];
+    const got = siratDayTimes(partial, "2026-08-27");
+    expect(got.jamaat).toEqual({ dhuhr: "13:30" });
+    expect(got.skipped).toEqual(["fajr", "asr", "maghrib", "isha"]);
+  });
+
+  it("returns nothing usable when the mosque has no record for today", () => {
+    const got = siratDayTimes([{ date: "2026-09-01", fajr: "05:20" }], "2026-08-27");
+    expect(got.jamaat).toEqual({});
+    expect(got.jumuah).toEqual([]);
+    expect(got.skipped).toEqual(["fajr", "dhuhr", "asr", "maghrib", "isha"]);
+  });
+
+  it("survives a missing or malformed times array", () => {
+    for (const input of [undefined, null, [], "nope", [null]]) {
+      const got = siratDayTimes(input, "2026-08-27");
+      expect(got.jamaat).toEqual({});
+      expect(got.jumuah).toEqual([]);
+    }
+  });
+
+  it("de-duplicates repeated sittings", () => {
+    const dupes = [
+      {
+        date: "2026-08-27",
+        jumuah: [
+          { label: "a", time: "13:30" },
+          { label: "b", time: "13:30" },
+          { label: "c", time: "bogus" },
+        ],
+      },
+    ];
+    expect(siratDayTimes(dupes, "2026-08-27").jumuah).toEqual(["13:30"]);
+  });
+});
+
+describe("parseDailyIqamahTable", () => {
+  // The real table from belfastislamiccentre.org.uk, including its
+  // two-prayers-in-one-row Sunrise/Dhuhr line.
+  const belfast = [
+    ["27/08/2026"],
+    ["Prayer صلاة", "Begins", "Iqamah"],
+    ["Fajr فجر", "04:40", "05:00"],
+    ["Sunrise شروق", "06:20", "Dhuhr ظهر", "13:27", "13:40"],
+    ["'Asr عصر", "17:16", "17:30"],
+    ["Maghrib مغرب", "20:31", "20:38"],
+    ["Isha عشاء", "21:56", "22:15"],
+  ];
+
+  it("reads the iqamah column for every prayer", () => {
+    expect(parseDailyIqamahTable(belfast, "2026-08-27")).toEqual({
+      fajr: "05:00",
+      dhuhr: "13:40",
+      asr: "17:30",
+      maghrib: "20:38",
+      isha: "22:15",
+    });
+  });
+
+  it("does not let a Sunrise time bleed onto the prayer beside it", () => {
+    // Sunrise's 06:20 shares a row with Dhuhr. Attributing it to Dhuhr would
+    // publish a jamā'ah seven hours early.
+    const parsed = parseDailyIqamahTable(belfast, "2026-08-27");
+    expect(parsed.dhuhr).toBe("13:40");
+    expect(Object.values(parsed)).not.toContain("06:20");
+  });
+
+  it("refuses a table that is not showing today", () => {
+    // A stale or cached page must yield nothing rather than yesterday's times.
+    expect(parseDailyIqamahTable(belfast, "2026-08-28")).toBeNull();
+  });
+
+  it("accepts a written-out date", () => {
+    const rows = [
+      ["Thursday 27th August 2026"],
+      ["Prayer", "Begins", "Jama'ah"],
+      ["Fajr", "04:40", "05:00"],
+    ];
+    expect(parseDailyIqamahTable(rows, "2026-08-27")).toEqual({ fajr: "05:00" });
+  });
+
+  it("returns null when no column names a jamaah time", () => {
+    // "Begins | Ends" is not a jamā'ah table; guessing would be a wrong time.
+    const rows = [
+      ["27/08/2026"],
+      ["Prayer", "Begins", "Ends"],
+      ["Fajr", "04:40", "06:20"],
+    ];
+    expect(parseDailyIqamahTable(rows, "2026-08-27")).toBeNull();
+  });
+
+  it("takes the iqamah column by name, not by position", () => {
+    // Reversed order: the jamā'ah is the FIRST time here.
+    const rows = [
+      ["27/08/2026"],
+      ["Prayer", "Iqamah", "Begins"],
+      ["Fajr", "05:00", "04:40"],
+      ["Asr", "17:30", "17:16"],
+    ];
+    expect(parseDailyIqamahTable(rows, "2026-08-27")).toEqual({
+      fajr: "05:00",
+      asr: "17:30",
+    });
+  });
+
+  it("resolves an explicit am/pm and a 12-hour jamaah column", () => {
+    const rows = [
+      ["27/08/2026"],
+      ["Prayer", "Begins", "Iqamah"],
+      ["Fajr", "4:40 am", "5:00 am"],
+      ["Isha", "9:56 pm", "10:15 pm"],
+    ];
+    expect(parseDailyIqamahTable(rows, "2026-08-27")).toEqual({
+      fajr: "05:00",
+      isha: "22:15",
+    });
+  });
+
+  it("reads a bare 12-hour jamaah column against the prayer", () => {
+    // No am/pm at all: "10:15" for Isha means 22:15, and Fajr stays morning.
+    const rows = [
+      ["27/08/2026"],
+      ["Prayer", "Begins", "Iqamah"],
+      ["Fajr", "4:40", "5:00"],
+      ["Isha", "9:56", "10:15"],
+    ];
+    expect(parseDailyIqamahTable(rows, "2026-08-27")).toEqual({
+      fajr: "05:00",
+      isha: "22:15",
+    });
+  });
+
+  it("skips a prayer whose row is missing a column", () => {
+    const rows = [
+      ["27/08/2026"],
+      ["Prayer", "Begins", "Iqamah"],
+      ["Fajr", "04:40", "05:00"],
+      ["Asr", "17:16"],
+    ];
+    expect(parseDailyIqamahTable(rows, "2026-08-27")).toEqual({ fajr: "05:00" });
+  });
+
+  it("ignores prose that merely mentions iqamah before the real header", () => {
+    // Real rows from harrowmosque.org.uk. The first cell is a banner, not a
+    // header; reading it as one made every data row unparseable and left a
+    // major mosque's times stale.
+    const harrow = [
+      ["IQAMAH CHANGES: Fajr: 5:30 AM Isha: 9:30 PM"],
+      ["27 August 2026 Fajr Jamaat 05:30 5:30 AM"],
+      ["Prayer", "Begins", "Jamaat"],
+      ["Fajr", "4:25 AM", "5:15 AM"],
+      ["Sunrise", "6:05 AM", "Zuhr", "1:07 AM", "1:30 PM"],
+      ["Asr**", "5:50 PM", "6:15 PM"],
+      ["Maghrib", "7:58 PM", "8:03 PM"],
+      ["Isha", "9:10 PM", "9:45 PM"],
+    ];
+    expect(parseDailyIqamahTable(harrow, "2026-08-27")).toEqual({
+      fajr: "05:15",
+      dhuhr: "13:30",
+      asr: "18:15",
+      maghrib: "20:03",
+      isha: "21:45",
+    });
+  });
+
+  it("returns null for a table with no rows or no date", () => {
+    expect(parseDailyIqamahTable([], "2026-08-27")).toBeNull();
+    expect(
+      parseDailyIqamahTable(
+        [["Prayer", "Begins", "Iqamah"], ["Fajr", "04:40", "05:00"]],
+        "2026-08-27",
+      ),
+    ).toBeNull();
   });
 });
 

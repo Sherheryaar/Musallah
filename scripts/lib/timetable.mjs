@@ -162,6 +162,177 @@ export function parseDatedJamaatTable(rows, isoDate) {
   return Object.keys(jamaat).length > 0 ? jamaat : null;
 }
 
+/**
+ * Reads one mosque's day out of a Sirat.uk snapshot entry's `times` array.
+ *
+ * Two separate questions, deliberately answered from different days:
+ *
+ *   * JAMĀ'AH comes from today's record only. These move with the sun, so a
+ *     neighbouring day's values would be quietly wrong.
+ *   * JUMU'AH comes from the soonest record from today onwards that actually
+ *     carries one — which is this week's Friday, and on a Friday is today.
+ *     Sirat publishes Jumu'ah on Friday's record rather than on every day's,
+ *     so reading only today would return nothing six days in seven, and a
+ *     mosque registered on a Tuesday would show no Jumu'ah until Friday.
+ *
+ * Returns { jamaat, jumuah, skipped } — `skipped` names the prayers with no
+ * time today, so the caller can report them rather than drop them silently.
+ */
+export function siratDayTimes(days, isoDate) {
+  const rows = Array.isArray(days) ? days : [];
+  const today = rows.find((d) => d?.date === isoDate);
+
+  const jamaat = {};
+  const skipped = [];
+  for (const key of JAMAAT_KEYS) {
+    const time = toHHMM(today?.[key]);
+    if (time) jamaat[key] = time;
+    else skipped.push(key);
+  }
+
+  const jumuahDay = rows
+    .filter((d) => typeof d?.date === "string" && d.date >= isoDate)
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .find((d) => Array.isArray(d.jumuah) && d.jumuah.length > 0);
+  const jumuah = [
+    ...new Set(
+      (jumuahDay?.jumuah ?? []).map((j) => toHHMM(j?.time)).filter(Boolean),
+    ),
+  ].sort();
+
+  return { jamaat, jumuah, skipped };
+}
+
+/** Is this cell a clock time rather than a label? */
+function isTimeCell(text) {
+  return /^\d{1,2}[:.]\d{2}\s*(?:am|pm)?$/i.test(String(text ?? "").trim());
+}
+
+/**
+ * "5:00 pm" -> "17:00", "12:30 am" -> "00:30", "17.30" -> "17:30".
+ * An explicit am/pm is stronger evidence than the per-prayer guess to24Hour
+ * has to make, so it is resolved here and the result left unambiguous.
+ */
+function normaliseTimeCell(text) {
+  const raw = String(text ?? "").trim().replace(".", ":");
+  const m = /^(\d{1,2}):(\d{2})\s*(am|pm)?$/i.exec(raw);
+  if (!m) return raw;
+  const meridiem = m[3]?.toLowerCase();
+  if (!meridiem) return `${m[1]}:${m[2]}`;
+  let h = Number(m[1]) % 12;
+  if (meridiem === "pm") h += 12;
+  return `${String(h).padStart(2, "0")}:${m[2]}`;
+}
+
+/**
+ * The OTHER common mosque timetable shape: one row PER PRAYER for today only,
+ * rather than one row per date for the year.
+ *
+ *   27/08/2026
+ *   Prayer   | Begins | Iqamah
+ *   Fajr فجر |  04:40 |  05:00
+ *   'Asr عصر |  17:16 |  17:30
+ *
+ * Three things make this readable without guessing, and each is required:
+ *
+ *   * TODAY'S DATE must appear in the table. A page of this shape shows one
+ *     day, so without that check a stale or cached page would be published
+ *     as if it were today's — the one failure worse than having no time.
+ *   * A HEADER must actually name an iqāmah/jamā'ah column. Plenty of
+ *     mosques publish "Begins | Ends" instead, and those are not jamā'ah
+ *     times; if nothing names one, this returns null rather than assume the
+ *     second time is it.
+ *   * The header decides WHICH time to take, by its position among the time
+ *     columns — not "the last one". A table ordering them Iqamah | Begins
+ *     would otherwise yield the start of the prayer as the jamā'ah.
+ *
+ * Rows are scanned label-by-label rather than by column index, because these
+ * tables are often laid out two prayers to a row and flatten to
+ * ["Sunrise", "06:20", "Dhuhr", "13:27", "13:40"]. Times are attributed to
+ * the label they follow, so Sunrise's time cannot land on Dhuhr.
+ */
+export function parseDailyIqamahTable(rows, isoDate) {
+  const [y, m, d] = isoDate.split("-");
+  const monthNames = [
+    "january", "february", "march", "april", "may", "june",
+    "july", "august", "september", "october", "november", "december",
+  ];
+  const month = monthNames[Number(m) - 1];
+  const day = String(Number(d));
+  const dateForms = [
+    `${d}/${m}/${y}`,
+    `${d}-${m}-${y}`,
+    `${d}.${m}.${y}`,
+    isoDate,
+  ].map((s) => s.toLowerCase());
+  const flat = rows.flat().map((c) => String(c ?? "").toLowerCase());
+  const showsToday =
+    flat.some((cell) => dateForms.some((form) => cell.includes(form))) ||
+    // "27 August 2026" / "August 27, 2026", allowing an ordinal suffix.
+    flat.some((cell) =>
+      new RegExp(
+        `(?:\\b${day}(?:st|nd|rd|th)?\\s+${month}\\b|\\b${month}\\s+${day}(?:st|nd|rd|th)?\\b)[^0-9]*${y}`,
+      ).test(cell),
+    );
+  if (!showsToday) return null;
+
+  // The header: a row naming the time columns, one of which is the jamā'ah.
+  let timeColumns = null;
+  for (const row of rows) {
+    const labels = row.filter((c) => !isTimeCell(c));
+    if (labels.length !== row.length) continue; // a data row, not a header
+    // A header names at least a row-label column and one time column, and its
+    // cells are short labels rather than sentences. Both checks exist because
+    // these pages carry prose that mentions the very words a header does:
+    // Harrow Central Mosque opens with a one-cell banner reading "IQAMAH
+    // CHANGES: Fajr: 5:30 AM Isha: 9:30 PM", which was being read as a
+    // single-column header and made every real row unparseable.
+    if (row.length < 2) continue;
+    if (labels.some((c) => String(c).trim().length > 30)) continue;
+    const named = labels.filter((c) =>
+      /iqam|iqaa?ma|jama|jamaah|jama'ah|congregation/i.test(c),
+    );
+    if (named.length === 0) continue;
+    // Drop the leading "Prayer"/"Salah" column: it labels the rows, not a time.
+    const columns = labels.filter(
+      (c) => !/^\s*(?:prayer|salah|salat|namaz|صلاة)\b/i.test(c) && c.trim() !== "",
+    );
+    const index = columns.findIndex((c) =>
+      /iqam|iqaa?ma|jama|jamaah|jama'ah|congregation/i.test(c),
+    );
+    if (index < 0) continue;
+    timeColumns = { count: columns.length, index };
+    break;
+  }
+  if (!timeColumns) return null;
+
+  const jamaat = {};
+  const take = (prayer, times) => {
+    if (!prayer || times.length !== timeColumns.count) return;
+    const time = to24Hour(times[timeColumns.index], prayer);
+    if (time && !jamaat[prayer]) jamaat[prayer] = time;
+  };
+
+  for (const row of rows) {
+    let prayer = null;
+    let times = [];
+    for (const cell of row) {
+      if (isTimeCell(cell)) {
+        times.push(normaliseTimeCell(cell));
+        continue;
+      }
+      take(prayer, times);
+      // A non-time cell starts a new label, even one we don't recognise
+      // (Sunrise, Zawal) — which is what stops its time bleeding onto the
+      // prayer named next in the same row.
+      prayer = prayerKeyFromLabel(cell);
+      times = [];
+    }
+    take(prayer, times);
+  }
+  return Object.keys(jamaat).length > 0 ? jamaat : null;
+}
+
 /** Strip tags/entities from an HTML table cell. */
 export function cellText(html) {
   return html
