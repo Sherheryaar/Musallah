@@ -711,7 +711,6 @@ export default function HomeScreen() {
       <PlaceCard
         place={item.place}
         distanceLabel={formatDistance(item.kmFromUser)}
-        distanceKm={item.kmFromUser}
         onPress={openPlace}
       />
     ),
@@ -945,7 +944,6 @@ export default function HomeScreen() {
                   key={item.place.id}
                   place={item.place}
                   distanceLabel={formatDistance(item.kmFromUser)}
-                  distanceKm={item.kmFromUser}
                   onPress={openPlace}
                 />
               ))}
