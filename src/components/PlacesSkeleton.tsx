@@ -7,16 +7,10 @@ import { createThemedStyles } from "@/lib/themedStyles";
 import { radius, spacing, type ThemeColors } from "@/lib/theme";
 import { useReducedMotion } from "@/lib/useReducedMotion";
 
-// Placeholder rows for the first load.
-//
-// The dataset is live-only by design (never bundled, never cached to disk),
-// so EVERY cold launch has a window with no places in memory. Before this
-// existed the list fell through to its empty state and told the user "No
-// places match -- or this is a gap in the data worth fixing", offering to
-// submit the entire country as a missing place. This says "loading"
-// instead, which is what was actually happening.
-//
-// Geometry mirrors PlaceCard exactly so nothing shifts when real rows
+// Placeholder rows for the first load. The dataset is live-only (never
+// bundled, never cached), so every cold launch has a window with no places in
+// memory — this says "loading" where EmptyState would wrongly say "no places
+// match". Geometry mirrors PlaceCard exactly so nothing shifts when real rows
 // replace these.
 
 const ROW_COUNT = 5;

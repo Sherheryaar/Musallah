@@ -163,17 +163,9 @@ export const numeric = { fontVariant: ["tabular-nums"] } satisfies TextStyle;
  *
  *   rowLabel: { ...type.body, fontWeight: "600", color: colors.text },
  *
- * Why the values changed: the previous version of this object was written
- * aspirationally and never adopted — every screen hand-picked sizes instead,
- * which produced 42 distinct size/leading/weight combinations across 107 text
- * styles, including SEVEN spellings of the uppercase section header. These
- * steps are the ones the app actually renders, so adopting the scale is
- * mostly a no-op on screen; what it removes is the accidental variance.
- *
- * Every step names a lineHeight, which is the part that was really missing.
- * Roughly half the app's text styles set a fontSize and no leading at all,
- * leaving the two platforms to apply their own font defaults — so the same
- * label occupied a different height on iOS than on Android.
+ * Every step names a lineHeight: without one the two platforms apply their
+ * own font defaults, so the same label occupies a different height on iOS
+ * than on Android.
  */
 export const type = {
   /** The qibla turn/bearing readout — the largest thing in the app. */
@@ -203,9 +195,7 @@ export const type = {
    * carries tracking, transform and weight, because all three are the role
    * rather than a choice: a 13px uppercase run needs the extra letterSpacing
    * to stay readable and the extra weight to hold up at that size, neither of
-   * which is true of any other step. Fixing the weight here is also what
-   * finishes the job: the seven places that spell this label were split 4/3
-   * between 700 and 600 for no reason anyone chose.
+   * which is true of any other step.
    */
   eyebrow: {
     fontSize: 13,

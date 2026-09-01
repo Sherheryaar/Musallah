@@ -65,35 +65,49 @@ The prayer-time tests pin golden values that were cross-checked against publishe
 ## Project structure
 
     app/                     Screens (file-based routing via expo-router)
-      _layout.tsx            Navigation shell + header styling
+      _layout.tsx            Navigation shell, providers, header styling
       index.tsx              Home: map, search, filters, bottom sheet, times bar
       place/[id].tsx         Detail page for one place
-      prayer.tsx             Full prayer schedule + countdown + Hijri date
-      settings.tsx           Calculation method, Asr mithl, privacy notes
+      prayer.tsx             Full prayer schedule + countdown + Hijri date + calendar
+      qibla.tsx              Compass instrument + sun method
+      settings.tsx           Calculation method, Asr mithl, notifications, privacy
     src/
       components/
-        PlacesMap.tsx        Map (react-native-maps)
+        PlacesMap.tsx        Map (react-native-maps), fixed marker pool + clustering
         BottomSheet.tsx      Draggable sheet over the map
-        FilterSheet.tsx      Facility filter modal
-        PlaceCard.tsx        List row
-        SuggestionForm.tsx   Suggest an edit / add a place
+        OverlaySheet.tsx     The one overlay every sheet/dialog is built on
+        FilterSheet.tsx      Facility filters
+        SuggestionSheet.tsx  Hosts SuggestionForm (suggest an edit / add a place)
+        JamaatCheck.tsx      One-tap "still right / out of date" on jamaat times
+        Onboarding.tsx       First-run: location prompt + Asr choice
         OfflineScreen.tsx    Shown when there's no connection and no data yet
+        Touchable.tsx        The app's tappable surface (ripple + press scale)
+        home/                Home-screen pieces: NextPrayerBar, SearchBar, ...
+        qibla/               Dial, TurnTape, SunCard
       context/
         PlacesContext.tsx    Data: Supabase only, in memory for the session
-        SettingsContext.tsx  Preferences, persisted to AsyncStorage
+        SettingsContext.tsx  Preferences (+ calcOptions), persisted to AsyncStorage
+        FavouritesContext    Saved place ids
+        NotificationsContext Local prayer reminders
+        OverlayContext.tsx   Lets a sheet dim/disarm the native header
       data/
-        places.ts            Place schema + labels (no bundled data)
+        places.ts            Place schema, prayer keys, labels (no bundled data)
         places.json          Pipeline artifact only -- never imported by the app
         placesRepo.ts        Supabase fetch + row validation, no on-device cache
       lib/
         prayerCalc.ts        On-device solar prayer-time calculation
-        prayerTimes.ts       Display helpers over prayerCalc
+        prayerTimes.ts       Schedule (Dates + display strings) over prayerCalc
+        prayerStatus.ts      "Now / next" for one day's schedule
+        qibla.ts             Bearing, sun azimuth, shadow-method crossings
         hijri.ts             Tabular Hijri date conversion
         distance.ts          Haversine distance + formatting
         geo.ts               Fallback location + coverage bounding box
+        time.ts              hhmm / isoDate / formatCountdown
+        useMinuteTick.ts     Minute-boundary clock, resyncs on foreground
+        useDeviceLocation.ts Permission + fix + fallback, once for all screens
         feedback.ts          Submissions: Supabase with email fallback
         supabase.ts          Shared client (null when unconfigured)
-        theme.ts             Colours, spacing, radii
+        theme.ts / elevation.ts   Colours, type scale, spacing, shadows, edges
         *.test.ts            Unit tests (vitest)
     scripts/
       sync-places.mjs        Snapshot the Supabase `places` table into src/data/places.json

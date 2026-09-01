@@ -107,20 +107,13 @@ export type Place = {
 
 /**
  * Deep equality for two loaded datasets, used to decide whether a refresh
- * actually changed anything (see PlacesContext).
+ * actually changed anything (see PlacesContext). Allocates nothing and stops
+ * at the first difference — deliberately not a JSON.stringify fingerprint,
+ * which cost ~1.5 MB of string per fetch.
  *
- * This replaces a `JSON.stringify(places)` fingerprint. That built a ~1.5 MB
- * string out of a few thousand rows on EVERY successful fetch — launch, every
- * foreground after a minute, and every realtime notification — and then held
- * onto it for the rest of the session so the next fetch had something to
- * compare against. This allocates nothing, stops at the first difference
- * (which is the common case when something really did change), and compares
- * against the array already in state.
- *
- * Every field is compared, and placesEqual is unit-tested by mutating each
- * key of a fully-populated place in turn — so a field added to `Place` and
- * forgotten here fails the test rather than silently freezing that field's
- * updates on screen.
+ * Every field is compared, and the test mutates each key of a fully-populated
+ * place in turn — so a field added to `Place` and forgotten here fails the
+ * test rather than silently freezing that field's updates on screen.
  */
 export function placesEqual(a: readonly Place[], b: readonly Place[]): boolean {
   if (a === b) return true;
@@ -246,11 +239,8 @@ export function cleanNotes(notes: string): string | undefined {
 const ADDRESS_JUNK_SEGMENT_RE =
   /(?:n\/a|none|not\s+known|unknown|tbc|tbd|tba|none\s+(?:until|in|till)\s*\d{4}|not\s+until\s*\d{4}|none\s+working)/i;
 
-// Derived from the pattern above, and compiled ONCE. These two were built with
-// `new RegExp(...)` inside cleanAddress, so loading the dataset compiled two
-// fresh regexes per row — a few thousand compilations on every launch and
-// every foreground refresh, which made this function cost several times what
-// the rest of the row validation put together does.
+// Derived from the pattern above and compiled once at module load:
+// cleanAddress runs on every row of every fetch.
 const ADDRESS_JUNK_MID_RE = new RegExp(
   `,\\s*${ADDRESS_JUNK_SEGMENT_RE.source}\\s*(?=,|$)`,
   "gi",

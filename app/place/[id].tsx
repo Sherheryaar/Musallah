@@ -602,18 +602,11 @@ export default function PlaceDetailScreen() {
               )}`}
             </Text>
           ) : null}
-          {/* ONE caution, never a stack of them. The age is already stated
-              in the source line directly above, so repeating "4 days ago"
-              here just to append a warning read as two paragraphs saying
-              the same thing. Both reasons collapse into a single sentence
-              with a single "confirm with the masjid". */}
+          {/* ONE caution, never a stack: jamaat times drift with the sun and
+              the pipeline keeps last-known times when a page stops parsing,
+              so a stale or unverified time looks exactly as authoritative as
+              a real one. The age itself is on the source line above. */}
           {jamaatCaution ? (
-            // Jamaat times drift with the sun — a Fajr time that hasn't been
-            // re-checked in days can be a quarter of an hour out, and the
-            // pipeline deliberately keeps the last-known times when a
-            // mosque's page stops parsing (stale beats silently wrong). An
-            // unverified time looks exactly as authoritative as a real one.
-            // Either way the honesty has to happen here.
             <Text style={styles.jamaatCaution}>{jamaatCaution}</Text>
           ) : null}
           {/* The community loop for the Jamaat column: one-tap
@@ -789,15 +782,9 @@ const useStyles = createThemedStyles((colors: ThemeColors, scheme) =>
     alignItems: "center",
     gap: spacing.xs + 2,
   },
-  // No `opacity` on any of the three. White has only 5.02:1 to spend on this
-  // green, so dimming it is expensive: the address shipped at 0.9, which
-  // composites to 4.40:1 and fails AA for 14px regular text. The palette
-  // tests never saw it, because they compare opaque colours and this was a
-  // stylesheet alpha — theme.test.ts now composites these explicitly.
-  //
-  // Nothing is lost visually. 0.9 vs 0.95 vs 1.0 white on this green is not a
-  // perceptible hierarchy; the real hierarchy is 22/700 → 14/400 → 12/600,
-  // which is doing all the work already.
+  // No `opacity` on any of the three: white has only 5.02:1 to spend on this
+  // green, and dimming it to 0.9 fails AA at 14px (theme.test.ts asserts the
+  // composites). Size and weight carry the hierarchy.
   heroMeta: {
     ...type.caption,
     fontWeight: "600",

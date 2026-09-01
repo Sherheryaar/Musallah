@@ -115,12 +115,7 @@ function tokenMatches(textToken: string, queryToken: string): boolean {
 /**
  * True when every query token matches some text token. BOTH sides are
  * pre-tokenised: the text side once per place, and the query side once per
- * keystroke.
- *
- * Tokenising the query inside this function (which is what the old
- * `fuzzyMatches(tokens, query)` shape forced) meant the same short string was
- * lowercased, NFD-normalised and split by four regexes once per PLACE — a few
- * thousand times per keystroke — to produce an identical result every time.
+ * keystroke — never once per place per keystroke.
  */
 export function fuzzyMatchesTokens(
   textTokens: readonly string[],

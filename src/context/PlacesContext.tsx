@@ -62,11 +62,8 @@ export function PlacesProvider({ children }: { children: React.ReactNode }) {
   const hasLoadedOnce = useRef(false);
   const inFlightRefresh = useRef<Promise<void> | null>(null);
   // The rows currently on screen, so a refresh returning identical data
-  // doesn't force a pointless re-render of the map and list. Compared
-  // structurally (placesEqual): the previous version of this held a
-  // JSON.stringify of the whole dataset — measured at 1.14 MB on the current
-  // 2,244 rows, rebuilt on every fetch and then retained for the rest of the
-  // session purely to diff the next one against.
+  // doesn't force a pointless re-render of the map and list (see placesEqual
+  // for why this is a structural compare and not a fingerprint).
   const lastApplied = useRef<Place[] | null>(null);
 
   // Deduped network refresh: concurrent callers (launch + foreground +

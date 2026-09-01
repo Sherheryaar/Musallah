@@ -50,18 +50,11 @@ export function getPrayerStatus(
   const previous = prayers[prayers.indexOf(next) - 1] ?? null;
 
   // Fajr is the ONE prayer whose window closes BEFORE the next prayer
-  // begins: it ends at sunrise, not at Dhuhr. Every other window runs right
-  // up to the following prayer, which is why "the previous prayer" is
-  // genuinely still current everywhere else.
-  //
-  // Without this the screen read "Now - Fajr" and highlighted the Fajr row
-  // for the ~7 hours between sunrise and Dhuhr, naming a prayer you can no
-  // longer pray and showing it as the active one. Nothing obligatory is in
-  // progress in that gap, so we say what actually happened and highlight
-  // nothing. What is voluntarily prayed in that window (Duha, and the
-  // makruh stretch just after sunrise) is deliberately NOT asserted here:
-  // that is a fiqh question with more than one answer, and guessing at it
-  // is exactly the kind of false authority this screen avoids.
+  // begins: it ends at sunrise, not at Dhuhr. Nothing obligatory is in
+  // progress between sunrise and Dhuhr, so say what happened and highlight
+  // nothing. What is voluntarily prayed in that gap (Duha, the makruh
+  // stretch after sunrise) is deliberately NOT asserted: that is a fiqh
+  // question with more than one answer.
   if (
     previous?.key === "fajr" &&
     sunrise &&
