@@ -8,6 +8,7 @@ import {
   JamaatTimes,
   Place,
   PlaceType,
+  PRAYER_KEYS,
 } from "@/data/places";
 import { supabase } from "@/lib/supabase";
 
@@ -24,24 +25,19 @@ const PLACE_TYPES: readonly PlaceType[] = [
   "multi_faith_room",
 ];
 
-const JAMAAT_PRAYER_KEYS = [
-  "fajr",
-  "dhuhr",
-  "asr",
-  "maghrib",
-  "isha",
-] as const;
-
 /**
- * "5:15" / "05:15" with hour 0-23 and minute 0-59 — the only shape the UI
- * renders as a prayer time. A digit-count-only regex would also accept
- * something like "25:99"; the caller renders this text directly, so a
- * malformed value must be rejected here, not just shaped correctly.
+ * "5:15" / "05:15" with hour 0-23 and minute 0-59 becomes "05:15"; anything
+ * else is null. The UI renders this text directly AND compares it to the
+ * current clock as a string (the place screen's "Next" pill), so a value has
+ * to come out of here both well-formed and zero-padded. A digit-count-only
+ * regex would also accept "25:99"; a malformed value must be rejected, not
+ * just shaped.
  */
-function isValidHHMM(value: string): boolean {
+function toHHMM(value: unknown): string | null {
+  if (typeof value !== "string") return null;
   const m = value.trim().match(/^(\d{1,2}):(\d{2})$/);
-  if (!m) return false;
-  return Number(m[1]) <= 23 && Number(m[2]) <= 59;
+  if (!m || Number(m[1]) > 23 || Number(m[2]) > 59) return null;
+  return `${m[1].padStart(2, "0")}:${m[2]}`;
 }
 
 /**
@@ -124,10 +120,10 @@ function coerceJamaat(value: unknown): JamaatTimes | undefined {
   if (!source || !recordedOn) return undefined;
   const jamaat: JamaatTimes = { source, recordedOn };
   let hasTime = false;
-  for (const key of JAMAAT_PRAYER_KEYS) {
-    const t = raw[key];
-    if (typeof t === "string" && isValidHHMM(t)) {
-      jamaat[key] = t.trim();
+  for (const key of PRAYER_KEYS) {
+    const t = toHHMM(raw[key]);
+    if (t) {
+      jamaat[key] = t;
       hasTime = true;
     }
   }
@@ -179,14 +175,13 @@ function buildPlace(raw: Record<string, unknown>): Place | null {
   if (raw.jumuahOnly === true) {
     place.jumuahOnly = true;
   }
-  if (
-    Array.isArray(raw.jumuahTimes) &&
-    raw.jumuahTimes.length > 0 &&
-    raw.jumuahTimes.every(
-      (t): t is string => typeof t === "string" && isValidHHMM(t),
-    )
-  ) {
-    place.jumuahTimes = raw.jumuahTimes.map((t) => t.trim());
+  if (Array.isArray(raw.jumuahTimes) && raw.jumuahTimes.length > 0) {
+    const times = raw.jumuahTimes.map(toHHMM);
+    // All or nothing: one malformed entry means the row was hand-edited
+    // badly, and showing the survivors as "the" Jumu'ah times would mislead.
+    if (times.every((t): t is string => t !== null)) {
+      place.jumuahTimes = times;
+    }
   }
   const jamaat = coerceJamaat(raw.jamaat);
   if (jamaat) place.jamaat = jamaat;

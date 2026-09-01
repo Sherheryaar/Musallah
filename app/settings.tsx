@@ -18,7 +18,7 @@ import { useNotifications } from "@/context/NotificationsContext";
 import { useSettings } from "@/context/SettingsContext";
 import { useTheme } from "@/context/ThemeContext";
 import { cardEdge } from "@/lib/elevation";
-import { PRAYER_KEYS, PRAYER_LABELS } from "@/lib/notificationPlan";
+import { PRAYER_KEYS, PRAYER_LABELS } from "@/data/places";
 import { createThemedStyles } from "@/lib/themedStyles";
 import { radius, spacing, type, type ThemeColors } from "@/lib/theme";
 import { MIN_TARGET } from "@/lib/metrics";

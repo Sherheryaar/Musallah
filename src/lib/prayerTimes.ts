@@ -3,11 +3,13 @@
 // API keys -- times are available instantly and offline, and the method
 // matches what apps like Pillars use for the UK.
 
+import type { PrayerKey } from "@/data/places";
 import {
   CalcOptions,
   computePrayerTimesUtc,
   type PrayerTimesUtcHours,
 } from "./prayerCalc";
+import { hhmm } from "./time";
 
 export type {
   CalcOptions,
@@ -15,15 +17,6 @@ export type {
   Madhab,
   Shafaq,
 } from "./prayerCalc";
-
-export type PrayerTimes = {
-  Fajr: string;
-  Sunrise: string;
-  Dhuhr: string;
-  Asr: string;
-  Maghrib: string;
-  Isha: string;
-};
 
 // ---------------------------------------------------------------------------
 // Memo over the astronomy
@@ -40,7 +33,7 @@ export type PrayerTimes = {
 // notificationPlan puts `entry.time` straight into a notification plan, so one
 // stray setMinutes() somewhere would corrupt the times every other screen
 // reads. Rebuilding six Dates per call costs nothing next to twelve solar
-// solves, and it keeps both public functions below returning fresh objects.
+// solves, and it keeps computePrayerSchedule returning fresh objects.
 // ---------------------------------------------------------------------------
 
 const utcCache = new Map<string, PrayerTimesUtcHours | null>();
@@ -80,56 +73,22 @@ function cachedTimesUtc(
   return computed;
 }
 
-/**
- * Prayer times for a location on a calendar day (defaults to today),
- * formatted "HH:MM" in the device's local time zone.
- *
- * Returns null only in polar day/night conditions where sunrise/sunset
- * don't exist -- callers should treat that as "nothing to show".
- */
-export function computePrayerTimes(
-  lat: number,
-  lng: number,
-  options: CalcOptions = {},
-  date: Date = new Date(),
-): PrayerTimes | null {
-  const year = date.getFullYear();
-  const month = date.getMonth() + 1;
-  const day = date.getDate();
-
-  const utc = cachedTimesUtc(lat, lng, options, year, month, day);
-  if (!utc) return null;
-
-  const format = (hoursUtc: number): string => {
-    // Round to the nearest minute, then let Date render it in local time.
-    const ms = Date.UTC(year, month - 1, day) + Math.round(hoursUtc * 60) * 60_000;
-    const d = new Date(ms);
-    const hh = String(d.getHours()).padStart(2, "0");
-    const mm = String(d.getMinutes()).padStart(2, "0");
-    return `${hh}:${mm}`;
-  };
-
-  return {
-    Fajr: format(utc.fajr),
-    Sunrise: format(utc.sunrise),
-    Dhuhr: format(utc.dhuhr),
-    Asr: format(utc.asr),
-    Maghrib: format(utc.maghrib),
-    Isha: format(utc.isha),
-  };
-}
-
 export type PrayerScheduleEntry = {
-  key: "fajr" | "sunrise" | "dhuhr" | "asr" | "maghrib" | "isha";
+  /** The five prayers plus sunrise, which is not a prayer but closes Fajr. */
+  key: PrayerKey | "sunrise";
   label: string;
   time: Date;
   display: string;
 };
 
 /**
- * Like computePrayerTimes, but returns real Date objects (plus "HH:MM"
- * display strings) so screens can run countdowns, highlight the current
- * prayer, and draw the sun arc.
+ * The day's six solar events for a location on a calendar day (defaults to
+ * today), as real Date objects plus "HH:MM" display strings in the device's
+ * local zone, so screens can run countdowns, highlight the current prayer,
+ * and draw the sun arc.
+ *
+ * Returns null only in polar day/night conditions where sunrise/sunset don't
+ * exist -- callers should treat that as "nothing to show".
  *
  * The astronomy behind this is memoized (see cachedTimesUtc), but the array,
  * the entries and the Dates are built fresh on every call — callers own what
@@ -153,13 +112,11 @@ export function computePrayerSchedule(
     label: string,
     hoursUtc: number,
   ): PrayerScheduleEntry => {
+    // Round to the nearest minute, then let Date render it in local time.
     const time = new Date(
       Date.UTC(year, month - 1, day) + Math.round(hoursUtc * 60) * 60_000,
     );
-    const display = `${String(time.getHours()).padStart(2, "0")}:${String(
-      time.getMinutes(),
-    ).padStart(2, "0")}`;
-    return { key, label, time, display };
+    return { key, label, time, display: hhmm(time) };
   };
 
   return [

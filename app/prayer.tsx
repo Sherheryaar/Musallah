@@ -19,7 +19,7 @@ import Svg, { Circle, Path } from "react-native-svg";
 import Touchable from "@/components/Touchable";
 import { useSettings } from "@/context/SettingsContext";
 import { useTheme } from "@/context/ThemeContext";
-import { formatCountdown } from "@/lib/duration";
+import { formatCountdown } from "@/lib/time";
 import { getPrayerStatus } from "@/lib/prayerStatus";
 import { cardEdge } from "@/lib/elevation";
 import { FALLBACK_LOCATION } from "@/lib/geo";

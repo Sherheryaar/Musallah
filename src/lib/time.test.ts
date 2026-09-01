@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { formatCountdown } from "./duration";
+import { formatCountdown } from "./time";
 
 describe("formatCountdown", () => {
   it("shows minutes under an hour", () => {

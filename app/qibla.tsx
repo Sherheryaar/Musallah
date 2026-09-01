@@ -46,6 +46,7 @@ import { hapticHeavy, hapticTick } from "@/lib/haptics";
 import { cardEdge, elevation } from "@/lib/elevation";
 import { MIN_TARGET } from "@/lib/metrics";
 import { radius, spacing, type, type ThemeColors } from "@/lib/theme";
+import { hhmm } from "@/lib/time";
 import { useReducedMotion } from "@/lib/useReducedMotion";
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
@@ -168,13 +169,6 @@ const PLATFORM: "ios" | "android" | "other" =
  * coordinates do.
  */
 const KM_FORMAT = new Intl.NumberFormat("en-GB", { maximumFractionDigits: 0 });
-
-/** "13:42" in the user's local time. */
-function formatClock(date: Date): string {
-  return `${String(date.getHours()).padStart(2, "0")}:${String(
-    date.getMinutes(),
-  ).padStart(2, "0")}`;
-}
 
 export default function QiblaScreen() {
   const { colors, scheme } = useTheme();
@@ -1231,7 +1225,7 @@ export default function QiblaScreen() {
                 {sunNow.sunUp
                   ? sunNow.instruction
                   : nextCrossing
-                    ? `Sun sits on the qibla line ${nextCrossing.tomorrow ? "tomorrow " : ""}at ${formatClock(nextCrossing.at)}`
+                    ? `Sun sits on the qibla line ${nextCrossing.tomorrow ? "tomorrow " : ""}at ${hhmm(nextCrossing.at)}`
                     : "Available in daylight"}
               </Text>
             )}
@@ -1254,7 +1248,7 @@ export default function QiblaScreen() {
             ) : null}
             {nextCrossing ? (
               <Text style={styles.sunBody}>
-                {`At ${formatClock(nextCrossing.at)} ${nextCrossing.tomorrow ? "tomorrow" : "today"} the sun sits exactly on the qibla line — face your shadow's opposite direction and that is the qibla, to a fraction of a degree.`}
+                {`At ${hhmm(nextCrossing.at)} ${nextCrossing.tomorrow ? "tomorrow" : "today"} the sun sits exactly on the qibla line — face your shadow's opposite direction and that is the qibla, to a fraction of a degree.`}
               </Text>
             ) : null}
           </View>

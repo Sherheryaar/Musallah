@@ -1,14 +1,12 @@
 import type { PrayerScheduleEntry } from "./prayerTimes";
 
-export type PrayerKey = PrayerScheduleEntry["key"];
-
 export type PrayerStatus = {
   /**
    * The obligatory prayer whose window is open RIGHT NOW, or null when none
    * is. The prayer screen highlights this row, so it must never name a
    * prayer you can no longer pray.
    */
-  currentKey: PrayerKey | null;
+  currentKey: PrayerScheduleEntry["key"] | null;
   /** What to say about "now", directly above the countdown. */
   nowLabel: string;
   nextLabel: string;

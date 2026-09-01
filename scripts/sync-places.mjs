@@ -10,14 +10,22 @@
 //
 // Reads the Supabase URL + anon key from .env (never the service key --
 // this only needs the public read policy). Rows are validated with the
-// same rules the app enforces at runtime (src/data/placesRepo.ts); invalid
-// rows are reported and skipped, never written.
+// same SHAPE rules the app enforces at runtime (src/data/placesRepo.ts):
+// required fields, coordinate ranges, HH:MM times, known enum values.
+// Invalid rows are reported and skipped, never written.
+//
+// Deliberately NOT applied here, because they are display-time transforms
+// the harvest scripts must not match against: cleanAddress, disambiguateName
+// and the masjid facility defaults. The snapshot is the raw table, tidied
+// only enough to be trustworthy.
 //
 // No dependencies -- plain Node 18+ (built-in fetch).
 
 import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+
+import { JAMAAT_KEYS, toHHMM } from "./lib/timetable.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const outPath = join(root, "src", "data", "places.json");
@@ -39,35 +47,31 @@ if (!URL_ || !KEY) {
   process.exit(1);
 }
 
-// --- validation (mirrors src/data/placesRepo.ts) ----------------------------
+// --- validation (same shape rules as src/data/placesRepo.ts) ----------------
 const PLACE_TYPES = new Set(["masjid", "musalla", "multi_faith_room"]);
 const FACILITY_KEYS = ["sistersSpace", "wudu", "disabledAccess", "parking", "jumuah", "janazah"];
-const JAMAAT_PRAYER_KEYS = ["fajr", "dhuhr", "asr", "maghrib", "isha"];
 const CONFIDENCE_VALUES = new Set(["verified", "community", "unverified"]);
-
-/** "5:15" with hour 0-23, minute 0-59 -- a shape-only regex would also let "25:99" through. */
-function isValidHHMM(value) {
-  const m = value.trim().match(/^(\d{1,2}):(\d{2})$/);
-  if (!m) return false;
-  return Number(m[1]) <= 23 && Number(m[2]) <= 59;
-}
 
 const str = (v) => (typeof v === "string" && v !== "" ? v : undefined);
 const url = (v) => {
   const s = str(v);
   return s && /^https?:\/\//i.test(s) ? s : undefined;
 };
+const inRange = (v, min, max) => typeof v === "number" && v >= min && v <= max;
 
 function mapRow(row, problems) {
   if (typeof row.id !== "string" || !row.id) return problems.push("row with no id"), null;
   if (typeof row.name !== "string" || !row.name) return problems.push(`${row.id}: no name`), null;
-  if (typeof row.lat !== "number" || !Number.isFinite(row.lat)) return problems.push(`${row.id}: bad lat`), null;
-  if (typeof row.lng !== "number" || !Number.isFinite(row.lng)) return problems.push(`${row.id}: bad lng`), null;
+  if (!inRange(row.lat, -90, 90)) return problems.push(`${row.id}: bad lat`), null;
+  if (!inRange(row.lng, -180, 180)) return problems.push(`${row.id}: bad lng`), null;
 
+  // Hand-edited rows arrive with "Masjid" or " masjid"; the app normalises
+  // those, so the snapshot must too or the two disagree about a place's type.
+  const type = typeof row.type === "string" ? row.type.trim().toLowerCase() : row.type;
   const place = {
     id: row.id,
     name: row.name,
-    type: PLACE_TYPES.has(row.type) ? row.type : "musalla",
+    type: PLACE_TYPES.has(type) ? type : "musalla",
     address: typeof row.address === "string" ? row.address : "",
     lat: row.lat,
     lng: row.lng,
@@ -77,12 +81,10 @@ function mapRow(row, problems) {
   };
 
   if (row.jumuah_only === true) place.jumuahOnly = true;
-  if (
-    Array.isArray(row.jumuah_times) &&
-    row.jumuah_times.length > 0 &&
-    row.jumuah_times.every((t) => typeof t === "string" && isValidHHMM(t))
-  ) {
-    place.jumuahTimes = row.jumuah_times.map((t) => t.trim());
+  if (Array.isArray(row.jumuah_times) && row.jumuah_times.length > 0) {
+    const times = row.jumuah_times.map(toHHMM);
+    if (times.every((t) => t !== null)) place.jumuahTimes = times;
+    else problems.push(`${row.id}: jumuah_times has a malformed entry (skipped)`);
   }
   if (row.jamaat && typeof row.jamaat === "object") {
     const source = str(row.jamaat.source);
@@ -90,10 +92,10 @@ function mapRow(row, problems) {
     if (source && recordedOn) {
       const jamaat = { source, recordedOn };
       let hasTime = false;
-      for (const k of JAMAAT_PRAYER_KEYS) {
-        const t = row.jamaat[k];
-        if (typeof t === "string" && isValidHHMM(t)) {
-          jamaat[k] = t.trim();
+      for (const k of JAMAAT_KEYS) {
+        const t = toHHMM(row.jamaat[k]);
+        if (t) {
+          jamaat[k] = t;
           hasTime = true;
         }
       }
@@ -117,7 +119,12 @@ function mapRow(row, problems) {
     const v = url(row[key]);
     if (v) place[key] = v;
   }
-  if (CONFIDENCE_VALUES.has(row.confidence)) place.confidence = row.confidence;
+  // Same rule as the app: a PRESENT but unrecognised value is treated as
+  // "unverified", never as "not set" (which the app reads as corroborated).
+  if (typeof row.confidence === "string" && row.confidence.trim() !== "") {
+    const normalized = row.confidence.trim().toLowerCase();
+    place.confidence = CONFIDENCE_VALUES.has(normalized) ? normalized : "unverified";
+  }
 
   return place;
 }

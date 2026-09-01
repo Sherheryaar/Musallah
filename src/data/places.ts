@@ -55,13 +55,23 @@ export function isCorroborated(place: Place): boolean {
   return place.confidence !== "unverified";
 }
 
-export type JamaatTimes = {
-  /** Display strings "HH:MM" 24h. Only include prayers you actually know. */
-  fajr?: string;
-  dhuhr?: string;
-  asr?: string;
-  maghrib?: string;
-  isha?: string;
+/**
+ * The five obligatory prayers, in order. This is THE list: jamaat records,
+ * notification preferences, the place screen's table and the pipeline all
+ * iterate it, so it is defined once here in the schema.
+ */
+export const PRAYER_KEYS = ["fajr", "dhuhr", "asr", "maghrib", "isha"] as const;
+export type PrayerKey = (typeof PRAYER_KEYS)[number];
+
+export const PRAYER_LABELS: Record<PrayerKey, string> = {
+  fajr: "Fajr",
+  dhuhr: "Dhuhr",
+  asr: "Asr",
+  maghrib: "Maghrib",
+  isha: "Isha",
+};
+
+export type JamaatTimes = Partial<Record<PrayerKey, string>> & {
   /** Where these times came from, e.g. "Website timetable, July 2026". */
   source: string;
   /** ISO date the times were recorded. */
@@ -163,11 +173,7 @@ function jamaatEqual(a?: JamaatTimes, b?: JamaatTimes): boolean {
   return (
     a.source === b.source &&
     a.recordedOn === b.recordedOn &&
-    a.fajr === b.fajr &&
-    a.dhuhr === b.dhuhr &&
-    a.asr === b.asr &&
-    a.maghrib === b.maghrib &&
-    a.isha === b.isha
+    PRAYER_KEYS.every((key) => a[key] === b[key])
   );
 }
 

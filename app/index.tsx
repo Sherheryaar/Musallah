@@ -36,7 +36,7 @@ import PlacesMap from "@/components/PlacesMap";
 import PlacesSkeleton from "@/components/PlacesSkeleton";
 import SuggestionSheet from "@/components/SuggestionSheet";
 import { distanceFrom, distanceKm, formatDistance } from "@/lib/distance";
-import { formatCountdown } from "@/lib/duration";
+import { formatCountdown } from "@/lib/time";
 import { fuzzyMatchesTokens, tokenize } from "@/lib/fuzzy";
 import {
   FALLBACK_LOCATION,

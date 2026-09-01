@@ -26,6 +26,8 @@ import {
   isCorroborated,
   Place,
   PLACE_TYPE_LABELS,
+  PRAYER_KEYS,
+  PRAYER_LABELS,
 } from "@/data/places";
 import Touchable from "@/components/Touchable";
 import { useFavourites } from "@/context/FavouritesContext";
@@ -41,8 +43,9 @@ import { JAMAAT_SOURCE_TOPICS } from "@/lib/jamaatContribution";
 import { FACILITY_ICONS, PLACE_TYPE_ICONS, type IconName } from "@/lib/icons";
 import { formatAddress } from "@/lib/formatAddress";
 import { isLikelyIreland } from "@/lib/geo";
-import { computePrayerTimes, PrayerTimes } from "@/lib/prayerTimes";
+import { computePrayerSchedule } from "@/lib/prayerTimes";
 import { createThemedStyles } from "@/lib/themedStyles";
+import { hhmm } from "@/lib/time";
 import {
   numeric,
   spacing,
@@ -64,18 +67,6 @@ function mapsSearchUrl(place: Place): string {
   const query = encodeURIComponent(place.name + ", " + place.address);
   return "https://www.google.com/maps/search/?api=1&query=" + query;
 }
-
-const PRAYER_ROWS: {
-  label: string;
-  jamaatKey: "fajr" | "dhuhr" | "asr" | "maghrib" | "isha";
-  calculatedKey: keyof PrayerTimes;
-}[] = [
-  { label: "Fajr", jamaatKey: "fajr", calculatedKey: "Fajr" },
-  { label: "Dhuhr", jamaatKey: "dhuhr", calculatedKey: "Dhuhr" },
-  { label: "Asr", jamaatKey: "asr", calculatedKey: "Asr" },
-  { label: "Maghrib", jamaatKey: "maghrib", calculatedKey: "Maghrib" },
-  { label: "Isha", jamaatKey: "isha", calculatedKey: "Isha" },
-];
 
 /**
  * Northern Ireland uses the UK's own numbering plan end-to-end (the "028"
@@ -104,15 +95,14 @@ function phoneToTel(display: string, place: Place): string {
 }
 
 /**
- * Whole days since a "YYYY-MM-DD" recordedOn stamp, in the DEVICE's zone.
- * Parsed by hand rather than `new Date(iso)`: a bare ISO date parses as UTC
- * midnight, which for anyone west of Greenwich reads as "yesterday" and
- * would age every stamp by a day. NaN-safe: an unparseable stamp returns 0,
- * which shows the raw string rather than a false "N days ago".
+ * Whole days since a "YYYY-MM-DD" recordedOn stamp, in the DEVICE's zone, or
+ * null for a stamp that isn't one. Parsed by hand rather than `new Date(iso)`:
+ * a bare ISO date parses as UTC midnight, which for anyone west of Greenwich
+ * reads as "yesterday" and would age every stamp by a day.
  */
-function jamaatAgeDays(recordedOn: string, now: Date): number {
+function jamaatAgeDays(recordedOn: string, now: Date): number | null {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(recordedOn);
-  if (!m) return 0;
+  if (!m) return null;
   const recorded = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   return Math.round((today.getTime() - recorded.getTime()) / 86_400_000);
@@ -121,9 +111,8 @@ function jamaatAgeDays(recordedOn: string, now: Date): number {
 /** "recorded today" / "yesterday" / "3 days ago" — a raw ISO date is for
     machines; how stale the times are is the fact a reader needs. */
 function describeRecordedOn(recordedOn: string, now: Date): string {
-  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(recordedOn);
-  if (!m) return recordedOn;
   const days = jamaatAgeDays(recordedOn, now);
+  if (days === null) return recordedOn;
   if (days <= 0) return "recorded today";
   if (days === 1) return "recorded yesterday";
   return `recorded ${days} days ago`;
@@ -181,22 +170,24 @@ export default function PlaceDetailScreen() {
     [],
   );
 
-  // Computed on-device for this place's exact coordinates -- instant,
-  // offline, and it follows the mithl/method chosen in Settings. Only the
-  // calculation-relevant settings are dependencies.
-  const calculatedTimes = useMemo<PrayerTimes | null>(
-    () =>
-      place
-        ? computePrayerTimes(place.lat, place.lng, {
-            method: settings.method,
-            madhab: settings.madhab,
-            shafaq: settings.shafaq,
-          })
-        : null,
-    [place, settings.method, settings.madhab, settings.shafaq],
-  );
-
   const [now, setNow] = useState(() => new Date());
+
+  // Computed on-device for this place's exact coordinates -- instant,
+  // offline, and it follows the mithl/method chosen in Settings. Keyed on
+  // `now` so the column rolls over at midnight; the astronomy behind it is
+  // cached per day, so the per-minute recompute is six Date objects.
+  const calculated = useMemo<Partial<Record<string, string>> | null>(() => {
+    if (!place) return null;
+    const schedule = computePrayerSchedule(
+      place.lat,
+      place.lng,
+      { method: settings.method, madhab: settings.madhab, shafaq: settings.shafaq },
+      now,
+    );
+    return schedule
+      ? Object.fromEntries(schedule.map((e) => [e.key, e.display]))
+      : null;
+  }, [place, settings.method, settings.madhab, settings.shafaq, now]);
 
   // Tick on each minute BOUNDARY so the upcoming prayer highlight stays current,
   // and resync on foreground when returning to an already-open screen.
@@ -241,34 +232,27 @@ export default function PlaceDetailScreen() {
     [settings.hapticFeedback],
   );
 
+  // The first prayer whose time (jamaat where known, else calculated) is
+  // still ahead today; after Isha, tomorrow's Fajr. Both sides are zero-
+  // padded "HH:MM" (placesRepo normalises jamaat on load), so a plain string
+  // comparison against the clock is exact and needs no parsing.
   const currentUpcomingKey = useMemo(() => {
-    if (!calculatedTimes) return null;
-    const nowMinutes = now.getHours() * 60 + now.getMinutes();
-
-    const parseMinutes = (timeStr?: string) => {
-      if (!timeStr) return null;
-      const parts = timeStr.split(":");
-      if (parts.length < 2) return null;
-      return parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
-    };
-
-    for (const row of PRAYER_ROWS) {
-      const timeStr =
-        place?.jamaat?.[row.jamaatKey] ?? calculatedTimes[row.calculatedKey];
-      const mins = parseMinutes(timeStr);
-      if (mins !== null && mins > nowMinutes) {
-        return row.jamaatKey;
-      }
-    }
-    return "fajr";
-  }, [calculatedTimes, place?.jamaat, now]);
+    if (!calculated) return null;
+    const clock = hhmm(now);
+    return (
+      PRAYER_KEYS.find((key) => {
+        const t = place?.jamaat?.[key] ?? calculated[key];
+        return t !== undefined && t > clock;
+      }) ?? "fajr"
+    );
+  }, [calculated, place?.jamaat, now]);
 
   // One sentence covering both ways these times can mislead, so the card
   // never stacks two near-identical warnings. The age is not repeated here:
   // the source line above already carries "recorded N days ago".
   const jamaatCaution = useMemo(() => {
     if (!place?.jamaat) return null;
-    const stale = jamaatAgeDays(place.jamaat.recordedOn, now) > 3;
+    const stale = (jamaatAgeDays(place.jamaat.recordedOn, now) ?? 0) > 3;
     const unverified = place.confidence !== "verified";
     if (stale && unverified) {
       return "Unverified, and possibly out of date — confirm with the masjid before relying on these.";
@@ -595,7 +579,7 @@ export default function PlaceDetailScreen() {
         </View>
       ) : null}
 
-      {calculatedTimes || place.jamaat ? (
+      {calculated || place.jamaat ? (
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Prayer times</Text>
           <View style={styles.prayerTable}>
@@ -611,11 +595,11 @@ export default function PlaceDetailScreen() {
                 Start
               </Text>
             </View>
-            {PRAYER_ROWS.map((row) => {
-              const isUpcoming = row.jamaatKey === currentUpcomingKey;
+            {PRAYER_KEYS.map((key) => {
+              const isUpcoming = key === currentUpcomingKey;
               return (
                 <View
-                  key={row.label}
+                  key={key}
                   style={[
                     styles.prayerRow,
                     isUpcoming && styles.prayerRowUpcoming,
@@ -628,9 +612,9 @@ export default function PlaceDetailScreen() {
                         isUpcoming && styles.prayerNameCellUpcoming,
                       ]}
                     >
-                      {row.label === "Asr"
+                      {key === "asr"
                         ? `Asr (${settings.madhab === "hanafi" ? "2" : "1"} mithl)`
-                        : row.label}
+                        : PRAYER_LABELS[key]}
                     </Text>
                     {isUpcoming ? (
                       <View style={styles.nextPill}>
@@ -644,10 +628,10 @@ export default function PlaceDetailScreen() {
                       isUpcoming && styles.prayerJamaatCellUpcoming,
                     ]}
                   >
-                    {place.jamaat?.[row.jamaatKey] ?? "—"}
+                    {place.jamaat?.[key] ?? "—"}
                   </Text>
                   <Text style={styles.prayerCalculatedCell}>
-                    {calculatedTimes?.[row.calculatedKey] ?? "—"}
+                    {calculated?.[key] ?? "—"}
                   </Text>
                 </View>
               );

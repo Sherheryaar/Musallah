@@ -21,7 +21,8 @@
 // This module is the pure part — message formats and the re-ask policy —
 // so both are unit-tested without touching React or the network.
 
-import type { JamaatTimes, Place } from "@/data/places";
+import { PRAYER_KEYS, type JamaatTimes, type Place } from "@/data/places";
+import { isoDate } from "./time";
 
 /**
  * How long one user's "still right" tap silences the question on their own
@@ -33,13 +34,6 @@ import type { JamaatTimes, Place } from "@/data/places";
 export const CONFIRM_COOLDOWN_DAYS = 30;
 
 const DAY_MS = 24 * 60 * 60 * 1000;
-
-/** ISO "YYYY-MM-DD" for the device's local calendar date. */
-export function localIsoDate(now: Date): string {
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(
-    now.getDate(),
-  ).padStart(2, "0")}`;
-}
 
 /**
  * Should the confirm controls be offered, given the last recorded tap?
@@ -59,7 +53,12 @@ export function shouldOfferConfirmation(
   return now.getTime() - last >= CONFIRM_COOLDOWN_DAYS * DAY_MS;
 }
 
-const JAMAAT_KEYS = ["fajr", "dhuhr", "asr", "maghrib", "isha"] as const;
+/** "fajr 05:15, dhuhr 13:30" — only the prayers the record actually has. */
+function timesShown(jamaat: JamaatTimes): string {
+  return PRAYER_KEYS.filter((key) => jamaat[key])
+    .map((key) => `${key} ${jamaat[key]}`)
+    .join(", ");
+}
 
 /**
  * The one-tap confirmation, as a structured submission message.
@@ -73,13 +72,10 @@ export function buildConfirmationMessage(
   jamaat: JamaatTimes,
   now: Date,
 ): string {
-  const times = JAMAAT_KEYS.filter((key) => jamaat[key])
-    .map((key) => `${key} ${jamaat[key]}`)
-    .join(", ");
   return (
     `[Jamaat confirmed] A user checked the jamaat times shown in the app ` +
-    `on ${localIsoDate(now)} and marked them still correct. ` +
-    `Times shown: ${times}. ` +
+    `on ${isoDate(now)} and marked them still correct. ` +
+    `Times shown: ${timesShown(jamaat)}. ` +
     `(App data recorded ${jamaat.recordedOn}; source: ${jamaat.source}.)`
   );
 }
@@ -90,13 +86,10 @@ export function buildConfirmationMessage(
  * refresh signal even if nobody ever types the new times.
  */
 export function buildOutdatedMessage(jamaat: JamaatTimes, now: Date): string {
-  const times = JAMAAT_KEYS.filter((key) => jamaat[key])
-    .map((key) => `${key} ${jamaat[key]}`)
-    .join(", ");
   return (
     `[Jamaat outdated] A user checked the jamaat times shown in the app ` +
-    `on ${localIsoDate(now)} and marked them OUT OF DATE. ` +
-    `Times shown: ${times}. ` +
+    `on ${isoDate(now)} and marked them OUT OF DATE. ` +
+    `Times shown: ${timesShown(jamaat)}. ` +
     `(App data recorded ${jamaat.recordedOn}; source: ${jamaat.source}.)`
   );
 }

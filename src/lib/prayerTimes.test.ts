@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { computePrayerSchedule, computePrayerTimes } from "./prayerTimes";
+import { computePrayerSchedule } from "./prayerTimes";
 import { computePrayerTimesUtc } from "./prayerCalc";
 
 // The astronomy itself is covered by prayerCalc.test.ts. What is tested here
@@ -152,31 +152,5 @@ describe("computePrayerSchedule", () => {
     expect(polar()).toBeNull();
     // A cached `null` is a real answer, not a cache miss.
     expect(polar()).toBeNull();
-  });
-});
-
-describe("computePrayerTimes", () => {
-  it("agrees with computePrayerSchedule, which now shares its cache", () => {
-    const times = computePrayerTimes(LONDON.lat, LONDON.lng, OPTIONS, DAY)!;
-    const schedule = computePrayerSchedule(
-      LONDON.lat,
-      LONDON.lng,
-      OPTIONS,
-      DAY,
-    )!;
-    const byKey = Object.fromEntries(schedule.map((e) => [e.key, e.display]));
-    expect(times.Fajr).toBe(byKey.fajr);
-    expect(times.Sunrise).toBe(byKey.sunrise);
-    expect(times.Dhuhr).toBe(byKey.dhuhr);
-    expect(times.Asr).toBe(byKey.asr);
-    expect(times.Maghrib).toBe(byKey.maghrib);
-    expect(times.Isha).toBe(byKey.isha);
-  });
-
-  it("returns a fresh object each call", () => {
-    const a = computePrayerTimes(LONDON.lat, LONDON.lng, OPTIONS, DAY);
-    const b = computePrayerTimes(LONDON.lat, LONDON.lng, OPTIONS, DAY);
-    expect(a).toEqual(b);
-    expect(a).not.toBe(b);
   });
 });

@@ -12,25 +12,9 @@
 // Pure functions: the expo-notifications calls live in the context; this
 // module just decides WHAT to schedule and is fully testable.
 
-import { formatCountdown } from "./duration";
+import { PRAYER_KEYS, type PrayerKey } from "@/data/places";
 import { computePrayerSchedule, type CalcOptions } from "./prayerTimes";
-
-export const PRAYER_KEYS = [
-  "fajr",
-  "dhuhr",
-  "asr",
-  "maghrib",
-  "isha",
-] as const;
-export type PrayerKey = (typeof PRAYER_KEYS)[number];
-
-export const PRAYER_LABELS: Record<PrayerKey, string> = {
-  fajr: "Fajr",
-  dhuhr: "Dhuhr",
-  asr: "Asr",
-  maghrib: "Maghrib",
-  isha: "Isha",
-};
+import { formatCountdown, isoDate } from "./time";
 
 export type NotificationPrefs = {
   enabled: boolean;
@@ -99,7 +83,7 @@ export function planNotifications(
     );
     const schedule = computePrayerSchedule(lat, lng, options, day);
     if (!schedule) continue; // polar edge case: skip the day
-    const dateKey = `${day.getFullYear()}-${String(day.getMonth() + 1).padStart(2, "0")}-${String(day.getDate()).padStart(2, "0")}`;
+    const dateKey = isoDate(day);
     for (const entry of schedule) {
       if (entry.key === "sunrise" || !wanted.has(entry.key)) continue;
       const fireAt = new Date(entry.time.getTime() - offsetMs);

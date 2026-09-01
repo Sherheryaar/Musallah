@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { isoDate } from "./time";
 
 import {
   buildConfirmationMessage,
@@ -7,7 +8,6 @@ import {
   canContributeJamaat,
   CONFIRM_COOLDOWN_DAYS,
   confirmStorageKey,
-  localIsoDate,
   shouldOfferConfirmation,
 } from "./jamaatContribution";
 import type { JamaatTimes, Place } from "@/data/places";
@@ -112,8 +112,8 @@ describe("canContributeJamaat", () => {
 });
 
 describe("helpers", () => {
-  it("localIsoDate pads to YYYY-MM-DD", () => {
-    expect(localIsoDate(new Date(2026, 0, 5))).toBe("2026-01-05");
+  it("isoDate pads to YYYY-MM-DD", () => {
+    expect(isoDate(new Date(2026, 0, 5))).toBe("2026-01-05");
   });
 
   it("storage key is namespaced per place", () => {

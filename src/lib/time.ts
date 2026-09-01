@@ -1,7 +1,22 @@
-// How long until the next prayer, in words. The home screen's times bar and
-// the prayer screen's hero both count down to the same moment, so they read
-// from this one function — a gap spelled two ways ("1 h 3 min" here, "1 hr 2
-// mins" there) looks like two different clocks.
+// Clock and date strings, in the device's local time zone.
+//
+// Every screen that shows a time or counts down to one reads from here, so
+// the same instant can never be spelled two ways ("1 h 3 min" on one screen
+// and "1 hr 2 mins" on another looks like two different clocks).
+
+/** "05:15" — 24-hour, zero-padded. */
+export function hhmm(date: Date): string {
+  return `${String(date.getHours()).padStart(2, "0")}:${String(
+    date.getMinutes(),
+  ).padStart(2, "0")}`;
+}
+
+/** "2026-01-05" — the device's local calendar date, not UTC's. */
+export function isoDate(date: Date): string {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(
+    date.getDate(),
+  ).padStart(2, "0")}`;
+}
 
 /**
  * A countdown as "45 mins", "1 hr", or "1 hr 2 mins".
