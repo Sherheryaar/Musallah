@@ -1,7 +1,10 @@
 #!/usr/bin/env node
-// Syncs src/data/places.json (the offline fallback bundled into the app)
-// from the live Supabase `places` table, so offline users see the real
-// dataset rather than a stale sample.
+// Syncs src/data/places.json from the live Supabase `places` table.
+//
+// places.json is the PIPELINE's snapshot, never the app's: the harvest and
+// verify scripts match against it, and it makes the dataset reviewable in a
+// diff. The app itself reads Supabase live and never bundles this file (see
+// src/data/places.ts), so a stale snapshot only ever weakens matching.
 //
 //   node scripts/sync-places.mjs
 //
@@ -157,7 +160,7 @@ if (places.length === 0) {
 }
 
 // A schema drift that makes mapRow() reject MOST (not literally all) rows
-// must not silently overwrite the bundled dataset with a gutted one: this
+// must not silently overwrite the snapshot with a gutted one: this
 // runs unattended in CI and auto-commits its output (refresh-jummah.yml),
 // with no human review gate before the push.
 let previousCount = 0;

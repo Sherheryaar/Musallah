@@ -6,8 +6,8 @@
 // WHY MAWAQIT: mawaqit.net is the prayer-times platform a large share of UK
 // mosques use to publish their own timetables. The data is entered by the
 // mosques themselves, which makes it far better evidence than scraping
-// times out of homepage HTML (see scripts/harvest-jummah-times.mjs, which
-// managed ~8%: most mosque sites render times with JavaScript widgets).
+// times out of homepage HTML (an earlier attempt at that managed ~8%: most
+// mosque sites render times with JavaScript widgets).
 // Their public search endpoint returns, per mosque: name, coordinates,
 // contact details, a `jumua` time, today's daily times, facility flags, and
 // a `closed` flag.
@@ -16,9 +16,9 @@
 //   * jumua / jumua2  -> imported. A mosque's Jumu'ah sitting is stable for
 //     months, so a stored value stays true and is what people plan around.
 //   * daily times     -> recorded in the JSON output for future work, but
-//     NOT imported. They change every single day, so a snapshot baked into
-//     the bundled dataset would be wrong within a week. Serving those needs
-//     a live fetch with a "published by the mosque, fetched today" label.
+//     NOT imported here. They change every single day, so a one-off snapshot
+//     would be wrong within a week; the daily refresh (refresh-times.mjs)
+//     is what serves those, labelled with the source and date recorded.
 //   * facility flags / closed -> reported as corroboration for the place
 //     audit, never auto-applied.
 //

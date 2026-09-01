@@ -1147,7 +1147,7 @@ const sql = `-- Proposed \`confidence\` values for public.places
 -- ${changed.length} of ${places.length} rows change tier
 -- (${upgrades.length} -> verified, ${toCommunity.length} -> community, ${downgrades.length} -> unverified).
 --
--- AFTER RUNNING THIS in the Supabase SQL editor, re-sync the bundled dataset:
+-- AFTER RUNNING THIS in the Supabase SQL editor, re-sync the pipeline snapshot:
 --
 --     npm run sync:places
 --

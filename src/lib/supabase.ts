@@ -7,8 +7,9 @@ const url = process.env.EXPO_PUBLIC_SUPABASE_URL?.trim();
 const anonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY?.trim();
 
 /**
- * Single shared Supabase client, or null when env vars are missing so the
- * app runs entirely on bundled data. No auth features are used.
+ * Single shared Supabase client, or null when env vars are missing — in
+ * which case there is no place data at all and the offline screen shows
+ * (see PlacesContext). No auth features are used.
  */
 export const supabase: SupabaseClient | null =
   url && anonKey

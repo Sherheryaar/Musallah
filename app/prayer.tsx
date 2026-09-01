@@ -595,11 +595,9 @@ export default function PrayerScreen() {
           accessibilityLabel="Previous day"
           accessibilityState={{ disabled: atToday }}
         >
-          {/* MaterialCommunityIcons, not the \u2039 and \u203a text glyphs these were:
-              every other piece of chrome in the app is from this one icon set,
-              and a font glyph renders at a different weight and baseline on
-              each platform \u2014 exactly the drift _layout.tsx already removed
-              when it dropped \ud83e\udded and \u2699\ufe0f for vector icons. */}
+          {/* Vector icons, not text glyphs: every other piece of chrome in the
+              app is from this one icon set, and a font glyph renders at a
+              different weight and baseline on each platform. */}
           <MaterialCommunityIcons
             name="chevron-left"
             size={26}

@@ -53,7 +53,7 @@ Supabase credentials live in `.env` (gitignored):
 
 Without them the app has no place data to show at all — see "Live data only" above, and the offline screen is exactly what an unconfigured install sees. The anon key is shipped inside the app bundle by design, so the Supabase project **must** have Row Level Security enabled: public read on `places`, insert-only on `submissions`.
 
-To set up a fresh Supabase project, run `scripts/schema.sql` in the SQL editor — it creates both tables **with the RLS policies the security model depends on** (plus a length cap on submissions and the realtime publication), then seed data with `scripts/seed-places.sql`.
+A fresh Supabase project needs two tables and three policies, all created in the SQL editor: `places` (read by the app, written only by the pipeline's service key) with an `anon` **select** policy and no insert/update/delete policy; `submissions` (`kind`, `place_id`, `message`) with an `anon` **insert-only** policy and a `CHECK (length(message) <= 2000)` on `message`; and `places` added to the `supabase_realtime` publication so the app's live updates work. RLS must be enabled on both tables — without it the anon key in the bundle could write anything.
 
 ## Development
 
@@ -96,26 +96,25 @@ The prayer-time tests pin golden values that were cross-checked against publishe
         theme.ts             Colours, spacing, radii
         *.test.ts            Unit tests (vitest)
     scripts/
-      schema.sql             Create tables + RLS policies (run first, once)
-      csv-to-places.mjs      Rebuild src/data/places.json from a CSV export
+      sync-places.mjs        Snapshot the Supabase `places` table into src/data/places.json
+      refresh-times.mjs      Daily jamaat/jumu'ah refresh (see Data pipeline below)
       gen-pin-assets.js      Regenerate map pin PNGs in assets/pins/
-      seed-places.sql        Seed/reset the Supabase `places` table
+      gen-cluster-assets.js  Regenerate cluster bubble PNGs
+      gen-app-icons.js       Regenerate the app, adaptive and notification icons
 
 ## Data pipeline
 
-The Supabase `places` table is the source of truth, and the ONLY place the shipped app ever reads it from (see "Live data only" above). `src/data/places.json` is a pipeline artifact, not something the app ships with — it exists so the dataset is reviewable in a diff and other scripts (`verify-places.mjs`, `csv-to-places.mjs`) have a snapshot to work from. Sync it from Supabase with:
+The Supabase `places` table is the source of truth, and the ONLY place the shipped app ever reads it from (see "Live data only" above). `src/data/places.json` is a pipeline artifact, not something the app ships with — it exists so the dataset is reviewable in a diff and the harvest/verify scripts have a snapshot to match against. Sync it from Supabase with:
 
     npm run sync:places
 
-This fetches every row over the public read policy (anon key from `.env`), validates each one with the same rules the app enforces at runtime, and rewrites `src/data/places.json`. Re-run it whenever the database changes meaningfully, and commit the result for the record — nothing reads it at runtime, so there's no rush.
-
-(`npm run build:places` still exists for the older CSV-export route: dashboard → export `places` as CSV → save as `data/places.csv` → run it.)
+This fetches every row over the public read policy (anon key from `.env`), validates each one with the same rules the app enforces at runtime, and rewrites `src/data/places.json`. Re-run it before any harvest (a stale snapshot silently weakens matching), and commit the result for the record — nothing reads it at runtime, so there's no rush.
 
 ### Automatic prayer-time refresh (multi-source)
 
-Jamaat and Jumu'ah times come from **each mosque's own published timetable**, refreshed **daily** by a scheduled GitHub Actions workflow (`.github/workflows/refresh-jummah.yml`). Daily rather than weekly because jamaat times track the sun — East London Mosque's Fajr jamā'ah moves about two minutes a day, so a weekly snapshot would be a quarter of an hour wrong by Sunday.
+Jamaat and Jumu'ah times come from **each mosque's own published timetable**, refreshed **twice daily** by a scheduled GitHub Actions workflow (`.github/workflows/refresh-times.yml`). Daily rather than weekly because jamaat times track the sun — East London Mosque's Fajr jamā'ah moves about two minutes a day, so a weekly snapshot would be a quarter of an hour wrong by Sunday.
 
-**No provider is privileged.** [Mawaqit](https://mawaqit.net) covers 131 of the 2,244 places and *none* of London's largest mosques are on it, so each place is registered to whichever system its own mosque publishes through:
+**No provider is privileged.** [Mawaqit](https://mawaqit.net) covers only a small fraction of the dataset and *none* of London's largest mosques are on it, so each place is registered to whichever system its own mosque publishes through. Current per-source counts are whatever `scripts/timetable-links.json` says — the prose here deliberately carries none.
 
 | File | Role |
 |---|---|
@@ -130,9 +129,10 @@ Jamaat and Jumu'ah times come from **each mosque's own published timetable**, re
 Providers currently supported:
 
 - **`mawaqit`** — Mawaqit's public search API. Reads each mosque's `iqama` entries, which are either clock times or `+N` offsets from the adhan (resolved against that mosque's own times).
-- **`masjidbox`** — a `masjidbox.net/<slug>` page, whose grid gives Athan and Iqamah per prayer.
+- **`masjidbox`** — a `masjidbox.com/prayer-times/<slug>` or `masjidbox.net/<slug>` page; the embedded state carries a month of labelled iqamah times, with the rendered grid as a fallback.
 - **`dated-table`** — the generic one: *any* mosque publishing a yearly or monthly HTML calendar (one row per date, columns named per prayer). East London Mosque is the first entry of this kind, not a special case. Registering another mosque is a registry row with a URL — **no new code**.
-- **`sirat`** — [Sirat.uk](https://sirat.uk/mosques/developers)'s keyless UK mosque-times API (ODC-By 1.0 licensed). Unlike the three above, this is a third-party directory rather than a platform mosques publish to directly, so it is used ONLY to fill places that had no other source at all — 360 of them, found by `scripts/harvest-sirat.mjs` matching Sirat.uk's ~605 mosques against our 2,081 places with no timetable source, on distance (≤150 m) plus a fuzzy name-token check tight enough to reject "same town, different mosque" pairs (this rejected real candidates in testing — see the comments in that file). It never overrides a place already registered to a mosque-published source.
+- **`daily-iqamah`** — the other generic shape: a page showing today only, one row per prayer with an Iqamah/Jamā'ah column. The parser insists today's date appears on the page before reading anything.
+- **`sirat`** — [Sirat.uk](https://sirat.uk/mosques/developers)'s keyless UK mosque-times API (ODC-By 1.0 licensed). Unlike the others, this is a third-party directory rather than a platform mosques publish to directly, so it is used ONLY to fill places that had no other source at all, matched by `scripts/harvest-sirat.mjs` on distance plus name-token or full-postcode agreement (see `scripts/lib/identity.mjs` for why the postcode). It never overrides a place already registered to a mosque-published source.
 
 `scripts/discover-timetables.mjs` finds candidates for `masjidbox`/`dated-table` automatically: it probes each place's own website, fingerprints known platforms, and — for dated tables — actually parses today's row, reporting only what really yields times. It writes ready-to-paste registry entries for a human to approve; nothing is auto-registered, because a mis-registered source would show another mosque's prayer times.
 
@@ -151,7 +151,7 @@ Safety rules, each because the failure it prevents is worse than a stale time:
 
 Dry-run locally (reads only, no service key needed): `npm run refresh:times` — add `--source mawaqit` / `--source eastlondonmosque` and `--limit N` to narrow it.
 
-The workflow needs four repository secrets: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` (writes — RLS blocks public writes by design; this key must exist **only** as a CI secret, never in the repo or the app), and `EXPO_PUBLIC_SUPABASE_URL` / `EXPO_PUBLIC_SUPABASE_ANON_KEY` for the sync step. It can also be run on demand from the Actions tab ("Run workflow"). The bundled offline dataset is re-synced and committed on **Mondays** (and on manual runs) rather than daily — committing a 1 MB dataset every day would bury the history for no user benefit, since the app reads live from Supabase.
+The workflow needs four repository secrets: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` (writes — RLS blocks public writes by design; this key must exist **only** as a CI secret, never in the repo or the app), and `EXPO_PUBLIC_SUPABASE_URL` / `EXPO_PUBLIC_SUPABASE_ANON_KEY` for the sync step. It can also be run on demand from the Actions tab ("Run workflow"). The pipeline snapshot `src/data/places.json` is re-synced and committed on **Mondays** (and on manual runs) rather than daily — committing a 1 MB file every day would bury the history for no benefit, since the app reads live from Supabase and only the harvest scripts read the snapshot.
 
 ## Shareable builds for testers (EAS)
 
@@ -178,6 +178,6 @@ The `preview` profile builds an installable APK; `production` builds the store f
 
 ## Notes
 
-- Current place data is a **small seed set** — verify facilities (especially sisters' space and access) before real users rely on them.
+- Facilities come from the source directory and are not all field-verified — the `confidence` tier and the "hide unconfirmed places" filter exist for exactly that reason.
 - Jamaat times change seasonally; the detail page shows the source and date they were recorded so stale data is visible.
 - Prayer times are calculated, not scraped — a masjid's own timetable always wins where they differ.

@@ -14,9 +14,10 @@ Expo's dev client (Path B) does **not** do that. A development build still needs
 the laptop off and you get a connection error. It is a developer tool for fast
 reloading, not a way to carry the app around.
 
-So: **Path A for trialling the app. Path B only if you want live-reload on a
-real device** (Expo Go can't run this project's native map code, which is
-probably why you were tunnelling).
+So: **Path A for trialling the app. Path B only if you want live-reload in a
+standalone binary.** For day-to-day iteration Expo Go over USB (`adb reverse
+tcp:8081 tcp:8081`, then `npx expo start`) runs everything in this project,
+map included, and needs neither a tunnel nor a build.
 
 ---
 

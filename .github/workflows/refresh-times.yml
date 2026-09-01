@@ -1,9 +1,9 @@
-# Daily refresh of jamaat and Jumu'ah times from each mosque's OWN published
-# timetable (scripts/refresh-times.mjs + scripts/timetable-sources.mjs).
+# Twice-daily refresh of jamaat and Jumu'ah times from each mosque's OWN
+# published timetable (scripts/refresh-times.mjs + scripts/timetable-sources.mjs).
 #
-# Sources are pluggable and no provider is privileged: Mawaqit covers 151 of
-# the 2,239 places and none of London's largest mosques are on it, so places
-# are registered to whichever system their own mosque publishes through
+# Sources are pluggable and no provider is privileged: Mawaqit covers only a
+# small fraction of places and none of London's largest mosques are on it, so
+# places are registered to whichever system their own mosque publishes through
 # (scripts/timetable-links.json). Every source must be credited in the app's
 # About screen.
 #
@@ -20,9 +20,9 @@
 #      actually changed. This alone is enough for users: the app reads live
 #      from Supabase (realtime + refresh on foreground).
 #   2. On MONDAYS only, also re-sync and commit src/data/places.json — the
-#      offline fallback bundled into the app. Committing a 1 MB dataset every
-#      single day would bury the repo history in noise for no user benefit,
-#      and jamaat times already display the date they were recorded.
+#      PIPELINE's snapshot, which the harvest scripts match against (the app
+#      never bundles it; it reads Supabase live). Committing a 1 MB file
+#      every run would bury the repo history in noise for no benefit.
 #
 # Required repository secrets (Settings -> Secrets and variables -> Actions):
 #   SUPABASE_URL                    project URL (same as EXPO_PUBLIC_SUPABASE_URL)
@@ -81,7 +81,7 @@ jobs:
         id: when
         run: echo "dow=$(date -u +%u)" >> "$GITHUB_OUTPUT"
 
-      - name: Sync bundled dataset from Supabase
+      - name: Sync the pipeline snapshot from Supabase
         if: steps.when.outputs.dow == '1' || github.event_name == 'workflow_dispatch'
         env:
           EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.EXPO_PUBLIC_SUPABASE_URL }}

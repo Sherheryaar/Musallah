@@ -36,7 +36,7 @@ export function isInCoverage(lat: number, lng: number): boolean {
  * means the phone-dialling code below falls back to its current (already
  * correct for NI, occasionally wrong for the Republic) behaviour; the
  * costly mistake would be flagging a real Great Britain location, and
- * spot-checking the bundled dataset found none.
+ * spot-checking the dataset found none.
  */
 const IRELAND_ISH_BOUNDS = {
   minLat: 51.3,
