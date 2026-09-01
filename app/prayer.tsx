@@ -1,27 +1,21 @@
 import React, { useEffect, useMemo, useState } from "react";
-import {
-  Modal,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
-import { Link } from "expo-router";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Circle, Path } from "react-native-svg";
 
+import OverlaySheet from "@/components/OverlaySheet";
 import Touchable from "@/components/Touchable";
 import { useSettings } from "@/context/SettingsContext";
 import { useTheme } from "@/context/ThemeContext";
-import { formatCountdown } from "@/lib/time";
+import { formatCountdown, isoDate } from "@/lib/time";
 import { getPrayerStatus } from "@/lib/prayerStatus";
-import { cardEdge } from "@/lib/elevation";
+import { cardEdge, clipRipple } from "@/lib/elevation";
 import { FALLBACK_LOCATION } from "@/lib/geo";
 import { formatHijri } from "@/lib/hijri";
+import { MIN_TARGET } from "@/lib/metrics";
 import { computePrayerSchedule, PrayerScheduleEntry } from "@/lib/prayerTimes";
 import { createThemedStyles } from "@/lib/themedStyles";
 import { numeric, radius, spacing, type, type ThemeColors } from "@/lib/theme";
@@ -92,9 +86,10 @@ function SunTrajectoryArc({
   colors: ThemeColors;
   styles: ReturnType<typeof useStyles>;
 }) {
-  const sunrise = schedule.find((s) => s.key === "sunrise")?.time;
-  const dhuhr = schedule.find((s) => s.key === "dhuhr")?.time;
-  const maghrib = schedule.find((s) => s.key === "maghrib")?.time;
+  const byKey = new Map(schedule.map((s) => [s.key, s]));
+  const sunrise = byKey.get("sunrise")?.time;
+  const dhuhr = byKey.get("dhuhr")?.time;
+  const maghrib = byKey.get("maghrib")?.time;
 
   if (!sunrise || !dhuhr || !maghrib) return null;
 
@@ -155,7 +150,7 @@ function SunTrajectoryArc({
             color={colors.textSecondary}
           />
           <Text style={[styles.arcLabelText, { color: colors.textSecondary }]}>
-            {schedule.find((s) => s.key === "sunrise")?.display}
+            {byKey.get("sunrise")?.display}
           </Text>
         </View>
         <View style={styles.arcLabelItem}>
@@ -170,7 +165,7 @@ function SunTrajectoryArc({
               { color: isDaylight ? colors.attention : colors.textSecondary },
             ]}
           >
-            {schedule.find((s) => s.key === "dhuhr")?.display}
+            {byKey.get("dhuhr")?.display}
           </Text>
         </View>
         <View style={styles.arcLabelItem}>
@@ -180,7 +175,7 @@ function SunTrajectoryArc({
             color={colors.textSecondary}
           />
           <Text style={[styles.arcLabelText, { color: colors.textSecondary }]}>
-            {schedule.find((s) => s.key === "maghrib")?.display}
+            {byKey.get("maghrib")?.display}
           </Text>
         </View>
       </View>
@@ -254,111 +249,101 @@ function CalendarSheet({
   const selectedDayMs = startOfDay(selectedDate).getTime();
 
   return (
-    <Modal
+    <OverlaySheet
       visible={visible}
-      transparent
-      animationType="fade"
-      onRequestClose={onClose}
+      onClose={onClose}
+      anchor="center"
+      zIndex={30}
+      closeLabel="Close calendar"
+      cardStyle={styles.calCard}
     >
-      <Pressable
-        style={styles.calBackdrop}
-        onPress={onClose}
-        accessibilityRole="button"
-        accessibilityLabel="Close calendar"
-      >
-        {/* A Pressable that swallows the tap, so touching the card itself
-            doesn't dismiss through to the backdrop. */}
-        <Pressable style={styles.calCard} onPress={() => {}}>
-          <View style={styles.calHeader}>
-            <Touchable
-              style={styles.chevronButton}
-              onPress={() => setViewMonth(new Date(year, month - 1, 1))}
-              disabled={atCurrentMonth}
-              accessibilityRole="button"
-              accessibilityLabel="Previous month"
-              accessibilityState={{ disabled: atCurrentMonth }}
-            >
-              <MaterialCommunityIcons
-                name="chevron-left"
-                size={24}
-                color={atCurrentMonth ? colors.controlBorder : colors.accent}
-              />
-            </Touchable>
-            <Text style={styles.calMonthTitle}>
-              {MONTHS[month]} {year}
-            </Text>
-            <Touchable
-              style={styles.chevronButton}
-              onPress={() => setViewMonth(new Date(year, month + 1, 1))}
-              accessibilityRole="button"
-              accessibilityLabel="Next month"
-            >
-              <MaterialCommunityIcons
-                name="chevron-right"
-                size={24}
-                color={colors.accent}
-              />
-            </Touchable>
-          </View>
+      <View style={styles.calHeader}>
+        <Touchable
+          style={styles.chevronButton}
+          onPress={() => setViewMonth(new Date(year, month - 1, 1))}
+          disabled={atCurrentMonth}
+          accessibilityRole="button"
+          accessibilityLabel="Previous month"
+          accessibilityState={{ disabled: atCurrentMonth }}
+        >
+          <MaterialCommunityIcons
+            name="chevron-left"
+            size={24}
+            color={atCurrentMonth ? colors.controlBorder : colors.accent}
+          />
+        </Touchable>
+        <Text style={styles.calMonthTitle}>
+          {MONTHS[month]} {year}
+        </Text>
+        <Touchable
+          style={styles.chevronButton}
+          onPress={() => setViewMonth(new Date(year, month + 1, 1))}
+          accessibilityRole="button"
+          accessibilityLabel="Next month"
+        >
+          <MaterialCommunityIcons
+            name="chevron-right"
+            size={24}
+            color={colors.accent}
+          />
+        </Touchable>
+      </View>
 
-          <View style={styles.calGrid}>
-            {CAL_WEEKDAYS.map((d, i) => (
-              <View key={`h${i}`} style={styles.calCell}>
-                <Text style={styles.calWeekday}>{d}</Text>
-              </View>
-            ))}
-            {cells.map((date, i) => {
-              if (!date) return <View key={`b${i}`} style={styles.calCell} />;
-              const ms = date.getTime();
-              const isPast = ms < today.getTime();
-              const isToday = ms === today.getTime();
-              const isSelected = ms === selectedDayMs;
-              return (
-                <View key={ms} style={styles.calCell}>
-                  <Touchable
-                    style={[
-                      styles.calDay,
-                      isToday && !isSelected && styles.calDayToday,
-                      isSelected && styles.calDaySelected,
-                    ]}
-                    disabled={isPast}
-                    onPress={() => onSelect(date)}
-                    accessibilityRole="button"
-                    accessibilityLabel={`${WEEKDAYS[date.getDay()]} ${ordinal(
-                      date.getDate(),
-                    )} ${MONTHS[date.getMonth()]}`}
-                    accessibilityState={{
-                      disabled: isPast,
-                      selected: isSelected,
-                    }}
-                  >
-                    <Text
-                      style={[
-                        styles.calDayText,
-                        isPast && styles.calDayTextPast,
-                        isSelected && styles.calDayTextSelected,
-                      ]}
-                    >
-                      {date.getDate()}
-                    </Text>
-                  </Touchable>
-                </View>
-              );
-            })}
+      <View style={styles.calGrid}>
+        {CAL_WEEKDAYS.map((d, i) => (
+          <View key={`h${i}`} style={styles.calCell}>
+            <Text style={styles.calWeekday}>{d}</Text>
           </View>
-        </Pressable>
-      </Pressable>
-    </Modal>
+        ))}
+        {cells.map((date, i) => {
+          if (!date) return <View key={`b${i}`} style={styles.calCell} />;
+          const ms = date.getTime();
+          const isPast = ms < today.getTime();
+          const isToday = ms === today.getTime();
+          const isSelected = ms === selectedDayMs;
+          return (
+            <View key={ms} style={styles.calCell}>
+              <Touchable
+                style={[
+                  styles.calDay,
+                  isToday && !isSelected && styles.calDayToday,
+                  isSelected && styles.calDaySelected,
+                ]}
+                disabled={isPast}
+                onPress={() => onSelect(date)}
+                accessibilityRole="button"
+                accessibilityLabel={`${WEEKDAYS[date.getDay()]} ${ordinal(
+                  date.getDate(),
+                )} ${MONTHS[date.getMonth()]}`}
+                accessibilityState={{
+                  disabled: isPast,
+                  selected: isSelected,
+                }}
+              >
+                <Text
+                  style={[
+                    styles.calDayText,
+                    isPast && styles.calDayTextPast,
+                    isSelected && styles.calDayTextSelected,
+                  ]}
+                >
+                  {date.getDate()}
+                </Text>
+              </Touchable>
+            </View>
+          );
+        })}
+      </View>
+    </OverlaySheet>
   );
 }
 
 export default function PrayerScreen() {
   const styles = useStyles();
   const { colors } = useTheme();
-  // The app draws edge-to-edge on Android, so the last thing on this screen —
-  // the "Change in Settings" link — sat under the gesture/navigation bar.
-  // index, settings and place/[id] all pad by this; these two screens were
-  // simply missed.
+  const router = useRouter();
+  // The app draws edge-to-edge on Android, so the last thing on this screen
+  // would otherwise sit under the gesture/navigation bar.
   const insets = useSafeAreaInsets();
   const { settings, calcOptions } = useSettings();
   const [dayOffset, setDayOffset] = useState(0);
@@ -371,16 +356,31 @@ export default function PrayerScreen() {
   const { coords, usingFallback } = useDeviceLocation({ prompt: false });
   const location = coords ?? FALLBACK_LOCATION;
 
-  const selectedDate = useMemo(() => addDays(now, dayOffset), [now, dayOffset]);
+  // Midnight today, keyed on the calendar DATE: the selected day and the pill
+  // strip change at midnight, not every minute.
+  const dayKey = isoDate(now);
+  const today = useMemo(
+    () => startOfDay(now),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [dayKey],
+  );
+  const selectedDate = useMemo(
+    () => addDays(today, dayOffset),
+    [today, dayOffset],
+  );
 
-  const dayPills = useMemo(() => {
-    return Array.from({ length: 7 }, (_, i) => {
-      const d = addDays(now, i);
-      const label =
-        i === 0 ? "Today" : `${SHORT_WEEKDAYS[d.getDay()]} ${d.getDate()}`;
-      return { offset: i, label, date: d };
-    });
-  }, [now]);
+  const dayPills = useMemo(
+    () =>
+      Array.from({ length: 7 }, (_, i) => {
+        const d = addDays(today, i);
+        return {
+          offset: i,
+          label:
+            i === 0 ? "Today" : `${SHORT_WEEKDAYS[d.getDay()]} ${d.getDate()}`,
+        };
+      }),
+    [today],
+  );
 
   const schedule = useMemo(
     () =>
@@ -411,9 +411,7 @@ export default function PrayerScreen() {
 
   // Only highlight a row when we are actually looking at today — and only
   // when a prayer is genuinely in progress. Between sunrise and Dhuhr
-  // currentKey is null, so nothing lights up. Comparing typed keys also
-  // drops the old label.toLowerCase() coupling, which quietly depended on
-  // every label being exactly its key.
+  // currentKey is null, so nothing lights up.
   const highlightKey = dayOffset === 0 && status ? status.currentKey : null;
 
   /** Today is the floor. A prayer time that has already passed is not
@@ -599,10 +597,7 @@ export default function PrayerScreen() {
           ) : null}
           {schedule.map((entry) => {
             const isCurrent = entry.key === highlightKey;
-            const isUpcoming =
-              dayOffset === 0 &&
-              status !== null &&
-              entry.key === status.nextLabel.toLowerCase();
+            const isUpcoming = dayOffset === 0 && entry.key === status?.nextKey;
             const isSunrise = entry.key === "sunrise";
             return (
               <View
@@ -654,11 +649,18 @@ export default function PrayerScreen() {
       ) : null}
 
       <Text style={styles.footnote}>
-        {`Calculated on this device \u00B7 ${methodLabel} \u00B7 Asr at ${mithlLabel}. `}
-        <Link href="/settings" style={styles.footnoteLink}>
-          Change in Settings
-        </Link>
+        {`Calculated on this device \u00B7 ${methodLabel} \u00B7 Asr at ${mithlLabel}.`}
       </Text>
+      {/* Its own row, not a Link inside the footnote: an inline text link is
+          a ~12pt target and cannot be hit-slopped. */}
+      <Touchable
+        style={styles.footnoteLink}
+        onPress={() => router.push("/settings")}
+        accessibilityRole="link"
+        accessibilityLabel="Change calculation settings"
+      >
+        <Text style={styles.footnoteLinkText}>Change in Settings</Text>
+      </Touchable>
     </ScrollView>
   );
 }
@@ -741,12 +743,6 @@ const useStyles = createThemedStyles((colors: ThemeColors, scheme) =>
     minWidth: 44,
     justifyContent: "center",
   },
-  calBackdrop: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.45)",
-    justifyContent: "center",
-    padding: spacing.l,
-  },
   calCard: {
     backgroundColor: colors.canvas,
     borderRadius: radius.xl,
@@ -786,8 +782,7 @@ const useStyles = createThemedStyles((colors: ThemeColors, scheme) =>
     borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
-    // Android only: clips the ripple to the circle (see chevronButton).
-    ...Platform.select({ android: { overflow: "hidden" as const } }),
+    ...clipRipple,
   },
   calDayToday: {
     borderWidth: 1,
@@ -826,9 +821,7 @@ const useStyles = createThemedStyles((colors: ThemeColors, scheme) =>
     ...cardEdge(scheme, colors),
     alignItems: "center",
     justifyContent: "center",
-    // Android only: clips the ripple to the circle. iOS must not clip, or
-    // masksToBounds erases the shadow.
-    ...Platform.select({ android: { overflow: "hidden" as const } }),
+    ...clipRipple,
   },
   dateCenter: {
     flex: 1,
@@ -916,8 +909,18 @@ const useStyles = createThemedStyles((colors: ThemeColors, scheme) =>
       textAlign: "center",
     },
     footnoteLink: {
-      color: colors.accent,
+      alignSelf: "center",
+      minHeight: MIN_TARGET,
+      justifyContent: "center",
+      paddingHorizontal: spacing.m,
+      // Pulls the row back up under the footnote so the two still read as
+      // one group despite the content gap.
+      marginTop: -spacing.m,
+    },
+    footnoteLinkText: {
+      ...type.caption,
       fontWeight: "600",
+      color: colors.accent,
     },
     arcContainer: {
       alignItems: "center",

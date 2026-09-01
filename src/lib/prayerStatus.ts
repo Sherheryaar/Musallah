@@ -9,6 +9,8 @@ export type PrayerStatus = {
   currentKey: PrayerScheduleEntry["key"] | null;
   /** What to say about "now", directly above the countdown. */
   nowLabel: string;
+  /** The prayer being counted down to — typed, so a row can match on it. */
+  nextKey: PrayerScheduleEntry["key"];
   nextLabel: string;
   msUntilNext: number;
 };
@@ -39,6 +41,7 @@ export function getPrayerStatus(
     return {
       currentKey: "isha",
       nowLabel: "Now · Isha",
+      nextKey: "fajr",
       nextLabel: "Fajr",
       msUntilNext: tomorrowFajr.getTime() - now.getTime(),
     };
@@ -67,6 +70,7 @@ export function getPrayerStatus(
     return {
       currentKey: null,
       nowLabel: `Fajr ended · ${sunrise.display}`,
+      nextKey: next.key,
       nextLabel: next.label,
       msUntilNext: next.time.getTime() - now.getTime(),
     };
@@ -77,6 +81,7 @@ export function getPrayerStatus(
   return {
     currentKey: current.key,
     nowLabel: `Now · ${current.label}`,
+    nextKey: next.key,
     nextLabel: next.label,
     msUntilNext: next.time.getTime() - now.getTime(),
   };

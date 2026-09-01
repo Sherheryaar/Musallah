@@ -98,3 +98,28 @@ export function cardEdge(scheme: "light" | "dark", colors: ThemeColors) {
     ...elevation(scheme, "raised"),
   };
 }
+
+/**
+ * A floating surface — onboarding, the suggestion sheet, the recenter FAB.
+ * Same value-only-across-schemes shape as cardEdge, but it KEEPS the
+ * `floating` Android elevation in dark mode: for these the elevation is
+ * z-order as well as shadow (the FAB at 6 must stay below the sheet at 12).
+ */
+export function floatingEdge(scheme: "light" | "dark", colors: ThemeColors) {
+  return {
+    borderWidth: scheme === "dark" ? 1 : 0,
+    borderColor: colors.border,
+    ...elevation(scheme, "floating"),
+  };
+}
+
+/**
+ * Spread into any rounded surface that shows a press ripple. Android draws
+ * the ripple as a full rectangle unless the view clips; iOS must NOT clip,
+ * because masksToBounds erases the shadow* props — which in light mode are
+ * the only thing lifting a card off the page. Android's elevation shadow
+ * survives clipping (it draws from the outline).
+ */
+export const clipRipple = Platform.select({
+  android: { overflow: "hidden" as const },
+});

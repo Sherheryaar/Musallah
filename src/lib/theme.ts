@@ -112,6 +112,14 @@ export const placeTypeColors = {
 export const rippleColor = (scheme: "light" | "dark"): string =>
   scheme === "dark" ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.08)";
 
+/**
+ * The scrim behind every sheet and dialog. The root layout paints the same
+ * colour over the native header while one is open (see OverlayContext), so
+ * every overlay must take it from here or the two halves of the scrim differ.
+ */
+export const scrimColor = (scheme: "light" | "dark"): string =>
+  scheme === "dark" ? "rgba(0,0,0,0.6)" : "rgba(0,0,0,0.45)";
+
 export const spacing = {
   xs: 4,
   s: 8,

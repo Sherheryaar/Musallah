@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo } from "react";
-import { Platform, Text, View, StyleSheet } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
 import Touchable from "./Touchable";
@@ -12,7 +12,7 @@ import {
 } from "@/data/places";
 import { FACILITY_ICONS, PLACE_TYPE_ICONS } from "@/lib/icons";
 import { useTheme } from "@/context/ThemeContext";
-import { cardEdge } from "@/lib/elevation";
+import { cardEdge, clipRipple } from "@/lib/elevation";
 import { createThemedStyles } from "@/lib/themedStyles";
 import {
   numeric,
@@ -164,10 +164,7 @@ const useStyles = createThemedStyles((colors: ThemeColors, scheme) =>
     borderRadius: radius.xl,
     ...cardEdge(scheme, colors),
     padding: spacing.l,
-    // Android only: keeps the ripple inside the rounded corners (the
-    // elevation shadow survives — it draws from the outline). iOS must NOT
-    // clip, or masksToBounds erases the card's shadow.
-    ...Platform.select({ android: { overflow: "hidden" as const } }),
+    ...clipRipple,
   },
   typeTile: {
     width: 44,

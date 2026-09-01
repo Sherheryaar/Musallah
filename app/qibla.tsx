@@ -42,7 +42,7 @@ import {
   smoothAngle,
 } from "@/lib/qibla";
 import { hapticHeavy, hapticTick } from "@/lib/haptics";
-import { cardEdge, elevation } from "@/lib/elevation";
+import { cardEdge, clipRipple, elevation } from "@/lib/elevation";
 import { MIN_TARGET } from "@/lib/metrics";
 import { radius, spacing, type, type ThemeColors } from "@/lib/theme";
 import { hhmm, isoDate } from "@/lib/time";
@@ -1488,9 +1488,7 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark", dial: numbe
       backgroundColor: colors.canvas,
       borderRadius: radius.xl,
       ...cardEdge(scheme, colors),
-      // Android only: clips the header ripple. iOS must not clip, or
-      // masksToBounds erases the shadow.
-      ...Platform.select({ android: { overflow: "hidden" as const } }),
+      ...clipRipple,
     },
     sunHeader: {
       flexDirection: "row",

@@ -10,10 +10,16 @@ import Touchable from "./Touchable";
 import { useOverlayLock } from "@/context/OverlayContext";
 import { useSettings } from "@/context/SettingsContext";
 import { useTheme } from "@/context/ThemeContext";
-import { elevation } from "@/lib/elevation";
+import { floatingEdge } from "@/lib/elevation";
 import { MIN_TARGET } from "@/lib/metrics";
 import { createThemedStyles } from "@/lib/themedStyles";
-import { radius, spacing, type, type ThemeColors } from "@/lib/theme";
+import {
+  radius,
+  scrimColor,
+  spacing,
+  type,
+  type ThemeColors,
+} from "@/lib/theme";
 
 // First run, before anything asks for anything.
 //
@@ -32,13 +38,6 @@ import { radius, spacing, type, type ThemeColors } from "@/lib/theme";
 //    choice — so it is offered here, once, in the same words Settings uses.
 
 const STORAGE_KEY = "onboarding:v1";
-
-// Shared with the header strip this overlay cannot reach on its own, so the
-// two halves of the scrim are the same colour. See OverlayContext — on this
-// screen the header is how a first-run user reached Qibla, which asks for
-// location on mount and spends the one prompt iOS ever gives.
-const scrim = (scheme: "light" | "dark") =>
-  scheme === "dark" ? "rgba(0,0,0,0.6)" : "rgba(0,0,0,0.45)";
 
 type Props = {
   /** Called once the user has finished — the caller then reads location. */
@@ -106,11 +105,13 @@ export default function Onboarding({ onDone }: Props) {
     void finish();
   };
 
-  // Dim and disarm the header while this owns the screen. No progress value:
-  // this card has no entry animation to stay in step with.
+  // Dim and disarm the header while this owns the screen: on this screen the
+  // header is how a first-run user reached Qibla, which asks for location on
+  // mount and spends the one prompt iOS ever gives. No progress value: this
+  // card has no entry animation to stay in step with.
   useOverlayLock(seen === false, {
     headerHeight,
-    color: scrim(scheme),
+    color: scrimColor(scheme),
   });
 
   if (seen !== false) return null;
@@ -217,7 +218,7 @@ const useStyles = createThemedStyles((colors: ThemeColors, scheme: "light" | "da
   StyleSheet.create({
     backdrop: {
       ...StyleSheet.absoluteFillObject,
-      backgroundColor: scrim(scheme),
+      backgroundColor: scrimColor(scheme),
       alignItems: "center",
       justifyContent: "center",
       padding: spacing.l,
@@ -229,17 +230,13 @@ const useStyles = createThemedStyles((colors: ThemeColors, scheme: "light" | "da
       maxWidth: 460,
       backgroundColor: colors.canvas,
       borderRadius: radius.xl,
-      // Value-only across schemes — see cardEdge in elevation.ts for why a
-      // theme switch must never add or remove native props on a mounted view.
-      borderWidth: scheme === "dark" ? 1 : 0,
-      borderColor: colors.border,
       padding: spacing.xl,
       gap: spacing.m,
       alignItems: "flex-start",
       // Never taller than the screen, so the pinned buttons below always have
       // somewhere to sit.
       maxHeight: "100%",
-      ...elevation(scheme, "floating"),
+      ...floatingEdge(scheme, colors),
     },
     scroll: {
       // flexShrink, NOT flex: 1 — flex would make the scroll region claim the

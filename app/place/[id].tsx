@@ -63,10 +63,24 @@ import { MIN_TARGET } from "@/lib/metrics";
 // inconsistency, not information (the type is stated in words).
 const HERO_TEXT = "#FFFFFF";
 
-function mapsSearchUrl(place: Place): string {
-  const query = encodeURIComponent(place.name + ", " + place.address);
-  return "https://www.google.com/maps/search/?api=1&query=" + query;
-}
+/** "Name, address" as a maps query — what every directions handoff searches. */
+const placeQuery = (place: Place) =>
+  encodeURIComponent(`${place.name}, ${place.address}`);
+const mapsSearchUrl = (place: Place) =>
+  `https://www.google.com/maps/search/?api=1&query=${placeQuery(place)}`;
+
+/** The contact rows, in display order. Only fields the place has render. */
+const CONTACT_FIELDS = [
+  { field: "phone", label: "Phone", icon: "phone", action: "Call phone" },
+  { field: "website", label: "Website", icon: "web", action: "Open website" },
+  { field: "facebook", label: "Facebook", icon: "facebook", action: "Open Facebook" },
+  { field: "instagram", label: "Instagram", icon: "instagram", action: "Open Instagram" },
+] as const satisfies readonly {
+  field: keyof Place;
+  label: string;
+  icon: IconName;
+  action: string;
+}[];
 
 /**
  * Northern Ireland uses the UK's own numbering plan end-to-end (the "028"
@@ -271,7 +285,7 @@ export default function PlaceDetailScreen() {
   const address = formatAddress(place.address);
 
   const openDirections = () => {
-    const query = encodeURIComponent(place.name + ", " + place.address);
+    const query = placeQuery(place);
     const webUrl = mapsSearchUrl(place);
     const url = Platform.select({
       ios: "maps:0,0?q=" + query,
@@ -294,44 +308,14 @@ export default function PlaceDetailScreen() {
 
   const facilityKeys = Object.keys(FACILITY_LABELS) as FacilityKey[];
 
-  const contactRows: {
-    label: string;
-    icon: IconName;
-    url: string;
-    accessibilityLabel: string;
-  }[] = [];
-  if (place.phone) {
-    contactRows.push({
-      label: "Phone",
-      icon: "phone",
-      url: phoneToTel(place.phone, place),
-      accessibilityLabel: "Call phone",
-    });
-  }
-  if (place.website) {
-    contactRows.push({
-      label: "Website",
-      icon: "web",
-      url: place.website,
-      accessibilityLabel: "Open website",
-    });
-  }
-  if (place.facebook) {
-    contactRows.push({
-      label: "Facebook",
-      icon: "facebook",
-      url: place.facebook,
-      accessibilityLabel: "Open Facebook",
-    });
-  }
-  if (place.instagram) {
-    contactRows.push({
-      label: "Instagram",
-      icon: "instagram",
-      url: place.instagram,
-      accessibilityLabel: "Open Instagram",
-    });
-  }
+  // `value` is what is shown and copied; `url` is what a tap opens (the same
+  // thing for links, a tel: URL for the phone number).
+  const contactRows = CONTACT_FIELDS.flatMap((row) => {
+    const value = place[row.field];
+    if (!value) return [];
+    const url = row.field === "phone" ? phoneToTel(value, place) : value;
+    return [{ ...row, value, url }];
+  });
 
   // One status, not a pile of verification phrases: the old line rendered
   // "Unverified · Not yet verified · <source>", which read like a list of
@@ -522,12 +506,9 @@ export default function PlaceDetailScreen() {
                 onPress={() => {
                   Linking.openURL(row.url).catch(() => {});
                 }}
-                onLongPress={() => {
-                  const val = row.label === "Phone" ? place.phone : row.url;
-                  if (val) copyToClipboard(val, row.label);
-                }}
+                onLongPress={() => copyToClipboard(row.value, row.label)}
                 accessibilityRole="button"
-                accessibilityLabel={`${row.accessibilityLabel}. Long press to copy`}
+                accessibilityLabel={`${row.action}. Long press to copy`}
               >
                 <View style={styles.contactLabelWrap}>
                   <MaterialCommunityIcons
@@ -538,7 +519,7 @@ export default function PlaceDetailScreen() {
                   <Text style={styles.contactLabel}>{row.label}</Text>
                 </View>
                 <Text style={styles.contactValue} numberOfLines={1}>
-                  {row.label === "Phone" ? place.phone : row.url}
+                  {row.value}
                 </Text>
               </Touchable>
             ))}

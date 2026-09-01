@@ -3,7 +3,6 @@ import {
   Animated,
   BackHandler,
   PanResponder,
-  Platform,
   StyleSheet,
   View,
   useWindowDimensions,
@@ -11,7 +10,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useTheme } from "@/context/ThemeContext";
-import { elevation } from "@/lib/elevation";
+import { clipRipple, elevation } from "@/lib/elevation";
 import { createThemedStyles } from "@/lib/themedStyles";
 import { radius, spacing, type ThemeColors } from "@/lib/theme";
 import { useReducedMotion } from "@/lib/useReducedMotion";
@@ -300,13 +299,9 @@ const useStyles = createThemedStyles((colors: ThemeColors, scheme: "light" | "da
     borderTopWidth: 1,
     borderColor: colors.border,
     ...elevation(scheme, "sheet"),
-    // Android only: clips the list's ripples to the rounded top corners (the
-    // elevation shadow survives — it draws from the outline). iOS must NOT
-    // clip, or masksToBounds erases the shadow above, which in light mode is
-    // the ONLY thing separating the sheet from the map. Nothing needs
-    // clipping there anyway: handleArea is 37pt tall, so every child below it
-    // starts clear of the 28pt corner curve.
-    ...Platform.select({ android: { overflow: "hidden" as const } }),
+    // Nothing needs clipping on iOS anyway: handleArea is 37pt tall, so every
+    // child below it starts clear of the 28pt corner curve.
+    ...clipRipple,
   },
   handleArea: {
     alignItems: "center",

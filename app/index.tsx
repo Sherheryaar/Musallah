@@ -9,7 +9,6 @@ import {
   AppState,
   FlatList,
   Keyboard,
-  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -22,7 +21,13 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Location from "expo-location";
 
 import Touchable from "@/components/Touchable";
-import { FacilityKey, isCorroborated, Place } from "@/data/places";
+import {
+  FACILITY_LABELS,
+  FacilityKey,
+  isCorroborated,
+  Place,
+} from "@/data/places";
+import { FACILITY_ICONS, type IconName } from "@/lib/icons";
 import { useFavourites } from "@/context/FavouritesContext";
 import { useNotifications } from "@/context/NotificationsContext";
 import { usePlaces } from "@/context/PlacesContext";
@@ -48,7 +53,7 @@ import { submitNewPlaceSuggestion } from "@/lib/feedback";
 import { useDeviceLocation } from "@/lib/useDeviceLocation";
 import { useMinuteTick } from "@/lib/useMinuteTick";
 import { useTheme } from "@/context/ThemeContext";
-import { cardEdge, elevation } from "@/lib/elevation";
+import { cardEdge, clipRipple, floatingEdge } from "@/lib/elevation";
 import { MIN_TARGET } from "@/lib/metrics";
 import { hapticSelection } from "@/lib/haptics";
 import { createThemedStyles } from "@/lib/themedStyles";
@@ -196,18 +201,23 @@ const NextPrayerBar = React.memo(function NextPrayerBar({
   );
 });
 
-const QUICK_FILTERS: Array<{
-  key: string;
-  label: string;
-  icon: keyof typeof MaterialCommunityIcons.glyphMap;
-}> = [
-  { key: "womens_area", label: "Women's Area", icon: "human-female" },
-  { key: "wheelchair_accessible", label: "Wheelchair", icon: "wheelchair-accessibility" },
-  { key: "parking", label: "Parking", icon: "parking" },
-  { key: "wudu_facilities", label: "Wudu", icon: "water" },
-  { key: "jumuah", label: "Jumu'ah", icon: "clock-outline" },
-  { key: "saved", label: "Saved", icon: "heart" },
+// The chips under the times bar. Labels and icons come from the schema's own
+// vocabulary (FACILITY_LABELS / FACILITY_ICONS) so a chip can never name a
+// facility key the data does not have — three of these once did, and
+// toggling them filtered out every place.
+type QuickFilterKey = FacilityKey | "saved";
+const QUICK_FILTERS: readonly QuickFilterKey[] = [
+  "sistersSpace",
+  "disabledAccess",
+  "parking",
+  "wudu",
+  "jumuah",
+  "saved",
 ];
+const quickFilterLabel = (key: QuickFilterKey) =>
+  key === "saved" ? "Saved" : FACILITY_LABELS[key];
+const quickFilterIcon = (key: QuickFilterKey): IconName =>
+  key === "saved" ? "heart" : FACILITY_ICONS[key];
 
 export default function HomeScreen() {
   const styles = useStyles();
@@ -404,34 +414,34 @@ export default function HomeScreen() {
   // always follow the user's real location.
   const origin = searchOrigin ?? gpsOrigin;
 
-  // Two-stage memo: distances/sorting only recompute when location or data
-  // changes -- NOT on every filter toggle or keystroke.
-  // When an area search is active the two anchors differ: places are chosen
-  // and ordered around the searched area (km), but each row is labelled
-  // with the distance from the user (kmFromUser) — "the masjids in London,
-  // and how far each one is from me".
-  const byDistance = useMemo<Result[]>(() => {
-    const measureFromAnchor = distanceFrom(origin.lat, origin.lng);
-    // With no area search the two anchors ARE the same point, which is the
-    // normal case — measuring twice then produced two identical numbers for
-    // every place in the dataset, on every GPS fix.
+  // One measuring function for the whole screen. When an area search is
+  // active the two anchors differ: places are chosen and ordered around the
+  // searched area (km), but each row is labelled with the distance from the
+  // user (kmFromUser) — "the masjids in London, and how far each one is from
+  // me". With no search they are the same point, so it measures once.
+  const measure = useMemo(() => {
+    const fromAnchor = distanceFrom(origin.lat, origin.lng);
     const sameAnchor =
       origin.lat === gpsOrigin.lat && origin.lng === gpsOrigin.lng;
-    const measureFromUser = sameAnchor
-      ? measureFromAnchor
+    const fromUser = sameAnchor
+      ? fromAnchor
       : distanceFrom(gpsOrigin.lat, gpsOrigin.lng);
-    const measured: Result[] = new Array(places.length);
-    for (let i = 0; i < places.length; i++) {
-      const place = places[i];
-      const km = measureFromAnchor(place.lat, place.lng);
-      measured[i] = {
+    return (place: Place): Result => {
+      const km = fromAnchor(place.lat, place.lng);
+      return {
         place,
         km,
-        kmFromUser: sameAnchor ? km : measureFromUser(place.lat, place.lng),
+        kmFromUser: sameAnchor ? km : fromUser(place.lat, place.lng),
       };
-    }
-    return measured.sort((a, b) => a.km - b.km);
-  }, [places, origin.lat, origin.lng, gpsOrigin.lat, gpsOrigin.lng]);
+    };
+  }, [origin.lat, origin.lng, gpsOrigin.lat, gpsOrigin.lng]);
+
+  // Distances/sorting only recompute when location or data changes -- NOT
+  // on every filter toggle or keystroke.
+  const byDistance = useMemo<Result[]>(
+    () => places.map(measure).sort((a, b) => a.km - b.km),
+    [places, measure],
+  );
 
   // Pre-lowercased haystack and pre-tokenised name+address per place, so
   // neither the exact-substring pass nor the typo-tolerant one has to
@@ -578,43 +588,17 @@ export default function HomeScreen() {
     return withTime.concat(withoutTime);
   }, [results, effectiveQuery, isFriday, savedIdSet, settings.savedOnly]);
 
-  // Saved places, resolved from ids against the live dataset. Excluded
-  // from the nearby list below so the same row never appears twice.
-  //
-  // Resolved through the id index and measured directly, rather than by
-  // scanning the sorted list: at most a hundred saved ids were being found by
-  // filtering a few thousand rows, and the filter re-ran on every GPS fix.
-  const favourites = useMemo(() => {
-    if (favouriteIds.length === 0) return [];
-    const measureFromAnchor = distanceFrom(origin.lat, origin.lng);
-    const sameAnchor =
-      origin.lat === gpsOrigin.lat && origin.lng === gpsOrigin.lng;
-    const measureFromUser = sameAnchor
-      ? measureFromAnchor
-      : distanceFrom(gpsOrigin.lat, gpsOrigin.lng);
-    const resolved: Result[] = [];
-    // The user's own order, not distance order.
-    for (const id of favouriteIds) {
-      const place = placesById.get(id);
-      // A saved id that is no longer in the dataset simply doesn't render —
-      // which is also the right behaviour when a place is removed upstream.
-      if (!place) continue;
-      const km = measureFromAnchor(place.lat, place.lng);
-      resolved.push({
-        place,
-        km,
-        kmFromUser: sameAnchor ? km : measureFromUser(place.lat, place.lng),
-      });
-    }
-    return resolved;
-  }, [
-    favouriteIds,
-    placesById,
-    origin.lat,
-    origin.lng,
-    gpsOrigin.lat,
-    gpsOrigin.lng,
-  ]);
+  // Saved places, in the user's own order, resolved through the id index (not
+  // by scanning the sorted list). A saved id no longer in the dataset simply
+  // doesn't render, which is also right when a place is removed upstream.
+  const favourites = useMemo<Result[]>(
+    () =>
+      favouriteIds.flatMap((id) => {
+        const place = placesById.get(id);
+        return place ? [measure(place)] : [];
+      }),
+    [favouriteIds, placesById, measure],
+  );
 
   // Stable callbacks keep React.memo'd rows from re-rendering needlessly.
   const openPlace = useCallback(
@@ -703,13 +687,10 @@ export default function HomeScreen() {
   );
 
   const toggleQuickFilter = useCallback(
-    (key: string) => {
+    (key: FacilityKey | "saved") => {
       hapticSelection(settings.hapticFeedback);
-      if (key === "saved") {
-        updateSettings({ savedOnly: !settings.savedOnly });
-        return;
-      }
-      toggleFilter(key as FacilityKey);
+      if (key === "saved") updateSettings({ savedOnly: !settings.savedOnly });
+      else toggleFilter(key);
     },
     [settings.hapticFeedback, settings.savedOnly, toggleFilter, updateSettings],
   );
@@ -721,11 +702,10 @@ export default function HomeScreen() {
       contentContainerStyle={styles.quickFilterStrip}
       style={styles.quickFilterScroll}
     >
-      {QUICK_FILTERS.map(({ key, label, icon }) => {
+      {QUICK_FILTERS.map((key) => {
+        const label = quickFilterLabel(key);
         const active =
-          key === "saved"
-            ? settings.savedOnly
-            : activeFilters.has(key as FacilityKey);
+          key === "saved" ? settings.savedOnly : activeFilters.has(key);
         return (
           <Touchable
             key={key}
@@ -739,7 +719,7 @@ export default function HomeScreen() {
             accessibilityLabel={`Filter: ${label}`}
           >
             <MaterialCommunityIcons
-              name={icon}
+              name={quickFilterIcon(key)}
               size={15}
               color={active ? colors.accent : colors.textSecondary}
             />
@@ -1080,11 +1060,7 @@ const useStyles = createThemedStyles((colors: ThemeColors, scheme: "light" | "da
     backgroundColor: colors.canvas,
     borderRadius: radius.pill,
     ...cardEdge(scheme, colors),
-    // Android only: clip the press ripple to the rounded corners — without
-    // this it flashes as a full rectangle behind them. The elevation shadow
-    // survives clipping (it draws from the outline); iOS must NOT clip, or
-    // clipsToBounds would erase the shadow* props above.
-    ...Platform.select({ android: { overflow: "hidden" as const } }),
+    ...clipRipple,
   },
   // Filters on = the pill fills with the accent. Louder than the old tinted
   // outline on purpose: an active filter silently hides places, which is
@@ -1285,20 +1261,12 @@ const useStyles = createThemedStyles((colors: ThemeColors, scheme: "light" | "da
     height: 52,
     borderRadius: 26,
     backgroundColor: colors.canvas,
-    // Hairline only in dark, where the shadow below is invisible.
-    // Value-only across schemes — see cardEdge in elevation.ts for why a
-    // theme switch must never add or remove native props on a mounted view.
-    borderWidth: scheme === "dark" ? 1 : 0,
-    borderColor: colors.border,
     alignItems: "center",
     justifyContent: "center",
-    // `floating` is the level a FAB belongs on, and its Android elevation (6)
-    // is still below the sheet's (12), so the sheet keeps sliding over this
-    // when dragged to full — see BottomSheet's aboveSheet contract. The old
-    // hand-rolled values (iOS 0.15/6/2 against the dial's 0.06/18/8, both at
-    // Android elevation 3–4) were exactly the cross-platform drift
-    // elevation.ts was written to end.
-    ...elevation(scheme, "floating"),
+    // Floating (Android elevation 6) sits below the sheet's 12, so the sheet
+    // keeps sliding over this when dragged to full — BottomSheet's
+    // aboveSheet contract.
+    ...floatingEdge(scheme, colors),
   },
   listContainer: {
     flex: 1,

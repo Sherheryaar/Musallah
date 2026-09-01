@@ -1,32 +1,16 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import {
-  Animated,
-  BackHandler,
-  Keyboard,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { Keyboard, ScrollView, StyleSheet, Text, View } from "react-native";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import { useHeaderHeight } from "@react-navigation/elements";
-import { usePreventRemove } from "@react-navigation/native";
 
+import OverlaySheet from "./OverlaySheet";
 import Touchable from "./Touchable";
-import { useOverlayLock } from "@/context/OverlayContext";
 import SuggestionForm from "@/components/SuggestionForm";
 import { type SubmissionResult } from "@/lib/feedback";
 import { useKeyboardHeight } from "@/lib/useKeyboardHeight";
-import { useReducedMotion } from "@/lib/useReducedMotion";
-import { useSheetAnimation } from "@/lib/useSheetAnimation";
 import { useTheme } from "@/context/ThemeContext";
-import { elevation } from "@/lib/elevation";
+import { floatingEdge } from "@/lib/elevation";
 import { createThemedStyles } from "@/lib/themedStyles";
 import { radius, spacing, type, type ThemeColors } from "@/lib/theme";
-
-// Shared with the header strip this overlay cannot reach on its own, so the
-// two halves of the scrim are the same colour. See OverlayContext.
-const SCRIM = "rgba(0,0,0,0.45)";
 
 // Long enough to read the confirmation, short enough that the sheet doesn't
 // feel stuck waiting for a second dismissal.
@@ -42,15 +26,11 @@ type Props = {
 };
 
 /**
- * Hosts SuggestionForm in a TOP-ANCHORED overlay. The forms used to sit
- * inline mid-scroll, where the keyboard covered the input on both platforms;
- * pinning the card to the top of the screen means the keyboard (which owns
- * the bottom half) physically cannot overlap what you're typing.
- *
- * Like FilterSheet, this is deliberately NOT a native <Modal>: RN's modal
- * host view crashed on iOS combined with react-native-screens while the map
- * bottom sheet was being dragged. A plain absolutely-positioned overlay
- * renders the same UI with no native modal involved.
+ * Hosts SuggestionForm in a TOP-ANCHORED overlay (see OverlaySheet). The
+ * forms used to sit inline mid-scroll, where the keyboard covered the input
+ * on both platforms; pinning the card to the top of the screen means the
+ * keyboard (which owns the bottom half) physically cannot overlap what
+ * you're typing.
  */
 export default function SuggestionSheet({
   visible,
@@ -63,18 +43,12 @@ export default function SuggestionSheet({
   const { colors } = useTheme();
   const styles = useStyles();
   const keyboardHeight = useKeyboardHeight();
-  const reduceMotion = useReducedMotion();
-  const { mounted, progress } = useSheetAnimation(visible, reduceMotion);
-  const headerHeight = useHeaderHeight();
   // Measured rather than derived: the card must fit the space between the
   // top of this overlay and the top of the keyboard, and the overlay's own
-  // height is the only honest source for that.
+  // height is the only honest source for that. (Not insets.top: the overlay
+  // is an absolute fill INSIDE a view the native stack has already laid out
+  // below the header, so the status bar has been counted once already.)
   const [containerHeight, setContainerHeight] = useState(0);
-
-  // Was `Math.max(insets.top, spacing.l)`, which double-counted the status
-  // bar: this overlay is an absolute fill INSIDE a view the native stack has
-  // already laid out below the header, so insets.top had been applied once
-  // already and the card sat a status bar's height too low.
   const cardMaxHeight =
     containerHeight > 0
       ? Math.max(220, containerHeight - keyboardHeight - spacing.l * 2)
@@ -102,26 +76,6 @@ export default function SuggestionSheet({
     onClose();
   }, [onClose]);
 
-  // Android hardware/gesture back closes the sheet instead of the screen.
-  useEffect(() => {
-    if (!visible) return;
-    const sub = BackHandler.addEventListener("hardwareBackPress", () => {
-      close();
-      return true;
-    });
-    return () => sub.remove();
-  }, [visible, close]);
-
-  // The header's back arrow is native chrome, outside anything this overlay
-  // can cover or intercept: it popped the whole screen while the user was
-  // mid-sentence, taking the draft — which lives in local state — with it.
-  // BackHandler above only ever saw the hardware button.
-  usePreventRemove(visible, close);
-
-  // Dim and disarm the header for as long as this is on screen. `mounted`
-  // rather than `visible`, so the strip fades out with the sheet.
-  useOverlayLock(mounted, { headerHeight, color: SCRIM, progress });
-
   const handleSent = useCallback(() => {
     Keyboard.dismiss();
     closeTimer.current = setTimeout(() => {
@@ -130,102 +84,52 @@ export default function SuggestionSheet({
     }, CLOSE_AFTER_SENT_MS);
   }, [onClose]);
 
-  if (!mounted) return null;
-
   return (
-    <Animated.View
-      style={[
-        styles.backdrop,
-        { opacity: progress },
-        // Stops the fading-out scrim eating taps during the exit.
-        { pointerEvents: visible ? "auto" : "none" },
-      ]}
+    <OverlaySheet
+      visible={visible}
+      onClose={close}
+      anchor="top"
+      zIndex={20}
+      closeLabel="Close suggestion form"
       onLayout={(e) => setContainerHeight(e.nativeEvent.layout.height)}
-      // See FilterSheet: this traps VoiceOver inside the overlay, and
-      // onAccessibilityEscape is the iOS twin of the BackHandler above.
-      accessibilityViewIsModal
-      onAccessibilityEscape={close}
+      cardStyle={[styles.card, { maxHeight: cardMaxHeight }]}
     >
-      {/* Backdrop tap only dismisses BELOW the card — a stray tap while the
-          keyboard is up must not eat a half-typed suggestion, so the card
-          itself and the strip above it are inert. */}
-      {/* A short drop, not a full card-height slide: this sheet is
-          top-anchored and autofocuses its input, so the keyboard rises at
-          the same moment and a long slide fights it. */}
-      <Animated.View
-        style={[
-          styles.card,
-          { maxHeight: cardMaxHeight },
-          {
-            transform: [
-              {
-                translateY: progress.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [-24, 0],
-                }),
-              },
-            ],
-          },
-        ]}
-      >
-        <View style={styles.headerRow}>
-          <Text style={styles.title}>{title}</Text>
-          <Touchable
-            onPress={close}
-            accessibilityRole="button"
-            accessibilityLabel="Close"
-            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-          >
-            <MaterialCommunityIcons
-              name="close"
-              size={20}
-              color={colors.textSecondary}
-            />
-          </Touchable>
-        </View>
-        <ScrollView
-          keyboardShouldPersistTaps="handled"
-          contentContainerStyle={styles.scrollContent}
+      <View style={styles.headerRow}>
+        <Text style={styles.title}>{title}</Text>
+        <Touchable
+          onPress={close}
+          accessibilityRole="button"
+          accessibilityLabel="Close"
+          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
         >
-          <SuggestionForm
-            placeholder={placeholder}
-            topics={topics}
-            autoFocus
-            onSend={onSend}
-            onSent={handleSent}
+          <MaterialCommunityIcons
+            name="close"
+            size={20}
+            color={colors.textSecondary}
           />
-        </ScrollView>
-      </Animated.View>
-      <Touchable
-        style={styles.backdropTouch}
-        onPress={close}
-        accessibilityRole="button"
-        accessibilityLabel="Close suggestion form"
-        accessibilityElementsHidden
-        importantForAccessibility="no-hide-descendants"
-      />
-    </Animated.View>
+        </Touchable>
+      </View>
+      <ScrollView
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={styles.scrollContent}
+      >
+        <SuggestionForm
+          placeholder={placeholder}
+          topics={topics}
+          autoFocus
+          onSend={onSend}
+          onSent={handleSent}
+        />
+      </ScrollView>
+    </OverlaySheet>
   );
 }
 
 const useStyles = createThemedStyles((colors: ThemeColors, scheme: "light" | "dark") =>
   StyleSheet.create({
-    backdrop: {
-      ...StyleSheet.absoluteFillObject,
-      backgroundColor: SCRIM,
-      zIndex: 20,
-      elevation: 20,
-    },
-    backdropTouch: {
-      flex: 1,
-    },
     card: {
       backgroundColor: colors.surface,
       borderRadius: radius.xl,
-      // Value-only across schemes — see cardEdge in elevation.ts for why a
-      // theme switch must never add or remove native props on a mounted view.
-      borderWidth: scheme === "dark" ? 1 : 0,
-      borderColor: colors.border,
       padding: spacing.l,
       gap: spacing.m,
       marginTop: spacing.l,
@@ -234,10 +138,7 @@ const useStyles = createThemedStyles((colors: ThemeColors, scheme: "light" | "da
       width: "94%",
       maxWidth: 680,
       alignSelf: "center",
-      // Android draws NO shadow from the shadow* props — without the
-      // elevation half of this token the card was the one perfectly flat
-      // surface in the app.
-      ...elevation(scheme, "floating"),
+      ...floatingEdge(scheme, colors),
     },
     scrollContent: {
       paddingBottom: spacing.xs,

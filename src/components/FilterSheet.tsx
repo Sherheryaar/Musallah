@@ -1,31 +1,15 @@
-import React, { useEffect, useRef, useState } from "react";
-import {
-  Animated,
-  BackHandler,
-  Keyboard,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import React, { useEffect } from "react";
+import { Keyboard, ScrollView, StyleSheet, Text, View } from "react-native";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useHeaderHeight } from "@react-navigation/elements";
-import { usePreventRemove } from "@react-navigation/native";
 
+import OverlaySheet from "./OverlaySheet";
 import Touchable from "./Touchable";
-import { useOverlayLock } from "@/context/OverlayContext";
 import { FACILITY_KEYS, FACILITY_LABELS, FacilityKey } from "@/data/places";
 import { useTheme } from "@/context/ThemeContext";
 import { elevation } from "@/lib/elevation";
 import { createThemedStyles } from "@/lib/themedStyles";
 import { radius, spacing, type, type ThemeColors } from "@/lib/theme";
-import { useReducedMotion } from "@/lib/useReducedMotion";
-import { useSheetAnimation } from "@/lib/useSheetAnimation";
-
-// Shared with the header strip this overlay cannot reach on its own, so the
-// two halves of the scrim are the same colour. See OverlayContext.
-const SCRIM = "rgba(0,0,0,0.4)";
 
 type Props = {
   visible: boolean;
@@ -39,14 +23,52 @@ type Props = {
   onClose: () => void;
 };
 
-/**
- * All filters behind one button, in a slide-up sheet.
- *
- * Deliberately NOT a native <Modal>: React Native's modal host view was
- * crashing on iOS when combined with react-native-screens while the map
- * bottom sheet was being dragged. A plain absolutely-positioned overlay
- * renders the same UI with no native modal involved.
- */
+/** One filter: a label (with an optional explanation) and a checkbox. */
+function CheckRow({
+  label,
+  hint,
+  checked,
+  accessibilityLabel,
+  onToggle,
+}: {
+  label: string;
+  hint?: string;
+  checked: boolean;
+  accessibilityLabel: string;
+  onToggle: () => void;
+}) {
+  const { colors } = useTheme();
+  const styles = useStyles();
+  return (
+    <Touchable
+      style={styles.row}
+      onPress={onToggle}
+      accessibilityRole="checkbox"
+      accessibilityState={{ checked }}
+      accessibilityLabel={accessibilityLabel}
+    >
+      {hint ? (
+        <View style={styles.rowTextWrap}>
+          <Text style={styles.rowLabel}>{label}</Text>
+          <Text style={styles.rowHint}>{hint}</Text>
+        </View>
+      ) : (
+        <Text style={styles.rowLabel}>{label}</Text>
+      )}
+      <View style={[styles.box, checked && styles.boxActive]}>
+        {checked ? (
+          <MaterialCommunityIcons
+            name="check-bold"
+            size={15}
+            color={colors.canvas}
+          />
+        ) : null}
+      </View>
+    </Touchable>
+  );
+}
+
+/** All filters behind one button, in a slide-up sheet (see OverlaySheet). */
 export default function FilterSheet({
   visible,
   active,
@@ -58,26 +80,8 @@ export default function FilterSheet({
   onClear,
   onClose,
 }: Props) {
-  const { colors } = useTheme();
   const styles = useStyles();
   const insets = useSafeAreaInsets();
-  const reduceMotion = useReducedMotion();
-  const { mounted, progress } = useSheetAnimation(visible, reduceMotion);
-  const headerHeight = useHeaderHeight();
-  // Cached in a ref, with a sensible fallback: measuring is only possible
-  // AFTER the first layout, and without the fallback the very first open
-  // would slide from 0 and appear not to move at all.
-  const cardHeight = useRef(420);
-
-  // Android hardware/gesture back closes the sheet instead of the screen.
-  useEffect(() => {
-    if (!visible) return;
-    const sub = BackHandler.addEventListener("hardwareBackPress", () => {
-      onClose();
-      return true;
-    });
-    return () => sub.remove();
-  }, [visible, onClose]);
 
   // The Filters button sits beside the search field, so this sheet routinely
   // opens with the keyboard up — and it is bottom-anchored, which put the
@@ -87,301 +91,194 @@ export default function FilterSheet({
     if (visible) Keyboard.dismiss();
   }, [visible]);
 
-  // The header's back arrow and nav actions are native chrome this overlay
-  // cannot cover; without this they navigated away over an open sheet.
-  usePreventRemove(visible, onClose);
-
-  // Dim and disarm the header for as long as this is on screen. `mounted`
-  // rather than `visible`, so the strip fades out with the sheet.
-  useOverlayLock(mounted, { headerHeight, color: SCRIM, progress });
-
-  if (!mounted) return null;
-
   const totalActive =
     active.size + (corroboratedOnly ? 1 : 0) + (savedOnly ? 1 : 0);
 
   return (
-    // accessibilityViewIsModal goes on the BACKDROP, not the card: it makes
-    // VoiceOver ignore this view's SIBLINGS, and the siblings that need
-    // ignoring are the map, the search box and the list underneath. Without
-    // it the reader swiped straight through the scrim into the screen below.
-    //
-    // onAccessibilityEscape is the iOS counterpart to the Android
-    // BackHandler above — the two-finger-Z gesture — not a duplicate of it.
-    <Animated.View
-      style={[
-        styles.backdrop,
-        { opacity: progress },
-        // Without this the fading-out scrim keeps eating taps for the whole
-        // 180ms exit.
-        { pointerEvents: visible ? "auto" : "none" },
+    <OverlaySheet
+      visible={visible}
+      onClose={onClose}
+      anchor="bottom"
+      zIndex={50}
+      closeLabel="Close filters"
+      cardStyle={[
+        styles.card,
+        { paddingBottom: spacing.xl + Math.max(insets.bottom, spacing.s) },
       ]}
-      accessibilityViewIsModal
-      onAccessibilityEscape={onClose}
     >
-      <Touchable
-        style={styles.backdropTouch}
-        onPress={onClose}
-        accessibilityRole="button"
-        accessibilityLabel="Close filters"
-        // The scrim is a big empty target that reads as noise in the
-        // rotor; the header's own close affordances cover this action.
-        accessibilityElementsHidden
-        importantForAccessibility="no-hide-descendants"
-      />
-      <Animated.View
-        onLayout={(e) => {
-          cardHeight.current = e.nativeEvent.layout.height;
-        }}
-        style={[
-          styles.card,
-          { paddingBottom: spacing.xl + Math.max(insets.bottom, spacing.s) },
-          {
-            transform: [
-              {
-                translateY: progress.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [cardHeight.current, 0],
-                }),
-              },
-            ],
-          },
-        ]}
+      <View style={styles.headerRow}>
+        <Text style={styles.title}>Filters</Text>
+        {totalActive > 0 ? (
+          <Touchable
+            onPress={onClear}
+            accessibilityRole="button"
+            accessibilityLabel="Clear all filters"
+            // The destructive action in this sheet, and it was the
+            // smallest target in it.
+            hitSlop={{ top: 14, bottom: 14, left: 16, right: 16 }}
+          >
+            <Text style={styles.clear}>Clear all</Text>
+          </Touchable>
+        ) : null}
+      </View>
+      {/* Scrolls so the sheet stays usable at large system font sizes: at
+          200% the card previously overflowed off the TOP of the screen and
+          the title, "Clear all" and the first filters became unreachable. */}
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
       >
-        <View style={styles.headerRow}>
-          <Text style={styles.title}>Filters</Text>
-          {totalActive > 0 ? (
-            <Touchable
-              onPress={onClear}
-              accessibilityRole="button"
-              accessibilityLabel="Clear all filters"
-              // The destructive action in this sheet, and it was the
-              // smallest target in it.
-              hitSlop={{ top: 14, bottom: 14, left: 16, right: 16 }}
-            >
-              <Text style={styles.clear}>Clear all</Text>
-            </Touchable>
-          ) : null}
-        </View>
-        {/* Scrolls so the sheet stays usable at large system font sizes.
-            At 200% the card previously overflowed off the TOP of the screen
-            and the title, "Clear all" and the first filters became
-            unreachable, with nothing to scroll. */}
-        <ScrollView
-          style={styles.scroll}
-          contentContainerStyle={styles.scrollContent}
-        >
         <Text style={styles.subtitle}>
           Only show places with everything you tick. Your choices are saved
           for next time.
         </Text>
-        {FACILITY_KEYS.map((key) => {
-          const isActive = active.has(key);
-          return (
-            <Touchable
-              key={key}
-              style={styles.row}
-              onPress={() => onToggle(key)}
-              accessibilityRole="checkbox"
-              accessibilityState={{ checked: isActive }}
-              accessibilityLabel={`Filter: ${FACILITY_LABELS[key]}`}
-            >
-              <Text style={styles.rowLabel}>{FACILITY_LABELS[key]}</Text>
-              <View style={[styles.box, isActive && styles.boxActive]}>
-                {isActive ? (
-                  <MaterialCommunityIcons
-                    name="check-bold"
-                    size={15}
-                    color={colors.canvas}
-                  />
-                ) : null}
-              </View>
-            </Touchable>
-          );
-        })}
+        {FACILITY_KEYS.map((key) => (
+          <CheckRow
+            key={key}
+            label={FACILITY_LABELS[key]}
+            checked={active.has(key)}
+            accessibilityLabel={`Filter: ${FACILITY_LABELS[key]}`}
+            onToggle={() => onToggle(key)}
+          />
+        ))}
         <Text style={styles.sectionTitle}>Your places</Text>
-        <Touchable
-          style={styles.row}
-          onPress={onToggleSaved}
-          accessibilityRole="checkbox"
-          accessibilityState={{ checked: savedOnly }}
+        <CheckRow
+          label="Saved places only"
+          hint="Only show places you've saved with the heart button — on the map and in the list."
+          checked={savedOnly}
           accessibilityLabel="Filter: saved places only"
-        >
-          <View style={styles.rowTextWrap}>
-            <Text style={styles.rowLabel}>Saved places only</Text>
-            <Text style={styles.rowHint}>
-              Only show places you&apos;ve saved with the heart button — on
-              the map and in the list.
-            </Text>
-          </View>
-          <View style={[styles.box, savedOnly && styles.boxActive]}>
-            {savedOnly ? (
-              <MaterialCommunityIcons
-                name="check-bold"
-                size={15}
-                color={colors.canvas}
-              />
-            ) : null}
-          </View>
-        </Touchable>
+          onToggle={onToggleSaved}
+        />
         <Text style={styles.sectionTitle}>Data quality</Text>
-        <Touchable
-          style={styles.row}
-          onPress={onToggleCorroborated}
-          accessibilityRole="checkbox"
-          accessibilityState={{ checked: corroboratedOnly }}
+        <CheckRow
+          label="Hide unconfirmed places"
+          hint="Only show places backed by more than one source. Useful when you're travelling and can't afford a wasted trip."
+          checked={corroboratedOnly}
           accessibilityLabel="Filter: hide unconfirmed places"
-        >
-          <View style={styles.rowTextWrap}>
-            <Text style={styles.rowLabel}>Hide unconfirmed places</Text>
-            <Text style={styles.rowHint}>
-              Only show places backed by more than one source. Useful when
-              you&apos;re travelling and can&apos;t afford a wasted trip.
-            </Text>
-          </View>
-          <View style={[styles.box, corroboratedOnly && styles.boxActive]}>
-            {corroboratedOnly ? (
-              <MaterialCommunityIcons
-                name="check-bold"
-                size={15}
-                color={colors.canvas}
-              />
-            ) : null}
-          </View>
-        </Touchable>
-        </ScrollView>
+          onToggle={onToggleCorroborated}
+        />
+      </ScrollView>
 
-        <Touchable
-          style={styles.doneButton}
-          onPress={onClose}
-          accessibilityRole="button"
-        >
-          <Text style={styles.doneLabel}>
-            {totalActive > 0
-              ? `Done \u00B7 ${totalActive} filter${
-                  totalActive === 1 ? "" : "s"
-                } on`
-              : "Done"}
-          </Text>
-        </Touchable>
-      </Animated.View>
-    </Animated.View>
+      <Touchable
+        style={styles.doneButton}
+        onPress={onClose}
+        accessibilityRole="button"
+      >
+        <Text style={styles.doneLabel}>
+          {totalActive > 0
+            ? `Done · ${totalActive} filter${
+                totalActive === 1 ? "" : "s"
+              } on`
+            : "Done"}
+        </Text>
+      </Touchable>
+    </OverlaySheet>
   );
 }
 
 const useStyles = createThemedStyles((colors: ThemeColors, scheme: "light" | "dark") =>
   StyleSheet.create({
-  backdrop: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: SCRIM,
-    justifyContent: "flex-end",
-    zIndex: 50,
-    elevation: 50,
-  },
-  backdropTouch: {
-    flex: 1,
-  },
-  card: {
-    backgroundColor: colors.canvas,
-    borderTopLeftRadius: radius.xxl,
-    borderTopRightRadius: radius.xxl,
-    padding: spacing.xl,
-    gap: spacing.s,
-    // Never taller than most of the screen, so the sheet cannot grow off
-    // the top when the system font is scaled up.
-    maxHeight: "85%",
-    // Android draws elevation shadows in black, which is invisible against
-    // the dark theme's near-black backdrop — the border is what gives the
-    // sheet an edge there.
-    borderTopWidth: 1,
-    borderColor: colors.border,
-    ...elevation(scheme, "sheet"),
-  },
-  scroll: {
-    // flexShrink, NOT flex: 1 — flex would make the scroll region claim the
-    // whole 85% card even when there are only six short rows, stranding the
-    // Done button at the bottom of a mostly empty sheet.
-    flexShrink: 1,
-  },
-  scrollContent: {
-    gap: spacing.s,
-  },
-  headerRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  title: {
-    ...type.title4,
-    fontWeight: "700",
-    color: colors.text,
-  },
-  clear: {
-    ...type.subhead,
-    fontWeight: "600",
-    color: colors.accent,
-  },
-  subtitle: {
-    ...type.footnote,
-    color: colors.textSecondary,
-    marginBottom: spacing.s,
-  },
-  row: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    minHeight: 48,
-    gap: spacing.m,
-  },
-  rowTextWrap: {
-    flex: 1,
-  },
-  rowLabel: {
-    ...type.body,
-    color: colors.text,
-  },
-  rowHint: {
-    ...type.caption,
-    color: colors.textSecondary,
-    marginTop: 2,
-  },
-  sectionTitle: {
-    ...type.eyebrow,
-    color: colors.textSecondary,
-    marginTop: spacing.l,
-  },
-  box: {
-    width: 26,
-    height: 26,
-    borderRadius: radius.m,
-    borderWidth: 2,
-    // controlBorder: unchecked, this box IS the checkbox — there is no label
-    // inside it and no fill. In `border` it measured 1.26:1 on canvas, so all
-    // eight checkboxes in this sheet were invisible until ticked.
-    borderColor: colors.controlBorder,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  boxActive: {
-    backgroundColor: colors.accent,
-    borderColor: colors.accent,
-  },
-  doneButton: {
-    marginTop: spacing.m,
-    minHeight: 52,
-    borderRadius: radius.pill,
-    backgroundColor: colors.accent,
-    alignItems: "center",
-    justifyContent: "center",
-    // Clips the Android ripple to the rounded corners.
-    overflow: "hidden",
-  },
-  // canvas, not literal white: the dark theme's accent is a LIGHT green,
-  // where white text fails contrast — canvas flips to near-black there.
-  doneLabel: {
-    color: colors.canvas,
-    ...type.body,
-    fontWeight: "700",
-  },
-}),
+    card: {
+      backgroundColor: colors.canvas,
+      borderTopLeftRadius: radius.xxl,
+      borderTopRightRadius: radius.xxl,
+      padding: spacing.xl,
+      gap: spacing.s,
+      // Never taller than most of the screen, so the sheet cannot grow off
+      // the top when the system font is scaled up.
+      maxHeight: "85%",
+      // Android draws elevation shadows in black, which is invisible against
+      // the dark theme's near-black backdrop — the border is what gives the
+      // sheet an edge there.
+      borderTopWidth: 1,
+      borderColor: colors.border,
+      ...elevation(scheme, "sheet"),
+    },
+    scroll: {
+      // flexShrink, NOT flex: 1 — flex would make the scroll region claim the
+      // whole 85% card even when there are only six short rows, stranding the
+      // Done button at the bottom of a mostly empty sheet.
+      flexShrink: 1,
+    },
+    scrollContent: {
+      gap: spacing.s,
+    },
+    headerRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+    },
+    title: {
+      ...type.title4,
+      fontWeight: "700",
+      color: colors.text,
+    },
+    clear: {
+      ...type.subhead,
+      fontWeight: "600",
+      color: colors.accent,
+    },
+    subtitle: {
+      ...type.footnote,
+      color: colors.textSecondary,
+      marginBottom: spacing.s,
+    },
+    row: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      minHeight: 48,
+      gap: spacing.m,
+    },
+    rowTextWrap: {
+      flex: 1,
+    },
+    rowLabel: {
+      ...type.body,
+      color: colors.text,
+    },
+    rowHint: {
+      ...type.caption,
+      color: colors.textSecondary,
+      marginTop: 2,
+    },
+    sectionTitle: {
+      ...type.eyebrow,
+      color: colors.textSecondary,
+      marginTop: spacing.l,
+    },
+    box: {
+      width: 26,
+      height: 26,
+      borderRadius: radius.m,
+      borderWidth: 2,
+      // controlBorder: unchecked, this box IS the checkbox — there is no label
+      // inside it and no fill. In `border` it measured 1.26:1 on canvas, so all
+      // eight checkboxes in this sheet were invisible until ticked.
+      borderColor: colors.controlBorder,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    boxActive: {
+      backgroundColor: colors.accent,
+      borderColor: colors.accent,
+    },
+    doneButton: {
+      marginTop: spacing.m,
+      minHeight: 52,
+      borderRadius: radius.pill,
+      backgroundColor: colors.accent,
+      alignItems: "center",
+      justifyContent: "center",
+      // Clips the Android ripple to the rounded corners.
+      overflow: "hidden",
+    },
+    // canvas, not literal white: the dark theme's accent is a LIGHT green,
+    // where white text fails contrast — canvas flips to near-black there.
+    doneLabel: {
+      color: colors.canvas,
+      ...type.body,
+      fontWeight: "700",
+    },
+  }),
 );

@@ -1,12 +1,5 @@
 import React, { useMemo } from "react";
-import {
-  Linking,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { Linking, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Constants from "expo-constants";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
@@ -17,13 +10,12 @@ import ThemedSwitch from "@/components/ThemedSwitch";
 import { useNotifications } from "@/context/NotificationsContext";
 import { useSettings } from "@/context/SettingsContext";
 import { useTheme } from "@/context/ThemeContext";
-import { cardEdge } from "@/lib/elevation";
+import { cardEdge, clipRipple } from "@/lib/elevation";
 import { PRAYER_KEYS, PRAYER_LABELS } from "@/data/places";
+import type { IconName } from "@/lib/icons";
 import { createThemedStyles } from "@/lib/themedStyles";
 import { radius, spacing, type, type ThemeColors } from "@/lib/theme";
 import { MIN_TARGET } from "@/lib/metrics";
-
-type IconName = React.ComponentProps<typeof MaterialCommunityIcons>["name"];
 
 const PRIVACY_POINTS: { title: string; body: string }[] = [
   {
@@ -163,14 +155,6 @@ export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const { settings, updateSettings } = useSettings();
   const notifications = useNotifications();
-
-  const toggleNotifications = async (on: boolean) => {
-    if (!on) {
-      notifications.disable();
-      return;
-    }
-    await notifications.enable();
-  };
 
   return (
     <ScrollView
@@ -338,7 +322,9 @@ export default function SettingsScreen() {
           <Text style={styles.optionLabel}>Notify me at prayer times</Text>
           <ThemedSwitch
             value={notifications.prefs.enabled}
-            onValueChange={toggleNotifications}
+            onValueChange={(on) =>
+              on ? void notifications.enable() : notifications.disable()
+            }
             accessibilityLabel="Prayer time notifications"
           />
         </View>
@@ -542,9 +528,7 @@ const useStyles = createThemedStyles((colors: ThemeColors, scheme) =>
     backgroundColor: colors.canvas,
     borderRadius: radius.xl,
     ...cardEdge(scheme, colors),
-    // Android only: clips row ripples/selected fills to the corners. iOS
-    // must NOT clip — masksToBounds would erase the card's shadow.
-    ...Platform.select({ android: { overflow: "hidden" as const } }),
+    ...clipRipple,
   },
   rowDivider: {
     borderTopWidth: 1,

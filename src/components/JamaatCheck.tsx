@@ -63,8 +63,30 @@ type Props = {
   onAddTimes: () => void;
 };
 
-export default function JamaatCheck({ place, onAddTimes }: Props) {
+/** The acknowledgement row every answered state renders, plus a follow-up. */
+function ThanksRow({
+  text,
+  children,
+}: {
+  text: string;
+  children?: React.ReactNode;
+}) {
   const { colors } = useTheme();
+  const styles = useStyles();
+  return (
+    <View style={styles.thanksRow}>
+      <MaterialCommunityIcons
+        name="check-circle-outline"
+        size={16}
+        color={colors.positive}
+      />
+      <Text style={styles.thanksText}>{text}</Text>
+      {children}
+    </View>
+  );
+}
+
+export default function JamaatCheck({ place, onAddTimes }: Props) {
   const styles = useStyles();
   // null = storage not read yet; render nothing rather than flashing the
   // question at someone who answered it last week.
@@ -202,30 +224,13 @@ export default function JamaatCheck({ place, onAddTimes }: Props) {
   if (offer !== true && phase === "idle") return null;
 
   if (phase === "confirmed") {
-    return (
-      <View style={styles.thanksRow}>
-        <MaterialCommunityIcons
-          name="check-circle-outline"
-          size={16}
-          color={colors.positive}
-        />
-        <Text style={styles.thanksText}>
-          JazakAllah khair {"—"} noted as still correct.
-        </Text>
-      </View>
-    );
+    return <ThanksRow text="JazakAllah khair — noted as still correct." />;
   }
 
   // Filed as far as the user is concerned, but still recallable.
   if (phase === "noted") {
     return (
-      <View style={styles.thanksRow}>
-        <MaterialCommunityIcons
-          name="check-circle-outline"
-          size={16}
-          color={colors.positive}
-        />
-        <Text style={styles.thanksText}>Noted {"—"} thank you.</Text>
+      <ThanksRow text="Noted — thank you.">
         <Touchable
           style={styles.undoButton}
           onPress={undoReport}
@@ -234,19 +239,13 @@ export default function JamaatCheck({ place, onAddTimes }: Props) {
         >
           <Text style={styles.inviteLink}>Undo</Text>
         </Touchable>
-      </View>
+      </ThanksRow>
     );
   }
 
   if (phase === "outdated") {
     return (
-      <View style={styles.thanksRow}>
-        <MaterialCommunityIcons
-          name="check-circle-outline"
-          size={16}
-          color={colors.positive}
-        />
-        <Text style={styles.thanksText}>Noted {"—"} thank you. </Text>
+      <ThanksRow text="Noted — thank you. ">
         <Touchable
           onPress={onAddTimes}
           accessibilityRole="button"
@@ -255,7 +254,7 @@ export default function JamaatCheck({ place, onAddTimes }: Props) {
         >
           <Text style={styles.inviteLink}>Know the new times?</Text>
         </Touchable>
-      </View>
+      </ThanksRow>
     );
   }
 
