@@ -7,7 +7,6 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "tunnel": "expo start --tunnel",
-    "build:places": "node scripts/csv-to-places.mjs",
     "sync:places": "node scripts/sync-places.mjs",
     "verify:places": "node scripts/verify-places.mjs",
     "refresh:times": "node scripts/refresh-times.mjs --dry-run",

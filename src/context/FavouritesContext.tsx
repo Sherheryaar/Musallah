@@ -38,8 +38,6 @@ type FavouritesValue = {
   idSet: ReadonlySet<string>;
   isFavourite: (id: string) => boolean;
   toggle: (id: string) => void;
-  /** False until storage has been read, so the UI can avoid flicker. */
-  hydrated: boolean;
 };
 
 const FavouritesContext = createContext<FavouritesValue>({
@@ -47,7 +45,6 @@ const FavouritesContext = createContext<FavouritesValue>({
   idSet: new Set(),
   isFavourite: () => false,
   toggle: () => {},
-  hydrated: false,
 });
 
 export function FavouritesProvider({
@@ -56,7 +53,6 @@ export function FavouritesProvider({
   children: React.ReactNode;
 }) {
   const [ids, setIds] = useState<string[]>([]);
-  const [hydrated, setHydrated] = useState(false);
   // Writes are fire-and-forget, but they must not race the initial read.
   const ready = useRef(false);
 
@@ -78,9 +74,7 @@ export function FavouritesProvider({
         // Unreadable or corrupt storage just means "no favourites yet".
       })
       .finally(() => {
-        if (cancelled) return;
-        ready.current = true;
-        setHydrated(true);
+        if (!cancelled) ready.current = true;
       });
     return () => {
       cancelled = true;
@@ -111,9 +105,8 @@ export function FavouritesProvider({
       idSet,
       isFavourite: (id: string) => idSet.has(id),
       toggle,
-      hydrated,
     }),
-    [ids, idSet, toggle, hydrated],
+    [ids, idSet, toggle],
   );
 
   return (

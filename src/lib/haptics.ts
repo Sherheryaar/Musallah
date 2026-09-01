@@ -39,14 +39,6 @@ export function hapticSelection(enabled: boolean): void {
     .catch(() => {});
 }
 
-/** Medium impact — for card swipes and sheet snaps. */
-export function hapticMedium(enabled: boolean): void {
-  if (!enabled) return;
-  void load()
-    .then((H) => H.impactAsync(H.ImpactFeedbackStyle.Medium))
-    .catch(() => {});
-}
-
 /** Heavy impact — for decisive lock-on events (e.g. Qibla alignment). */
 export function hapticHeavy(enabled: boolean): void {
   if (!enabled) return;

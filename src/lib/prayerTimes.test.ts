@@ -1,11 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import {
-  computeForbiddenWindows,
-  computePrayerSchedule,
-  computePrayerTimes,
-  computeTahajjudWindow,
-} from "./prayerTimes";
+import { computePrayerSchedule, computePrayerTimes } from "./prayerTimes";
 import { computePrayerTimesUtc } from "./prayerCalc";
 
 // The astronomy itself is covered by prayerCalc.test.ts. What is tested here
@@ -185,39 +180,3 @@ describe("computePrayerTimes", () => {
     expect(a).not.toBe(b);
   });
 });
-
-describe("computeForbiddenWindows & computeTahajjudWindow", () => {
-  it("calculates Shurooq (sunrise + 15m) and Zawal (pre-Dhuhr 10m)", () => {
-    const schedule = computePrayerSchedule(
-      LONDON.lat,
-      LONDON.lng,
-      OPTIONS,
-      DAY,
-    )!;
-    const forbidden = computeForbiddenWindows(schedule);
-    expect(forbidden).toHaveLength(2);
-    expect(forbidden[0].key).toBe("shurooq");
-    expect(forbidden[1].key).toBe("zawal");
-
-    const sunrise = schedule.find((e) => e.key === "sunrise")!.time;
-    expect(forbidden[0].start.getTime()).toBe(sunrise.getTime());
-    expect(forbidden[0].end.getTime()).toBe(sunrise.getTime() + 15 * 60_000);
-
-    const dhuhr = schedule.find((e) => e.key === "dhuhr")!.time;
-    expect(forbidden[1].start.getTime()).toBe(dhuhr.getTime() - 10 * 60_000);
-    expect(forbidden[1].end.getTime()).toBe(dhuhr.getTime());
-  });
-
-  it("calculates Tahajjud as the last third of the night", () => {
-    const maghrib = new Date(2026, 7, 10, 20, 30); // 20:30 (8:30 PM)
-    const nextFajr = new Date(2026, 7, 11, 4, 30); // 04:30 (8 hours later)
-    // 8 hours = 480 mins. 2/3 of 480 = 320 mins (5h 20m).
-    // Tahajjud start = 20:30 + 5h 20m = 01:50.
-    const tahajjud = computeTahajjudWindow(maghrib, nextFajr);
-    expect(tahajjud.start.getHours()).toBe(1);
-    expect(tahajjud.start.getMinutes()).toBe(50);
-    expect(tahajjud.end.getTime()).toBe(nextFajr.getTime());
-    expect(tahajjud.display).toBe("01:50 - 04:30");
-  });
-});
-

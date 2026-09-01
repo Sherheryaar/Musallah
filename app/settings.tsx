@@ -503,10 +503,6 @@ export default function SettingsScreen() {
             {Constants.expoConfig?.version ?? "dev"}
           </Text>
         </View>
-        <View style={[styles.aboutRow, styles.rowDivider]}>
-          <Text style={styles.aboutLabel}>Prayer times</Text>
-          <Text style={styles.aboutValue}>Calculated on-device</Text>
-        </View>
       </View>
     </ScrollView>
   );

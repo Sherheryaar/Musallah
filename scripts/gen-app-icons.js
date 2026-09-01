@@ -1,5 +1,5 @@
 /**
- * Generates the app icon and PWA icons: a white mosque silhouette (dome,
+ * Generates the app icons: a white mosque silhouette (dome,
  * two minarets, arched doorway) on the app's accent-green background.
  * Dependency-free — same procedural PNG approach as gen-pin-assets.js.
  *
@@ -10,8 +10,6 @@
  *                                              requires a full-bleed opaque
  *                                              square — the OS rounds the
  *                                              corners itself)
- *   public/icon-512.png              512×512   PWA manifest icon
- *   public/icon-192.png              192×192   PWA manifest icon + favicon
  *   assets/adaptive-icon.png        1024×1024  Android adaptive foreground
  *                                              (transparent; composited over
  *                                              adaptiveIcon.backgroundColor)
@@ -81,8 +79,8 @@ const GLYPH_W = GLYPH_BOX.x2 - GLYPH_BOX.x1;
  * zone, since everything outside can be cropped by the launcher's mask.
  *
  * Omitting `fit` leaves the geometry EXACTLY as originally authored —
- * icon.png and the PWA icons already ship, and re-centring them would move
- * the mark for no reason.
+ * icon.png already ships, and re-centring it would move the mark for no
+ * reason.
  */
 function makeIcon(size, { background = BACKGROUND, fit = null } = {}) {
   const [gr, gg, gb] = hexToRgb(GLYPH);
@@ -129,8 +127,6 @@ const root = path.join(__dirname, "..");
 const outputs = [
   // iOS + the legacy Android icon: full-bleed, opaque (iOS forbids alpha).
   [path.join(root, "assets", "icon.png"), 1024, {}],
-  [path.join(root, "public", "icon-512.png"), 512, {}],
-  [path.join(root, "public", "icon-192.png"), 192, {}],
   // Android adaptive foreground. Transparent, glyph inside the safe zone;
   // app.json pairs it with backgroundColor #2E7D57 so the composited result
   // matches icon.png. Without this Android 8+ shrinks the legacy square

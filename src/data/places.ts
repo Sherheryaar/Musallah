@@ -5,9 +5,9 @@
 // (see PlacesContext) precisely so the manually-curated place list is never
 // shipped as a static asset inside the app binary, where anyone could
 // extract it by unzipping the install. src/data/places.json still exists as
-// the data PIPELINE's artifact (what scripts/sync-places.mjs writes and
-// scripts/csv-to-places.mjs / scripts/verify-places.mjs read) -- it is just
-// never imported from here, so Metro never bundles it into the app.
+// the data PIPELINE's artifact (what scripts/sync-places.mjs writes and the
+// harvest/verify scripts read) -- it is just never imported from here, so
+// Metro never bundles it into the app.
 // ---------------------------------------------------------------------------
 
 export type PlaceType = "masjid" | "musalla" | "multi_faith_room";
@@ -92,7 +92,7 @@ export type Place = {
   facebook?: string;
   instagram?: string;
   /** How trustworthy this record is. */
-  confidence?: "verified" | "community" | "unverified";
+  confidence?: Confidence;
 };
 
 /**
@@ -179,9 +179,9 @@ function jamaatEqual(a?: JamaatTimes, b?: JamaatTimes): boolean {
 // identical "Prayer Room" rows tells the user nothing. The venue is almost
 // always the first useful segment of the address ("University College
 // Hospital, 235 Euston Road, ..."), so generic names get it appended:
-// "Prayer Room (University College Hospital)". Applied at load time for
-// every data path (bundled, network, cache) and idempotent — an already
-// disambiguated name no longer matches the generic pattern.
+// "Prayer Room (University College Hospital)". Applied as rows are loaded
+// from Supabase, and idempotent — an already disambiguated name no longer
+// matches the generic pattern.
 // ---------------------------------------------------------------------------
 
 const GENERIC_NAME_RE =

@@ -17,6 +17,10 @@ expo-env.d.ts
 # Generated audit/harvest output — reproducible by re-running the scripts
 # in scripts/, and too large/churny to keep in history.
 coord-report*.md
+place-confidence-report.md
+address-issues.json
+close-pairs.json
+london-subset.json
 jummah-candidates.*
 mawaqit-matches.json
 mawaqit-checkpoint.json
