@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import {
   AccessibilityInfo,
   ActivityIndicator,
-  AppState,
   Linking,
   Platform,
   ScrollView,
@@ -46,6 +45,7 @@ import { isLikelyIreland } from "@/lib/geo";
 import { computePrayerSchedule } from "@/lib/prayerTimes";
 import { createThemedStyles } from "@/lib/themedStyles";
 import { hhmm } from "@/lib/time";
+import { useMinuteTick } from "@/lib/useMinuteTick";
 import {
   numeric,
   spacing,
@@ -144,7 +144,7 @@ export default function PlaceDetailScreen() {
   // re-renders on form and prayer-time state changes, and the previous
   // `places.find()` walked the whole dataset to reach one row.
   const place = byId.get(id);
-  const { settings } = useSettings();
+  const { settings, calcOptions } = useSettings();
   const { isFavourite, toggle: toggleFavourite } = useFavourites();
   const [showEditForm, setShowEditForm] = useState(false);
   const [showTimesForm, setShowTimesForm] = useState(false);
@@ -170,7 +170,7 @@ export default function PlaceDetailScreen() {
     [],
   );
 
-  const [now, setNow] = useState(() => new Date());
+  const now = useMinuteTick();
 
   // Computed on-device for this place's exact coordinates -- instant,
   // offline, and it follows the mithl/method chosen in Settings. Keyed on
@@ -178,35 +178,11 @@ export default function PlaceDetailScreen() {
   // cached per day, so the per-minute recompute is six Date objects.
   const calculated = useMemo<Partial<Record<string, string>> | null>(() => {
     if (!place) return null;
-    const schedule = computePrayerSchedule(
-      place.lat,
-      place.lng,
-      { method: settings.method, madhab: settings.madhab, shafaq: settings.shafaq },
-      now,
-    );
+    const schedule = computePrayerSchedule(place.lat, place.lng, calcOptions, now);
     return schedule
       ? Object.fromEntries(schedule.map((e) => [e.key, e.display]))
       : null;
-  }, [place, settings.method, settings.madhab, settings.shafaq, now]);
-
-  // Tick on each minute BOUNDARY so the upcoming prayer highlight stays current,
-  // and resync on foreground when returning to an already-open screen.
-  useEffect(() => {
-    let id: ReturnType<typeof setTimeout>;
-    const schedule = () =>
-      setTimeout(() => {
-        setNow(new Date());
-        id = schedule();
-      }, 60_000 - (Date.now() % 60_000));
-    id = schedule();
-    const sub = AppState.addEventListener("change", (state) => {
-      if (state === "active") setNow(new Date());
-    });
-    return () => {
-      clearTimeout(id);
-      sub.remove();
-    };
-  }, []);
+  }, [place, calcOptions, now]);
 
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);

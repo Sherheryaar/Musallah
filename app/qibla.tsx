@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import {
   AccessibilityInfo,
   Animated,
-  AppState,
   Easing,
   Linking,
   Platform,
@@ -46,7 +45,9 @@ import { hapticHeavy, hapticTick } from "@/lib/haptics";
 import { cardEdge, elevation } from "@/lib/elevation";
 import { MIN_TARGET } from "@/lib/metrics";
 import { radius, spacing, type, type ThemeColors } from "@/lib/theme";
-import { hhmm } from "@/lib/time";
+import { hhmm, isoDate } from "@/lib/time";
+import { useDeviceLocation } from "@/lib/useDeviceLocation";
+import { useMinuteTick } from "@/lib/useMinuteTick";
 import { useReducedMotion } from "@/lib/useReducedMotion";
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
@@ -192,25 +193,18 @@ export default function QiblaScreen() {
     [colors, scheme, dial],
   );
 
-  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(
-    null,
-  );
-  const [usingFallback, setUsingFallback] = useState(false);
+  // Prompts (this screen cannot work without it), and on foreground re-checks
+  // a denied permission so granting it in system Settings brings the compass
+  // up without leaving the screen.
+  const { coords, usingFallback, permission, retry } = useDeviceLocation({
+    prompt: true,
+  });
   const [heading, setHeading] = useState<HeadingState>({ kind: "loading" });
-  /**
-   * Bumped when the user grants location from the in-screen button.
-   *
-   * The setup effect below keys on this, so a grant re-runs the ONE path that
-   * reads the permission, fetches coordinates and subscribes to the heading:
-   * mount and retry cannot drift apart, and the effect's own cleanup removes
-   * the previous subscription before the next one starts.
-   */
-  const [setupAttempt, setSetupAttempt] = useState(0);
   // Sensor-quality inputs, sampled continuously while the screen is open.
   const [fieldStrength, setFieldStrength] = useState<number | null>(null);
   const [tiltDeg, setTiltDeg] = useState<number | null>(null);
-  // Ticks once a minute so the sun guidance stays current.
-  const [minuteTick, setMinuteTick] = useState(0);
+  // Once a minute, so the sun guidance stays current.
+  const now = useMinuteTick();
   const [sunOpen, setSunOpen] = useState(false);
   const [tipsOpen, setTipsOpen] = useState(false);
 
@@ -255,123 +249,101 @@ export default function QiblaScreen() {
   const hapticsRef = useRef(settings.hapticFeedback);
   hapticsRef.current = settings.hapticFeedback;
 
+  // The compass subscription follows the location permission: nothing to
+  // subscribe to until it is granted, and a denial is a static bearing with
+  // an "Allow location" button. Keyed on `permission`, so the in-screen retry
+  // (which re-runs the location hook) re-runs this too — mount and retry
+  // cannot drift apart, and the cleanup removes the previous subscription
+  // before the next one starts.
   useEffect(() => {
+    if (permission === "denied") {
+      setHeading({
+        kind: "static",
+        cause: "permission",
+        reason:
+          "Allow location access to use the live compass. The bearing above is still correct for your area.",
+      });
+      return;
+    }
+    if (permission !== "granted") return;
+    // On a retry the note explaining the denial is still on screen; the
+    // permission is in hand now, so clear it here rather than leaving it
+    // contradicting the app until the first heading sample lands.
+    setHeading((prevState) =>
+      prevState.kind === "loading" ? prevState : { kind: "loading" },
+    );
+
     let cancelled = false;
     let sub: Location.LocationSubscription | null = null;
-
-    (async () => {
-      let position = FALLBACK_LOCATION;
-      let fellBack = true;
-      let granted = false;
-      try {
-        const { status } = await Location.requestForegroundPermissionsAsync();
-        granted = status === "granted";
-        if (granted) {
-          const pos =
-            (await Location.getLastKnownPositionAsync({
-              maxAge: 5 * 60 * 1000,
-            })) ??
-            (await Location.getCurrentPositionAsync({
-              accuracy: Location.Accuracy.Balanced,
-            }));
-          position = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-          fellBack = false;
-        }
-      } catch {
-        // Keep the fallback: a bearing for central London is still far more
-        // useful than an error screen.
-      }
+    Location.watchHeadingAsync((data) => {
       if (cancelled) return;
-      setCoords(position);
-      setUsingFallback(fellBack);
+      // trueHeading is corrected for magnetic declination by the OS and
+      // is what the qibla bearing must be compared against. It reports
+      // -1 when unavailable, in which case magnetic north is close
+      // enough in the UK (declination is ~0–3° here).
+      const raw =
+        typeof data.trueHeading === "number" && data.trueHeading >= 0
+          ? data.trueHeading
+          : data.magHeading;
+      if (typeof raw !== "number" || Number.isNaN(raw)) return;
 
-      if (!granted) {
-        setHeading({
-          kind: "static",
-          cause: "permission",
-          reason:
-            "Allow location access to use the live compass. The bearing above is still correct for your area.",
-        });
-        return;
+      const prev = smoothed.current;
+      const next = prev === null ? raw : smoothAngle(prev, raw);
+      smoothed.current = next;
+      // angleDelta is signed and shortest-path, so 359° → 1° accumulates
+      // as +2 and never as −358. That is the whole shortest-arc fix.
+      if (prev !== null) unwrapped.current += angleDelta(prev, next);
+      else unwrapped.current = next;
+
+      const duration = reduceMotionRef.current ? 0 : 140;
+      // watchHeadingAsync fires up to 60×/second and every .start() is a
+      // bridge round-trip, so accumulate on every sample but only drive
+      // the animation when the value has actually moved.
+      if (Math.abs(unwrapped.current - lastAnimatedTo.current) > 0.25) {
+        lastAnimatedTo.current = unwrapped.current;
+        Animated.timing(spin, {
+          toValue: unwrapped.current,
+          duration,
+          easing: Easing.out(Easing.quad),
+          useNativeDriver: true,
+        }).start();
       }
-      // On a retry the note explaining the denial is still on screen; the
-      // permission is in hand now, so clear it here rather than leaving it
-      // contradicting the app until the first heading sample lands.
-      setHeading((prevState) =>
-        prevState.kind === "loading" ? prevState : { kind: "loading" },
-      );
-      try {
-        const newSub = await Location.watchHeadingAsync((data) => {
-          if (cancelled) return;
-          // trueHeading is corrected for magnetic declination by the OS and
-          // is what the qibla bearing must be compared against. It reports
-          // -1 when unavailable, in which case magnetic north is close
-          // enough in the UK (declination is ~0–3° here).
-          const raw =
-            typeof data.trueHeading === "number" && data.trueHeading >= 0
-              ? data.trueHeading
-              : data.magHeading;
-          if (typeof raw !== "number" || Number.isNaN(raw)) return;
 
-          const prev = smoothed.current;
-          const next = prev === null ? raw : smoothAngle(prev, raw);
-          smoothed.current = next;
-          // angleDelta is signed and shortest-path, so 359° → 1° accumulates
-          // as +2 and never as −358. That is the whole shortest-arc fix.
-          if (prev !== null) unwrapped.current += angleDelta(prev, next);
-          else unwrapped.current = next;
+      const nextTurn = angleDelta(next, bearingRef.current);
+      Animated.timing(turn, {
+        toValue: nextTurn,
+        duration,
+        easing: Easing.out(Easing.quad),
+        useNativeDriver: true,
+      }).start();
 
-          const duration = reduceMotionRef.current ? 0 : 140;
-          // watchHeadingAsync fires up to 60×/second and every .start() is a
-          // bridge round-trip, so accumulate on every sample but only drive
-          // the animation when the value has actually moved.
-          if (Math.abs(unwrapped.current - lastAnimatedTo.current) > 0.25) {
-            lastAnimatedTo.current = unwrapped.current;
-            Animated.timing(spin, {
-              toValue: unwrapped.current,
-              duration,
-              easing: Easing.out(Easing.quad),
-              useNativeDriver: true,
-            }).start();
-          }
-
-          const nextTurn = angleDelta(next, bearingRef.current);
-          Animated.timing(turn, {
-            toValue: nextTurn,
-            duration,
-            easing: Easing.out(Easing.quad),
-            useNativeDriver: true,
-          }).start();
-
-          const accuracy =
-            typeof data.accuracy === "number" ? data.accuracy : null;
-          setHeading((prevState) => {
-            if (
-              prevState.kind === "live" &&
-              prevState.accuracy === accuracy &&
-              // The dial is animated natively now, so state only needs to
-              // change when the rendered TEXT would: a whole degree of turn.
-              Math.round(angleDelta(prevState.heading, bearingRef.current)) ===
-                Math.round(nextTurn)
-            ) {
-              return prevState;
-            }
-            return { kind: "live", heading: next, accuracy };
-          });
-        });
-        // The effect may have been cleaned up while this await was in
-        // flight (cleanup ran when `sub` was still null, so its
-        // `sub?.remove()` was a no-op) -- remove it now instead of leaking
-        // a live compass listener for the rest of the session.
-        if (cancelled) {
-          newSub.remove();
-        } else {
-          sub = newSub;
+      const accuracy =
+        typeof data.accuracy === "number" ? data.accuracy : null;
+      setHeading((prevState) => {
+        if (
+          prevState.kind === "live" &&
+          prevState.accuracy === accuracy &&
+          // The dial is animated natively now, so state only needs to
+          // change when the rendered TEXT would: a whole degree of turn.
+          Math.round(angleDelta(prevState.heading, bearingRef.current)) ===
+            Math.round(nextTurn)
+        ) {
+          return prevState;
         }
-      } catch {
-        // Guarded like the callback above: the rejection can land after this
-        // run was torn down, and a stale failure must not overwrite the state
-        // belonging to the run that replaced it.
+        return { kind: "live", heading: next, accuracy };
+      });
+    })
+      .then((newSub) => {
+        // The effect may have been cleaned up while the subscription was
+        // still being set up (cleanup ran when `sub` was null, so its
+        // `sub?.remove()` was a no-op) -- remove it now instead of leaking a
+        // live compass listener for the rest of the session.
+        if (cancelled) newSub.remove();
+        else sub = newSub;
+      })
+      .catch(() => {
+        // A stale failure must not overwrite the state belonging to the run
+        // that replaced this one.
         if (cancelled) return;
         setHeading({
           kind: "static",
@@ -379,17 +351,13 @@ export default function QiblaScreen() {
           reason:
             "This device didn't report a compass heading. Use the bearing above with a compass app.",
         });
-      }
-    })();
+      });
 
     return () => {
       cancelled = true;
       sub?.remove();
     };
-    // setupAttempt is what makes the in-screen "Allow location" button work:
-    // it re-runs this whole path, and the cleanup above tears the old
-    // subscription down first so there is never more than one.
-  }, [spin, turn, setupAttempt]);
+  }, [permission, spin, turn]);
 
   // Sensor-quality feeds: magnetometer field strength catches magnets and
   // metal (an interfered compass reads confidently and WRONG — the single
@@ -432,32 +400,23 @@ export default function QiblaScreen() {
     };
   }, [bubbleX, bubbleY]);
 
-  // Minute tick keeps the sun guidance current while the screen is open.
-  useEffect(() => {
-    const id = setInterval(() => setMinuteTick((t) => t + 1), 60_000);
-    return () => clearInterval(id);
-  }, []);
-
-  // Which calendar day the sun crossings below are for. A separate value from
-  // minuteTick because the crossings only change at MIDNIGHT, while the live
-  // sun position changes every minute — and the dependency that encoded that
-  // used to be the expression `minuteTick > 0 && new Date().getDate()`, which
-  // evaluates to `false` on the first render and to a number on the second.
-  // So the day-long scan ran twice on every visit to this screen, and would
-  // silently stop tracking the date if the tick were ever reset to 0.
-  const dayKey = useMemo(() => {
-    const now = new Date();
-    return `${now.getFullYear()}-${now.getMonth()}-${now.getDate()}`;
-    // minuteTick is the clock this is sampled against, by design.
+  // Midnight today. Keyed on the calendar DATE rather than the minute, so the
+  // day-long sun scans below rerun once a day, not once a minute.
+  const dayKey = isoDate(now);
+  const today = useMemo(
+    () => new Date(now.getFullYear(), now.getMonth(), now.getDate()),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [minuteTick]);
+    [dayKey],
+  );
 
   const point = coords ?? FALLBACK_LOCATION;
   const bearing = useMemo(
     () => qiblaBearing(point.lat, point.lng),
     [point.lat, point.lng],
   );
-  bearingRef.current = bearing;
+  useEffect(() => {
+    bearingRef.current = bearing;
+  }, [bearing]);
   const distanceKm = useMemo(
     () => distanceToKaabaKm(point.lat, point.lng),
     [point.lat, point.lng],
@@ -487,23 +446,21 @@ export default function QiblaScreen() {
   // Sun-based guidance: immune to everything that fools a magnetometer.
   // Recomputed each minute (the sun moves ~0.25°/min).
   const sunNow = useMemo(
-    () => qiblaFromSun(point.lat, point.lng, new Date()),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [point.lat, point.lng, minuteTick],
+    () => qiblaFromSun(point.lat, point.lng, now),
+    [point.lat, point.lng, now],
   );
   // The day's shadow-method crossings. The heaviest computation on this
   // screen (a minute-by-minute scan of the whole day), and it only needs
   // redoing when the date or the location changes — never on the minute tick.
   const crossings = useMemo(
-    () => qiblaSunCrossings(point.lat, point.lng, new Date()),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [point.lat, point.lng, dayKey],
+    () => qiblaSunCrossings(point.lat, point.lng, today),
+    [point.lat, point.lng, today],
   );
   // A crossing that has already happened is not advice, so it is dropped:
   // everything below either names an instant the user can still act on, or
   // says nothing at all.
   const stillToCome =
-    crossings.towards !== null && crossings.towards.getTime() > Date.now();
+    crossings.towards !== null && crossings.towards.getTime() > now.getTime();
   // Once today's crossing is behind us the next usable one is tomorrow's, from
   // the same scan a day on. `stillToCome` flips at most once a day, so keying
   // the memo on it — rather than on the clock — keeps the day-long scan off
@@ -511,12 +468,10 @@ export default function QiblaScreen() {
   // qibla azimuth, which the copy has to survive.
   const tomorrowCrossing = useMemo(() => {
     if (stillToCome) return null;
-    const tomorrow = new Date();
+    const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
     return qiblaSunCrossings(point.lat, point.lng, tomorrow).towards;
-    // dayKey is the clock this is sampled against, as above.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [stillToCome, point.lat, point.lng, dayKey]);
+  }, [stillToCome, point.lat, point.lng, today]);
   const nextCrossing =
     crossings.towards && stillToCome
       ? { at: crossings.towards, tomorrow: false }
@@ -532,16 +487,16 @@ export default function QiblaScreen() {
   // --- Lock-on -----------------------------------------------------------
   // Hysteresis: enter at the 5° tolerance, leave only at 8°, so hovering on
   // the boundary doesn't strobe the whole instrument.
-  const wasAligned = useRef(false);
   const turnMagnitude = guidance ? Math.abs(guidance.turn) : 180;
-  if (wasAligned.current) {
-    if (turnMagnitude > HYSTERESIS_EXIT_DEG || !quality.trustworthy) {
-      wasAligned.current = false;
-    }
-  } else if (aligned) {
-    wasAligned.current = true;
-  }
-  const locked = wasAligned.current;
+  const [locked, setLocked] = useState(false);
+  useEffect(() => {
+    // Enter on `aligned` (5°); once in, stay until 8° or the reading stops
+    // being trustworthy. State rather than a ref mutated during render, so a
+    // discarded concurrent render can never flip the latch.
+    setLocked((was) =>
+      was ? turnMagnitude <= HYSTERESIS_EXIT_DEG && quality.trustworthy : aligned,
+    );
+  }, [turnMagnitude, quality.trustworthy, aligned]);
 
   useEffect(() => {
     const duration = reduceMotion ? 0 : 260;
@@ -628,39 +583,15 @@ export default function QiblaScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [announceBucket]);
 
-  // Granting in system Settings — which is exactly where requestLocation
-  // sends the user once Android has stopped prompting — does NOT restart the
-  // app on Android, so without this the screen sits on the fallback bearing
-  // with its "Allow location" note until it is left and reopened, even though
-  // the permission is now in hand. Held in a ref so the listener is installed
-  // once and still reads current state; the retry is skipped unless the
-  // permission is what is actually blocking the compass, so coming back to a
-  // working screen never restarts its subscription.
-  const permissionBlocked =
-    heading.kind === "static" && heading.cause === "permission";
-  const permissionBlockedRef = useRef(permissionBlocked);
-  permissionBlockedRef.current = permissionBlocked;
-  useEffect(() => {
-    const sub = AppState.addEventListener("change", (next) => {
-      if (next === "active" && permissionBlockedRef.current) {
-        setSetupAttempt((n) => n + 1);
-      }
-    });
-    return () => sub.remove();
-  }, []);
-
   const requestLocation = useCallback(async () => {
     const { status } = await Location.requestForegroundPermissionsAsync();
-    if (status === "granted") {
-      // Re-runs the one setup path straight away rather than waiting on the
-      // AppState listener above: this prompt is answered without the app ever
-      // leaving the foreground, so no "active" transition arrives.
-      setSetupAttempt((n) => n + 1);
-      return;
-    }
-    // Once the OS stops prompting, the only route left is Settings.
-    Linking.openSettings().catch(() => {});
-  }, []);
+    // Granted from the in-app prompt: re-run the location read straight away
+    // (the app never left the foreground, so no AppState transition arrives
+    // to do it). Once the OS stops prompting, the only route left is Settings
+    // — and useDeviceLocation re-checks on the way back from there.
+    if (status === "granted") retry();
+    else Linking.openSettings().catch(() => {});
+  }, [retry]);
 
   // --- Dial geometry, in SVG user units ----------------------------------
   const c = dial / 2;

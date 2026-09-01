@@ -9,6 +9,7 @@ import React, {
 } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+import type { CalcOptions } from "@/lib/prayerCalc";
 import {
   DEFAULT_SETTINGS,
   LEGACY_SETTINGS_STORAGE_KEY,
@@ -23,11 +24,24 @@ export { DEFAULT_SETTINGS, type PrayerSettings } from "./settingsStorage";
 type SettingsContextValue = {
   settings: PrayerSettings;
   updateSettings: (patch: Partial<PrayerSettings>) => void;
+  /**
+   * Just the three settings the prayer-time maths depends on, as one stable
+   * object. Screens key their schedule memos on THIS rather than on
+   * `settings`, so toggling a facility filter never recomputes a prayer time.
+   */
+  calcOptions: CalcOptions;
 };
+
+const calcOptionsOf = (s: PrayerSettings): CalcOptions => ({
+  method: s.method,
+  madhab: s.madhab,
+  shafaq: s.shafaq,
+});
 
 const SettingsContext = createContext<SettingsContextValue>({
   settings: DEFAULT_SETTINGS,
   updateSettings: () => {},
+  calcOptions: calcOptionsOf(DEFAULT_SETTINGS),
 });
 
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
@@ -108,9 +122,14 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     setSettings((prev) => ({ ...prev, ...patch }));
   }, []);
 
+  const calcOptions = useMemo(
+    () => calcOptionsOf(settings),
+    [settings.method, settings.madhab, settings.shafaq],
+  );
+
   const value = useMemo(
-    () => ({ settings, updateSettings }),
-    [settings, updateSettings],
+    () => ({ settings, updateSettings, calcOptions }),
+    [settings, updateSettings, calcOptions],
   );
 
   return (

@@ -45,6 +45,8 @@ import {
 } from "@/lib/geo";
 import { CalcOptions, computePrayerSchedule } from "@/lib/prayerTimes";
 import { submitNewPlaceSuggestion } from "@/lib/feedback";
+import { useDeviceLocation } from "@/lib/useDeviceLocation";
+import { useMinuteTick } from "@/lib/useMinuteTick";
 import { useTheme } from "@/context/ThemeContext";
 import { cardEdge, elevation } from "@/lib/elevation";
 import { MIN_TARGET } from "@/lib/metrics";
@@ -104,29 +106,7 @@ const NextPrayerBar = React.memo(function NextPrayerBar({
 }) {
   const styles = useStyles();
   const { colors } = useTheme();
-  const [now, setNow] = useState(() => Date.now());
-
-  useEffect(() => {
-    // A fixed 30s interval ticks at an arbitrary phase, so the displayed
-    // minute changed up to 30s late — "1 min" could sit on screen while the
-    // prayer time actually passed. Sleeping to the next minute BOUNDARY and
-    // rescheduling keeps the label honest and halves the wake-ups.
-    let id: ReturnType<typeof setTimeout>;
-    const tick = () => {
-      setNow(Date.now());
-      id = setTimeout(tick, 60_000 - (Date.now() % 60_000));
-    };
-    id = setTimeout(tick, 60_000 - (Date.now() % 60_000));
-    // Refresh immediately on foreground — the timer may have been frozen
-    // for hours in the background.
-    const sub = AppState.addEventListener("change", (state) => {
-      if (state === "active") setNow(Date.now());
-    });
-    return () => {
-      clearTimeout(id);
-      sub.remove();
-    };
-  }, []);
+  const now = useMinuteTick().getTime();
 
   const info = useMemo(() => {
     // Sunrise isn't a prayer; yesterday/tomorrow bracket the edges (before
@@ -242,13 +222,9 @@ export default function HomeScreen() {
     status: placesStatus,
     refresh: refreshPlaces,
   } = usePlaces();
-  const { settings, updateSettings } = useSettings();
+  const { settings, updateSettings, calcOptions } = useSettings();
   const { reportLocation } = useNotifications();
   const { ids: favouriteIds, idSet: savedIdSet } = useFavourites();
-  const [location, setLocation] = useState<{ lat: number; lng: number } | null>(
-    null,
-  );
-  const [usingFallback, setUsingFallback] = useState(false);
   const [showNewPlaceForm, setShowNewPlaceForm] = useState(false);
   const [fridayNoticeDismissed, setFridayNoticeDismissed] = useState(false);
   // Re-checked when the app is foregrounded rather than on a timer: the
@@ -275,62 +251,13 @@ export default function HomeScreen() {
   // told what it is for.
   const [locationAllowed, setLocationAllowed] = useState(false);
   const allowLocationRead = useCallback(() => setLocationAllowed(true), []);
-
-  // Get location once at launch, then keep it updated as the user moves
-  // (re-sorts distances after every ~250 m). No account, no tracking --
-  // everything is processed on-device.
-  useEffect(() => {
-    if (!locationAllowed) return;
-    let cancelled = false;
-    let watcher: Location.LocationSubscription | null = null;
-    (async () => {
-      let coords = FALLBACK_LOCATION;
-      let fellBack = true;
-      try {
-        const { status } = await Location.requestForegroundPermissionsAsync();
-        if (status === "granted") {
-          // A recent cached fix is instant; only wait for a fresh GPS
-          // reading if there is no fix from the last 5 minutes.
-          const pos =
-            (await Location.getLastKnownPositionAsync({
-              maxAge: 5 * 60 * 1000,
-            })) ??
-            (await Location.getCurrentPositionAsync({
-              accuracy: Location.Accuracy.Balanced,
-            }));
-          coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-          fellBack = false;
-          watcher = await Location.watchPositionAsync(
-            {
-              accuracy: Location.Accuracy.Balanced,
-              timeInterval: 30 * 1000,
-              distanceInterval: 250,
-            },
-            (p) => {
-              if (!cancelled) {
-                setLocation({
-                  lat: p.coords.latitude,
-                  lng: p.coords.longitude,
-                });
-              }
-            },
-          );
-        }
-      } catch {
-        // Keep fallback -- the app must still work without location.
-      }
-      if (cancelled) {
-        watcher?.remove();
-        return;
-      }
-      setLocation(coords);
-      setUsingFallback(fellBack);
-    })();
-    return () => {
-      cancelled = true;
-      watcher?.remove();
-    };
-  }, [locationAllowed]);
+  // Once at launch, then updated as the user moves (re-sorts distances after
+  // every ~250 m). Everything is processed on-device.
+  const { coords: location, usingFallback } = useDeviceLocation({
+    prompt: true,
+    watch: true,
+    enabled: locationAllowed,
+  });
 
   // Facility filters live in Settings storage, so a choice like "sisters'
   // space" made on first launch is remembered on every later launch.
@@ -476,17 +403,6 @@ export default function HomeScreen() {
   // Distances come from the searched area when one is set; prayer times
   // always follow the user's real location.
   const origin = searchOrigin ?? gpsOrigin;
-
-  // Only the calculation-relevant settings: depending on the whole settings
-  // object meant toggling a facility filter recomputed prayer times.
-  const calcOptions = useMemo(
-    () => ({
-      method: settings.method,
-      madhab: settings.madhab,
-      shafaq: settings.shafaq,
-    }),
-    [settings.method, settings.madhab, settings.shafaq],
-  );
 
   // Two-stage memo: distances/sorting only recompute when location or data
   // changes -- NOT on every filter toggle or keystroke.

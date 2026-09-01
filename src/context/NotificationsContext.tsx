@@ -175,7 +175,7 @@ export function NotificationsProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const { settings } = useSettings();
+  const { calcOptions } = useSettings();
   const [prefs, setPrefs] = useState<NotificationPrefs>(
     DEFAULT_NOTIFICATION_PREFS,
   );
@@ -185,18 +185,12 @@ export function NotificationsProvider({
   const [locationAvailable, setLocationAvailable] = useState(false);
   const location = useRef<{ lat: number; lng: number } | null>(null);
   const scheduleState = useRef<ScheduleState>(EMPTY_STATE);
-  const hydrated = useRef(false);
+  // State, not a ref: the effects below must not schedule anything from the
+  // defaults before storage has been read, and as state it is an honest
+  // dependency that re-runs them once it has.
+  const [hydrated, setHydrated] = useState(false);
   // Serialises reschedules: a second trigger while one is in flight waits.
   const rescheduling = useRef<Promise<void> | null>(null);
-
-  const calcOptions = useMemo(
-    () => ({
-      method: settings.method,
-      madhab: settings.madhab,
-      shafaq: settings.shafaq,
-    }),
-    [settings.method, settings.madhab, settings.shafaq],
-  );
 
   // Hydrate prefs + schedule bookkeeping once.
   useEffect(() => {
@@ -231,7 +225,7 @@ export function NotificationsProvider({
       } catch {
         // Corrupt storage must never break launch.
       } finally {
-        hydrated.current = true;
+        if (!cancelled) setHydrated(true);
       }
     })();
     return () => {
@@ -239,9 +233,12 @@ export function NotificationsProvider({
     };
   }, []);
 
-  const persistPrefs = useCallback((next: NotificationPrefs) => {
-    void AsyncStorage.setItem(PREFS_KEY, JSON.stringify(next)).catch(() => {});
-  }, []);
+  // Persist whatever the prefs are once storage has been read — including
+  // the hydrated copy itself, which harmlessly normalises an old blob.
+  useEffect(() => {
+    if (!hydrated) return;
+    void AsyncStorage.setItem(PREFS_KEY, JSON.stringify(prefs)).catch(() => {});
+  }, [prefs, hydrated]);
 
   /**
    * Coordinates to plan from: this session's fix when the home screen has
@@ -352,7 +349,7 @@ export function NotificationsProvider({
 
   // Top up the rolling window on foreground and on relevant changes.
   useEffect(() => {
-    if (!hydrated.current) return;
+    if (!hydrated) return;
     void reschedule("topup");
     const sub = AppState.addEventListener("change", (state) => {
       if (state !== "active") return;
@@ -372,25 +369,18 @@ export function NotificationsProvider({
       }
     });
     return () => sub.remove();
-  }, [reschedule, permissionGranted]);
+  }, [reschedule, permissionGranted, hydrated]);
 
-  const updatePrefs = useCallback(
-    (patch: Partial<NotificationPrefs>) => {
-      setPrefs((prev) => {
-        const next = { ...prev, ...patch };
-        persistPrefs(next);
-        return next;
-      });
-    },
-    [persistPrefs],
-  );
+  const updatePrefs = useCallback((patch: Partial<NotificationPrefs>) => {
+    setPrefs((prev) => ({ ...prev, ...patch }));
+  }, []);
 
   // Prefs/settings changed -> rebuild the queue (reschedule identity
   // changes with them, so this effect covers both).
   useEffect(() => {
-    if (!hydrated.current) return;
+    if (!hydrated) return;
     void reschedule("change");
-  }, [reschedule]);
+  }, [reschedule, hydrated]);
 
   const enable = useCallback(async (): Promise<boolean> => {
     const N = await getNotifier();

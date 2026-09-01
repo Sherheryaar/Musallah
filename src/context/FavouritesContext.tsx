@@ -4,7 +4,6 @@ import React, {
   useContext,
   useEffect,
   useMemo,
-  useRef,
   useState,
 } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -53,8 +52,9 @@ export function FavouritesProvider({
   children: React.ReactNode;
 }) {
   const [ids, setIds] = useState<string[]>([]);
-  // Writes are fire-and-forget, but they must not race the initial read.
-  const ready = useRef(false);
+  // Writes must not race the initial read: a toggle before hydration would
+  // otherwise persist a one-item list over the user's real one.
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -74,27 +74,26 @@ export function FavouritesProvider({
         // Unreadable or corrupt storage just means "no favourites yet".
       })
       .finally(() => {
-        if (!cancelled) ready.current = true;
+        if (!cancelled) setHydrated(true);
       });
     return () => {
       cancelled = true;
     };
   }, []);
 
+  // Persistence is an effect of the state, not a side effect inside the
+  // state updater (updaters must be pure; React runs them twice in dev).
+  useEffect(() => {
+    if (!hydrated) return;
+    void AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(ids)).catch(() => {});
+  }, [ids, hydrated]);
+
   const toggle = useCallback((id: string) => {
-    setIds((prev) => {
-      const next = prev.includes(id)
+    setIds((prev) =>
+      prev.includes(id)
         ? prev.filter((x) => x !== id)
-        : [...prev, id].slice(-MAX_FAVOURITES);
-      // Guarded so a toggle fired before hydration can't persist an empty
-      // list over the user's real one.
-      if (ready.current) {
-        void AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(next)).catch(
-          () => {},
-        );
-      }
-      return next;
-    });
+        : [...prev, id].slice(-MAX_FAVOURITES),
+    );
   }, []);
 
   const idSet = useMemo(() => new Set(ids), [ids]);

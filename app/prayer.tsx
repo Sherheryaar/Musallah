@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
 import {
-  AppState,
   Modal,
   Platform,
   Pressable,
@@ -11,7 +10,6 @@ import {
 } from "react-native";
 import { Link } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
-import * as Location from "expo-location";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Circle, Path } from "react-native-svg";
@@ -28,6 +26,8 @@ import { computePrayerSchedule, PrayerScheduleEntry } from "@/lib/prayerTimes";
 import { createThemedStyles } from "@/lib/themedStyles";
 import { numeric, radius, spacing, type, type ThemeColors } from "@/lib/theme";
 import { hapticSelection } from "@/lib/haptics";
+import { useDeviceLocation } from "@/lib/useDeviceLocation";
+import { useMinuteTick } from "@/lib/useMinuteTick";
 
 const SHORT_WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -360,66 +360,16 @@ export default function PrayerScreen() {
   // index, settings and place/[id] all pad by this; these two screens were
   // simply missed.
   const insets = useSafeAreaInsets();
-  const { settings } = useSettings();
-  const [location, setLocation] = useState(FALLBACK_LOCATION);
-  const [usingFallback, setUsingFallback] = useState(false);
+  const { settings, calcOptions } = useSettings();
   const [dayOffset, setDayOffset] = useState(0);
   const [showCalendar, setShowCalendar] = useState(false);
-  const [now, setNow] = useState(() => new Date());
+  const now = useMinuteTick();
 
-  // Tick on each minute BOUNDARY so the countdown stays honest, and
-  // resync on foreground: a fixed interval is frozen while the app is
-  // backgrounded, so this screen's countdown was silently stale — often by
-  // hours — for anyone returning to an already-open prayer screen.
-  useEffect(() => {
-    let id: ReturnType<typeof setTimeout>;
-    const schedule = () =>
-      setTimeout(() => {
-        setNow(new Date());
-        id = schedule();
-      }, 60_000 - (Date.now() % 60_000));
-    id = schedule();
-    const sub = AppState.addEventListener("change", (state) => {
-      if (state === "active") setNow(new Date());
-    });
-    return () => {
-      clearTimeout(id);
-      sub.remove();
-    };
-  }, []);
-
-  // Silent location read -- the home screen owns the permission prompt, so
-  // this never asks; it just uses the existing fix when there is one.
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const { status } = await Location.getForegroundPermissionsAsync();
-        if (status !== "granted") {
-          // Permission was never granted (or this screen was deep-linked to
-          // before the home screen could ask). Say so instead of silently
-          // showing central-London times as if they were the user's.
-          if (!cancelled) setUsingFallback(true);
-          return;
-        }
-        const pos =
-          (await Location.getLastKnownPositionAsync({
-            maxAge: 10 * 60 * 1000,
-          })) ??
-          (await Location.getCurrentPositionAsync({
-            accuracy: Location.Accuracy.Balanced,
-          }));
-        if (!cancelled) {
-          setLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-        }
-      } catch {
-        if (!cancelled) setUsingFallback(true);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  // Silent: the home screen owns the permission prompt, so this never asks.
+  // It uses the existing fix when there is one and, when there isn't, says
+  // so rather than showing central-London times as if they were the user's.
+  const { coords, usingFallback } = useDeviceLocation({ prompt: false });
+  const location = coords ?? FALLBACK_LOCATION;
 
   const selectedDate = useMemo(() => addDays(now, dayOffset), [now, dayOffset]);
 
@@ -431,17 +381,6 @@ export default function PrayerScreen() {
       return { offset: i, label, date: d };
     });
   }, [now]);
-
-  // Only the calculation-relevant settings, so unrelated settings changes
-  // (facility filters) don't recompute the schedule.
-  const calcOptions = useMemo(
-    () => ({
-      method: settings.method,
-      madhab: settings.madhab,
-      shafaq: settings.shafaq,
-    }),
-    [settings.method, settings.madhab, settings.shafaq],
-  );
 
   const schedule = useMemo(
     () =>
