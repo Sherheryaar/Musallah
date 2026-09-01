@@ -5,66 +5,48 @@ import React, {
   useRef,
   useState,
 } from "react";
-import {
-  AppState,
-  FlatList,
-  Keyboard,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { AppState, FlatList, Keyboard, StyleSheet, Text, View } from "react-native";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Location from "expo-location";
 
-import Touchable from "@/components/Touchable";
-import {
-  FACILITY_LABELS,
-  FacilityKey,
-  isCorroborated,
-  Place,
-} from "@/data/places";
-import { FACILITY_ICONS, type IconName } from "@/lib/icons";
-import { useFavourites } from "@/context/FavouritesContext";
-import { useNotifications } from "@/context/NotificationsContext";
-import { usePlaces } from "@/context/PlacesContext";
-import { useSettings } from "@/context/SettingsContext";
 import BottomSheet from "@/components/BottomSheet";
 import FilterSheet from "@/components/FilterSheet";
+import EmptyState from "@/components/home/EmptyState";
+import FridayBanner from "@/components/home/FridayBanner";
+import MapLegend from "@/components/home/MapLegend";
+import NextPrayerBar from "@/components/home/NextPrayerBar";
+import QuickFilterStrip, {
+  type QuickFilterKey,
+} from "@/components/home/QuickFilterStrip";
+import SearchBar from "@/components/home/SearchBar";
 import OfflineScreen from "@/components/OfflineScreen";
 import Onboarding from "@/components/Onboarding";
 import PlaceCard from "@/components/PlaceCard";
 import PlacesMap from "@/components/PlacesMap";
 import PlacesSkeleton from "@/components/PlacesSkeleton";
 import SuggestionSheet from "@/components/SuggestionSheet";
+import Touchable from "@/components/Touchable";
+import { useFavourites } from "@/context/FavouritesContext";
+import { useNotifications } from "@/context/NotificationsContext";
+import { usePlaces } from "@/context/PlacesContext";
+import { useSettings } from "@/context/SettingsContext";
+import { useTheme } from "@/context/ThemeContext";
+import { FacilityKey, isCorroborated, Place } from "@/data/places";
 import { distanceFrom, distanceKm, formatDistance } from "@/lib/distance";
-import { formatCountdown } from "@/lib/time";
+import { floatingEdge } from "@/lib/elevation";
+import { submitNewPlaceSuggestion } from "@/lib/feedback";
 import { fuzzyMatchesTokens, tokenize } from "@/lib/fuzzy";
 import {
   FALLBACK_LOCATION,
   isInCoverage,
   queryMatchesPlaceFields,
 } from "@/lib/geo";
-import { CalcOptions, computePrayerSchedule } from "@/lib/prayerTimes";
-import { submitNewPlaceSuggestion } from "@/lib/feedback";
-import { useDeviceLocation } from "@/lib/useDeviceLocation";
-import { useMinuteTick } from "@/lib/useMinuteTick";
-import { useTheme } from "@/context/ThemeContext";
-import { cardEdge, clipRipple, floatingEdge } from "@/lib/elevation";
-import { MIN_TARGET } from "@/lib/metrics";
 import { hapticSelection } from "@/lib/haptics";
 import { createThemedStyles } from "@/lib/themedStyles";
-import {
-  numeric,
-  placeTypeColors,
-  radius,
-  spacing,
-  type,
-  type ThemeColors,
-} from "@/lib/theme";
+import { radius, spacing, type, type ThemeColors } from "@/lib/theme";
+import { useDeviceLocation } from "@/lib/useDeviceLocation";
 
 // The list shows a handful of nearby, reasonable options -- not the whole
 // dataset. The map receives ALL filtered results and picks what to render
@@ -73,12 +55,6 @@ import {
 const MAX_LIST_RESULTS = 12;
 const MAX_LIST_DISTANCE_KM = 30;
 const MIN_LIST_RESULTS = 5;
-
-const LEGEND_ITEMS: { type: keyof typeof placeTypeColors; label: string }[] = [
-  { type: "masjid", label: "Masjid" },
-  { type: "musalla", label: "Prayer room" },
-  { type: "multi_faith_room", label: "Multi-faith" },
-];
 
 // km: distance from the active anchor (searched area or user) — used for
 // selection and ordering. kmFromUser: distance from the user's own location
@@ -91,133 +67,6 @@ const keyExtractor = (item: Result) => item.place.id;
 
 /** One place's precomputed search fields — see getSearchIndex below. */
 type SearchEntry = { name: string; address: string; tokens: string[] };
-
-/**
- * The times bar answers the question people actually have — "when is the
- * next prayer?" — with the following ones small beside it and a progress
- * line through the current window. Self-contained and memoized so its
- * 30-second countdown tick re-renders THIS bar, not the map and list.
- */
-const NextPrayerBar = React.memo(function NextPrayerBar({
-  lat,
-  lng,
-  options,
-  onPress,
-}: {
-  lat: number;
-  lng: number;
-  options: CalcOptions;
-  onPress: () => void;
-}) {
-  const styles = useStyles();
-  const { colors } = useTheme();
-  const now = useMinuteTick().getTime();
-
-  const info = useMemo(() => {
-    // Sunrise isn't a prayer; yesterday/tomorrow bracket the edges (before
-    // Fajr the "current window" started at yesterday's Isha; after Isha
-    // the next prayer is tomorrow's Fajr).
-    const prayersOf = (d: Date) =>
-      (computePrayerSchedule(lat, lng, options, d) ?? []).filter(
-        (e) => e.key !== "sunrise",
-      );
-    const all = [
-      ...prayersOf(new Date(now - 86_400_000)),
-      ...prayersOf(new Date(now)),
-      ...prayersOf(new Date(now + 86_400_000)),
-    ];
-    const idx = all.findIndex((e) => e.time.getTime() > now);
-    if (idx < 0) return null; // polar conditions
-    const next = all[idx];
-    const prev = idx > 0 ? all[idx - 1] : null;
-    const msUntilNext = next.time.getTime() - now;
-    const progress = prev
-      ? Math.min(
-          1,
-          Math.max(
-            0,
-            (now - prev.time.getTime()) /
-              (next.time.getTime() - prev.time.getTime()),
-          ),
-        )
-      : 0;
-    return {
-      next,
-      upcoming: all.slice(idx + 1, idx + 3),
-      msUntilNext,
-      progress,
-    };
-  }, [lat, lng, options, now]);
-
-  if (!info) return null;
-
-  const countdown = formatCountdown(info.msUntilNext);
-
-  return (
-    <Touchable
-      style={styles.timesBar}
-      onPress={onPress}
-      accessibilityRole="button"
-      accessibilityLabel={`Next prayer: ${info.next.label} at ${info.next.display}, in ${countdown}. Open prayer times.`}
-    >
-      <View style={styles.timesTopRow}>
-        <View style={styles.nextBlock}>
-          {/* Two lines and a capped multiplier: this row sits inside the
-              sheet's `overflow: hidden`, so anything it cannot fit is not
-              scrolled — it is cut off. Wrapping here is what keeps the
-              chevron and the upcoming times whole at large font scales. */}
-          <Text
-            style={styles.nextLabel}
-            numberOfLines={2}
-            maxFontSizeMultiplier={1.5}
-          >
-            Next {"·"} {info.next.label} in {countdown}
-          </Text>
-          <Text style={styles.nextTime}>{info.next.display}</Text>
-        </View>
-        <View style={styles.upcomingRow}>
-          {info.upcoming.map((e) => (
-            <View key={`${e.key}-${e.time.getTime()}`} style={styles.timeItem}>
-              <Text style={styles.timeLabel}>{e.label}</Text>
-              <Text style={styles.timeValue}>{e.display}</Text>
-            </View>
-          ))}
-          <MaterialCommunityIcons
-            name="chevron-right"
-            size={20}
-            color={colors.textSecondary}
-          />
-        </View>
-      </View>
-      <View style={styles.progressTrack}>
-        {/* scaleX rather than a percentage width: width is a LAYOUT prop,
-            so every tick re-laid-out the fill inside its clipping track.
-            A transform costs nothing and is the same pixels. */}
-        <View
-          style={[styles.progressFill, { transform: [{ scaleX: info.progress }] }]}
-        />
-      </View>
-    </Touchable>
-  );
-});
-
-// The chips under the times bar. Labels and icons come from the schema's own
-// vocabulary (FACILITY_LABELS / FACILITY_ICONS) so a chip can never name a
-// facility key the data does not have — three of these once did, and
-// toggling them filtered out every place.
-type QuickFilterKey = FacilityKey | "saved";
-const QUICK_FILTERS: readonly QuickFilterKey[] = [
-  "sistersSpace",
-  "disabledAccess",
-  "parking",
-  "wudu",
-  "jumuah",
-  "saved",
-];
-const quickFilterLabel = (key: QuickFilterKey) =>
-  key === "saved" ? "Saved" : FACILITY_LABELS[key];
-const quickFilterIcon = (key: QuickFilterKey): IconName =>
-  key === "saved" ? "heart" : FACILITY_ICONS[key];
 
 export default function HomeScreen() {
   const styles = useStyles();
@@ -279,11 +128,8 @@ export default function HomeScreen() {
   const toggleFilter = useCallback(
     (key: FacilityKey) => {
       const next = new Set(settings.facilityFilters);
-      if (next.has(key)) {
-        next.delete(key);
-      } else {
-        next.add(key);
-      }
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
       updateSettings({ facilityFilters: [...next] });
     },
     [settings.facilityFilters, updateSettings],
@@ -302,6 +148,20 @@ export default function HomeScreen() {
   const toggleCorroborated = useCallback(
     () => updateSettings({ corroboratedOnly: !settings.corroboratedOnly }),
     [settings.corroboratedOnly, updateSettings],
+  );
+
+  const toggleSaved = useCallback(
+    () => updateSettings({ savedOnly: !settings.savedOnly }),
+    [settings.savedOnly, updateSettings],
+  );
+
+  const toggleQuickFilter = useCallback(
+    (key: QuickFilterKey) => {
+      hapticSelection(settings.hapticFeedback);
+      if (key === "saved") toggleSaved();
+      else toggleFilter(key);
+    },
+    [settings.hapticFeedback, toggleSaved, toggleFilter],
   );
 
   const gpsOrigin = location ?? FALLBACK_LOCATION;
@@ -347,10 +207,7 @@ export default function HomeScreen() {
       // something the user typed to appear in what that place is actually
       // called. Otherwise "asdf qwerty" quietly re-anchors to a random
       // village. (If reverse geocoding itself fails, trust the hit.)
-      const looksRight = async (hit: {
-        latitude: number;
-        longitude: number;
-      }) => {
+      const looksRight = async (hit: { latitude: number; longitude: number }) => {
         try {
           const rev = await Location.reverseGeocodeAsync({
             latitude: hit.latitude,
@@ -380,15 +237,11 @@ export default function HomeScreen() {
         // lives in the input, not a separate chip).
         setSearchOrigin({ lat: hit.latitude, lng: hit.longitude, label: text });
       } else {
-        setSearchNote(
-          `Couldn't find "${text}" — showing name matches instead.`,
-        );
+        setSearchNote(`Couldn't find "${text}" — showing name matches instead.`);
       }
     } catch {
       if (isStale()) return;
-      setSearchNote(
-        "Area search needs a connection — try a place name instead.",
-      );
+      setSearchNote("Area search needs a connection — try a place name instead.");
     }
   }, [query, gpsOrigin.lat, gpsOrigin.lng]);
 
@@ -445,13 +298,10 @@ export default function HomeScreen() {
 
   // Pre-lowercased haystack and pre-tokenised name+address per place, so
   // neither the exact-substring pass nor the typo-tolerant one has to
-  // re-derive them from thousands of strings on every keystroke.
-  //
-  // Built LAZILY, on the first keystroke: tokenising the whole dataset costs
-  // several thousand regex passes, and it used to run eagerly the moment the
-  // data landed — on the critical path of the first paint, for a feature the
-  // user may never touch. A ref keyed on the dataset it was built from is the
-  // whole cache; nothing re-renders when it fills.
+  // re-derive them from thousands of strings on every keystroke. Built
+  // LAZILY, on the first keystroke: tokenising the whole dataset costs
+  // several thousand regex passes, which must not sit on the critical path
+  // of the first paint for a feature the user may never touch.
   const searchIndexRef = useRef<{
     source: Place[];
     entries: Map<string, SearchEntry>;
@@ -461,10 +311,9 @@ export default function HomeScreen() {
     if (cached && cached.source === places) return cached.entries;
     const entries = new Map<string, SearchEntry>();
     for (const place of places) {
-      // Name and address stay SEPARATE strings. Concatenating them into one
-      // haystack would quietly widen the exact-match pass to queries that
-      // straddle the join, which is a different feature from the one the
-      // fuzzy tier already provides.
+      // Name and address stay SEPARATE strings: one concatenated haystack
+      // would quietly widen the exact-match pass to queries that straddle
+      // the join, which the fuzzy tier already provides.
       entries.set(place.id, {
         name: place.name.toLowerCase(),
         address: place.address.toLowerCase(),
@@ -476,9 +325,8 @@ export default function HomeScreen() {
   }, [places]);
 
   // Debounced text actually used to filter/recluster: the box itself
-  // updates every keystroke (below), but re-filtering 2,000+ places and
-  // reclustering the map on EVERY keystroke is wasted work while someone's
-  // still mid-word, and was measurably janky on slower devices.
+  // updates every keystroke, but re-filtering 2,000+ places and reclustering
+  // the map on EVERY keystroke was measurably janky on slower devices.
   const [debouncedQuery, setDebouncedQuery] = useState("");
   useEffect(() => {
     const handle = setTimeout(() => setDebouncedQuery(query), 150);
@@ -529,10 +377,7 @@ export default function HomeScreen() {
     );
     if (!q) return base;
     const index = getSearchIndex();
-    // Tokenised ONCE, not once per place: fuzzyMatches(tokens, query) took the
-    // raw query string, so the same few characters were lowercased,
-    // NFD-normalised and split by four regexes a few thousand times per
-    // keystroke to produce the identical token list every time.
+    // Tokenised ONCE, not once per place.
     const queryTokens = tokenize(q);
     const exact: Result[] = [];
     const fuzzy: Result[] = [];
@@ -540,8 +385,7 @@ export default function HomeScreen() {
       const { place } = result;
       // The index is built from the same `places` array this list came from,
       // so a miss shouldn't happen — but if it ever did, the place must still
-      // be findable by name. Dropping it would remove a real place from search
-      // results with nothing to show that anything went wrong.
+      // be findable by name.
       const entry = index.get(place.id);
       const name = entry?.name ?? place.name.toLowerCase();
       const address = entry?.address ?? place.address.toLowerCase();
@@ -580,9 +424,9 @@ export default function HomeScreen() {
     if (!isFriday) return capped;
     // Promotion, not re-sorting: keep the nearest-first order and simply
     // float the places that PUBLISH a jumu'ah time above those that don't.
-    // Deliberately not "sort by jumu'ah time" — only 136 of 2,244 rows
-    // carry one, so that would collapse to the ordinary distance list while
-    // looking like it did something.
+    // Deliberately not "sort by jumu'ah time" — few rows carry one, so that
+    // would collapse to the ordinary distance list while looking like it
+    // did something.
     const withTime = capped.filter((r) => r.place.jumuahTimes?.length);
     const withoutTime = capped.filter((r) => !r.place.jumuahTimes?.length);
     return withTime.concat(withoutTime);
@@ -605,6 +449,8 @@ export default function HomeScreen() {
     (id: string) => router.push(`/place/${id}`),
     [router],
   );
+  const openPrayer = useCallback(() => router.push("/prayer"), [router]);
+  const openNewPlaceForm = useCallback(() => setShowNewPlaceForm(true), []);
 
   const renderItem = useCallback(
     ({ item }: { item: Result }) => (
@@ -621,294 +467,6 @@ export default function HomeScreen() {
     activeFilters.size +
     (settings.corroboratedOnly ? 1 : 0) +
     (settings.savedOnly ? 1 : 0);
-
-  const searchRow = (
-    <View style={styles.searchRow}>
-      <View style={styles.searchInputWrap}>
-        <TextInput
-          style={styles.searchInput}
-          placeholder={'Try "Stratford" or a masjid name...'}
-          placeholderTextColor={colors.textSecondary}
-          value={query}
-          onChangeText={setQuery}
-          onSubmitEditing={searchArea}
-          returnKeyType="search"
-          autoCorrect={false}
-          accessibilityLabel="Search for an area or place"
-        />
-        {query.length > 0 || searchOrigin ? (
-          // One search at a time: the box holds it, this clears it. (The
-          // old separate "Near X" pill read like stackable filter tags.)
-          <Touchable
-            style={styles.clearButton}
-            onPress={clearSearch}
-            accessibilityRole="button"
-            accessibilityLabel="Clear search"
-            // The target box is deliberately wider than the ✕ it draws, so a
-            // bounded ripple would flash a square of empty input. A circular
-            // one lands on the glyph, which is what the finger aimed at.
-            borderless
-            rippleRadius={20}
-          >
-            <View style={styles.clearBadge}>
-              <MaterialCommunityIcons
-                name="close"
-                size={14}
-                color={colors.textSecondary}
-              />
-            </View>
-          </Touchable>
-        ) : null}
-      </View>
-      <Touchable
-        style={[
-          styles.filterButton,
-          filterCount > 0 && styles.filterButtonActive,
-        ]}
-        onPress={() => setShowFilters(true)}
-        accessibilityRole="button"
-        accessibilityLabel={
-          filterCount > 0
-            ? `Filters, ${filterCount} on`
-            : "Filters"
-        }
-        accessibilityState={{ expanded: showFilters }}
-      >
-        <Text
-          style={[
-            styles.filterButtonLabel,
-            filterCount > 0 && styles.filterButtonLabelActive,
-          ]}
-        >
-          {filterCount > 0 ? `Filters (${filterCount})` : "Filters"}
-        </Text>
-      </Touchable>
-    </View>
-  );
-
-  const toggleQuickFilter = useCallback(
-    (key: FacilityKey | "saved") => {
-      hapticSelection(settings.hapticFeedback);
-      if (key === "saved") updateSettings({ savedOnly: !settings.savedOnly });
-      else toggleFilter(key);
-    },
-    [settings.hapticFeedback, settings.savedOnly, toggleFilter, updateSettings],
-  );
-
-  const quickFilterStrip = (
-    <ScrollView
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      contentContainerStyle={styles.quickFilterStrip}
-      style={styles.quickFilterScroll}
-    >
-      {QUICK_FILTERS.map((key) => {
-        const label = quickFilterLabel(key);
-        const active =
-          key === "saved" ? settings.savedOnly : activeFilters.has(key);
-        return (
-          <Touchable
-            key={key}
-            style={[
-              styles.quickFilterChip,
-              active && styles.quickFilterChipActive,
-            ]}
-            onPress={() => toggleQuickFilter(key)}
-            accessibilityRole="checkbox"
-            accessibilityState={{ checked: active }}
-            accessibilityLabel={`Filter: ${label}`}
-          >
-            <MaterialCommunityIcons
-              name={quickFilterIcon(key)}
-              size={15}
-              color={active ? colors.accent : colors.textSecondary}
-            />
-            <Text
-              style={[
-                styles.quickFilterLabel,
-                active && styles.quickFilterLabelActive,
-              ]}
-            >
-              {label}
-            </Text>
-          </Touchable>
-        );
-      })}
-    </ScrollView>
-  );
-
-  const searchNoteRow = searchNote ? (
-    <View style={styles.contextRow}>
-      <Text style={styles.searchNote}>{searchNote}</Text>
-    </View>
-  ) : null;
-
-  // What each pin colour means. Sits under the search bar (the bottom of the
-  // map is covered by the list sheet, so a bottom-corner key would be hidden
-  // at the default sheet position).
-  const mapLegend = (
-    <View
-      style={styles.legend}
-      // Without `accessible`, iOS ignores a container's accessibilityLabel
-      // entirely and reads the three loose words instead — so the one place
-      // the pin colours are explained in WORDS never reached the people who
-      // can only use words. Grouping costs one long focus stop; that is the
-      // right trade here. Android's twin of `accessible` is "yes" on the group
-      // ITSELF — "no-hide-descendants" drops this view and everything under it
-      // from the tree, label included, which is the one outcome to avoid.
-      accessible
-      importantForAccessibility="yes"
-      accessibilityLabel="Map key: green is a masjid, amber is a prayer room, purple is a multi-faith room. The blue dot is your location. A numbered circle groups several places — tap it to zoom in."
-    >
-      {LEGEND_ITEMS.map(({ type, label }) => (
-        <View key={type} style={styles.legendItem}>
-          <View
-            style={[
-              styles.legendDot,
-              { backgroundColor: placeTypeColors[type] },
-            ]}
-          />
-          <Text style={styles.legendLabel}>{label}</Text>
-        </View>
-      ))}
-    </View>
-  );
-
-  const openPrayer = useCallback(() => router.push("/prayer"), [router]);
-
-  const timesBar = (
-    <NextPrayerBar
-      lat={gpsOrigin.lat}
-      lng={gpsOrigin.lng}
-      options={calcOptions}
-      onPress={openPrayer}
-    />
-  );
-
-  const fridayBanner =
-    isFriday && !fridayNoticeDismissed && listResults.length > 0 ? (
-      <View style={styles.fridayBanner}>
-        <MaterialCommunityIcons
-          name="calendar-star"
-          size={18}
-          color={colors.accent}
-        />
-        <Text style={styles.fridayBannerText}>
-          It&apos;s Friday {"—"} places with a published Jumu&apos;ah
-          time are shown first, and Jumu&apos;ah-only venues are included.
-        </Text>
-        <Touchable
-          onPress={() => setFridayNoticeDismissed(true)}
-          accessibilityRole="button"
-          accessibilityLabel="Dismiss Friday notice"
-          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-        >
-          <MaterialCommunityIcons
-            name="close"
-            size={16}
-            color={colors.textSecondary}
-          />
-        </Touchable>
-      </View>
-    ) : null;
-
-  const list = (
-    <FlatList
-      style={styles.listContainer}
-      data={listResults}
-      keyExtractor={keyExtractor}
-      // Render tuning: draw a screenful quickly, keep a modest window
-      // mounted instead of the whole list.
-      initialNumToRender={8}
-      maxToRenderPerBatch={10}
-      windowSize={7}
-      keyboardShouldPersistTaps="handled"
-      contentContainerStyle={[
-        styles.list,
-        { paddingBottom: spacing.xxl + insets.bottom },
-      ]}
-      renderItem={renderItem}
-      ListHeaderComponent={
-        <>
-          {/* Hidden while the saved-only filter is on: the main list IS the
-              saved places then, and this header would duplicate every row. */}
-          {favourites.length > 0 && !effectiveQuery && !settings.savedOnly ? (
-            <View style={styles.savedSection}>
-              <Text style={styles.savedTitle}>Saved</Text>
-              {favourites.map((item) => (
-                <PlaceCard
-                  key={item.place.id}
-                  place={item.place}
-                  distanceLabel={formatDistance(item.kmFromUser)}
-                  onPress={openPlace}
-                />
-              ))}
-            </View>
-          ) : null}
-          {fridayBanner}
-        </>
-      }
-      // "Nothing here" and "nothing YET" are different states and must not
-      // share a component. Places load live on every launch (never bundled,
-      // never cached — see src/data/places.ts), so during the first fetch
-      // `listResults` is legitimately empty and the empty state used to fire
-      // on 100% of cold starts, inviting the user to report the entire
-      // dataset as a gap.
-      ListEmptyComponent={
-        placesStatus === "loading" ? (
-          <PlacesSkeleton />
-        ) : (
-          <View style={styles.empty}>
-            <Text style={styles.emptyTitle}>
-              {settings.savedOnly ? "No saved places" : "No places match"}
-            </Text>
-            {/* Advice about a control that isn't on is worse than none: with
-                no filter narrowing the list, the only thing that can be
-                hiding places is what was typed. */}
-            <Text style={styles.emptyText}>
-              {settings.savedOnly
-                ? "Tap the heart on a place to save it — or turn off " +
-                  "the saved-places filter."
-                : filterCount > 0
-                  ? "Try removing a filter — or this is a gap in the " +
-                    "data worth fixing."
-                  : "Try a shorter search, or a nearby town — or this " +
-                    "is a gap in the data worth fixing."}
-            </Text>
-            <Touchable
-              style={styles.emptyButton}
-              onPress={() => setShowNewPlaceForm(true)}
-              accessibilityRole="button"
-              accessibilityLabel="Add a missing place"
-            >
-              <Text style={styles.emptyButtonLabel}>Add a missing place</Text>
-            </Touchable>
-          </View>
-        )
-      }
-      // The form itself lives in a top-anchored SuggestionSheet overlay
-      // (rendered at the screen root) — inline in the footer, the keyboard
-      // covered it as you typed.
-      ListFooterComponent={
-        listResults.length > 0 ? (
-          // The empty state has its own "Add a missing place" CTA.
-          <View style={styles.listFooter}>
-            <View style={styles.listFooterRow}>
-              <Text style={styles.listFooterText}>Missing a place? </Text>
-              <Touchable
-                onPress={() => setShowNewPlaceForm(true)}
-                accessibilityRole="button"
-                accessibilityLabel="Suggest a missing place"
-                hitSlop={{ top: 14, bottom: 14, left: 16, right: 16 }}
-              >
-                <Text style={styles.listFooterLink}>Suggest it</Text>
-              </Touchable>
-            </View>
-          </View>
-        ) : null
-      }
-    />
-  );
 
   // Nothing loaded yet AND the most recent fetch failed: there's no
   // bundled/cached dataset to fall back to (by design — see
@@ -931,9 +489,22 @@ export default function HomeScreen() {
         />
       </View>
       <View style={styles.overlayTop}>
-        {searchRow}
-        {searchNoteRow}
-        {mapLegend}
+        <SearchBar
+          query={query}
+          onChangeQuery={setQuery}
+          onSubmit={searchArea}
+          canClear={query.length > 0 || searchOrigin !== null}
+          onClear={clearSearch}
+          filterCount={filterCount}
+          filtersOpen={showFilters}
+          onOpenFilters={() => setShowFilters(true)}
+        />
+        {searchNote ? (
+          <View style={styles.contextRow}>
+            <Text style={styles.searchNote}>{searchNote}</Text>
+          </View>
+        ) : null}
+        <MapLegend />
         {usingFallback ? (
           <Text style={styles.fallbackNote}>
             Using central London — enable location for accurate results.
@@ -947,9 +518,9 @@ export default function HomeScreen() {
             onPress={recenter}
             accessibilityRole="button"
             accessibilityLabel="Back to my location"
-            // Circular FAB: a borderless ripple is the Material idiom
-            // here, and it avoids clipping the view — which on Android
-            // would take the elevation shadow with it.
+            // Circular FAB: a borderless ripple is the Material idiom here,
+            // and it avoids clipping the view — which on Android would take
+            // the elevation shadow with it.
             borderless
             rippleRadius={26}
             scaleTo={0.92}
@@ -963,14 +534,94 @@ export default function HomeScreen() {
           </Touchable>
         }
       >
-        {timesBar}
-        {quickFilterStrip}
-        {list}
+        <NextPrayerBar
+          lat={gpsOrigin.lat}
+          lng={gpsOrigin.lng}
+          options={calcOptions}
+          onPress={openPrayer}
+        />
+        <QuickFilterStrip
+          active={activeFilters}
+          savedOnly={settings.savedOnly}
+          onToggle={toggleQuickFilter}
+        />
+        <FlatList
+          style={styles.listContainer}
+          data={listResults}
+          keyExtractor={keyExtractor}
+          // Render tuning: draw a screenful quickly, keep a modest window
+          // mounted instead of the whole list.
+          initialNumToRender={8}
+          maxToRenderPerBatch={10}
+          windowSize={7}
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={[
+            styles.list,
+            { paddingBottom: spacing.xxl + insets.bottom },
+          ]}
+          renderItem={renderItem}
+          ListHeaderComponent={
+            <>
+              {/* Hidden while the saved-only filter is on: the main list IS
+                  the saved places then, and this would duplicate every row. */}
+              {favourites.length > 0 && !effectiveQuery && !settings.savedOnly ? (
+                <View style={styles.savedSection}>
+                  <Text style={styles.savedTitle}>Saved</Text>
+                  {favourites.map((item) => (
+                    <PlaceCard
+                      key={item.place.id}
+                      place={item.place}
+                      distanceLabel={formatDistance(item.kmFromUser)}
+                      onPress={openPlace}
+                    />
+                  ))}
+                </View>
+              ) : null}
+              {isFriday && !fridayNoticeDismissed && listResults.length > 0 ? (
+                <FridayBanner onDismiss={() => setFridayNoticeDismissed(true)} />
+              ) : null}
+            </>
+          }
+          // "Nothing here" and "nothing YET" are different states: during the
+          // first fetch the list is legitimately empty.
+          ListEmptyComponent={
+            placesStatus === "loading" ? (
+              <PlacesSkeleton />
+            ) : (
+              <EmptyState
+                savedOnly={settings.savedOnly}
+                filterCount={filterCount}
+                onAddPlace={openNewPlaceForm}
+              />
+            )
+          }
+          // The form itself lives in a top-anchored SuggestionSheet overlay
+          // (rendered at the screen root) — inline in the footer, the
+          // keyboard covered it as you typed.
+          ListFooterComponent={
+            listResults.length > 0 ? (
+              // The empty state has its own "Add a missing place" CTA.
+              <View style={styles.listFooter}>
+                <View style={styles.listFooterRow}>
+                  <Text style={styles.listFooterText}>Missing a place? </Text>
+                  <Touchable
+                    onPress={openNewPlaceForm}
+                    accessibilityRole="button"
+                    accessibilityLabel="Suggest a missing place"
+                    hitSlop={{ top: 14, bottom: 14, left: 16, right: 16 }}
+                  >
+                    <Text style={styles.listFooterLink}>Suggest it</Text>
+                  </Touchable>
+                </View>
+              </View>
+            ) : null
+          }
+        />
       </BottomSheet>
       <FilterSheet
         visible={showFilters}
         savedOnly={settings.savedOnly}
-        onToggleSaved={() => updateSettings({ savedOnly: !settings.savedOnly })}
+        onToggleSaved={toggleSaved}
         active={activeFilters}
         corroboratedOnly={settings.corroboratedOnly}
         onToggle={toggleFilter}
@@ -990,367 +641,96 @@ export default function HomeScreen() {
   );
 }
 
-const useStyles = createThemedStyles((colors: ThemeColors, scheme: "light" | "dark") =>
+const useStyles = createThemedStyles((colors: ThemeColors, scheme) =>
   StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: colors.surface,
-  },
-  overlayTop: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    padding: spacing.m,
-    gap: spacing.s,
-    // "box-none" is what lets map gestures through the gaps between the
-    // search row and the legend while those stay tappable.
-    pointerEvents: "box-none",
-  },
-  searchRow: {
-    flexDirection: "row",
-    gap: spacing.s,
-  },
-  searchInputWrap: {
-    flex: 1,
-    justifyContent: "center",
-  },
-  // A floating pill, the redesign's signature control: no outline, just a
-  // soft lift off the map. Dark mode keeps its hairline via cardEdge — an
-  // unlit dark pill over dark map tiles has no edge at all.
-  searchInput: {
-    minHeight: 48,
-    backgroundColor: colors.canvas,
-    borderRadius: radius.pill,
-    ...cardEdge(scheme, colors),
-    paddingLeft: spacing.l + spacing.xs,
-    // Room for the ✕ so text never runs under it — this clears the whole
-    // clearBadge below, not just the glyph, and must move with it.
-    paddingRight: spacing.xxl + spacing.l,
-    ...type.callout,
-    fontWeight: "500",
-    color: colors.text,
-  },
-  // MIN_TARGET lives on the BOX, not on hitSlop: Touchable hoists width and
-  // height onto its outer wrapper while hitSlop lands on the Pressable inside
-  // it, and neither platform dispatches a touch that already missed the
-  // wrapper — so slop around a 24pt box is unreachable, and a near miss lands
-  // in the TextInput and raises the keyboard instead of clearing the search.
-  // The box is transparent; clearBadge is the part that is seen.
-  clearButton: {
-    position: "absolute",
-    right: spacing.xs,
-    width: MIN_TARGET,
-    height: MIN_TARGET,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  clearBadge: {
-    width: 32,
-    height: 32,
-    borderRadius: radius.pill,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: colors.surfaceSecondary,
-  },
-  filterButton: {
-    minHeight: 48,
-    justifyContent: "center",
-    paddingHorizontal: spacing.l,
-    backgroundColor: colors.canvas,
-    borderRadius: radius.pill,
-    ...cardEdge(scheme, colors),
-    ...clipRipple,
-  },
-  // Filters on = the pill fills with the accent. Louder than the old tinted
-  // outline on purpose: an active filter silently hides places, which is
-  // exactly the state that must never be missable.
-  filterButtonActive: {
-    backgroundColor: colors.accent,
-    // Only meaningful in dark mode, where cardEdge drew a hairline.
-    borderColor: colors.accent,
-  },
-  filterButtonLabel: {
-    ...type.subhead,
-    fontWeight: "700",
-    color: colors.textSecondary,
-  },
-  filterButtonLabelActive: {
-    color: colors.canvas,
-  },
-  contextRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    flexWrap: "wrap",
-    gap: spacing.s,
-  },
-  searchNote: {
-    flexShrink: 1,
-    ...type.footnote,
-    color: colors.textSecondary,
-    backgroundColor: colors.canvas,
-    paddingHorizontal: spacing.m,
-    paddingVertical: spacing.s,
-    borderRadius: radius.m,
-    overflow: "hidden",
-  },
-  quickFilterScroll: {
-    flexGrow: 0,
-    // NO negative marginHorizontal here. That trick bleeds a strip out to
-    // the screen edges, but it only works when the parent HAS matching
-    // padding to cancel — and BottomSheet's body is a bare `flex: 1`. The
-    // -16 pushed the strip 16pt off-screen each side, so the content's +16
-    // landed the first chip at exactly x=0 with its rounded corner sliced
-    // flat against the sheet edge. Without it the first chip lines up with
-    // the cards below (list padding is also spacing.l), which is what the
-    // eye actually wants.
-    marginBottom: spacing.xs,
-  },
-  quickFilterStrip: {
-    paddingHorizontal: spacing.l,
-    // Room for the chips' own shadow. cardEdge gives these pills
-    // `elevation: 3` on Android, whose shadow draws OUTSIDE the view box,
-    // and an Android ScrollView clips its children — so with no vertical
-    // padding the content box hugged the pill exactly and the shadow was
-    // cut off in a straight line across every chip.
-    paddingVertical: spacing.s,
-    gap: spacing.s,
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  quickFilterChip: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.xs + 2,
-    minHeight: 34,
-    paddingHorizontal: spacing.m,
-    paddingVertical: 6,
-    borderRadius: radius.pill,
-    backgroundColor: colors.canvas,
-    ...cardEdge(scheme, colors),
-  },
-  quickFilterChipActive: {
-    backgroundColor: colors.accentSoft,
-    borderColor: colors.accent,
-  },
-  quickFilterLabel: {
-    ...type.footnote,
-    fontWeight: "600",
-    color: colors.textSecondary,
-  },
-  quickFilterLabelActive: {
-    color: colors.accent,
-    fontWeight: "700",
-  },
-  legend: {
-    alignSelf: "flex-start",
-    flexDirection: "row",
-    flexWrap: "wrap",
-    alignItems: "center",
-    gap: spacing.m,
-    backgroundColor: colors.canvas,
-    borderRadius: radius.pill,
-    ...cardEdge(scheme, colors),
-    paddingHorizontal: spacing.l,
-    paddingVertical: spacing.s,
-  },
-  legendItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.xs,
-  },
-  legendDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    borderWidth: 1.5,
-    borderColor: colors.canvas,
-  },
-  legendLabel: {
-    ...type.caption,
-    fontWeight: "600",
-    color: colors.textSecondary,
-  },
-  fallbackNote: {
-    alignSelf: "flex-start",
-    ...type.footnote,
-    color: colors.textSecondary,
-    backgroundColor: colors.canvas,
-    paddingHorizontal: spacing.m,
-    paddingVertical: spacing.s,
-    borderRadius: radius.m,
-    overflow: "hidden",
-  },
-  timesBar: {
-    flexShrink: 0,
-    backgroundColor: colors.canvas,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-    paddingHorizontal: spacing.l,
-    paddingTop: spacing.m,
-    paddingBottom: spacing.m,
-    gap: spacing.m,
-  },
-  timesTopRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    gap: spacing.l,
-  },
-  // The block that gives up width when the row runs out of it (Yoga's default
-  // flexShrink is 0, so without this the row simply overflows). The headline
-  // time still lays out at its full size; only the label above it wraps.
-  nextBlock: {
-    flexShrink: 1,
-    gap: 2,
-  },
-  nextLabel: {
-    ...type.caption,
-    fontWeight: "600",
-    color: colors.textSecondary,
-    ...numeric,
-  },
-  // The headline of the whole sheet: the next prayer's time, in the brand
-  // green at title weight. This is the number people open the app for.
-  nextTime: {
-    ...type.title2,
-    fontWeight: "800",
-    color: colors.accent,
-    ...numeric,
-  },
-  upcomingRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    // Never squeezed: the chevron at its end is the only thing saying the
-    // whole bar is tappable, and a half-cropped "21:1" is worse than no time.
-    flexShrink: 0,
-    gap: spacing.l,
-  },
-  timeItem: {
-    alignItems: "center",
-    gap: 2,
-  },
-  timeLabel: {
-    ...type.caption,
-    color: colors.textSecondary,
-  },
-  timeValue: {
-    ...type.subhead,
-    fontWeight: "600",
-    color: colors.text,
-    ...numeric,
-  },
-  progressTrack: {
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: colors.surfaceSecondary,
-    overflow: "hidden",
-  },
-  progressFill: {
-    height: 6,
-    width: "100%",
-    backgroundColor: colors.accent,
-    // Grow from the left edge, not the centre. The ARRAY form with all
-    // three values [x, y, z] — two crashes the renderer.
-    transformOrigin: ["0%", "50%", 0],
-    // No borderRadius: scaling X squashes it to a sub-pixel smear at low
-    // progress. The track's own radius + overflow does the rounding.
-  },
-  recenterButton: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: colors.canvas,
-    alignItems: "center",
-    justifyContent: "center",
-    // Floating (Android elevation 6) sits below the sheet's 12, so the sheet
-    // keeps sliding over this when dragged to full — BottomSheet's
-    // aboveSheet contract.
-    ...floatingEdge(scheme, colors),
-  },
-  listContainer: {
-    flex: 1,
-  },
-  list: {
-    padding: spacing.l,
-    gap: spacing.m,
-  },
-  empty: {
-    alignItems: "center",
-    padding: spacing.xxl,
-    gap: spacing.s,
-  },
-  emptyTitle: {
-    ...type.body,
-    fontWeight: "600",
-    color: colors.text,
-  },
-  emptyText: {
-    ...type.subhead,
-    color: colors.textSecondary,
-    textAlign: "center",
-  },
-  // A real filled pill, not a text link: on an empty screen this button IS
-  // the way forward, so it dresses like the primary action it is.
-  emptyButton: {
-    alignItems: "center",
-    justifyContent: "center",
-    minHeight: MIN_TARGET,
-    marginTop: spacing.s,
-    paddingHorizontal: spacing.xl,
-    borderRadius: radius.pill,
-    backgroundColor: colors.accent,
-    overflow: "hidden",
-  },
-  emptyButtonLabel: {
-    ...type.subhead,
-    color: colors.canvas,
-    fontWeight: "700",
-  },
-  listFooter: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: spacing.xl,
-    gap: spacing.m,
-    width: "100%",
-  },
-  listFooterRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  listFooterText: {
-    ...type.subhead,
-    color: colors.textSecondary,
-  },
-  savedSection: {
-    gap: spacing.m,
-    marginBottom: spacing.l,
-  },
-  savedTitle: {
-    ...type.eyebrow,
-    color: colors.textSecondary,
-  },
-  fridayBanner: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.s,
-    backgroundColor: colors.accentSoft,
-    borderRadius: radius.l,
-    borderWidth: 1,
-    borderColor: colors.accent,
-    padding: spacing.m,
-    marginBottom: spacing.m,
-  },
-  fridayBannerText: {
-    flex: 1,
-    ...type.footnote,
-    color: colors.text,
-  },
-  listFooterLink: {
-    ...type.subhead,
-    color: colors.accent,
-    fontWeight: "600",
-  },
-}),
+    screen: {
+      flex: 1,
+      backgroundColor: colors.surface,
+    },
+    overlayTop: {
+      position: "absolute",
+      top: 0,
+      left: 0,
+      right: 0,
+      padding: spacing.m,
+      gap: spacing.s,
+      // "box-none" is what lets map gestures through the gaps between the
+      // search row and the legend while those stay tappable.
+      pointerEvents: "box-none",
+    },
+    contextRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      flexWrap: "wrap",
+      gap: spacing.s,
+    },
+    searchNote: {
+      flexShrink: 1,
+      ...type.footnote,
+      color: colors.textSecondary,
+      backgroundColor: colors.canvas,
+      paddingHorizontal: spacing.m,
+      paddingVertical: spacing.s,
+      borderRadius: radius.m,
+      overflow: "hidden",
+    },
+    fallbackNote: {
+      alignSelf: "flex-start",
+      ...type.footnote,
+      color: colors.textSecondary,
+      backgroundColor: colors.canvas,
+      paddingHorizontal: spacing.m,
+      paddingVertical: spacing.s,
+      borderRadius: radius.m,
+      overflow: "hidden",
+    },
+    recenterButton: {
+      width: 52,
+      height: 52,
+      borderRadius: 26,
+      backgroundColor: colors.canvas,
+      alignItems: "center",
+      justifyContent: "center",
+      // Floating (Android elevation 6) sits below the sheet's 12, so the
+      // sheet keeps sliding over this when dragged to full — BottomSheet's
+      // aboveSheet contract.
+      ...floatingEdge(scheme, colors),
+    },
+    listContainer: {
+      flex: 1,
+    },
+    list: {
+      padding: spacing.l,
+      gap: spacing.m,
+    },
+    listFooter: {
+      alignItems: "center",
+      justifyContent: "center",
+      paddingVertical: spacing.xl,
+      gap: spacing.m,
+      width: "100%",
+    },
+    listFooterRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    listFooterText: {
+      ...type.subhead,
+      color: colors.textSecondary,
+    },
+    listFooterLink: {
+      ...type.subhead,
+      color: colors.accent,
+      fontWeight: "600",
+    },
+    savedSection: {
+      gap: spacing.m,
+      marginBottom: spacing.l,
+    },
+    savedTitle: {
+      ...type.eyebrow,
+      color: colors.textSecondary,
+    },
+  }),
 );

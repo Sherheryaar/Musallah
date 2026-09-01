@@ -13,25 +13,24 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Location from "expo-location";
-import { Accelerometer, Magnetometer } from "expo-sensors";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import Svg, { Circle, Path, Polygon } from "react-native-svg";
 
-import KaabaMark from "@/components/KaabaMark";
+import Dial from "@/components/qibla/Dial";
+import SunCard from "@/components/qibla/SunCard";
+import TurnTape from "@/components/qibla/TurnTape";
 import Touchable from "@/components/Touchable";
 import { useSettings } from "@/context/SettingsContext";
 import { useTheme } from "@/context/ThemeContext";
 import {
   assessCompass,
   describeAccuracy,
-  magnitude,
-  tiltFromFlat,
   type CompassQuality,
 } from "@/lib/compassQuality";
+import { cardEdge } from "@/lib/elevation";
 import { FALLBACK_LOCATION } from "@/lib/geo";
+import { hapticHeavy, hapticTick } from "@/lib/haptics";
+import { MIN_TARGET } from "@/lib/metrics";
 import {
-  ALIGNED_TOLERANCE_DEG,
-  angleDelta,
   compassPoint,
   distanceToKaabaKm,
   instrumentSize,
@@ -39,140 +38,35 @@ import {
   qiblaFromSun,
   qiblaGuidance,
   qiblaSunCrossings,
-  smoothAngle,
 } from "@/lib/qibla";
-import { hapticHeavy, hapticTick } from "@/lib/haptics";
-import { cardEdge, clipRipple, elevation } from "@/lib/elevation";
-import { MIN_TARGET } from "@/lib/metrics";
+import { createThemedStyles } from "@/lib/themedStyles";
 import { radius, spacing, type, type ThemeColors } from "@/lib/theme";
-import { hhmm, isoDate } from "@/lib/time";
+import { isoDate } from "@/lib/time";
+import { useCompassHeading } from "@/lib/useCompassHeading";
 import { useDeviceLocation } from "@/lib/useDeviceLocation";
 import { useMinuteTick } from "@/lib/useMinuteTick";
 import { useReducedMotion } from "@/lib/useReducedMotion";
+import { useSensorQuality } from "@/lib/useSensorQuality";
 
-const AnimatedCircle = Animated.createAnimatedComponent(Circle);
-
-// --- Dial geometry -------------------------------------------------------
-// Every dimension derives from DIAL (measured at runtime) so the instrument
-// fits a 360px phone, a foldable and the web layout without three sets of
-// magic numbers.
 const MAX_DIAL = 320;
-/**
- * Floor for the dial, and it is load-bearing rather than defensive.
- *
- * `useWindowDimensions()` reports a width of 0 before the first layout, which
- * made `windowWidth - spacing.l * 2` evaluate to -32. Every radius on the dial
- * derives from that, so the bezel asked SVG for r=-31 and r=-34 and the
- * needle for a -32×-32 canvas — invalid on both platforms:
- *
- *   Error: <circle> attribute r: A negative value is not valid. ("-31")
- *   Error: <svg> attribute width: A negative value is not valid. ("-32")
- *
- * Clamping here fixes it once for every dimension downstream, since they all
- * come from `dial`. 200 is small enough never to bind on a real device (the
- * narrowest phones are ~320dp wide) and large enough to stay a legible
- * instrument if it ever does.
- */
+// A floor as well as a cap: useWindowDimensions() reports 0 before the first
+// layout, and a negative dial size put negative radii into the SVG. See
+// instrumentSize, which is tested for exactly this.
 const MIN_DIAL = 200;
-/** Distance from the dial's edge to the outer end of the graduations. */
-const RIM = 12;
-const TICK_MINOR = { w: 1.5, h: 6 };
-const TICK_MAJOR = { w: 2, h: 12 };
-
-/**
- * Graduated bezel: 72 ticks every 5°, emphasised every 30°.
- *
- * Drawn as TWO stroked circles with a dash pattern rather than 72 views —
- * one node each, and the spacing is exact by construction. A circle's path
- * starts at 3 o'clock, and both 90° and 30° are whole multiples of the 5°
- * period, so a tick lands on each cardinal without any phase correction
- * beyond centring the dash on its own angle.
- */
-function bezelDashes(radius: number, everyDeg: number, width: number) {
-  const circumference = 2 * Math.PI * radius;
-  const period = (circumference * everyDeg) / 360;
-  return {
-    strokeDasharray: [width, period - width] as number[],
-    // Half a dash back, so each tick straddles its angle instead of
-    // starting on it.
-    strokeDashoffset: width / 2,
-  };
-}
-
-/** SVG path for a wedge of an annulus, angles in degrees clockwise from 12. */
-function annulusSector(
-  cx: number,
-  cy: number,
-  rInner: number,
-  rOuter: number,
-  fromDeg: number,
-  toDeg: number,
-): string {
-  // SVG's 0° is at 3 o'clock; the dial's 0° is at 12.
-  const pt = (r: number, deg: number) => {
-    const a = ((deg - 90) * Math.PI) / 180;
-    return [cx + r * Math.cos(a), cy + r * Math.sin(a)];
-  };
-  const [x1o, y1o] = pt(rOuter, fromDeg);
-  const [x2o, y2o] = pt(rOuter, toDeg);
-  const [x2i, y2i] = pt(rInner, toDeg);
-  const [x1i, y1i] = pt(rInner, fromDeg);
-  const large = Math.abs(toDeg - fromDeg) > 180 ? 1 : 0;
-  return [
-    `M ${x1o} ${y1o}`,
-    `A ${rOuter} ${rOuter} 0 ${large} 1 ${x2o} ${y2o}`,
-    `L ${x2i} ${y2i}`,
-    `A ${rInner} ${rInner} 0 ${large} 0 ${x1i} ${y1i}`,
-    "Z",
-  ].join(" ");
-}
-
-const CARDINALS: { angle: number; label: string }[] = [
-  { angle: 0, label: "N" },
-  { angle: 90, label: "E" },
-  { angle: 180, label: "S" },
-  { angle: 270, label: "W" },
-];
-
-// --- Turn tape -----------------------------------------------------------
-// The rim of a 320px dial travels ~2.8px per degree, so the final few
-// degrees — exactly where alignment is decided — are invisible on it. The
-// tape shows a ±TAPE_RANGE window at roughly double that resolution, which
-// is what makes the last 3° readable.
-const TAPE_RANGE = 30;
-const TAPE_HEIGHT = 46;
-const MAX_TAPE = 360;
 
 /** Below this the needle is drawn as authoritative; above it, as a hint. */
 const HYSTERESIS_EXIT_DEG = 8;
 
-/** The Kaaba mark's box at the needle's tip. */
-const KAABA_SIZE = 26;
-
-type HeadingState =
-  | { kind: "loading" }
-  | { kind: "live"; heading: number; accuracy: number | null }
-  // No compass available (denied permission, no magnetometer): the
-  // bearing is still useful, so show it as a static number. `cause` separates
-  // the two, because a denied permission can be retried from the note while
-  // re-requesting an already-granted one resolves instantly with no prompt —
-  // so the sensor failure must not offer that button.
-  | { kind: "static"; cause: "permission" | "sensor"; reason: string };
-
 const PLATFORM: "ios" | "android" | "other" =
   Platform.OS === "ios" ? "ios" : Platform.OS === "android" ? "android" : "other";
 
-/**
- * Hoisted, not `Number.prototype.toLocaleString()` at the call site: the
- * metrics strip re-renders on roughly every whole degree of turn, and each
- * bare toLocaleString() call builds a fresh formatter (locale data parse plus
- * lookup tables) to print a number that only changes when the user's
- * coordinates do.
- */
+// Hoisted: the metrics strip re-renders on roughly every whole degree of
+// turn, and a bare toLocaleString() builds a fresh formatter each call.
 const KM_FORMAT = new Intl.NumberFormat("en-GB", { maximumFractionDigits: 0 });
 
 export default function QiblaScreen() {
-  const { colors, scheme } = useTheme();
+  const { colors } = useTheme();
+  const styles = useStyles();
   const { settings } = useSettings();
   const { width: windowWidth } = useWindowDimensions();
   const reduceMotion = useReducedMotion();
@@ -180,18 +74,8 @@ export default function QiblaScreen() {
   // scroll sits under the gesture/navigation bar.
   const insets = useSafeAreaInsets();
 
-  // Clamped below as well as above — see instrumentSize, which is unit-tested
-  // because the missing lower bound put negative radii into the SVG. Without
-  // it a pre-layout width of 0 also made the tape's px-per-degree negative,
-  // which positioned its graduations backwards off the left edge.
   const available = windowWidth - spacing.l * 2;
   const dial = instrumentSize(available, MAX_DIAL, MIN_DIAL);
-  const tapeWidth = instrumentSize(available, MAX_TAPE, MIN_DIAL);
-  const pxPerDeg = tapeWidth / 2 / TAPE_RANGE;
-  const styles = useMemo(
-    () => createStyles(colors, scheme, dial),
-    [colors, scheme, dial],
-  );
 
   // Prompts (this screen cannot work without it), and on foreground re-checks
   // a denied permission so granting it in system Settings brings the compass
@@ -199,39 +83,26 @@ export default function QiblaScreen() {
   const { coords, usingFallback, permission, retry } = useDeviceLocation({
     prompt: true,
   });
-  const [heading, setHeading] = useState<HeadingState>({ kind: "loading" });
-  // Sensor-quality inputs, sampled continuously while the screen is open.
-  const [fieldStrength, setFieldStrength] = useState<number | null>(null);
-  const [tiltDeg, setTiltDeg] = useState<number | null>(null);
+  const point = coords ?? FALLBACK_LOCATION;
+  const bearing = useMemo(
+    () => qiblaBearing(point.lat, point.lng),
+    [point.lat, point.lng],
+  );
+  const distanceKm = useMemo(
+    () => distanceToKaabaKm(point.lat, point.lng),
+    [point.lat, point.lng],
+  );
+
+  const { heading, spin, turn } = useCompassHeading(permission, bearing, reduceMotion);
+  const { fieldStrength, tiltDeg, bubbleX, bubbleY } = useSensorQuality();
   // Once a minute, so the sun guidance stays current.
   const now = useMinuteTick();
   const [sunOpen, setSunOpen] = useState(false);
   const [tipsOpen, setTipsOpen] = useState(false);
 
-  // Smoothed heading lives in a ref: the filter must not depend on render
-  // timing, and we only re-render when the value moves visibly.
-  const smoothed = useRef<number | null>(null);
-
-  // --- Animation state ---------------------------------------------------
-  // ONE native-driven value carries the dial. `spin` is deliberately
-  // UNBOUNDED — it accumulates signed deltas rather than tracking a
-  // normalised 0–359 heading, because interpolating a normalised angle makes
-  // the dial whip 358° the wrong way every time the user crosses north.
-  const spin = useRef(new Animated.Value(0)).current;
-  const unwrapped = useRef(0);
-  const lastAnimatedTo = useRef(0);
-  /** Signed turn to the qibla, ±180. Drives the tape. */
-  const turn = useRef(new Animated.Value(0)).current;
-  /** Native driven spirit bubble level coordinates: zero JS re-renders. */
-  const bubbleX = useRef(new Animated.Value(0)).current;
-  const bubbleY = useRef(new Animated.Value(0)).current;
-  /**
-   * 0 → 1 as alignment is acquired. NATIVE driver: it only ever feeds
-   * transform and opacity on plain views.
-   */
+  // --- Lock-on animation state -------------------------------------------
+  /** 0 → 1 as alignment is acquired. NATIVE driver: transform and opacity. */
   const lock = useRef(new Animated.Value(0)).current;
-  /** Radial ripple wave triggered on magnetic lock. */
-  const pulseWave = useRef(new Animated.Value(0)).current;
   /**
    * The same 0 → 1, but on the JS driver, because it feeds an SVG
    * strokeDashoffset — which the native driver cannot animate. Sharing one
@@ -240,187 +111,14 @@ export default function QiblaScreen() {
    * so this deliberate duplicate is the fix, not an oversight.
    */
   const ring = useRef(new Animated.Value(0)).current;
-
-  // Read inside the heading callback, which is created once on mount and
-  // would otherwise close over the first render's values forever.
-  const bearingRef = useRef(0);
-  const reduceMotionRef = useRef(reduceMotion);
-  reduceMotionRef.current = reduceMotion;
+  /** Radial ripple wave triggered on lock. */
+  const pulseWave = useRef(new Animated.Value(0)).current;
+  // Read inside effects keyed on `locked` alone, so toggling the preference
+  // in Settings cannot itself trigger a buzz.
   const hapticsRef = useRef(settings.hapticFeedback);
   hapticsRef.current = settings.hapticFeedback;
-
-  // The compass subscription follows the location permission: nothing to
-  // subscribe to until it is granted, and a denial is a static bearing with
-  // an "Allow location" button. Keyed on `permission`, so the in-screen retry
-  // (which re-runs the location hook) re-runs this too — mount and retry
-  // cannot drift apart, and the cleanup removes the previous subscription
-  // before the next one starts.
-  useEffect(() => {
-    if (permission === "denied") {
-      setHeading({
-        kind: "static",
-        cause: "permission",
-        reason:
-          "Allow location access to use the live compass. The bearing above is still correct for your area.",
-      });
-      return;
-    }
-    if (permission !== "granted") return;
-    // On a retry the note explaining the denial is still on screen; the
-    // permission is in hand now, so clear it here rather than leaving it
-    // contradicting the app until the first heading sample lands.
-    setHeading((prevState) =>
-      prevState.kind === "loading" ? prevState : { kind: "loading" },
-    );
-
-    let cancelled = false;
-    let sub: Location.LocationSubscription | null = null;
-    Location.watchHeadingAsync((data) => {
-      if (cancelled) return;
-      // trueHeading is corrected for magnetic declination by the OS and
-      // is what the qibla bearing must be compared against. It reports
-      // -1 when unavailable, in which case magnetic north is close
-      // enough in the UK (declination is ~0–3° here).
-      const raw =
-        typeof data.trueHeading === "number" && data.trueHeading >= 0
-          ? data.trueHeading
-          : data.magHeading;
-      if (typeof raw !== "number" || Number.isNaN(raw)) return;
-
-      const prev = smoothed.current;
-      const next = prev === null ? raw : smoothAngle(prev, raw);
-      smoothed.current = next;
-      // angleDelta is signed and shortest-path, so 359° → 1° accumulates
-      // as +2 and never as −358. That is the whole shortest-arc fix.
-      if (prev !== null) unwrapped.current += angleDelta(prev, next);
-      else unwrapped.current = next;
-
-      const duration = reduceMotionRef.current ? 0 : 140;
-      // watchHeadingAsync fires up to 60×/second and every .start() is a
-      // bridge round-trip, so accumulate on every sample but only drive
-      // the animation when the value has actually moved.
-      if (Math.abs(unwrapped.current - lastAnimatedTo.current) > 0.25) {
-        lastAnimatedTo.current = unwrapped.current;
-        Animated.timing(spin, {
-          toValue: unwrapped.current,
-          duration,
-          easing: Easing.out(Easing.quad),
-          useNativeDriver: true,
-        }).start();
-      }
-
-      const nextTurn = angleDelta(next, bearingRef.current);
-      Animated.timing(turn, {
-        toValue: nextTurn,
-        duration,
-        easing: Easing.out(Easing.quad),
-        useNativeDriver: true,
-      }).start();
-
-      const accuracy =
-        typeof data.accuracy === "number" ? data.accuracy : null;
-      setHeading((prevState) => {
-        if (
-          prevState.kind === "live" &&
-          prevState.accuracy === accuracy &&
-          // The dial is animated natively now, so state only needs to
-          // change when the rendered TEXT would: a whole degree of turn.
-          Math.round(angleDelta(prevState.heading, bearingRef.current)) ===
-            Math.round(nextTurn)
-        ) {
-          return prevState;
-        }
-        return { kind: "live", heading: next, accuracy };
-      });
-    })
-      .then((newSub) => {
-        // The effect may have been cleaned up while the subscription was
-        // still being set up (cleanup ran when `sub` was null, so its
-        // `sub?.remove()` was a no-op) -- remove it now instead of leaking a
-        // live compass listener for the rest of the session.
-        if (cancelled) newSub.remove();
-        else sub = newSub;
-      })
-      .catch(() => {
-        // A stale failure must not overwrite the state belonging to the run
-        // that replaced this one.
-        if (cancelled) return;
-        setHeading({
-          kind: "static",
-          cause: "sensor",
-          reason:
-            "This device didn't report a compass heading. Use the bearing above with a compass app.",
-        });
-      });
-
-    return () => {
-      cancelled = true;
-      sub?.remove();
-    };
-  }, [permission, spin, turn]);
-
-  // Sensor-quality feeds: magnetometer field strength catches magnets and
-  // metal (an interfered compass reads confidently and WRONG — the single
-  // biggest cause of "the qibla app is off"), the accelerometer catches a
-  // tilted phone. Both are advisory sensors only; the heading itself still
-  // comes from watchHeadingAsync.
-  useEffect(() => {
-    let mag: { remove: () => void } | null = null;
-    let acc: { remove: () => void } | null = null;
-    try {
-      Magnetometer.setUpdateInterval(500);
-      Accelerometer.setUpdateInterval(500);
-      mag = Magnetometer.addListener((v) => {
-        // Expo reports microtesla on both platforms.
-        setFieldStrength(Math.round(magnitude(v)));
-      });
-      acc = Accelerometer.addListener((v) => {
-        setTiltDeg(Math.round(tiltFromFlat(v)));
-        const targetX = Math.max(-5, Math.min(5, -v.x * 6));
-        const targetY = Math.max(-5, Math.min(5, v.y * 6));
-        Animated.spring(bubbleX, {
-          toValue: targetX,
-          useNativeDriver: true,
-          friction: 7,
-          tension: 40,
-        }).start();
-        Animated.spring(bubbleY, {
-          toValue: targetY,
-          useNativeDriver: true,
-          friction: 7,
-          tension: 40,
-        }).start();
-      });
-    } catch {
-      // No sensors — quality checks simply stay unavailable.
-    }
-    return () => {
-      mag?.remove();
-      acc?.remove();
-    };
-  }, [bubbleX, bubbleY]);
-
-  // Midnight today. Keyed on the calendar DATE rather than the minute, so the
-  // day-long sun scans below rerun once a day, not once a minute.
-  const dayKey = isoDate(now);
-  const today = useMemo(
-    () => new Date(now.getFullYear(), now.getMonth(), now.getDate()),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [dayKey],
-  );
-
-  const point = coords ?? FALLBACK_LOCATION;
-  const bearing = useMemo(
-    () => qiblaBearing(point.lat, point.lng),
-    [point.lat, point.lng],
-  );
-  useEffect(() => {
-    bearingRef.current = bearing;
-  }, [bearing]);
-  const distanceKm = useMemo(
-    () => distanceToKaabaKm(point.lat, point.lng),
-    [point.lat, point.lng],
-  );
+  const reduceMotionRef = useRef(reduceMotion);
+  reduceMotionRef.current = reduceMotion;
 
   const live = heading.kind === "live";
   const guidance = live ? qiblaGuidance(heading.heading, bearing) : null;
@@ -442,30 +140,37 @@ export default function QiblaScreen() {
   // An untrustworthy compass must not render an authoritative needle: the
   // app has already decided it doesn't believe the reading.
   const authoritative = live && quality.trustworthy;
+  const needleColor = authoritative ? colors.accent : colors.textSecondary;
+  // A dial that can't track is a diagram, not an instrument, and must not be
+  // dressed as one: without a live heading the gate, the tape and every
+  // alignment claim come off.
+  const instrument = live;
 
-  // Sun-based guidance: immune to everything that fools a magnetometer.
+  // --- Sun method --------------------------------------------------------
+  // Midnight today, keyed on the calendar DATE rather than the minute, so the
+  // day-long sun scans rerun once a day, not once a minute.
+  const dayKey = isoDate(now);
+  const today = useMemo(
+    () => new Date(now.getFullYear(), now.getMonth(), now.getDate()),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [dayKey],
+  );
   // Recomputed each minute (the sun moves ~0.25°/min).
   const sunNow = useMemo(
     () => qiblaFromSun(point.lat, point.lng, now),
     [point.lat, point.lng, now],
   );
-  // The day's shadow-method crossings. The heaviest computation on this
-  // screen (a minute-by-minute scan of the whole day), and it only needs
-  // redoing when the date or the location changes — never on the minute tick.
+  // The day's shadow-method crossings: the heaviest computation on this
+  // screen (a minute-by-minute scan of the whole day).
   const crossings = useMemo(
     () => qiblaSunCrossings(point.lat, point.lng, today),
     [point.lat, point.lng, today],
   );
-  // A crossing that has already happened is not advice, so it is dropped:
-  // everything below either names an instant the user can still act on, or
-  // says nothing at all.
+  // A crossing that has already happened is not advice, so it is dropped;
+  // once today's is behind us the next usable one is tomorrow's. Still null
+  // at latitudes where the sun never reaches the qibla azimuth.
   const stillToCome =
     crossings.towards !== null && crossings.towards.getTime() > now.getTime();
-  // Once today's crossing is behind us the next usable one is tomorrow's, from
-  // the same scan a day on. `stillToCome` flips at most once a day, so keying
-  // the memo on it — rather than on the clock — keeps the day-long scan off
-  // the minute tick. Still null at latitudes where the sun never reaches the
-  // qibla azimuth, which the copy has to survive.
   const tomorrowCrossing = useMemo(() => {
     if (stillToCome) return null;
     const tomorrow = new Date(today);
@@ -478,31 +183,26 @@ export default function QiblaScreen() {
       : tomorrowCrossing
         ? { at: tomorrowCrossing, tomorrow: true }
         : null;
-
   // The sun method stops being a footnote the moment the compass can't be
   // trusted — that is precisely when it becomes the answer.
-  const sunIsPrimary = !live || !quality.trustworthy;
-  const sunExpanded = sunOpen || sunIsPrimary;
+  const sunExpanded = sunOpen || !live || !quality.trustworthy;
 
   // --- Lock-on -----------------------------------------------------------
-  // Hysteresis: enter at the 5° tolerance, leave only at 8°, so hovering on
-  // the boundary doesn't strobe the whole instrument.
+  // Hysteresis: enter at the 5° tolerance, leave only at 8° (or when the
+  // reading stops being trustworthy), so hovering on the boundary doesn't
+  // strobe the whole instrument.
   const turnMagnitude = guidance ? Math.abs(guidance.turn) : 180;
   const [locked, setLocked] = useState(false);
   useEffect(() => {
-    // Enter on `aligned` (5°); once in, stay until 8° or the reading stops
-    // being trustworthy. State rather than a ref mutated during render, so a
-    // discarded concurrent render can never flip the latch.
     setLocked((was) =>
       was ? turnMagnitude <= HYSTERESIS_EXIT_DEG && quality.trustworthy : aligned,
     );
   }, [turnMagnitude, quality.trustworthy, aligned]);
 
   useEffect(() => {
-    const duration = reduceMotion ? 0 : 260;
     Animated.timing(lock, {
       toValue: locked ? 1 : 0,
-      duration,
+      duration: reduceMotion ? 0 : 260,
       easing: Easing.out(Easing.cubic),
       useNativeDriver: true,
     }).start();
@@ -516,35 +216,26 @@ export default function QiblaScreen() {
     }).start();
   }, [locked, reduceMotion, lock, ring]);
 
-  // The confirmation buzz. `locked` already carries the 5°-in / 8°-out
-  // hysteresis and is gated on quality.trustworthy, so this fires once on
-  // a genuine acquisition — never while hovering on the boundary, and
-  // never for a reading the app itself doesn't believe.
-  //
-  // Deps are `locked` ALONE: reading the preference through a ref keeps
-  // toggling haptics off in Settings from itself triggering a buzz.
+  // The confirmation buzz and ripple, once per genuine acquisition: `locked`
+  // already carries the hysteresis and the trustworthiness gate.
   useEffect(() => {
-    if (locked) {
-      hapticHeavy(hapticsRef.current);
-      if (!reduceMotionRef.current) {
-        pulseWave.setValue(0);
-        Animated.timing(pulseWave, {
-          toValue: 1,
-          duration: 850,
-          easing: Easing.out(Easing.quad),
-          useNativeDriver: true,
-        }).start();
-      }
-    }
+    if (!locked) return;
+    hapticHeavy(hapticsRef.current);
+    if (reduceMotionRef.current) return;
+    pulseWave.setValue(0);
+    Animated.timing(pulseWave, {
+      toValue: 1,
+      duration: 850,
+      easing: Easing.out(Easing.quad),
+      useNativeDriver: true,
+    }).start();
   }, [locked, pulseWave]);
 
   // A light tick every 15° of turn, so the compass can be followed without
   // watching it. Skipped on the first render (there is no "turn" yet) and
   // whenever the heading isn't trustworthy enough to act on.
   const turnBucket =
-    authoritative && guidance && !locked
-      ? Math.round(guidance.turn / 15)
-      : null;
+    authoritative && guidance && !locked ? Math.round(guidance.turn / 15) : null;
   const lastBucket = useRef<number | null>(null);
   useEffect(() => {
     if (turnBucket === null) {
@@ -559,10 +250,9 @@ export default function QiblaScreen() {
 
   // --- Screen reader -----------------------------------------------------
   // A label is only announced when focus LANDS on an element; neither
-  // VoiceOver nor TalkBack re-reads a focused element because a prop
-  // changed. Someone turning on the spot would hear the instruction once
-  // and then silence, so announce on a coarse bucket instead — roughly
-  // every 15°, not 20× a second.
+  // VoiceOver nor TalkBack re-reads a focused element because a prop changed.
+  // Someone turning on the spot would hear the instruction once and then
+  // silence, so announce on a coarse bucket instead — roughly every 15°.
   const announceBucket = guidance
     ? `${Math.round(guidance.turn / 15)}:${locked}`
     : null;
@@ -593,113 +283,6 @@ export default function QiblaScreen() {
     else Linking.openSettings().catch(() => {});
   }, [retry]);
 
-  // --- Dial geometry, in SVG user units ----------------------------------
-  const c = dial / 2;
-  const rOuter = c - RIM;
-  const rMinor = rOuter - TICK_MINOR.h / 2;
-  const rMajor = rOuter - TICK_MAJOR.h / 2;
-  const minorDash = useMemo(() => bezelDashes(rMinor, 5, TICK_MINOR.w), [rMinor]);
-  const majorDash = useMemo(
-    () => bezelDashes(rMajor, 30, TICK_MAJOR.w),
-    [rMajor],
-  );
-  // The needle, pointing at 12 o'clock, already offset to the dial centre.
-  // A short tail crosses the hub so it reads as a balanced instrument
-  // needle rather than an arrow sticker pasted on.
-  const needlePoints = useMemo(() => {
-    const k = dial / 320;
-    // Y coordinates, not radii: the tip sits 30px inside the rim to leave
-    // the Kaaba mark its own space on the graduations.
-    const tipY = c - (rOuter - 30 * k);
-    const shoulderY = tipY + 28 * k;
-    const tailY = c + 50 * k;
-    const w = 7 * k;
-    return [
-      `${c},${tipY}`,
-      `${c + w},${shoulderY}`,
-      `${c + w * 0.42},${tailY}`,
-      `${c - w * 0.42},${tailY}`,
-      `${c - w},${shoulderY}`,
-    ].join(" ");
-  }, [dial, c, rOuter]);
-  // Confirmation ring: the circumference IS the dash length, so animating
-  // the offset from C to 0 makes a ring visibly close rather than fade in.
-  const ringRadius = c - 3;
-  const ringLength = 2 * Math.PI * ringRadius;
-  const captureWedge = useMemo(
-    () =>
-      annulusSector(
-        c,
-        c,
-        rOuter - 22,
-        rOuter,
-        -ALIGNED_TOLERANCE_DEG,
-        ALIGNED_TOLERANCE_DEG,
-      ),
-    [c, rOuter],
-  );
-
-  // `border` is a 1.4:1 whisper on the dark well, so the minor graduations
-  // simply vanish there. Dark mode draws them from textSecondary held back
-  // by opacity instead: subordinate to the majors without disappearing.
-  const minorTickColor =
-    scheme === "dark" ? colors.textSecondary : colors.border;
-  const minorTickOpacity = scheme === "dark" ? 0.45 : 1;
-
-  // --- Interpolations ----------------------------------------------------
-  // The face turns anticlockwise as the user turns clockwise; every child
-  // is a STATIC transform inside it, so the whole rose is one native node.
-  const faceSpin = useMemo(
-    () =>
-      spin.interpolate({
-        inputRange: [0, 360],
-        outputRange: ["0deg", "-360deg"],
-      }),
-    [spin],
-  );
-  // Glyphs that must stay upright cancel the face's rotation.
-  const uprightSpin = useMemo(
-    () =>
-      spin.interpolate({
-        inputRange: [0, 360],
-        outputRange: ["0deg", "360deg"],
-      }),
-    [spin],
-  );
-  const tapeShift = useMemo(
-    () =>
-      turn.interpolate({
-        inputRange: [-TAPE_RANGE, TAPE_RANGE],
-        outputRange: [-TAPE_RANGE * pxPerDeg, TAPE_RANGE * pxPerDeg],
-        extrapolate: "clamp",
-      }),
-    [turn, pxPerDeg],
-  );
-  const needleScale = useMemo(
-    () => lock.interpolate({ inputRange: [0, 1], outputRange: [1, 1.06] }),
-    [lock],
-  );
-  const gateOpacity = useMemo(
-    () => lock.interpolate({ inputRange: [0, 1], outputRange: [0.4, 1] }),
-    [lock],
-  );
-  // Full circumference (open) → 0 (closed).
-  const ringDashOffset = useMemo(
-    () =>
-      ring.interpolate({
-        inputRange: [0, 1],
-        outputRange: [ringLength, 0],
-      }),
-    [ring, ringLength],
-  );
-
-  const needleColor = authoritative ? colors.accent : colors.textSecondary;
-
-  // A dial that can't track is not an instrument — it's a diagram, and it
-  // must not be dressed as one. Without a live heading the rose is frozen
-  // north-up, so the gate, the tape and every alignment claim come off.
-  const instrument = live;
-
   return (
     <ScrollView
       style={styles.screen}
@@ -709,9 +292,7 @@ export default function QiblaScreen() {
       ]}
       showsVerticalScrollIndicator={false}
     >
-      {/* ---------------------------------------------------------------
-          HERO. What the user needs is a verb and a number, in that order.
-          --------------------------------------------------------------- */}
+      {/* HERO. What the user needs is a verb and a number, in that order. */}
       <View
         style={styles.hero}
         accessible
@@ -753,312 +334,27 @@ export default function QiblaScreen() {
         )}
       </View>
 
-      {/* ---------------------------------------------------------------
-          THE DIAL
-          --------------------------------------------------------------- */}
-      <View style={styles.dialWrap}>
-        {/* Fixed index gate at 12 o'clock. This is what turns a floating
-            arrow into a task: bring the Kaaba mark into the gate. It does
-            NOT rotate — it is the target, not part of the rose. */}
-        {instrument ? (
-          <Animated.View
-            style={[styles.gate, { opacity: gateOpacity }]}
-          >
-            <MaterialCommunityIcons
-              name="menu-down"
-              size={26}
-              color={locked ? colors.accent : colors.text}
-            />
-          </Animated.View>
-        ) : null}
+      <Dial
+        size={dial}
+        spin={spin}
+        lock={lock}
+        ring={ring}
+        pulseWave={pulseWave}
+        bubbleX={bubbleX}
+        bubbleY={bubbleY}
+        bearing={bearing}
+        sunAzimuth={sunNow.sunUp ? sunNow.sun.azimuth : null}
+        locked={locked}
+        instrument={instrument}
+        needleColor={needleColor}
+      />
 
-        <View style={styles.dial}>
-          {/* Screen-fixed overlay: the capture window and the confirmation
-              ring belong to the GATE, not to the rose, so they must not
-              rotate with the heading. This layer's parent is the dial
-              itself, which is NOT inert, so unlike the two Svgs below it
-              needs its own pointerEvents. */}
-          {instrument ? (
-            <Svg
-              width={dial}
-              height={dial}
-              style={[StyleSheet.absoluteFill, styles.inert]}
-            >
-              {/* The ±5° window, visible BEFORE you reach it. */}
-              <Path d={captureWedge} fill={colors.accent} opacity={0.14} />
-              {/* Closes clockwise from 12 as alignment is acquired.
-                  strokeDashoffset is not native-drivable, which is exactly
-                  why `ring` is a separate Animated.Value from `lock`. */}
-              <AnimatedCircle
-                cx={c}
-                cy={c}
-                r={ringRadius}
-                fill="none"
-                stroke={colors.accent}
-                strokeWidth={3}
-                strokeLinecap="round"
-                strokeDasharray={[ringLength, ringLength]}
-                strokeDashoffset={ringDashOffset}
-                // Start the ring at 12 o'clock rather than 3.
-                originX={c}
-                originY={c}
-                rotation={-90}
-              />
-            </Svg>
-          ) : null}
-
-          {/* ONE animated node carries the entire rose. Every child below
-              is a static transform, so the compass costs a single native
-              rotation per frame instead of fourteen JS-computed ones. */}
-          <Animated.View
-            style={[
-              styles.face,
-              instrument ? { transform: [{ rotate: faceSpin }] } : null,
-            ]}
-          >
-            {/* The graduated bezel: 72 ticks in two nodes. No pointerEvents of
-                its own — `styles.face` above is already inert. */}
-            <Svg
-              width={dial}
-              height={dial}
-              style={StyleSheet.absoluteFill}
-            >
-              <Circle
-                cx={c}
-                cy={c}
-                r={rMinor}
-                fill="none"
-                stroke={minorTickColor}
-                strokeOpacity={minorTickOpacity}
-                strokeWidth={TICK_MINOR.h}
-                {...minorDash}
-              />
-              <Circle
-                cx={c}
-                cy={c}
-                r={rMajor}
-                fill="none"
-                stroke={colors.textSecondary}
-                strokeOpacity={0.9}
-                strokeWidth={TICK_MAJOR.h}
-                {...majorDash}
-              />
-            </Svg>
-
-            {CARDINALS.map(({ angle, label }) => (
-              <View
-                key={label}
-                style={[styles.rotor, { transform: [{ rotate: `${angle}deg` }] }]}
-              >
-                {/* Counter-rotated so the letter stays upright as the dial
-                    turns. Rotation is about the glyph's own centre, which
-                    is why this cancels rather than compounds. */}
-                <Animated.Text
-                  allowFontScaling={false}
-                  style={[
-                    styles.cardinal,
-                    label === "N" && styles.cardinalNorth,
-                    {
-                      transform: [
-                        { rotate: `${-angle}deg` },
-                        ...(instrument ? [{ rotate: uprightSpin }] : []),
-                      ],
-                    },
-                  ]}
-                >
-                  {label}
-                </Animated.Text>
-              </View>
-            ))}
-
-            {/* The sun's live position on the rim — lets anyone sanity-check
-                the dial against the sky at a glance. A vector icon, not the
-                ☀️ emoji: emoji ignore `color`, and at 14px on a rotating
-                element Android renders it as a smear. */}
-            {sunNow.sunUp ? (
-              <View
-                style={[
-                  styles.rotor,
-                  { transform: [{ rotate: `${sunNow.sun.azimuth}deg` }] },
-                ]}
-              >
-                <Animated.View
-                  style={{
-                    marginTop: RIM + TICK_MAJOR.h + 16,
-                    transform: [
-                      { rotate: `${-sunNow.sun.azimuth}deg` },
-                      ...(instrument ? [{ rotate: uprightSpin }] : []),
-                    ],
-                  }}
-                >
-                  <MaterialCommunityIcons
-                    name="white-balance-sunny"
-                    size={17}
-                    color={colors.attention}
-                  />
-                </Animated.View>
-              </View>
-            ) : null}
-
-            {/* The qibla needle. */}
-            <Animated.View
-              style={[
-                styles.rotor,
-                {
-                  transform: [
-                    { rotate: `${bearing}deg` },
-                    { scale: needleScale },
-                  ],
-                },
-              ]}
-            >
-              {/* Authored SVG, not the 🕋 emoji this used to be — see
-                  KaabaMark. It follows `needleColor`, so when the compass is
-                  not trustworthy the mark dims with the needle instead of
-                  contradicting it. */}
-              <Animated.View
-                style={{
-                  width: KAABA_SIZE,
-                  height: KAABA_SIZE,
-                  alignItems: "center",
-                  justifyContent: "center",
-                  transform: [
-                    { rotate: `${-bearing}deg` },
-                    ...(instrument ? [{ rotate: uprightSpin }] : []),
-                  ],
-                }}
-              >
-                <KaabaMark
-                  size={KAABA_SIZE}
-                  color={needleColor}
-                  bandColor={colors.canvas}
-                />
-              </Animated.View>
-              {/* One polygon: tip, shoulders, and a counterweight tail
-                  crossing the hub. The old head-plus-stem pair met at a
-                  visible seam and could not taper. */}
-              {/* `styles.rotor` on the parent is already inert. */}
-              <Svg
-                width={dial}
-                height={dial}
-                style={StyleSheet.absoluteFill}
-              >
-                <Polygon points={needlePoints} fill={needleColor} />
-              </Svg>
-            </Animated.View>
-          </Animated.View>
-
-          <View style={styles.hub}>
-            <View style={styles.hubCenterTarget} />
-            <Animated.View
-              style={[
-                styles.spiritBubble,
-                {
-                  transform: [
-                    { translateX: bubbleX },
-                    { translateY: bubbleY },
-                  ],
-                  backgroundColor: locked
-                    ? colors.accent
-                    : colors.textSecondary,
-                },
-              ]}
-            />
-          </View>
-
-          {locked ? (
-            <Animated.View
-              style={[
-                styles.rippleWave,
-                {
-                  transform: [
-                    {
-                      scale: pulseWave.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: [1, 1.25],
-                      }),
-                    },
-                  ],
-                  opacity: pulseWave.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0.6, 0],
-                  }),
-                  borderColor: colors.accent,
-                },
-              ]}
-              pointerEvents="none"
-            />
-          ) : null}
-        </View>
-      </View>
-
-      {/* ---------------------------------------------------------------
-          TURN TAPE — the precision instrument. ~2× the rim's resolution,
-          which is what makes the last 3° actually readable.
-          --------------------------------------------------------------- */}
       {instrument ? (
-        <View
-          style={[styles.tape, { width: tapeWidth }]}
-          accessibilityElementsHidden
-          importantForAccessibility="no-hide-descendants"
-        >
-          <View
-            style={[
-              styles.tapeCapture,
-              {
-                width: ALIGNED_TOLERANCE_DEG * 2 * pxPerDeg,
-                left: tapeWidth / 2 - ALIGNED_TOLERANCE_DEG * pxPerDeg,
-              },
-            ]}
-          />
-          {/* Static heading scale: a graduation every 5°. */}
-          {Array.from({ length: TAPE_RANGE * 2 / 5 + 1 }, (_, i) => {
-            const deg = -TAPE_RANGE + i * 5;
-            const major = deg % 15 === 0;
-            return (
-              <View
-                key={deg}
-                style={{
-                  position: "absolute",
-                  top: major ? 8 : 12,
-                  left: tapeWidth / 2 + deg * pxPerDeg - 0.75,
-                  width: 1.5,
-                  height: major ? 12 : 7,
-                  borderRadius: 1,
-                  // controlBorder: this tape exists precisely BECAUSE the last
-                  // few degrees are unreadable on the rim, so its scale is the
-                  // thing being read. In `border` the graduations measured
-                  // 1.26:1 — the tape had no legible scale at all, defeating
-                  // the reason it was added.
-                  backgroundColor: colors.controlBorder,
-                }}
-              />
-            );
-          })}
-          {/* The qibla marker rides the tape and lands on the fixed index. */}
-          <Animated.View
-            style={[
-              styles.tapeMarker,
-              {
-                left: tapeWidth / 2 - 8,
-                transform: [{ translateX: tapeShift }],
-              },
-            ]}
-          >
-            <MaterialCommunityIcons
-              name="menu-down"
-              size={22}
-              color={needleColor}
-            />
-          </Animated.View>
-          <View style={[styles.tapeIndex, { left: tapeWidth / 2 - 1 }]} />
-        </View>
+        <TurnTape available={available} turn={turn} needleColor={needleColor} />
       ) : null}
 
-      {/* ---------------------------------------------------------------
-          METRICS. Three fixed columns — never dropped, or the strip
-          reflows every time the compass accuracy changes.
-          --------------------------------------------------------------- */}
+      {/* METRICS. Three fixed columns — never dropped, or the strip reflows
+          every time the compass accuracy changes. */}
       <View style={styles.metrics}>
         <View style={styles.metric}>
           <Text style={styles.metricLabel}>QIBLA</Text>
@@ -1082,8 +378,8 @@ export default function QiblaScreen() {
         </View>
       </View>
 
-      {/* Sensor verdict: say WHY the reading can't be trusted, not just
-          a generic calibration nag. Orange is reserved for this alone. */}
+      {/* Sensor verdict: say WHY the reading can't be trusted, not just a
+          generic calibration nag. Orange is reserved for this alone. */}
       {live && quality.advice ? (
         <View style={[styles.note, styles.noteAttention]}>
           <MaterialCommunityIcons
@@ -1118,73 +414,18 @@ export default function QiblaScreen() {
       {usingFallback ? (
         <View style={styles.note}>
           <Text style={styles.noteText}>
-            Using central London {"—"} enable location for a bearing exact
-            to where you are. Across the UK the qibla varies by about 6°.
+            Using central London — enable location for a bearing exact to
+            where you are. Across the UK the qibla varies by about 6°.
           </Text>
         </View>
       ) : null}
 
-      {/* ---------------------------------------------------------------
-          THE SUN METHOD. Arithmetic beats magnetometers. Collapsed by
-          default, but promoted automatically the moment the compass can't
-          be trusted — that is when it stops being trivia and becomes the
-          only working technique.
-          --------------------------------------------------------------- */}
-      <View style={styles.sunCard}>
-        {/* Touchable, not Pressable: this screen was the only one still using
-            bare Pressables, so its three controls were the only taps in the
-            app with no Android ripple and no press scale. */}
-        <Touchable
-          onPress={() => setSunOpen((v) => !v)}
-          accessibilityRole="button"
-          accessibilityState={{ expanded: sunExpanded }}
-          accessibilityLabel="Check the qibla against the sun"
-          style={styles.sunHeader}
-        >
-          <MaterialCommunityIcons
-            name="weather-sunny"
-            size={20}
-            color={colors.attention}
-          />
-          <View style={styles.sunHeaderText}>
-            <Text style={styles.sunTitle}>Check it against the sun</Text>
-            {/* Collapsed, this line IS the method — the whole instruction
-                has to fit here. Expanded, the body repeats it at full
-                weight, so showing it twice is just noise. */}
-            {sunExpanded ? null : (
-              <Text style={styles.sunSummary} numberOfLines={2}>
-                {sunNow.sunUp
-                  ? sunNow.instruction
-                  : nextCrossing
-                    ? `Sun sits on the qibla line ${nextCrossing.tomorrow ? "tomorrow " : ""}at ${hhmm(nextCrossing.at)}`
-                    : "Available in daylight"}
-              </Text>
-            )}
-          </View>
-          <MaterialCommunityIcons
-            name={sunExpanded ? "chevron-up" : "chevron-down"}
-            size={22}
-            color={colors.textSecondary}
-          />
-        </Touchable>
-
-        {sunExpanded ? (
-          <View style={styles.sunBodyWrap}>
-            <Text style={styles.sunBody}>
-              The sun&apos;s position is calculated, not sensed, so magnets and
-              metal can&apos;t fool it.
-            </Text>
-            {sunNow.sunUp ? (
-              <Text style={styles.sunInstruction}>{sunNow.instruction}</Text>
-            ) : null}
-            {nextCrossing ? (
-              <Text style={styles.sunBody}>
-                {`At ${hhmm(nextCrossing.at)} ${nextCrossing.tomorrow ? "tomorrow" : "today"} the sun sits exactly on the qibla line — face your shadow's opposite direction and that is the qibla, to a fraction of a degree.`}
-              </Text>
-            ) : null}
-          </View>
-        ) : null}
-      </View>
+      <SunCard
+        sun={sunNow}
+        nextCrossing={nextCrossing}
+        expanded={sunExpanded}
+        onToggle={() => setSunOpen((v) => !v)}
+      />
 
       {/* Reference, not instruction: assessCompass already tells the user to
           hold the phone flat AT THE MOMENT it is tilted, which is worth far
@@ -1206,7 +447,7 @@ export default function QiblaScreen() {
         {tipsOpen ? (
           <Text style={styles.tipsBody}>
             Hold the phone flat and level, screen up. Steel, speakers, laptops
-            and reinforced concrete all pull a compass off course {"—"} the
+            and reinforced concrete all pull a compass off course — the
             warnings above will tell you when that is happening.
           </Text>
         ) : null}
@@ -1220,42 +461,14 @@ export default function QiblaScreen() {
   );
 }
 
-const createStyles = (colors: ThemeColors, scheme: "light" | "dark", dial: number) => {
-  // Depth reads differently per theme: a black shadow on a near-black
-  // screen is mathematically invisible, so dark mode expresses lift by
-  // luminance (a lighter well, a lit top edge) instead.
-  //
-  // The shadow half comes from elevation(scheme, "ambient") rather than
-  // being written out here. Hand-rolled, this declared iOS 0.06/18/8 while the
-  // recenter button declared 0.15/6/2 and both landed on Android elevation 3–4
-  // — the two surfaces matched on one platform and not the other, which is the
-  // precise drift elevation.ts's own docstring describes.
-  // Value-only across schemes — see cardEdge in elevation.ts for why a theme
-  // switch must never add or remove native props on a mounted view.
-  const lift =
-    scheme === "dark"
-      ? {
-          borderColor: colors.surfaceSecondary,
-          ...Platform.select({
-            android: { elevation: 0 },
-            default: {
-              shadowColor: "#000",
-              shadowOpacity: 0,
-              shadowRadius: 0,
-              shadowOffset: { width: 0, height: 0 },
-            },
-          }),
-        }
-      : { borderColor: colors.border, ...elevation(scheme, "ambient") };
-
-  return StyleSheet.create({
+const useStyles = createThemedStyles((colors: ThemeColors, scheme) =>
+  StyleSheet.create({
     screen: {
       flex: 1,
       backgroundColor: colors.surface,
     },
     content: {
       padding: spacing.l,
-      paddingBottom: spacing.xxl,
       alignItems: "center",
       gap: spacing.m,
       width: "100%",
@@ -1286,136 +499,12 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark", dial: numbe
       gap: spacing.s,
       // minHeight, not height: 60 matches heroNumber's lineHeight so the hero
       // doesn't jump as it swaps between the two, but a hard height clipped
-      // the 34px "Aligned" — the screen's whole success state — for anyone
-      // running large text. minHeight keeps the alignment and lets it grow.
+      // the 34px "Aligned" for anyone running large text.
       minHeight: 60,
     },
     heroWord: {
       ...type.hero,
       fontWeight: "700",
-    },
-
-    dialWrap: {
-      width: dial,
-      alignItems: "center",
-    },
-    // The dial's layers all need the same treatment — they are a rendered
-    // instrument, not controls, and must never intercept a touch meant for
-    // the scroll view.
-    /** Any decorative layer that must never intercept a touch. */
-    inert: {
-      pointerEvents: "none",
-    },
-    gate: {
-      height: 20,
-      alignItems: "center",
-      justifyContent: "center",
-      marginBottom: -4,
-      pointerEvents: "none",
-    },
-    dial: {
-      width: dial,
-      height: dial,
-      borderRadius: dial / 2,
-      borderWidth: 1,
-      backgroundColor: colors.canvas,
-      ...lift,
-    },
-    face: {
-      position: "absolute",
-      width: dial,
-      height: dial,
-      pointerEvents: "none",
-    },
-    // Each glyph sits in a full-size layer rotated about the dial's centre;
-    // its child is pinned to the top, so rotating the layer sweeps the child
-    // around the rim.
-    rotor: {
-      position: "absolute",
-      width: dial,
-      height: dial,
-      alignItems: "center",
-      paddingTop: RIM,
-      pointerEvents: "none",
-    },
-    cardinal: {
-      marginTop: TICK_MAJOR.h + 6,
-      ...type.caption,
-      fontWeight: "700",
-      letterSpacing: 1.2,
-      color: colors.textSecondary,
-    },
-    cardinalNorth: {
-      color: colors.text,
-    },
-    hub: {
-      position: "absolute",
-      top: dial / 2 - 13,
-      left: dial / 2 - 13,
-      width: 26,
-      height: 26,
-      borderRadius: 13,
-      borderWidth: 2,
-      borderColor: colors.border,
-      backgroundColor: colors.surface,
-      alignItems: "center",
-      justifyContent: "center",
-      overflow: "hidden",
-    },
-    hubCenterTarget: {
-      width: 8,
-      height: 8,
-      borderRadius: 4,
-      borderWidth: 1,
-      borderColor: colors.controlBorder,
-      opacity: 0.5,
-    },
-    spiritBubble: {
-      position: "absolute",
-      width: 8,
-      height: 8,
-      borderRadius: 4,
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.25,
-      shadowRadius: 1,
-    },
-    rippleWave: {
-      position: "absolute",
-      top: 0,
-      left: 0,
-      width: dial,
-      height: dial,
-      borderRadius: dial / 2,
-      borderWidth: 2,
-    },
-
-    tape: {
-      height: TAPE_HEIGHT,
-      overflow: "hidden",
-      justifyContent: "center",
-      marginTop: spacing.xs,
-    },
-    tapeCapture: {
-      position: "absolute",
-      top: 4,
-      bottom: 4,
-      borderRadius: radius.m,
-      backgroundColor: colors.accentSoft,
-    },
-    tapeIndex: {
-      position: "absolute",
-      top: 2,
-      width: 2,
-      height: TAPE_HEIGHT - 4,
-      borderRadius: 1,
-      backgroundColor: colors.text,
-    },
-    tapeMarker: {
-      position: "absolute",
-      bottom: 2,
-      width: 16,
-      alignItems: "center",
     },
 
     metrics: {
@@ -1458,8 +547,7 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark", dial: numbe
       ...cardEdge(scheme, colors),
       padding: spacing.l,
     },
-    // The tinted fill carries the warning on its own now — the redesign
-    // dropped card outlines in light mode, and amber-on-amber-soft already
+    // The tinted fill carries the warning on its own: amber-on-amber-soft
     // clears AA for the icon and text inside.
     noteAttention: {
       backgroundColor: colors.attentionSoft,
@@ -1483,48 +571,6 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark", dial: numbe
       color: colors.accent,
     },
 
-    sunCard: {
-      width: "100%",
-      backgroundColor: colors.canvas,
-      borderRadius: radius.xl,
-      ...cardEdge(scheme, colors),
-      ...clipRipple,
-    },
-    sunHeader: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: spacing.m,
-      padding: spacing.l,
-      minHeight: MIN_TARGET,
-    },
-    sunHeaderText: {
-      flex: 1,
-      gap: 2,
-    },
-    sunTitle: {
-      ...type.callout,
-      fontWeight: "700",
-      color: colors.text,
-    },
-    sunSummary: {
-      ...type.footnote,
-      color: colors.textSecondary,
-    },
-    sunBodyWrap: {
-      paddingHorizontal: spacing.l,
-      paddingBottom: spacing.l,
-      gap: spacing.s,
-    },
-    sunBody: {
-      ...type.footnote,
-      color: colors.textSecondary,
-    },
-    sunInstruction: {
-      ...type.body,
-      fontWeight: "700",
-      color: colors.text,
-    },
-
     tips: {
       width: "100%",
     },
@@ -1543,14 +589,12 @@ const createStyles = (colors: ThemeColors, scheme: "light" | "dark", dial: numbe
       color: colors.textSecondary,
       paddingBottom: spacing.s,
     },
+    // No `opacity` on this: textSecondary is tuned to sit exactly at AA on
+    // `surface`, and dimming it further pushed it under.
     privacy: {
       ...type.caption,
       color: colors.textSecondary,
       textAlign: "center",
-      // No `opacity`. textSecondary is already the palette's quiet ink and is
-      // tuned to sit exactly at AA on `surface` (4.92:1 light); dimming it to
-      // 0.9 composited to 4.03:1 and pushed it under. The palette tests never
-      // caught it because the alpha lived here, not in the palette.
     },
-  });
-};
+  }),
+);
