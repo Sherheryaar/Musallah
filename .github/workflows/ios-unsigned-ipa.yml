@@ -1,0 +1,133 @@
+# Builds an UNSIGNED .ipa for sideloading (Sideloadly, AltStore, TrollStore).
+#
+# WHY THIS EXISTS: an .ipa can only be produced by Xcode, which only runs on
+# macOS. Development happens on Windows, so the archive is cut on a GitHub
+# macOS runner instead. Public repos get macOS runners for free, so this
+# costs nothing and needs no Apple Developer Program membership.
+#
+# WHY UNSIGNED: Sideloadly re-signs the app itself with your own Apple ID
+# (free accounts get a 7-day certificate, paid ones a year). Signing here
+# would only be thrown away — and would require Apple credentials this repo
+# deliberately does not hold. `CODE_SIGNING_ALLOWED=NO` also means no
+# entitlements are baked in, which is what we want: this app only schedules
+# LOCAL notifications (src/context/NotificationsContext.tsx), so it needs no
+# push entitlement, and a stale `aps-environment` is a common reason free
+# Apple IDs fail to sign a sideloaded app.
+#
+# WHY PREBUILD RUNS HERE: the repo is a managed Expo project — there is no
+# ios/ directory in git. `expo prebuild` generates it from app.json +
+# app.config.js on each run, so the native project can never drift from the
+# config. The Google Maps key app.config.js injects is Android-only; iOS uses
+# Apple Maps and needs no key.
+#
+# Repository secrets used (already set for the refresh-times workflow):
+#   EXPO_PUBLIC_SUPABASE_URL       inlined into the JS bundle at build time
+#   EXPO_PUBLIC_SUPABASE_ANON_KEY  same — public by design, RLS-guarded
+# Without them the app builds but every screen comes up with no data, because
+# src/lib/supabase.ts reads them at module load.
+#
+# TO USE: Actions -> "Build unsigned iOS IPA" -> Run workflow. When it
+# finishes, download the "musallah-unsigned-ipa" artifact, unzip it, and drop
+# the .ipa into Sideloadly with the iPhone plugged in.
+
+name: Build unsigned iOS IPA
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: ios-ipa
+  cancel-in-progress: true
+
+jobs:
+  build:
+    # Pinned rather than macos-latest: Expo SDK 54 / React Native 0.81 is
+    # known-good on the Xcode 16 toolchain this image ships, and a silent
+    # bump of the runner image to a new major Xcode is exactly the kind of
+    # breakage that is miserable to diagnose from Windows.
+    runs-on: macos-15
+    timeout-minutes: 60
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Show toolchain
+        run: |
+          xcodebuild -version
+          node --version
+
+      - name: Install dependencies
+        run: npm ci
+
+      # --clean guarantees the native project is generated from scratch, so a
+      # cached ios/ can never carry stale config into the archive.
+      - name: Generate the native iOS project
+        env:
+          EXPO_NO_TELEMETRY: "1"
+        run: npx expo prebuild --platform ios --clean
+
+      # prebuild normally runs this itself; running it explicitly means a
+      # CocoaPods failure is reported as its own red step rather than buried
+      # in prebuild's output.
+      - name: Install pods
+        run: pod install --project-directory=ios
+
+      - name: Locate the workspace and scheme
+        id: xc
+        run: |
+          ws=$(ls -d ios/*.xcworkspace | head -1)
+          scheme=$(basename "$ws" .xcworkspace)
+          echo "workspace=$ws" >> "$GITHUB_OUTPUT"
+          echo "scheme=$scheme" >> "$GITHUB_OUTPUT"
+          echo "Workspace: $ws (scheme $scheme)"
+
+      # The EXPO_PUBLIC_* values must be present HERE, not just at prebuild:
+      # Metro runs inside the "Bundle React Native code and images" build
+      # phase, and that is the moment process.env.EXPO_PUBLIC_* is inlined.
+      - name: Archive (no code signing)
+        env:
+          EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.EXPO_PUBLIC_SUPABASE_URL }}
+          EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.EXPO_PUBLIC_SUPABASE_ANON_KEY }}
+        run: |
+          set -o pipefail
+          xcodebuild archive \
+            -workspace "${{ steps.xc.outputs.workspace }}" \
+            -scheme "${{ steps.xc.outputs.scheme }}" \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -archivePath "$RUNNER_TEMP/Musallah.xcarchive" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGN_ENTITLEMENTS="" \
+            AD_HOC_CODE_SIGNING_ALLOWED=YES
+
+      # An .ipa is just a zip with the .app inside a folder called Payload.
+      # `xcodebuild -exportArchive` would refuse without a signing identity,
+      # so the archive is repackaged by hand instead.
+      - name: Package the .ipa
+        run: |
+          app=$(ls -d "$RUNNER_TEMP"/Musallah.xcarchive/Products/Applications/*.app | head -1)
+          echo "Packaging $app"
+          mkdir -p "$RUNNER_TEMP/pkg/Payload"
+          cp -R "$app" "$RUNNER_TEMP/pkg/Payload/"
+          version=$(node -p "require('./app.json').expo.version")
+          (cd "$RUNNER_TEMP/pkg" && zip -qry "Musallah-$version-unsigned.ipa" Payload)
+          mkdir -p out
+          mv "$RUNNER_TEMP/pkg"/*.ipa out/
+          ls -lh out
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: musallah-unsigned-ipa
+          path: out/*.ipa
+          # GitHub's default is 90 days. An unsigned build of a moving app is
+          # only ever useful for the few days you are testing it.
+          retention-days: 14
+          if-no-files-found: error
