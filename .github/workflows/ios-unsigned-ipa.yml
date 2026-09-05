@@ -5,7 +5,12 @@
 # macOS runner instead. Public repos get macOS runners for free, so this
 # costs nothing and needs no Apple Developer Program membership.
 #
-# WHY UNSIGNED: Sideloadly re-signs the app itself with your own Apple ID
+# WHY AD-HOC SIGNED, NOT UNSIGNED: Sideloadly re-signs the app itself with
+# your own Apple ID, but it does so by REPLACING a signature, so a truly
+# unsigned binary is rejected outright — see the ad-hoc signing step below.
+# Ad-hoc signing needs no Apple account, so nothing here does.
+#
+# Sideloadly re-signs the app itself with your own Apple ID
 # (free accounts get a 7-day certificate, paid ones a year). Signing here
 # would only be thrown away — and would require Apple credentials this repo
 # deliberately does not hold. `CODE_SIGNING_ALLOWED=NO` also means no
@@ -105,8 +110,28 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY="" \
-            CODE_SIGN_ENTITLEMENTS="" \
-            AD_HOC_CODE_SIGNING_ALLOWED=YES
+            CODE_SIGN_ENTITLEMENTS=""
+
+      # Sideloadly (and AltStore, and every zsign-based tool) re-signs by
+      # REPLACING an existing signature — it needs an LC_CODE_SIGNATURE load
+      # command to overwrite. A binary archived with CODE_SIGNING_ALLOWED=NO
+      # has no such load command at all, and Sideloadly rejects it with
+      # "Guru Meditation ... Invalid file" before it ever reaches the device.
+      #
+      # Ad-hoc signing ("-") is the fix and costs nothing: it needs no Apple
+      # certificate and no keychain, and it carries no entitlements and no
+      # team identity, so the result is still an app your own Apple ID will
+      # be signing for real. Nested code must be signed before its container,
+      # hence frameworks first.
+      - name: Ad-hoc sign so Sideloadly has a signature to replace
+        run: |
+          app=$(ls -d "$RUNNER_TEMP"/Musallah.xcarchive/Products/Applications/*.app | head -1)
+          if [ -d "$app/Frameworks" ]; then
+            find "$app/Frameworks" -maxdepth 1 \( -name '*.framework' -o -name '*.dylib' \) \
+              -exec codesign --force --sign - --timestamp=none {} \;
+          fi
+          codesign --force --sign - --timestamp=none "$app"
+          codesign --verify --verbose "$app"
 
       # An .ipa is just a zip with the .app inside a folder called Payload.
       # `xcodebuild -exportArchive` would refuse without a signing identity,
