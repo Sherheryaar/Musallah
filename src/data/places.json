@@ -6569,7 +6569,7 @@
 			"dhuhr": "13:30",
 			"asr": "17:00",
 			"maghrib": "19:08",
-			"isha": "20:38"
+			"isha": "20:33"
 		},
 		"notes": "Capacity ~200 (MuslimsInBritain.org); Data: MIB (mib-1743)",
 		"source": "MuslimsInBritain.org (with permission)",
@@ -11570,7 +11570,7 @@
 		"jamaat": {
 			"source": "Mawaqit.net (with permission)",
 			"recordedOn": "2026-09-21",
-			"fajr": "06:00",
+			"fajr": "06:15",
 			"dhuhr": "13:30",
 			"asr": "18:05",
 			"maghrib": "19:19",
@@ -13062,7 +13062,7 @@
 			"dhuhr": "13:30",
 			"asr": "18:00",
 			"maghrib": "19:06",
-			"isha": "21:00"
+			"isha": "20:30"
 		},
 		"notes": "Data: OSM (way/925372524)",
 		"source": "OpenStreetMap ((c) OpenStreetMap contributors)",
@@ -30557,7 +30557,7 @@
 			"dhuhr": "13:45",
 			"asr": "17:30",
 			"maghrib": "19:18",
-			"isha": "21:45"
+			"isha": "20:45"
 		},
 		"notes": "Capacity ~50 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-1358)",
 		"source": "MuslimsInBritain.org (with permission)",
@@ -46834,7 +46834,7 @@
 			"fajr": "05:38",
 			"dhuhr": "13:19",
 			"asr": "16:27",
-			"maghrib": "19:08",
+			"maghrib": "19:10",
 			"isha": "20:39"
 		},
 		"notes": "Capacity ~80 (MuslimsInBritain.org); Data: MIB (mib-718)",
