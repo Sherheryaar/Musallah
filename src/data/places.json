@@ -8726,7 +8726,7 @@
 			"dhuhr": "14:00",
 			"asr": "17:00",
 			"maghrib": "19:16",
-			"isha": "21:15"
+			"isha": "21:00"
 		},
 		"notes": "Denomination: muslim; Data: OSM (node/13208406265)",
 		"source": "OpenStreetMap ((c) OpenStreetMap contributors)",
@@ -11420,7 +11420,7 @@
 			"recordedOn": "2026-09-28",
 			"fajr": "06:30",
 			"dhuhr": "13:30",
-			"asr": "17:15",
+			"asr": "17:45",
 			"maghrib": "18:53",
 			"isha": "21:00"
 		},
@@ -11572,7 +11572,7 @@
 			"recordedOn": "2026-09-28",
 			"fajr": "06:15",
 			"dhuhr": "13:30",
-			"asr": "18:05",
+			"asr": "17:45",
 			"maghrib": "19:02",
 			"isha": "21:15"
 		},
@@ -36466,7 +36466,7 @@
 			"fajr": "06:15",
 			"dhuhr": "13:45",
 			"asr": "18:00",
-			"maghrib": "18:54",
+			"maghrib": "18:55",
 			"isha": "20:30"
 		},
 		"notes": "Capacity ~70 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-1031)",
@@ -40934,11 +40934,11 @@
 		},
 		"jamaat": {
 			"source": "westwoodmosque.org (published timetable)",
-			"recordedOn": "2026-09-27",
+			"recordedOn": "2026-09-28",
 			"fajr": "06:15",
 			"dhuhr": "13:45",
 			"asr": "17:15",
-			"maghrib": "19:03",
+			"maghrib": "19:00",
 			"isha": "20:30"
 		},
 		"notes": "Capacity ~400 (MuslimsInBritain.org); Denomination: Maududi / Jamaat-e-Islami; Data: MIB+OSM (mib-316)",
@@ -43561,11 +43561,11 @@
 		"jamaat": {
 			"source": "Masjidbox (mosque-published timetable)",
 			"recordedOn": "2026-09-28",
-			"fajr": "06:00",
+			"fajr": "06:10",
 			"dhuhr": "13:30",
-			"asr": "18:00",
-			"maghrib": "19:05",
-			"isha": "21:00"
+			"asr": "17:45",
+			"maghrib": "18:50",
+			"isha": "20:45"
 		},
 		"notes": "Capacity ~60 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-1192)",
 		"source": "MuslimsInBritain.org (with permission)",
@@ -48029,9 +48029,9 @@
 		"jamaat": {
 			"source": "Mawaqit.net (with permission)",
 			"recordedOn": "2026-09-28",
-			"fajr": "05:45",
+			"fajr": "05:47",
 			"dhuhr": "13:09",
-			"asr": "16:22",
+			"asr": "16:21",
 			"maghrib": "18:59",
 			"isha": "20:09"
 		},
