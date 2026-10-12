@@ -65,7 +65,7 @@
 			"fajr": "06:30",
 			"dhuhr": "13:30",
 			"asr": "17:00",
-			"maghrib": "18:17",
+			"maghrib": "18:15",
 			"isha": "19:45"
 		},
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Data: MIB+OSM (mib-1738)",
@@ -111,11 +111,11 @@
 		"jamaat": {
 			"source": "Sirat.uk (UK mosque directory, ODC-By 1.0)",
 			"recordedOn": "2026-10-12",
-			"fajr": "06:00",
+			"fajr": "06:15",
 			"dhuhr": "13:30",
 			"asr": "16:15",
-			"maghrib": "18:23",
-			"isha": "20:08"
+			"maghrib": "18:21",
+			"isha": "20:06"
 		},
 		"notes": "Capacity ~250 (MuslimsInBritain.org); Denomination: Arab mainstream; Data: MIB (mib-1)",
 		"source": "MuslimsInBritain.org (with permission)",
@@ -384,7 +384,7 @@
 			"fajr": "06:00",
 			"dhuhr": "13:30",
 			"asr": "16:45",
-			"maghrib": "18:16",
+			"maghrib": "18:14",
 			"isha": "20:30"
 		},
 		"notes": "Capacity ~1450 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-1131)",
@@ -417,7 +417,7 @@
 			"fajr": "06:15",
 			"dhuhr": "13:30",
 			"asr": "16:45",
-			"maghrib": "18:17",
+			"maghrib": "18:15",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~700 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-1130)",
@@ -624,7 +624,7 @@
 			"fajr": "06:45",
 			"dhuhr": "13:30",
 			"asr": "16:45",
-			"maghrib": "18:20",
+			"maghrib": "18:18",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~1600 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-1481)",
@@ -1411,7 +1411,7 @@
 			"fajr": "06:15",
 			"dhuhr": "13:30",
 			"asr": "16:15",
-			"maghrib": "18:22",
+			"maghrib": "18:20",
 			"isha": "20:00"
 		},
 		"notes": "Registered charity 1187230. Madrasah and youth programmes on site; daily prayer timetable published on Masjidbox.",
@@ -1559,7 +1559,7 @@
 			"fajr": "06:45",
 			"dhuhr": "13:30",
 			"asr": "16:45",
-			"maghrib": "18:25",
+			"maghrib": "18:23",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~750 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-408)",
@@ -1678,9 +1678,9 @@
 			"recordedOn": "2026-10-12",
 			"fajr": "07:10",
 			"dhuhr": "15:15",
-			"asr": "17:50",
-			"maghrib": "18:21",
-			"isha": "19:58"
+			"asr": "16:50",
+			"maghrib": "18:18",
+			"isha": "19:55"
 		},
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-1588)",
 		"source": "MuslimsInBritain.org (with permission)",
@@ -1948,9 +1948,9 @@
 			"recordedOn": "2026-10-12",
 			"fajr": "06:45",
 			"dhuhr": "14:00",
-			"asr": "17:15",
-			"maghrib": "18:20",
-			"isha": "20:00"
+			"asr": "17:00",
+			"maghrib": "18:16",
+			"isha": "19:45"
 		},
 		"notes": "Capacity ~650 (MuslimsInBritain.org); Denomination: Maududi / Jamaat-e-Islami; Data: MIB+OSM (mib-463)",
 		"source": "MuslimsInBritain.org (with permission)",
@@ -2140,7 +2140,7 @@
 			"fajr": "06:45",
 			"dhuhr": "13:30",
 			"asr": "16:45",
-			"maghrib": "18:26",
+			"maghrib": "18:24",
 			"isha": "20:15"
 		},
 		"notes": "Capacity ~200 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-15041902)",
@@ -2390,7 +2390,7 @@
 			"fajr": "06:45",
 			"dhuhr": "14:00",
 			"asr": "16:45",
-			"maghrib": "18:20",
+			"maghrib": "18:18",
 			"isha": "20:15"
 		},
 		"notes": "Capacity ~8000 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-201)",
@@ -2655,11 +2655,11 @@
 		"jamaat": {
 			"source": "Sirat.uk (UK mosque directory, ODC-By 1.0)",
 			"recordedOn": "2026-10-12",
-			"fajr": "04:38",
+			"fajr": "04:39",
 			"dhuhr": "11:57",
-			"asr": "14:48",
-			"maghrib": "17:19",
-			"isha": "19:09"
+			"asr": "14:46",
+			"maghrib": "17:17",
+			"isha": "19:07"
 		},
 		"notes": "Capacity ~1000 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-2037)",
 		"source": "MuslimsInBritain.org (with permission)",
@@ -2708,7 +2708,7 @@
 			"fajr": "06:15",
 			"dhuhr": "13:30",
 			"asr": "17:00",
-			"maghrib": "18:16",
+			"maghrib": "18:14",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~3400 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-1041)",
@@ -2738,7 +2738,7 @@
 			"fajr": "06:15",
 			"dhuhr": "13:30",
 			"asr": "16:30",
-			"maghrib": "18:18",
+			"maghrib": "18:16",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~415 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-505)",
@@ -2810,7 +2810,7 @@
 			"fajr": "06:30",
 			"dhuhr": "13:30",
 			"asr": "16:45",
-			"maghrib": "18:18",
+			"maghrib": "18:16",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB (mib-1737)",
@@ -2930,7 +2930,7 @@
 			"fajr": "06:30",
 			"dhuhr": "13:30",
 			"asr": "16:00",
-			"maghrib": "18:34",
+			"maghrib": "18:32",
 			"isha": "19:54"
 		},
 		"notes": "Capacity ~420 (MuslimsInBritain.org); Denomination: Salafi; Data: MIB (mib-576)",
@@ -3714,11 +3714,11 @@
 		"jamaat": {
 			"source": "Sirat.uk (UK mosque directory, ODC-By 1.0)",
 			"recordedOn": "2026-10-12",
-			"fajr": "06:00",
+			"fajr": "06:15",
 			"dhuhr": "13:30",
 			"asr": "16:15",
-			"maghrib": "18:23",
-			"isha": "20:08"
+			"maghrib": "18:21",
+			"isha": "20:06"
 		},
 		"notes": "Capacity ~1500 (MuslimsInBritain.org); Denomination: Arab mainstream; Data: MIB+OSM (mib-1683)",
 		"source": "MuslimsInBritain.org (with permission)",
@@ -3750,7 +3750,7 @@
 			"fajr": "06:45",
 			"dhuhr": "13:45",
 			"asr": "17:00",
-			"maghrib": "18:24",
+			"maghrib": "18:22",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~230 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB (mib-139)",
@@ -3855,7 +3855,7 @@
 			"fajr": "06:45",
 			"dhuhr": "13:30",
 			"asr": "17:00",
-			"maghrib": "18:17",
+			"maghrib": "18:15",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~2000 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-1287)",
@@ -3885,7 +3885,7 @@
 			"fajr": "06:45",
 			"dhuhr": "14:00",
 			"asr": "17:15",
-			"maghrib": "18:22",
+			"maghrib": "18:20",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~400 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-263)",
@@ -3938,7 +3938,7 @@
 			"fajr": "06:30",
 			"dhuhr": "13:30",
 			"asr": "17:00",
-			"maghrib": "18:20",
+			"maghrib": "18:18",
 			"isha": "20:15"
 		},
 		"notes": "Capacity ~400 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-1749)",
@@ -4429,7 +4429,7 @@
 			"fajr": "06:30",
 			"dhuhr": "13:30",
 			"asr": "17:00",
-			"maghrib": "18:20",
+			"maghrib": "18:18",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~100 (MuslimsInBritain.org); Data: MIB+OSM (mib-497)",
@@ -4555,7 +4555,7 @@
 			"fajr": "06:00",
 			"dhuhr": "13:30",
 			"asr": "16:00",
-			"maghrib": "18:17",
+			"maghrib": "18:15",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~650 (MuslimsInBritain.org); Denomination: Salafi; Data: MIB (mib-1173)",
@@ -4587,7 +4587,7 @@
 			"fajr": "06:45",
 			"dhuhr": "13:55",
 			"asr": "16:45",
-			"maghrib": "18:17",
+			"maghrib": "18:15",
 			"isha": "20:10"
 		},
 		"notes": "Capacity ~30 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-1086)",
@@ -4725,11 +4725,11 @@
 		"jamaat": {
 			"source": "Sirat.uk (UK mosque directory, ODC-By 1.0)",
 			"recordedOn": "2026-10-12",
-			"fajr": "06:10",
+			"fajr": "06:11",
 			"dhuhr": "12:55",
-			"asr": "15:41",
-			"maghrib": "18:18",
-			"isha": "19:47"
+			"asr": "15:39",
+			"maghrib": "18:16",
+			"isha": "19:45"
 		},
 		"notes": "Capacity ~500 (MuslimsInBritain.org); Denomination: Salafi; Data: MIB (mib-1689)",
 		"source": "MuslimsInBritain.org (with permission)",
@@ -4950,7 +4950,7 @@
 			"fajr": "06:30",
 			"dhuhr": "13:30",
 			"asr": "16:45",
-			"maghrib": "18:21",
+			"maghrib": "18:19",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~2500 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-1322)",
@@ -4998,11 +4998,11 @@
 		"jamaat": {
 			"source": "Sirat.uk (UK mosque directory, ODC-By 1.0)",
 			"recordedOn": "2026-10-12",
-			"fajr": "05:51",
-			"dhuhr": "12:58",
-			"asr": "16:25",
-			"maghrib": "18:21",
-			"isha": "19:43"
+			"fajr": "05:52",
+			"dhuhr": "12:57",
+			"asr": "16:23",
+			"maghrib": "18:18",
+			"isha": "19:41"
 		},
 		"notes": "Capacity ~350 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-2198)",
 		"source": "MuslimsInBritain.org (with permission)",
@@ -5069,7 +5069,7 @@
 			"fajr": "06:15",
 			"dhuhr": "13:30",
 			"asr": "16:45",
-			"maghrib": "18:21",
+			"maghrib": "18:19",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~700 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-2710)",
@@ -5200,7 +5200,7 @@
 			"fajr": "06:45",
 			"dhuhr": "13:30",
 			"asr": "16:45",
-			"maghrib": "18:17",
+			"maghrib": "18:15",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-1283)",
@@ -5891,7 +5891,7 @@
 			"fajr": "06:30",
 			"dhuhr": "13:30",
 			"asr": "16:15",
-			"maghrib": "18:43",
+			"maghrib": "18:40",
 			"isha": "20:30"
 		},
 		"notes": "Capacity ~700 (MuslimsInBritain.org); Denomination: Salafi; Data: MIB+OSM (mib-67)",
@@ -6083,7 +6083,7 @@
 			"fajr": "06:30",
 			"dhuhr": "13:30",
 			"asr": "16:45",
-			"maghrib": "18:19",
+			"maghrib": "18:17",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~450 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-2024)",
@@ -6193,7 +6193,7 @@
 			"fajr": "06:30",
 			"dhuhr": "13:45",
 			"asr": "16:45",
-			"maghrib": "18:22",
+			"maghrib": "18:20",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~2900 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-155)",
@@ -6343,7 +6343,7 @@
 			"fajr": "06:30",
 			"dhuhr": "14:00",
 			"asr": "17:00",
-			"maghrib": "18:24",
+			"maghrib": "18:21",
 			"isha": "20:15"
 		},
 		"notes": "Capacity ~400 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-2736)",
@@ -6373,7 +6373,7 @@
 			"fajr": "06:45",
 			"dhuhr": "13:45",
 			"asr": "16:45",
-			"maghrib": "18:23",
+			"maghrib": "18:21",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~400 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-82)",
@@ -6880,11 +6880,11 @@
 		"jamaat": {
 			"source": "Sirat.uk (UK mosque directory, ODC-By 1.0)",
 			"recordedOn": "2026-10-12",
-			"fajr": "05:37",
+			"fajr": "05:39",
 			"dhuhr": "12:58",
-			"asr": "15:46",
-			"maghrib": "18:22",
-			"isha": "20:11"
+			"asr": "15:44",
+			"maghrib": "18:20",
+			"isha": "20:09"
 		},
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Denomination: Salafi; Data: MIB (mib-1116); Friday (Jumu'ah) prayers only",
 		"source": "MuslimsInBritain.org (with permission)",
@@ -6967,7 +6967,7 @@
 			"fajr": "06:30",
 			"dhuhr": "13:30",
 			"asr": "16:00",
-			"maghrib": "18:18",
+			"maghrib": "18:16",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~100 (MuslimsInBritain.org); Denomination: Salafi; Data: MIB (mib-1707)",
@@ -7147,7 +7147,7 @@
 			"fajr": "06:30",
 			"dhuhr": "13:30",
 			"asr": "16:45",
-			"maghrib": "18:16",
+			"maghrib": "18:14",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~100 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-1320)",
@@ -7244,7 +7244,7 @@
 			"fajr": "06:30",
 			"dhuhr": "13:30",
 			"asr": "17:00",
-			"maghrib": "18:15",
+			"maghrib": "18:13",
 			"isha": "21:00"
 		},
 		"notes": "Data: MIB+OSM (mib-567)",
@@ -7334,7 +7334,7 @@
 			"fajr": "06:30",
 			"dhuhr": "13:30",
 			"asr": "16:45",
-			"maghrib": "18:21",
+			"maghrib": "18:19",
 			"isha": "19:45"
 		},
 		"notes": "Capacity ~600 (MuslimsInBritain.org); Data: MIB+OSM (mib-156)",
@@ -8198,7 +8198,7 @@
 			"fajr": "06:45",
 			"dhuhr": "14:00",
 			"asr": "17:00",
-			"maghrib": "18:18",
+			"maghrib": "18:16",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~400 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-609)",
@@ -8269,7 +8269,7 @@
 			"fajr": "06:45",
 			"dhuhr": "13:30",
 			"asr": "17:00",
-			"maghrib": "18:17",
+			"maghrib": "18:15",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~200 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-1382)",
@@ -9324,7 +9324,7 @@
 			"fajr": "06:30",
 			"dhuhr": "13:45",
 			"asr": "16:30",
-			"maghrib": "18:20",
+			"maghrib": "18:18",
 			"isha": "20:15"
 		},
 		"notes": "Capacity ~250 (MuslimsInBritain.org); Denomination: Salafi; Data: MIB+OSM (mib-1855)",
@@ -9432,7 +9432,7 @@
 			"fajr": "06:30",
 			"dhuhr": "13:30",
 			"asr": "17:00",
-			"maghrib": "18:24",
+			"maghrib": "18:22",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~200 (MuslimsInBritain.org); Data: MIB+OSM (mib-1746)",
@@ -9486,7 +9486,7 @@
 			"fajr": "07:00",
 			"dhuhr": "13:30",
 			"asr": "17:15",
-			"maghrib": "18:16",
+			"maghrib": "18:14",
 			"isha": "20:10"
 		},
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-1471)",
@@ -10192,7 +10192,7 @@
 			"fajr": "06:15",
 			"dhuhr": "13:30",
 			"asr": "16:00",
-			"maghrib": "18:23",
+			"maghrib": "18:20",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~950 (MuslimsInBritain.org); Denomination: Salafi; Data: MIB+OSM (mib-1799)",
@@ -10425,8 +10425,8 @@
 			"fajr": "06:45",
 			"dhuhr": "14:00",
 			"asr": "17:00",
-			"maghrib": "18:26",
-			"isha": "20:06"
+			"maghrib": "18:23",
+			"isha": "20:03"
 		},
 		"notes": "Capacity ~330 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB (mib-738)",
 		"source": "MuslimsInBritain.org (with permission)",
@@ -10595,10 +10595,10 @@
 		"jamaat": {
 			"source": "Sirat.uk (UK mosque directory, ODC-By 1.0)",
 			"recordedOn": "2026-10-12",
-			"fajr": "05:45",
+			"fajr": "05:47",
 			"dhuhr": "13:30",
 			"asr": "16:45",
-			"maghrib": "18:20",
+			"maghrib": "18:18",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~100 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-289)",
@@ -10632,7 +10632,7 @@
 			"fajr": "07:00",
 			"dhuhr": "14:00",
 			"asr": "17:00",
-			"maghrib": "18:28",
+			"maghrib": "18:25",
 			"isha": "21:00"
 		},
 		"notes": "Capacity ~200 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB (mib-1594)",
@@ -10689,10 +10689,10 @@
 		"jamaat": {
 			"source": "eastlondonmosque.org.uk (published timetable)",
 			"recordedOn": "2026-10-12",
-			"fajr": "06:05",
+			"fajr": "06:07",
 			"dhuhr": "13:30",
 			"asr": "16:45",
-			"maghrib": "18:24",
+			"maghrib": "18:22",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~5000 (MuslimsInBritain.org); Denomination: Maududi / Jamaat-e-Islami; Data: MIB+OSM (mib-1378); One of the largest mosques in the UK. Sisters' entrance via the London Muslim Centre.",
@@ -10760,11 +10760,11 @@
 		"jamaat": {
 			"source": "Sirat.uk (UK mosque directory, ODC-By 1.0)",
 			"recordedOn": "2026-10-12",
-			"fajr": "04:59",
-			"dhuhr": "12:56",
-			"asr": "16:26",
-			"maghrib": "19:20",
-			"isha": "20:50"
+			"fajr": "05:01",
+			"dhuhr": "12:55",
+			"asr": "16:25",
+			"maghrib": "19:18",
+			"isha": "20:48"
 		},
 		"notes": "Capacity ~200 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-750)",
 		"source": "MuslimsInBritain.org (with permission)",
@@ -10860,7 +10860,7 @@
 			"fajr": "06:30",
 			"dhuhr": "13:30",
 			"asr": "16:45",
-			"maghrib": "18:20",
+			"maghrib": "18:18",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Data: MIB (mib-15063001)",
@@ -10887,10 +10887,10 @@
 		"jamaat": {
 			"source": "Sirat.uk (UK mosque directory, ODC-By 1.0)",
 			"recordedOn": "2026-10-12",
-			"fajr": "06:16",
+			"fajr": "06:18",
 			"dhuhr": "13:30",
 			"asr": "16:45",
-			"maghrib": "18:24",
+			"maghrib": "18:22",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~80 (MuslimsInBritain.org); Data: MIB (mib-304)",
@@ -11141,7 +11141,7 @@
 			"fajr": "06:15",
 			"dhuhr": "13:30",
 			"asr": "17:00",
-			"maghrib": "18:16",
+			"maghrib": "18:14",
 			"isha": "20:15"
 		},
 		"notes": "Capacity ~500 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-2622)",
@@ -11169,9 +11169,9 @@
 			"source": "Sirat.uk (UK mosque directory, ODC-By 1.0)",
 			"recordedOn": "2026-10-12",
 			"fajr": "05:15",
-			"dhuhr": "13:02",
-			"asr": "16:27",
-			"maghrib": "19:24",
+			"dhuhr": "13:01",
+			"asr": "16:25",
+			"maghrib": "19:22",
 			"isha": "21:00"
 		},
 		"notes": "Capacity ~1000 (MuslimsInBritain.org); Denomination: Arab mainstream; Data: MIB (mib-2782)",
@@ -12053,7 +12053,7 @@
 			"fajr": "06:30",
 			"dhuhr": "14:00",
 			"asr": "17:00",
-			"maghrib": "18:26",
+			"maghrib": "18:23",
 			"isha": "20:45"
 		},
 		"notes": "Capacity ~150 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-2776)",
@@ -12245,11 +12245,11 @@
 		"jamaat": {
 			"source": "Sirat.uk (UK mosque directory, ODC-By 1.0)",
 			"recordedOn": "2026-10-12",
-			"fajr": "05:43",
-			"dhuhr": "13:10",
-			"asr": "16:32",
-			"maghrib": "18:27",
-			"isha": "20:35"
+			"fajr": "05:45",
+			"dhuhr": "13:09",
+			"asr": "16:30",
+			"maghrib": "18:24",
+			"isha": "20:33"
 		},
 		"notes": "Capacity ~600 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB (mib-806)",
 		"source": "MuslimsInBritain.org (with permission)",
@@ -12410,8 +12410,8 @@
 			"fajr": "06:30",
 			"dhuhr": "13:30",
 			"asr": "16:45",
-			"maghrib": "18:20",
-			"isha": "20:15"
+			"maghrib": "18:18",
+			"isha": "20:00"
 		},
 		"notes": "Capacity ~400 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-1300)",
 		"source": "MuslimsInBritain.org (with permission)",
@@ -13049,7 +13049,7 @@
 			"fajr": "06:50",
 			"dhuhr": "14:00",
 			"asr": "17:00",
-			"maghrib": "18:21",
+			"maghrib": "18:19",
 			"isha": "20:15"
 		},
 		"notes": "Capacity ~400 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-2126)",
@@ -13082,7 +13082,7 @@
 			"fajr": "06:30",
 			"dhuhr": "13:30",
 			"asr": "16:00",
-			"maghrib": "18:17",
+			"maghrib": "18:15",
 			"isha": "20:00"
 		},
 		"notes": "Data: OSM (way/925372524)",
@@ -13202,7 +13202,7 @@
 			"fajr": "06:30",
 			"dhuhr": "13:30",
 			"asr": "16:45",
-			"maghrib": "18:19",
+			"maghrib": "18:17",
 			"isha": "20:15"
 		},
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB (mib-1439)",
@@ -13343,7 +13343,7 @@
 			"fajr": "07:00",
 			"dhuhr": "13:45",
 			"asr": "17:00",
-			"maghrib": "18:28",
+			"maghrib": "18:26",
 			"isha": "20:15"
 		},
 		"notes": "Denomination: sunni; Data: OSM (way/394676530)",
@@ -13638,7 +13638,7 @@
 			"fajr": "06:30",
 			"dhuhr": "13:30",
 			"asr": "17:00",
-			"maghrib": "18:22",
+			"maghrib": "18:20",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-1404)",
@@ -13812,11 +13812,11 @@
 		"jamaat": {
 			"source": "Sirat.uk (UK mosque directory, ODC-By 1.0)",
 			"recordedOn": "2026-10-12",
-			"fajr": "04:51",
+			"fajr": "04:53",
 			"dhuhr": "11:59",
-			"asr": "15:29",
-			"maghrib": "17:46",
-			"isha": "18:53"
+			"asr": "15:27",
+			"maghrib": "17:43",
+			"isha": "18:51"
 		},
 		"notes": "Capacity ~1300 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB (mib-354)",
 		"source": "MuslimsInBritain.org (with permission)",
@@ -13847,7 +13847,7 @@
 			"fajr": "06:30",
 			"dhuhr": "13:30",
 			"asr": "17:00",
-			"maghrib": "18:20",
+			"maghrib": "18:18",
 			"isha": "20:15"
 		},
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Denomination: Maududi / Jamaat-e-Islami; Data: MIB (mib-229)",
@@ -13976,11 +13976,11 @@
 		"jamaat": {
 			"source": "Sirat.uk (UK mosque directory, ODC-By 1.0)",
 			"recordedOn": "2026-10-12",
-			"fajr": "06:13",
+			"fajr": "06:15",
 			"dhuhr": "13:20",
-			"asr": "15:51",
-			"maghrib": "18:20",
-			"isha": "19:50"
+			"asr": "15:50",
+			"maghrib": "18:18",
+			"isha": "19:48"
 		},
 		"notes": "Capacity ~700 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-836)",
 		"source": "MuslimsInBritain.org (with permission)",
@@ -14044,7 +14044,7 @@
 			"fajr": "06:45",
 			"dhuhr": "13:30",
 			"asr": "16:45",
-			"maghrib": "18:19",
+			"maghrib": "18:17",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~2100 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-1187)",
@@ -14168,7 +14168,7 @@
 			"fajr": "06:45",
 			"dhuhr": "13:45",
 			"asr": "17:00",
-			"maghrib": "18:28",
+			"maghrib": "18:25",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-2748)",
@@ -14278,11 +14278,11 @@
 		"jamaat": {
 			"source": "Sirat.uk (UK mosque directory, ODC-By 1.0)",
 			"recordedOn": "2026-10-12",
-			"fajr": "05:31",
+			"fajr": "05:33",
 			"dhuhr": "12:50",
-			"asr": "15:42",
-			"maghrib": "18:17",
-			"isha": "20:01"
+			"asr": "15:40",
+			"maghrib": "18:15",
+			"isha": "19:59"
 		},
 		"notes": "Capacity ~1350 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB (mib-220)",
 		"source": "MuslimsInBritain.org (with permission)",
@@ -14701,7 +14701,7 @@
 			"fajr": "06:45",
 			"dhuhr": "13:30",
 			"asr": "16:45",
-			"maghrib": "18:23",
+			"maghrib": "18:21",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~230 (MuslimsInBritain.org); Data: MIB+OSM (mib-944)",
@@ -14733,10 +14733,10 @@
 		"jamaat": {
 			"source": "Masjidbox (mosque-published timetable)",
 			"recordedOn": "2026-10-12",
-			"fajr": "06:05",
+			"fajr": "06:07",
 			"dhuhr": "13:30",
 			"asr": "16:45",
-			"maghrib": "18:22",
+			"maghrib": "18:20",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-1090)",
@@ -14827,7 +14827,7 @@
 			"fajr": "06:30",
 			"dhuhr": "13:30",
 			"asr": "16:45",
-			"maghrib": "18:22",
+			"maghrib": "18:20",
 			"isha": "20:15"
 		},
 		"notes": "Capacity ~3000 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-1212)",
@@ -14854,10 +14854,10 @@
 		"jamaat": {
 			"source": "Sirat.uk (UK mosque directory, ODC-By 1.0)",
 			"recordedOn": "2026-10-12",
-			"fajr": "06:15",
+			"fajr": "06:30",
 			"dhuhr": "13:30",
 			"asr": "16:45",
-			"maghrib": "18:22",
+			"maghrib": "18:20",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~500 (MuslimsInBritain.org); Data: MIB+OSM (mib-23)",
@@ -15053,11 +15053,11 @@
 		"jamaat": {
 			"source": "Sirat.uk (UK mosque directory, ODC-By 1.0)",
 			"recordedOn": "2026-10-12",
-			"fajr": "05:43",
+			"fajr": "05:45",
 			"dhuhr": "13:05",
-			"asr": "15:50",
-			"maghrib": "18:24",
-			"isha": "20:18"
+			"asr": "15:48",
+			"maghrib": "18:22",
+			"isha": "20:16"
 		},
 		"notes": "Capacity ~500 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-1822)",
 		"source": "MuslimsInBritain.org (with permission)",
@@ -15242,7 +15242,7 @@
 			"fajr": "06:30",
 			"dhuhr": "13:30",
 			"asr": "16:45",
-			"maghrib": "18:19",
+			"maghrib": "18:17",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~2500 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-1307)",
@@ -15558,11 +15558,11 @@
 		"jamaat": {
 			"source": "Sirat.uk (UK mosque directory, ODC-By 1.0)",
 			"recordedOn": "2026-10-12",
-			"fajr": "04:50",
-			"dhuhr": "13:03",
-			"asr": "17:20",
-			"maghrib": "19:22",
-			"isha": "20:34"
+			"fajr": "04:51",
+			"dhuhr": "13:02",
+			"asr": "17:18",
+			"maghrib": "19:20",
+			"isha": "20:32"
 		},
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-884)",
 		"source": "MuslimsInBritain.org (with permission)",
@@ -15661,7 +15661,7 @@
 			"fajr": "06:30",
 			"dhuhr": "13:30",
 			"asr": "17:00",
-			"maghrib": "18:21",
+			"maghrib": "18:19",
 			"isha": "20:30"
 		},
 		"notes": "Capacity ~100 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB (mib-2667)",
@@ -15887,7 +15887,7 @@
 			"fajr": "06:00",
 			"dhuhr": "13:30",
 			"asr": "16:00",
-			"maghrib": "18:17",
+			"maghrib": "18:15",
 			"isha": "20:30"
 		},
 		"notes": "Capacity ~500 (MuslimsInBritain.org); Denomination: Salafi; Data: MIB+OSM (mib-1306)",
@@ -15968,7 +15968,7 @@
 			"fajr": "06:15",
 			"dhuhr": "13:30",
 			"asr": "16:30",
-			"maghrib": "18:22",
+			"maghrib": "18:20",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~700 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-1047)",
@@ -16080,7 +16080,7 @@
 			"fajr": "06:15",
 			"dhuhr": "13:30",
 			"asr": "16:45",
-			"maghrib": "18:20",
+			"maghrib": "18:18",
 			"isha": "20:15"
 		},
 		"notes": "Capacity ~500 (MuslimsInBritain.org); Data: MIB+OSM (mib-309)",
@@ -16315,7 +16315,7 @@
 			"fajr": "06:20",
 			"dhuhr": "13:15",
 			"asr": "16:00",
-			"maghrib": "18:10",
+			"maghrib": "18:08",
 			"isha": "20:15"
 		},
 		"notes": "Capacity ~310 (MuslimsInBritain.org); Denomination: Arab mainstream; Data: MIB+OSM (mib-2704)",
@@ -16542,7 +16542,7 @@
 			"fajr": "07:00",
 			"dhuhr": "13:30",
 			"asr": "16:30",
-			"maghrib": "18:22",
+			"maghrib": "18:20",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Data: MIB (mib-1824)",
@@ -16937,7 +16937,7 @@
 			"fajr": "07:00",
 			"dhuhr": "14:00",
 			"asr": "17:30",
-			"maghrib": "18:31",
+			"maghrib": "18:29",
 			"isha": "21:00"
 		},
 		"notes": "Capacity ~500 (MuslimsInBritain.org); Data: MIB+OSM (mib-800)",
@@ -17069,7 +17069,7 @@
 			"fajr": "06:45",
 			"dhuhr": "13:15",
 			"asr": "17:00",
-			"maghrib": "18:23",
+			"maghrib": "18:20",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Data: MIB (mib-1851)",
@@ -17423,7 +17423,7 @@
 			"fajr": "06:30",
 			"dhuhr": "13:30",
 			"asr": "16:00",
-			"maghrib": "18:22",
+			"maghrib": "18:20",
 			"isha": "19:48"
 		},
 		"notes": "Capacity ~150 (MuslimsInBritain.org); Data: MIB (mib-74)",
@@ -17552,11 +17552,11 @@
 		"jamaat": {
 			"source": "Sirat.uk (UK mosque directory, ODC-By 1.0)",
 			"recordedOn": "2026-10-12",
-			"fajr": "05:46",
+			"fajr": "05:47",
 			"dhuhr": "13:05",
-			"asr": "15:53",
-			"maghrib": "18:26",
-			"isha": "20:17"
+			"asr": "15:52",
+			"maghrib": "18:24",
+			"isha": "20:15"
 		},
 		"notes": "Capacity ~100 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-446)",
 		"source": "MuslimsInBritain.org (with permission)",
@@ -17604,7 +17604,7 @@
 			"fajr": "06:30",
 			"dhuhr": "13:45",
 			"asr": "16:45",
-			"maghrib": "18:22",
+			"maghrib": "18:20",
 			"isha": "20:15"
 		},
 		"notes": "Capacity ~1600 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-2136)",
@@ -17668,7 +17668,7 @@
 			"fajr": "07:00",
 			"dhuhr": "13:30",
 			"asr": "16:45",
-			"maghrib": "18:26",
+			"maghrib": "18:24",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~400 (MuslimsInBritain.org); Denomination: Sufi; Data: MIB+OSM (mib-2331)",
@@ -17894,8 +17894,8 @@
 			"recordedOn": "2026-10-12",
 			"fajr": "06:15",
 			"dhuhr": "13:30",
-			"asr": "17:00",
-			"maghrib": "18:18",
+			"asr": "16:45",
+			"maghrib": "18:16",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~450 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-2261)",
@@ -17968,7 +17968,7 @@
 			"fajr": "06:50",
 			"dhuhr": "13:30",
 			"asr": "16:50",
-			"maghrib": "18:25",
+			"maghrib": "18:22",
 			"isha": "20:10"
 		},
 		"notes": "Capacity ~200 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-355)",
@@ -18503,7 +18503,7 @@
 			"fajr": "06:15",
 			"dhuhr": "13:30",
 			"asr": "16:45",
-			"maghrib": "18:19",
+			"maghrib": "18:16",
 			"isha": "19:45"
 		},
 		"notes": "Capacity ~600 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-2659)",
@@ -18690,7 +18690,7 @@
 			"fajr": "06:30",
 			"dhuhr": "13:30",
 			"asr": "16:45",
-			"maghrib": "18:17",
+			"maghrib": "18:15",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-2533)",
@@ -18860,7 +18860,7 @@
 			"fajr": "06:45",
 			"dhuhr": "13:35",
 			"asr": "17:15",
-			"maghrib": "18:22",
+			"maghrib": "18:20",
 			"isha": "20:30"
 		},
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-1856)",
@@ -18926,10 +18926,10 @@
 		"jamaat": {
 			"source": "Sirat.uk (UK mosque directory, ODC-By 1.0)",
 			"recordedOn": "2026-10-12",
-			"fajr": "05:58",
+			"fajr": "06:00",
 			"dhuhr": "14:00",
 			"asr": "17:00",
-			"maghrib": "18:31",
+			"maghrib": "18:29",
 			"isha": "20:30"
 		},
 		"notes": "Capacity ~350 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-797)",
@@ -19076,7 +19076,7 @@
 			"fajr": "06:45",
 			"dhuhr": "14:00",
 			"asr": "16:45",
-			"maghrib": "18:24",
+			"maghrib": "18:22",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~200 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-556)",
@@ -19307,7 +19307,7 @@
 			"fajr": "06:30",
 			"dhuhr": "13:30",
 			"asr": "17:15",
-			"maghrib": "18:18",
+			"maghrib": "18:16",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~500 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-2113)",
@@ -19632,7 +19632,7 @@
 			"fajr": "06:45",
 			"dhuhr": "14:00",
 			"asr": "16:45",
-			"maghrib": "18:25",
+			"maghrib": "18:22",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~1200 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-555)",
@@ -19743,7 +19743,7 @@
 			"fajr": "06:30",
 			"dhuhr": "13:30",
 			"asr": "16:45",
-			"maghrib": "18:21",
+			"maghrib": "18:19",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~4000 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-1392)",
@@ -20723,7 +20723,7 @@
 			"fajr": "06:30",
 			"dhuhr": "14:00",
 			"asr": "17:00",
-			"maghrib": "18:20",
+			"maghrib": "18:18",
 			"isha": "20:30"
 		},
 		"notes": "Capacity ~250 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-2200)",
@@ -20829,7 +20829,7 @@
 			"fajr": "07:00",
 			"dhuhr": "14:00",
 			"asr": "17:15",
-			"maghrib": "18:19",
+			"maghrib": "18:17",
 			"isha": "20:15"
 		},
 		"notes": "Capacity ~200 (MuslimsInBritain.org); Denomination: Maududi / Jamaat-e-Islami; Data: MIB+OSM (mib-2011)",
@@ -21128,7 +21128,7 @@
 			"fajr": "06:45",
 			"dhuhr": "14:00",
 			"asr": "17:00",
-			"maghrib": "18:20",
+			"maghrib": "18:18",
 			"isha": "20:15"
 		},
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-2329)",
@@ -21200,7 +21200,7 @@
 			"fajr": "06:45",
 			"dhuhr": "13:30",
 			"asr": "16:45",
-			"maghrib": "18:25",
+			"maghrib": "18:23",
 			"isha": "20:30"
 		},
 		"notes": "Capacity ~100 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-2227)",
@@ -21631,7 +21631,7 @@
 			"fajr": "06:30",
 			"dhuhr": "13:45",
 			"asr": "17:00",
-			"maghrib": "18:25",
+			"maghrib": "18:22",
 			"isha": "20:30"
 		},
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-342)",
@@ -21964,7 +21964,7 @@
 			"fajr": "06:45",
 			"dhuhr": "14:00",
 			"asr": "17:00",
-			"maghrib": "18:22",
+			"maghrib": "18:20",
 			"isha": "20:15"
 		},
 		"notes": "Capacity ~3800 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-436)",
@@ -24122,10 +24122,10 @@
 		"jamaat": {
 			"source": "Sirat.uk (UK mosque directory, ODC-By 1.0)",
 			"recordedOn": "2026-10-12",
-			"fajr": "06:11",
+			"fajr": "06:13",
 			"dhuhr": "13:12",
-			"asr": "15:52",
-			"maghrib": "18:23",
+			"asr": "15:50",
+			"maghrib": "18:21",
 			"isha": "19:57"
 		},
 		"notes": "Capacity ~200 (MuslimsInBritain.org); Data: MIB (mib-729); Friday (Jumu'ah) prayers only",
@@ -24523,7 +24523,7 @@
 			"fajr": "06:45",
 			"dhuhr": "13:30",
 			"asr": "17:00",
-			"maghrib": "18:23",
+			"maghrib": "18:20",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~400 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-1368)",
@@ -24686,7 +24686,7 @@
 			"fajr": "06:45",
 			"dhuhr": "13:30",
 			"asr": "16:45",
-			"maghrib": "18:25",
+			"maghrib": "18:22",
 			"isha": "20:30"
 		},
 		"notes": "Capacity ~800 (MuslimsInBritain.org); Denomination: Sufi; Data: MIB+OSM (mib-1839)",
@@ -24796,7 +24796,7 @@
 			"fajr": "06:15",
 			"dhuhr": "13:30",
 			"asr": "16:45",
-			"maghrib": "18:17",
+			"maghrib": "18:15",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~150 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-2857)",
@@ -25213,11 +25213,11 @@
 		"jamaat": {
 			"source": "Sirat.uk (UK mosque directory, ODC-By 1.0)",
 			"recordedOn": "2026-10-12",
-			"fajr": "05:53",
+			"fajr": "05:55",
 			"dhuhr": "13:17",
-			"asr": "16:51",
-			"maghrib": "18:22",
-			"isha": "20:13"
+			"asr": "16:49",
+			"maghrib": "18:20",
+			"isha": "20:11"
 		},
 		"notes": "Capacity ~100 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-2773)",
 		"source": "MuslimsInBritain.org (with permission)",
@@ -25367,7 +25367,7 @@
 			"fajr": "06:45",
 			"dhuhr": "13:30",
 			"asr": "16:45",
-			"maghrib": "18:23",
+			"maghrib": "18:20",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~200 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-39)",
@@ -25542,7 +25542,7 @@
 			"fajr": "06:45",
 			"dhuhr": "13:30",
 			"asr": "16:45",
-			"maghrib": "18:19",
+			"maghrib": "18:16",
 			"isha": "20:15"
 		},
 		"notes": "Capacity ~2700 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-965)",
@@ -25598,7 +25598,7 @@
 			"fajr": "06:30",
 			"dhuhr": "13:30",
 			"asr": "16:30",
-			"maghrib": "18:23",
+			"maghrib": "18:20",
 			"isha": "20:15"
 		},
 		"notes": "Capacity ~100 (MuslimsInBritain.org); Denomination: Maududi / Jamaat-e-Islami; Data: MIB+OSM (mib-2700)",
@@ -25739,7 +25739,7 @@
 			"fajr": "06:45",
 			"dhuhr": "13:30",
 			"asr": "16:45",
-			"maghrib": "18:18",
+			"maghrib": "18:16",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~1000 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-1384)",
@@ -25929,7 +25929,7 @@
 			"fajr": "06:30",
 			"dhuhr": "14:00",
 			"asr": "16:30",
-			"maghrib": "18:26",
+			"maghrib": "18:24",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~200 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-1028)",
@@ -26003,10 +26003,10 @@
 		"jamaat": {
 			"source": "Sirat.uk (UK mosque directory, ODC-By 1.0)",
 			"recordedOn": "2026-10-12",
-			"fajr": "06:07",
+			"fajr": "06:09",
 			"dhuhr": "13:30",
 			"asr": "16:45",
-			"maghrib": "18:19",
+			"maghrib": "18:17",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~150 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-1458)",
@@ -26214,7 +26214,7 @@
 			"fajr": "06:40",
 			"dhuhr": "13:30",
 			"asr": "16:45",
-			"maghrib": "18:19",
+			"maghrib": "18:17",
 			"isha": "20:15"
 		},
 		"notes": "Capacity ~540 (MuslimsInBritain.org); Data: MIB+OSM (mib-1755)",
@@ -26651,11 +26651,11 @@
 		"jamaat": {
 			"source": "Sirat.uk (UK mosque directory, ODC-By 1.0)",
 			"recordedOn": "2026-10-12",
-			"fajr": "05:39",
+			"fajr": "05:41",
 			"dhuhr": "12:58",
-			"asr": "16:32",
-			"maghrib": "18:20",
-			"isha": "20:15"
+			"asr": "16:30",
+			"maghrib": "18:18",
+			"isha": "20:13"
 		},
 		"notes": "Capacity ~200 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-862)",
 		"source": "MuslimsInBritain.org (with permission)",
@@ -26715,7 +26715,7 @@
 			"fajr": "06:45",
 			"dhuhr": "14:00",
 			"asr": "17:15",
-			"maghrib": "18:23",
+			"maghrib": "18:21",
 			"isha": "20:30"
 		},
 		"notes": "Capacity ~500 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-2000)",
@@ -26787,7 +26787,7 @@
 			"fajr": "06:45",
 			"dhuhr": "13:30",
 			"asr": "16:45",
-			"maghrib": "18:28",
+			"maghrib": "18:26",
 			"isha": "20:15"
 		},
 		"notes": "Capacity ~520 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-2053)",
@@ -27165,7 +27165,7 @@
 			"fajr": "07:00",
 			"dhuhr": "13:45",
 			"asr": "17:00",
-			"maghrib": "18:28",
+			"maghrib": "18:26",
 			"isha": "20:10"
 		},
 		"notes": "Capacity ~200 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB (mib-574)",
@@ -27194,10 +27194,10 @@
 		"jamaat": {
 			"source": "Sirat.uk (UK mosque directory, ODC-By 1.0)",
 			"recordedOn": "2026-10-12",
-			"fajr": "06:00",
+			"fajr": "06:02",
 			"dhuhr": "13:30",
 			"asr": "16:45",
-			"maghrib": "18:23",
+			"maghrib": "18:21",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~150 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-92)",
@@ -27307,10 +27307,10 @@
 		"jamaat": {
 			"source": "Masjidbox (mosque-published timetable)",
 			"recordedOn": "2026-10-12",
-			"fajr": "05:33",
+			"fajr": "05:35",
 			"dhuhr": "13:45",
-			"asr": "16:24",
-			"maghrib": "18:24",
+			"asr": "16:22",
+			"maghrib": "18:22",
 			"isha": "20:00"
 		},
 		"notes": "Data: OSM (way/1413120285)",
@@ -27497,7 +27497,7 @@
 			"fajr": "07:00",
 			"dhuhr": "13:30",
 			"asr": "17:00",
-			"maghrib": "18:22",
+			"maghrib": "18:20",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~4000 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-483)",
@@ -28082,7 +28082,7 @@
 			"fajr": "06:45",
 			"dhuhr": "13:30",
 			"asr": "17:00",
-			"maghrib": "18:17",
+			"maghrib": "18:15",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~450 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-1285)",
@@ -28367,7 +28367,7 @@
 			"fajr": "07:00",
 			"dhuhr": "13:45",
 			"asr": "17:15",
-			"maghrib": "18:25",
+			"maghrib": "18:22",
 			"isha": "20:10"
 		},
 		"notes": "Capacity ~200 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-320)",
@@ -28620,7 +28620,7 @@
 			"fajr": "06:30",
 			"dhuhr": "14:00",
 			"asr": "17:10",
-			"maghrib": "18:21",
+			"maghrib": "18:18",
 			"isha": "20:30"
 		},
 		"notes": "Capacity ~1600 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-2199)",
@@ -28834,7 +28834,7 @@
 			"fajr": "06:30",
 			"dhuhr": "13:45",
 			"asr": "16:00",
-			"maghrib": "18:20",
+			"maghrib": "18:18",
 			"isha": "20:15"
 		},
 		"notes": "Capacity ~500 (MuslimsInBritain.org); Denomination: Salafi; Data: MIB+OSM (mib-948)",
@@ -28913,11 +28913,11 @@
 		"jamaat": {
 			"source": "Sirat.uk (UK mosque directory, ODC-By 1.0)",
 			"recordedOn": "2026-10-12",
-			"fajr": "05:32",
+			"fajr": "05:33",
 			"dhuhr": "12:50",
-			"asr": "15:41",
-			"maghrib": "18:16",
-			"isha": "20:01"
+			"asr": "15:40",
+			"maghrib": "18:14",
+			"isha": "19:59"
 		},
 		"notes": "Data: MIB+OSM (mib-524)",
 		"source": "MuslimsInBritain.org (with permission)",
@@ -28945,7 +28945,7 @@
 			"fajr": "06:45",
 			"dhuhr": "13:30",
 			"asr": "17:00",
-			"maghrib": "18:24",
+			"maghrib": "18:21",
 			"isha": "20:15"
 		},
 		"notes": "Capacity ~80 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-706)",
@@ -28974,7 +28974,7 @@
 			"fajr": "06:45",
 			"dhuhr": "13:30",
 			"asr": "16:45",
-			"maghrib": "18:23",
+			"maghrib": "18:20",
 			"isha": "20:30"
 		},
 		"notes": "Capacity ~3000 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-1864)",
@@ -29023,7 +29023,7 @@
 			"fajr": "06:30",
 			"dhuhr": "14:00",
 			"asr": "16:45",
-			"maghrib": "18:32",
+			"maghrib": "18:30",
 			"isha": "20:15"
 		},
 		"notes": "Denomination: sunni; Data: OSM (way/204657583)",
@@ -29197,11 +29197,11 @@
 		"jamaat": {
 			"source": "Sirat.uk (UK mosque directory, ODC-By 1.0)",
 			"recordedOn": "2026-10-12",
-			"fajr": "05:37",
+			"fajr": "05:39",
 			"dhuhr": "12:58",
-			"asr": "15:47",
-			"maghrib": "18:22",
-			"isha": "20:11"
+			"asr": "15:45",
+			"maghrib": "18:20",
+			"isha": "20:09"
 		},
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-249)",
 		"source": "MuslimsInBritain.org (with permission)",
@@ -29410,7 +29410,7 @@
 			"fajr": "06:45",
 			"dhuhr": "14:15",
 			"asr": "17:15",
-			"maghrib": "18:21",
+			"maghrib": "18:18",
 			"isha": "20:15"
 		},
 		"notes": "Capacity ~1000 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-868)",
@@ -29680,9 +29680,9 @@
 			"recordedOn": "2026-10-12",
 			"fajr": "06:30",
 			"dhuhr": "13:30",
-			"asr": "16:23",
-			"maghrib": "18:16",
-			"isha": "19:50"
+			"asr": "16:21",
+			"maghrib": "18:14",
+			"isha": "19:47"
 		},
 		"notes": "Capacity ~1650 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-2064)",
 		"source": "MuslimsInBritain.org (with permission)",
@@ -29714,7 +29714,7 @@
 			"fajr": "06:45",
 			"dhuhr": "14:00",
 			"asr": "17:15",
-			"maghrib": "18:21",
+			"maghrib": "18:19",
 			"isha": "20:15"
 		},
 		"notes": "Capacity ~600 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-832)",
@@ -29825,7 +29825,7 @@
 			"fajr": "06:45",
 			"dhuhr": "13:30",
 			"asr": "17:15",
-			"maghrib": "18:19",
+			"maghrib": "18:17",
 			"isha": "20:15"
 		},
 		"notes": "Capacity ~1100 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-1950)",
@@ -30129,7 +30129,7 @@
 			"fajr": "06:45",
 			"dhuhr": "13:45",
 			"asr": "17:00",
-			"maghrib": "18:25",
+			"maghrib": "18:23",
 			"isha": "20:15"
 		},
 		"notes": "Capacity ~200 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-1618)",
@@ -30265,7 +30265,7 @@
 			"fajr": "06:30",
 			"dhuhr": "13:30",
 			"asr": "17:00",
-			"maghrib": "18:18",
+			"maghrib": "18:16",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~450 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-1706)",
@@ -30418,7 +30418,7 @@
 			"fajr": "06:45",
 			"dhuhr": "13:30",
 			"asr": "16:45",
-			"maghrib": "18:19",
+			"maghrib": "18:16",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~500 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-1015)",
@@ -30511,7 +30511,7 @@
 			"fajr": "06:45",
 			"dhuhr": "13:30",
 			"asr": "16:45",
-			"maghrib": "18:20",
+			"maghrib": "18:18",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~40 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-937)",
@@ -30968,7 +30968,7 @@
 			"fajr": "06:30",
 			"dhuhr": "13:30",
 			"asr": "16:30",
-			"maghrib": "18:22",
+			"maghrib": "18:20",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~150 (MuslimsInBritain.org); Denomination: Salafi; Data: MIB (mib-875)",
@@ -30996,8 +30996,8 @@
 			"fajr": "06:00",
 			"dhuhr": "13:15",
 			"asr": "16:00",
-			"maghrib": "18:20",
-			"isha": "19:44"
+			"maghrib": "18:18",
+			"isha": "19:42"
 		},
 		"notes": "Capacity ~200 (MuslimsInBritain.org); Denomination: Salafi; Data: MIB+OSM (mib-1138)",
 		"source": "MuslimsInBritain.org (with permission)",
@@ -31121,7 +31121,7 @@
 			"fajr": "07:00",
 			"dhuhr": "13:30",
 			"asr": "17:00",
-			"maghrib": "18:20",
+			"maghrib": "18:18",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-15032802)",
@@ -31436,7 +31436,7 @@
 			"fajr": "06:00",
 			"dhuhr": "13:30",
 			"asr": "16:00",
-			"maghrib": "18:19",
+			"maghrib": "18:17",
 			"isha": "20:15"
 		},
 		"notes": "Capacity ~100 (MuslimsInBritain.org); Denomination: Salafi; Data: MIB+OSM (mib-1637)",
@@ -31535,7 +31535,7 @@
 			"fajr": "06:00",
 			"dhuhr": "13:30",
 			"asr": "16:00",
-			"maghrib": "18:23",
+			"maghrib": "18:21",
 			"isha": "20:15"
 		},
 		"notes": "Capacity ~1000 (MuslimsInBritain.org); Data: MIB+OSM (mib-973)",
@@ -31692,11 +31692,11 @@
 		"jamaat": {
 			"source": "Sirat.uk (UK mosque directory, ODC-By 1.0)",
 			"recordedOn": "2026-10-12",
-			"fajr": "05:41",
+			"fajr": "05:42",
 			"dhuhr": "13:01",
-			"asr": "15:48",
-			"maghrib": "18:21",
-			"isha": "20:13"
+			"asr": "15:46",
+			"maghrib": "18:19",
+			"isha": "20:11"
 		},
 		"notes": "Capacity ~50 (MuslimsInBritain.org); Denomination: Salafi; Data: MIB+OSM (mib-15032903)",
 		"source": "MuslimsInBritain.org (with permission)",
@@ -32066,7 +32066,7 @@
 			"fajr": "06:30",
 			"dhuhr": "13:30",
 			"asr": "16:15",
-			"maghrib": "18:19",
+			"maghrib": "18:17",
 			"isha": "20:15"
 		},
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Denomination: Salafi; Data: MIB+OSM (mib-109)",
@@ -32129,7 +32129,7 @@
 			"fajr": "06:15",
 			"dhuhr": "13:30",
 			"asr": "15:45",
-			"maghrib": "18:16",
+			"maghrib": "18:14",
 			"isha": "20:30"
 		},
 		"notes": "Capacity ~500 (MuslimsInBritain.org); Denomination: Salafi; Data: MIB+OSM (mib-142)",
@@ -32182,7 +32182,7 @@
 			"fajr": "06:15",
 			"dhuhr": "13:30",
 			"asr": "16:00",
-			"maghrib": "18:19",
+			"maghrib": "18:16",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~500 (MuslimsInBritain.org); Denomination: Salafi; Data: MIB+OSM (mib-15042701)",
@@ -32306,7 +32306,7 @@
 			"fajr": "06:00",
 			"dhuhr": "14:00",
 			"asr": "16:30",
-			"maghrib": "18:08",
+			"maghrib": "18:06",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~150 (MuslimsInBritain.org); Data: MIB+OSM (mib-814)",
@@ -32387,7 +32387,7 @@
 			"fajr": "06:30",
 			"dhuhr": "13:30",
 			"asr": "16:45",
-			"maghrib": "18:21",
+			"maghrib": "18:19",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Denomination: Maududi / Jamaat-e-Islami; Data: MIB+OSM (mib-1169)",
@@ -32437,7 +32437,7 @@
 			"fajr": "07:00",
 			"dhuhr": "13:30",
 			"asr": "16:40",
-			"maghrib": "18:19",
+			"maghrib": "18:17",
 			"isha": "20:05"
 		},
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-247)",
@@ -33064,7 +33064,7 @@
 			"fajr": "06:45",
 			"dhuhr": "14:15",
 			"asr": "17:00",
-			"maghrib": "18:22",
+			"maghrib": "18:20",
 			"isha": "20:15"
 		},
 		"notes": "Capacity ~1480 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-164)",
@@ -33439,8 +33439,8 @@
 			"fajr": "07:00",
 			"dhuhr": "13:45",
 			"asr": "16:45",
-			"maghrib": "18:25",
-			"isha": "20:30"
+			"maghrib": "18:22",
+			"isha": "20:15"
 		},
 		"notes": "Capacity ~250 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-1043)",
 		"source": "MuslimsInBritain.org (with permission)",
@@ -33612,7 +33612,7 @@
 			"fajr": "07:00",
 			"dhuhr": "13:30",
 			"asr": "16:40",
-			"maghrib": "18:25",
+			"maghrib": "18:22",
 			"isha": "20:10"
 		},
 		"notes": "Capacity ~1500 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-314)",
@@ -33664,7 +33664,7 @@
 			"fajr": "06:50",
 			"dhuhr": "13:30",
 			"asr": "16:45",
-			"maghrib": "18:19",
+			"maghrib": "18:17",
 			"isha": "19:50"
 		},
 		"notes": "Capacity ~2000 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-1146)",
@@ -33697,7 +33697,7 @@
 			"fajr": "06:00",
 			"dhuhr": "13:30",
 			"asr": "16:45",
-			"maghrib": "18:17",
+			"maghrib": "18:15",
 			"isha": "20:30"
 		},
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB (mib-1303)",
@@ -33870,10 +33870,10 @@
 			"source": "Sirat.uk (UK mosque directory, ODC-By 1.0)",
 			"recordedOn": "2026-10-12",
 			"fajr": "07:00",
-			"dhuhr": "13:45",
-			"asr": "17:30",
-			"maghrib": "18:27",
-			"isha": "20:10"
+			"dhuhr": "13:35",
+			"asr": "17:15",
+			"maghrib": "18:24",
+			"isha": "20:05"
 		},
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-2093)",
 		"source": "MuslimsInBritain.org (with permission)",
@@ -34413,7 +34413,7 @@
 			"fajr": "06:30",
 			"dhuhr": "13:30",
 			"asr": "16:45",
-			"maghrib": "18:22",
+			"maghrib": "18:20",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-1634)",
@@ -34760,11 +34760,11 @@
 		"jamaat": {
 			"source": "Sirat.uk (UK mosque directory, ODC-By 1.0)",
 			"recordedOn": "2026-10-12",
-			"fajr": "05:31",
+			"fajr": "05:33",
 			"dhuhr": "12:50",
-			"asr": "15:42",
-			"maghrib": "18:17",
-			"isha": "20:01"
+			"asr": "15:40",
+			"maghrib": "18:15",
+			"isha": "19:59"
 		},
 		"notes": "Capacity ~550 (MuslimsInBritain.org); Denomination: Salafi; Data: MIB+OSM (mib-1251)",
 		"source": "MuslimsInBritain.org (with permission)",
@@ -34849,7 +34849,7 @@
 			"fajr": "06:30",
 			"dhuhr": "13:30",
 			"asr": "16:45",
-			"maghrib": "18:17",
+			"maghrib": "18:15",
 			"isha": "20:15"
 		},
 		"notes": "Capacity ~650 (MuslimsInBritain.org); Denomination: Maududi / Jamaat-e-Islami; Data: MIB+OSM (mib-1273)",
@@ -35066,7 +35066,7 @@
 			"fajr": "06:45",
 			"dhuhr": "13:30",
 			"asr": "16:30",
-			"maghrib": "18:15",
+			"maghrib": "18:13",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~500 (MuslimsInBritain.org); Denomination: Maududi / Jamaat-e-Islami; Data: MIB+OSM (mib-2062)",
@@ -35475,7 +35475,7 @@
 			"fajr": "07:05",
 			"dhuhr": "14:00",
 			"asr": "16:50",
-			"maghrib": "18:21",
+			"maghrib": "18:18",
 			"isha": "20:05"
 		},
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-17080603)",
@@ -35603,7 +35603,7 @@
 			"fajr": "07:00",
 			"dhuhr": "13:30",
 			"asr": "16:50",
-			"maghrib": "18:24",
+			"maghrib": "18:21",
 			"isha": "20:30"
 		},
 		"notes": "Capacity ~700 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-401)",
@@ -35756,7 +35756,7 @@
 			"fajr": "06:45",
 			"dhuhr": "13:45",
 			"asr": "17:00",
-			"maghrib": "18:21",
+			"maghrib": "18:19",
 			"isha": "20:15"
 		},
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-160)",
@@ -36081,7 +36081,7 @@
 			"fajr": "06:50",
 			"dhuhr": "13:45",
 			"asr": "16:45",
-			"maghrib": "18:25",
+			"maghrib": "18:22",
 			"isha": "20:10"
 		},
 		"notes": "Capacity ~2500 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-317)",
@@ -36213,7 +36213,7 @@
 			"fajr": "06:30",
 			"dhuhr": "13:30",
 			"asr": "16:45",
-			"maghrib": "18:14",
+			"maghrib": "18:12",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~100 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-602)",
@@ -36285,11 +36285,11 @@
 		"jamaat": {
 			"source": "Sirat.uk (UK mosque directory, ODC-By 1.0)",
 			"recordedOn": "2026-10-12",
-			"fajr": "05:45",
+			"fajr": "05:47",
 			"dhuhr": "12:52",
-			"asr": "15:38",
-			"maghrib": "18:18",
-			"isha": "19:39"
+			"asr": "15:37",
+			"maghrib": "18:15",
+			"isha": "19:38"
 		},
 		"notes": "Capacity ~1200 (MuslimsInBritain.org); Denomination: Arab mainstream; Data: MIB+OSM (mib-1247)",
 		"source": "MuslimsInBritain.org (with permission)",
@@ -36380,7 +36380,7 @@
 			"fajr": "07:00",
 			"dhuhr": "13:30",
 			"asr": "17:00",
-			"maghrib": "18:19",
+			"maghrib": "18:17",
 			"isha": "20:15"
 		},
 		"notes": "Capacity ~1200 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-974)",
@@ -36432,7 +36432,7 @@
 			"fajr": "06:00",
 			"dhuhr": "13:30",
 			"asr": "16:00",
-			"maghrib": "18:27",
+			"maghrib": "18:25",
 			"isha": "20:45"
 		},
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Denomination: Salafi; Data: MIB+OSM (mib-2248)",
@@ -36529,7 +36529,7 @@
 			"fajr": "07:00",
 			"dhuhr": "13:45",
 			"asr": "16:30",
-			"maghrib": "18:24",
+			"maghrib": "18:21",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-113)",
@@ -36669,7 +36669,7 @@
 			"fajr": "06:45",
 			"dhuhr": "13:30",
 			"asr": "16:30",
-			"maghrib": "18:20",
+			"maghrib": "18:18",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~210 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-2326)",
@@ -36793,11 +36793,11 @@
 		"jamaat": {
 			"source": "Sirat.uk (UK mosque directory, ODC-By 1.0)",
 			"recordedOn": "2026-10-12",
-			"fajr": "05:21",
-			"dhuhr": "13:02",
-			"asr": "16:27",
-			"maghrib": "19:25",
-			"isha": "20:42"
+			"fajr": "05:22",
+			"dhuhr": "13:01",
+			"asr": "16:26",
+			"maghrib": "19:22",
+			"isha": "20:39"
 		},
 		"notes": "Capacity ~730 (MuslimsInBritain.org); Denomination: Arab mainstream; Data: MIB+OSM (mib-1425)",
 		"source": "MuslimsInBritain.org (with permission)",
@@ -36914,7 +36914,7 @@
 			"fajr": "06:45",
 			"dhuhr": "14:00",
 			"asr": "16:45",
-			"maghrib": "18:17",
+			"maghrib": "18:15",
 			"isha": "20:15"
 		},
 		"notes": "Capacity ~550 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-1968)",
@@ -37004,7 +37004,7 @@
 			"fajr": "06:30",
 			"dhuhr": "13:30",
 			"asr": "16:30",
-			"maghrib": "18:18",
+			"maghrib": "18:15",
 			"isha": "20:15"
 		},
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Denomination: Sufi; Data: MIB+OSM (mib-2834)",
@@ -37275,7 +37275,7 @@
 			"fajr": "06:15",
 			"dhuhr": "13:15",
 			"asr": "16:45",
-			"maghrib": "18:16",
+			"maghrib": "18:14",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-496)",
@@ -37445,7 +37445,7 @@
 			"fajr": "06:30",
 			"dhuhr": "13:30",
 			"asr": "16:15",
-			"maghrib": "18:32",
+			"maghrib": "18:30",
 			"isha": "20:15"
 		},
 		"notes": "Capacity ~700 (MuslimsInBritain.org); Data: MIB+OSM (mib-763)",
@@ -37614,11 +37614,11 @@
 		"jamaat": {
 			"source": "Sirat.uk (UK mosque directory, ODC-By 1.0)",
 			"recordedOn": "2026-10-12",
-			"fajr": "05:31",
+			"fajr": "05:33",
 			"dhuhr": "12:50",
-			"asr": "15:42",
-			"maghrib": "18:17",
-			"isha": "20:01"
+			"asr": "15:40",
+			"maghrib": "18:15",
+			"isha": "19:59"
 		},
 		"notes": "Capacity ~750 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-55)",
 		"source": "MuslimsInBritain.org (with permission)",
@@ -37770,7 +37770,7 @@
 			"fajr": "06:45",
 			"dhuhr": "13:30",
 			"asr": "16:30",
-			"maghrib": "18:15",
+			"maghrib": "18:13",
 			"isha": "20:15"
 		},
 		"notes": "Capacity ~1400 (MuslimsInBritain.org); Denomination: Salafi; Data: MIB+OSM (mib-429)",
@@ -38729,7 +38729,7 @@
 			"fajr": "06:40",
 			"dhuhr": "13:30",
 			"asr": "17:00",
-			"maghrib": "18:20",
+			"maghrib": "18:18",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~500 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-1389)",
@@ -38761,7 +38761,7 @@
 			"fajr": "06:15",
 			"dhuhr": "13:30",
 			"asr": "16:30",
-			"maghrib": "18:17",
+			"maghrib": "18:15",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~280 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-1335)",
@@ -39265,11 +39265,11 @@
 		"jamaat": {
 			"source": "Sirat.uk (UK mosque directory, ODC-By 1.0)",
 			"recordedOn": "2026-10-12",
-			"fajr": "06:15",
+			"fajr": "06:30",
 			"dhuhr": "13:30",
-			"asr": "16:00",
-			"maghrib": "18:23",
-			"isha": "20:15"
+			"asr": "15:45",
+			"maghrib": "18:21",
+			"isha": "20:00"
 		},
 		"notes": "Capacity ~830 (MuslimsInBritain.org); Denomination: Arab mainstream; Data: MIB+OSM (mib-1423)",
 		"source": "MuslimsInBritain.org (with permission)",
@@ -39534,11 +39534,11 @@
 		"jamaat": {
 			"source": "Sirat.uk (UK mosque directory, ODC-By 1.0)",
 			"recordedOn": "2026-10-12",
-			"fajr": "06:43",
+			"fajr": "06:44",
 			"dhuhr": "13:45",
 			"asr": "18:30",
-			"maghrib": "18:33",
-			"isha": "20:18"
+			"maghrib": "18:31",
+			"isha": "20:16"
 		},
 		"notes": "Capacity ~200 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-1360)",
 		"source": "MuslimsInBritain.org (with permission)",
@@ -39589,7 +39589,7 @@
 			"fajr": "06:45",
 			"dhuhr": "13:45",
 			"asr": "16:50",
-			"maghrib": "18:26",
+			"maghrib": "18:23",
 			"isha": "20:15"
 		},
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-727)",
@@ -39663,11 +39663,11 @@
 		"jamaat": {
 			"source": "Sirat.uk (UK mosque directory, ODC-By 1.0)",
 			"recordedOn": "2026-10-12",
-			"fajr": "06:28",
+			"fajr": "06:30",
 			"dhuhr": "13:47",
-			"asr": "16:40",
-			"maghrib": "19:14",
-			"isha": "20:58"
+			"asr": "16:38",
+			"maghrib": "19:12",
+			"isha": "20:56"
 		},
 		"notes": "Capacity ~200 (MuslimsInBritain.org); Denomination: Maududi / Jamaat-e-Islami; Data: MIB (mib-630)",
 		"source": "MuslimsInBritain.org (with permission)",
@@ -39734,7 +39734,7 @@
 			"fajr": "06:45",
 			"dhuhr": "13:30",
 			"asr": "16:45",
-			"maghrib": "18:15",
+			"maghrib": "18:13",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~50 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-1681)",
@@ -39763,7 +39763,7 @@
 			"fajr": "06:15",
 			"dhuhr": "13:30",
 			"asr": "17:00",
-			"maghrib": "18:21",
+			"maghrib": "18:19",
 			"isha": "20:30"
 		},
 		"notes": "Capacity ~200 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-2715)",
@@ -39839,11 +39839,11 @@
 		"jamaat": {
 			"source": "Sirat.uk (UK mosque directory, ODC-By 1.0)",
 			"recordedOn": "2026-10-12",
-			"fajr": "06:18",
+			"fajr": "06:19",
 			"dhuhr": "13:30",
-			"asr": "15:46",
-			"maghrib": "18:26",
-			"isha": "19:51"
+			"asr": "15:44",
+			"maghrib": "18:24",
+			"isha": "19:49"
 		},
 		"notes": "Capacity ~350 (MuslimsInBritain.org); Denomination: Salafi; Data: MIB+OSM (mib-1926)",
 		"source": "MuslimsInBritain.org (with permission)",
@@ -39921,7 +39921,7 @@
 			"fajr": "06:30",
 			"dhuhr": "13:30",
 			"asr": "16:45",
-			"maghrib": "18:16",
+			"maghrib": "18:13",
 			"isha": "19:50"
 		},
 		"notes": "Capacity ~200 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-1717)",
@@ -40171,7 +40171,7 @@
 			"fajr": "07:00",
 			"dhuhr": "13:45",
 			"asr": "16:45",
-			"maghrib": "18:22",
+			"maghrib": "18:19",
 			"isha": "19:45"
 		},
 		"notes": "Capacity ~1000 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-480)",
@@ -40235,7 +40235,7 @@
 			"fajr": "06:30",
 			"dhuhr": "13:30",
 			"asr": "17:15",
-			"maghrib": "18:19",
+			"maghrib": "18:17",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~900 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-1390)",
@@ -40320,7 +40320,7 @@
 			"fajr": "06:15",
 			"dhuhr": "13:30",
 			"asr": "16:15",
-			"maghrib": "18:24",
+			"maghrib": "18:22",
 			"isha": "21:00"
 		},
 		"notes": "Capacity ~200 (MuslimsInBritain.org); Denomination: Salafi; Data: MIB (mib-2812)",
@@ -40571,7 +40571,7 @@
 			"fajr": "06:15",
 			"dhuhr": "13:15",
 			"asr": "15:45",
-			"maghrib": "18:12",
+			"maghrib": "18:09",
 			"isha": "19:45"
 		},
 		"notes": "Capacity ~250 (MuslimsInBritain.org); Denomination: Salafi; Data: MIB+OSM (mib-267)",
@@ -40765,7 +40765,7 @@
 			"fajr": "06:45",
 			"dhuhr": "13:45",
 			"asr": "17:00",
-			"maghrib": "18:19",
+			"maghrib": "18:17",
 			"isha": "20:45"
 		},
 		"notes": "Capacity ~2500 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-1970)",
@@ -40897,7 +40897,7 @@
 			"fajr": "06:30",
 			"dhuhr": "13:45",
 			"asr": "16:45",
-			"maghrib": "18:21",
+			"maghrib": "18:18",
 			"isha": "20:15"
 		},
 		"notes": "Capacity ~2000 (MuslimsInBritain.org); Data: MIB+OSM (mib-2003)",
@@ -40968,7 +40968,7 @@
 			"fajr": "06:30",
 			"dhuhr": "13:45",
 			"asr": "16:45",
-			"maghrib": "18:27",
+			"maghrib": "18:24",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~400 (MuslimsInBritain.org); Denomination: Maududi / Jamaat-e-Islami; Data: MIB+OSM (mib-316)",
@@ -41027,11 +41027,11 @@
 		"jamaat": {
 			"source": "Sirat.uk (UK mosque directory, ODC-By 1.0)",
 			"recordedOn": "2026-10-12",
-			"fajr": "05:42",
+			"fajr": "05:44",
 			"dhuhr": "13:01",
-			"asr": "15:50",
-			"maghrib": "18:23",
-			"isha": "20:13"
+			"asr": "15:49",
+			"maghrib": "18:21",
+			"isha": "20:11"
 		},
 		"notes": "Capacity ~1250 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-2051)",
 		"source": "MuslimsInBritain.org (with permission)",
@@ -41087,7 +41087,7 @@
 			"fajr": "06:45",
 			"dhuhr": "13:45",
 			"asr": "16:30",
-			"maghrib": "18:22",
+			"maghrib": "18:20",
 			"isha": "19:45"
 		},
 		"notes": "Capacity ~700 (MuslimsInBritain.org); Denomination: Maududi / Jamaat-e-Islami; Data: MIB (mib-244)",
@@ -41509,7 +41509,7 @@
 			"fajr": "06:45",
 			"dhuhr": "13:30",
 			"asr": "16:45",
-			"maghrib": "18:23",
+			"maghrib": "18:21",
 			"isha": "20:30"
 		},
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-2073)",
@@ -42735,7 +42735,7 @@
 			"fajr": "06:30",
 			"dhuhr": "13:30",
 			"asr": "16:40",
-			"maghrib": "18:18",
+			"maghrib": "18:16",
 			"isha": "20:15"
 		},
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Data: MIB (mib-374)",
@@ -42767,7 +42767,7 @@
 			"fajr": "06:30",
 			"dhuhr": "13:30",
 			"asr": "16:45",
-			"maghrib": "18:18",
+			"maghrib": "18:16",
 			"isha": "20:15"
 		},
 		"notes": "Capacity ~20 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-1213)",
@@ -42815,7 +42815,7 @@
 			"fajr": "06:45",
 			"dhuhr": "13:30",
 			"asr": "17:15",
-			"maghrib": "18:21",
+			"maghrib": "18:19",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~200 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-134)",
@@ -43694,7 +43694,7 @@
 			"fajr": "06:15",
 			"dhuhr": "13:30",
 			"asr": "16:00",
-			"maghrib": "18:23",
+			"maghrib": "18:20",
 			"isha": "19:45"
 		},
 		"notes": "Capacity ~120 (MuslimsInBritain.org); Data: MIB+OSM (mib-15042503)",
@@ -43975,7 +43975,7 @@
 			"fajr": "06:30",
 			"dhuhr": "13:30",
 			"asr": "17:00",
-			"maghrib": "18:26",
+			"maghrib": "18:23",
 			"isha": "20:45"
 		},
 		"notes": "Capacity ~90 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-45)",
@@ -44073,7 +44073,7 @@
 			"fajr": "06:30",
 			"dhuhr": "13:30",
 			"asr": "17:00",
-			"maghrib": "18:18",
+			"maghrib": "18:16",
 			"isha": "20:20"
 		},
 		"notes": "Capacity ~600 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-1313)",
@@ -44165,7 +44165,7 @@
 			"fajr": "06:30",
 			"dhuhr": "13:30",
 			"asr": "16:45",
-			"maghrib": "18:21",
+			"maghrib": "18:19",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~1700 (MuslimsInBritain.org); Denomination: Sufi; Data: MIB (mib-1373)",
@@ -44270,7 +44270,7 @@
 			"fajr": "06:15",
 			"dhuhr": "13:30",
 			"asr": "16:45",
-			"maghrib": "18:16",
+			"maghrib": "18:14",
 			"isha": "20:30"
 		},
 		"notes": "Capacity ~260 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-2692)",
@@ -44322,7 +44322,7 @@
 			"fajr": "06:45",
 			"dhuhr": "14:00",
 			"asr": "16:45",
-			"maghrib": "18:20",
+			"maghrib": "18:18",
 			"isha": "20:15"
 		},
 		"notes": "Capacity ~500 (MuslimsInBritain.org); Denomination: Sufi; Data: MIB (mib-224)",
@@ -44574,7 +44574,7 @@
 			"fajr": "06:45",
 			"dhuhr": "13:45",
 			"asr": "17:00",
-			"maghrib": "18:27",
+			"maghrib": "18:25",
 			"isha": "20:15"
 		},
 		"notes": "Capacity ~270 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-2253)",
@@ -44694,8 +44694,8 @@
 			"recordedOn": "2026-10-12",
 			"fajr": "06:30",
 			"dhuhr": "13:30",
-			"asr": "16:22",
-			"maghrib": "18:21",
+			"asr": "16:20",
+			"maghrib": "18:18",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~600 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-1301)",
@@ -44910,10 +44910,10 @@
 		"jamaat": {
 			"source": "Masjidbox (mosque-published timetable)",
 			"recordedOn": "2026-10-12",
-			"fajr": "06:05",
+			"fajr": "06:07",
 			"dhuhr": "13:30",
 			"asr": "16:45",
-			"maghrib": "18:23",
+			"maghrib": "18:21",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-1153)",
@@ -45423,7 +45423,7 @@
 			"fajr": "06:40",
 			"dhuhr": "13:30",
 			"asr": "16:45",
-			"maghrib": "18:18",
+			"maghrib": "18:16",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~450 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-1370)",
@@ -45679,11 +45679,11 @@
 		"jamaat": {
 			"source": "Sirat.uk (UK mosque directory, ODC-By 1.0)",
 			"recordedOn": "2026-10-12",
-			"fajr": "04:04",
+			"fajr": "04:01",
 			"dhuhr": "13:09",
-			"asr": "16:55",
-			"maghrib": "20:02",
-			"isha": "22:04"
+			"asr": "16:56",
+			"maghrib": "20:04",
+			"isha": "22:07"
 		},
 		"notes": "Capacity ~200 (MuslimsInBritain.org); Denomination: Arab mainstream; Data: MIB (mib-2966)",
 		"source": "MuslimsInBritain.org (with permission)",
@@ -45796,7 +45796,7 @@
 			"fajr": "06:40",
 			"dhuhr": "13:30",
 			"asr": "16:30",
-			"maghrib": "18:18",
+			"maghrib": "18:16",
 			"isha": "19:45"
 		},
 		"notes": "Data: OSM (way/616755825)",
@@ -45958,7 +45958,7 @@
 			"fajr": "06:45",
 			"dhuhr": "13:30",
 			"asr": "16:45",
-			"maghrib": "18:22",
+			"maghrib": "18:20",
 			"isha": "20:30"
 		},
 		"notes": "Capacity ~1200 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-2247)",
@@ -46189,7 +46189,7 @@
 			"fajr": "06:50",
 			"dhuhr": "13:30",
 			"asr": "16:45",
-			"maghrib": "18:16",
+			"maghrib": "18:14",
 			"isha": "20:15"
 		},
 		"notes": "Capacity ~550 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-2262)",
@@ -46219,7 +46219,7 @@
 			"fajr": "06:30",
 			"dhuhr": "13:30",
 			"asr": "16:45",
-			"maghrib": "18:20",
+			"maghrib": "18:17",
 			"isha": "20:15"
 		},
 		"notes": "Capacity ~60 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-2267)",
@@ -46247,7 +46247,7 @@
 			"fajr": "06:30",
 			"dhuhr": "13:30",
 			"asr": "16:45",
-			"maghrib": "18:18",
+			"maghrib": "18:16",
 			"isha": "20:15"
 		},
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Data: MIB (mib-1747)",
@@ -46954,7 +46954,7 @@
 			"fajr": "06:45",
 			"dhuhr": "13:30",
 			"asr": "17:00",
-			"maghrib": "18:19",
+			"maghrib": "18:17",
 			"isha": "20:15"
 		},
 		"notes": "Capacity ~400 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-979)",
@@ -47133,7 +47133,7 @@
 			"fajr": "06:45",
 			"dhuhr": "13:30",
 			"asr": "17:00",
-			"maghrib": "18:22",
+			"maghrib": "18:19",
 			"isha": "20:30"
 		},
 		"notes": "Capacity ~900 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-432)",
@@ -48383,7 +48383,7 @@
 			"fajr": "06:45",
 			"dhuhr": "13:30",
 			"asr": "16:00",
-			"maghrib": "18:29",
+			"maghrib": "18:27",
 			"isha": "19:49"
 		},
 		"notes": "Capacity ~600 (MuslimsInBritain.org); Denomination: Maududi / Jamaat-e-Islami; Data: MIB+OSM (mib-594)",
@@ -48435,7 +48435,7 @@
 			"fajr": "06:45",
 			"dhuhr": "13:30",
 			"asr": "16:50",
-			"maghrib": "18:26",
+			"maghrib": "18:24",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~550 (MuslimsInBritain.org); Denomination: Maududi / Jamaat-e-Islami; Data: MIB (mib-2405)",
@@ -48504,7 +48504,7 @@
 			"fajr": "06:30",
 			"dhuhr": "14:00",
 			"asr": "17:00",
-			"maghrib": "18:27",
+			"maghrib": "18:25",
 			"isha": "20:40"
 		},
 		"notes": "Capacity ~1150 (MuslimsInBritain.org); Denomination: Maududi / Jamaat-e-Islami; Data: MIB+OSM (mib-1804)",
@@ -48562,7 +48562,7 @@
 			"fajr": "06:00",
 			"dhuhr": "13:45",
 			"asr": "16:45",
-			"maghrib": "18:19",
+			"maghrib": "18:16",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~350 (MuslimsInBritain.org); Denomination: Maududi / Jamaat-e-Islami; Data: MIB (mib-2423)",
@@ -48588,11 +48588,11 @@
 		"jamaat": {
 			"source": "Sirat.uk (UK mosque directory, ODC-By 1.0)",
 			"recordedOn": "2026-10-12",
-			"fajr": "04:55",
-			"dhuhr": "11:56",
-			"asr": "14:45",
-			"maghrib": "17:22",
-			"isha": "18:55"
+			"fajr": "04:57",
+			"dhuhr": "11:55",
+			"asr": "14:43",
+			"maghrib": "17:19",
+			"isha": "18:53"
 		},
 		"notes": "Capacity ~200 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-1464)",
 		"source": "MuslimsInBritain.org (with permission)",
@@ -48728,10 +48728,10 @@
 		"jamaat": {
 			"source": "Sirat.uk (UK mosque directory, ODC-By 1.0)",
 			"recordedOn": "2026-10-12",
-			"fajr": "06:08",
+			"fajr": "06:10",
 			"dhuhr": "13:30",
 			"asr": "16:00",
-			"maghrib": "18:21",
+			"maghrib": "18:19",
 			"isha": "19:30"
 		},
 		"notes": "Capacity ~380 (MuslimsInBritain.org); Denomination: Salafi; Data: MIB (mib-1785)",
@@ -49466,7 +49466,7 @@
 			"fajr": "06:30",
 			"dhuhr": "13:30",
 			"asr": "16:45",
-			"maghrib": "18:21",
+			"maghrib": "18:19",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~250 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-17080304)",
@@ -49627,7 +49627,7 @@
 			"fajr": "06:30",
 			"dhuhr": "13:30",
 			"asr": "16:45",
-			"maghrib": "18:17",
+			"maghrib": "18:15",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~2200 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB+OSM (mib-1063)",
@@ -49804,7 +49804,7 @@
 			"fajr": "06:30",
 			"dhuhr": "13:30",
 			"asr": "16:30",
-			"maghrib": "18:17",
+			"maghrib": "18:15",
 			"isha": "19:45"
 		},
 		"notes": "Capacity ~60 (MuslimsInBritain.org); Denomination: Salafi; Data: MIB+OSM (mib-1444)",
@@ -49837,7 +49837,7 @@
 			"fajr": "07:00",
 			"dhuhr": "13:30",
 			"asr": "16:00",
-			"maghrib": "18:30",
+			"maghrib": "18:28",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~80 (MuslimsInBritain.org); Denomination: Salafi; Data: MIB (mib-500)",
@@ -49919,7 +49919,7 @@
 			"fajr": "06:30",
 			"dhuhr": "13:45",
 			"asr": "17:00",
-			"maghrib": "18:26",
+			"maghrib": "18:24",
 			"isha": "20:15"
 		},
 		"notes": "Denomination: Deobandi; Data: MIB (mib-578)",
@@ -50088,7 +50088,7 @@
 			"fajr": "06:15",
 			"dhuhr": "13:30",
 			"asr": "16:50",
-			"maghrib": "18:24",
+			"maghrib": "18:22",
 			"isha": "20:00"
 		},
 		"notes": "Denomination: sunni; Data: OSM (way/227651356)",
@@ -50479,7 +50479,7 @@
 			"fajr": "06:15",
 			"dhuhr": "13:30",
 			"asr": "17:00",
-			"maghrib": "18:19",
+			"maghrib": "18:17",
 			"isha": "20:15"
 		},
 		"notes": "Capacity ~220 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-2421)",
@@ -50606,11 +50606,11 @@
 		"jamaat": {
 			"source": "Sirat.uk (UK mosque directory, ODC-By 1.0)",
 			"recordedOn": "2026-10-12",
-			"fajr": "05:45",
+			"fajr": "05:47",
 			"dhuhr": "13:07",
-			"asr": "15:52",
-			"maghrib": "18:26",
-			"isha": "20:21"
+			"asr": "15:50",
+			"maghrib": "18:24",
+			"isha": "20:18"
 		},
 		"notes": "Capacity ~300 (MuslimsInBritain.org); Denomination: Deobandi; Data: MIB (mib-1312)",
 		"source": "MuslimsInBritain.org (with permission)",
