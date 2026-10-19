@@ -13045,11 +13045,11 @@
 		},
 		"jamaat": {
 			"source": "goldenmosque.org (published timetable)",
-			"recordedOn": "2026-10-18",
+			"recordedOn": "2026-10-19",
 			"fajr": "07:00",
 			"dhuhr": "14:00",
 			"asr": "16:45",
-			"maghrib": "18:08",
+			"maghrib": "18:05",
 			"isha": "20:00"
 		},
 		"notes": "Capacity ~400 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-2126)",
@@ -30414,11 +30414,11 @@
 		},
 		"jamaat": {
 			"source": "owma.org.uk (published timetable)",
-			"recordedOn": "2026-10-18",
+			"recordedOn": "2026-10-19",
 			"fajr": "06:45",
 			"dhuhr": "13:30",
 			"asr": "16:30",
-			"maghrib": "18:05",
+			"maghrib": "18:03",
 			"isha": "19:45"
 		},
 		"notes": "Capacity ~500 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-1015)",
@@ -36458,11 +36458,11 @@
 		},
 		"jamaat": {
 			"source": "masjid-us-sunnah.com (published timetable)",
-			"recordedOn": "2026-10-18",
+			"recordedOn": "2026-10-19",
 			"fajr": "06:30",
 			"dhuhr": "13:30",
 			"asr": "15:45",
-			"maghrib": "18:11",
+			"maghrib": "18:09",
 			"isha": "19:45"
 		},
 		"notes": "Capacity ~100 (MuslimsInBritain.org); Denomination: Maududi / Jamaat-e-Islami; Data: MIB+OSM (mib-1011)",
@@ -40964,11 +40964,11 @@
 		},
 		"jamaat": {
 			"source": "westwoodmosque.org (published timetable)",
-			"recordedOn": "2026-10-18",
+			"recordedOn": "2026-10-19",
 			"fajr": "06:30",
 			"dhuhr": "13:45",
 			"asr": "16:30",
-			"maghrib": "18:13",
+			"maghrib": "18:11",
 			"isha": "19:45"
 		},
 		"notes": "Capacity ~400 (MuslimsInBritain.org); Denomination: Maududi / Jamaat-e-Islami; Data: MIB+OSM (mib-316)",
@@ -44466,12 +44466,12 @@
 		},
 		"jamaat": {
 			"source": "shahjalaljamemasjid.com (published timetable)",
-			"recordedOn": "2026-10-18",
-			"fajr": "06:15",
+			"recordedOn": "2026-10-19",
+			"fajr": "06:30",
 			"dhuhr": "13:30",
-			"asr": "16:45",
-			"maghrib": "18:07",
-			"isha": "20:00"
+			"asr": "16:30",
+			"maghrib": "18:05",
+			"isha": "19:45"
 		},
 		"notes": "Capacity ~200 (MuslimsInBritain.org); Denomination: Barelvi; Data: MIB+OSM (mib-1100)",
 		"source": "MuslimsInBritain.org (with permission)",
