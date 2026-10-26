@@ -30096,7 +30096,7 @@
 			"source": "masjidabubakr.co.uk (published timetable)",
 			"recordedOn": "2026-10-26",
 			"fajr": "06:00",
-			"dhuhr": "13:30",
+			"dhuhr": "13:00",
 			"asr": "15:15",
 			"maghrib": "16:49",
 			"isha": "19:30"
@@ -41001,11 +41001,11 @@
 		},
 		"jamaat": {
 			"source": "westwoodmosque.org (published timetable)",
-			"recordedOn": "2026-10-25",
+			"recordedOn": "2026-10-26",
 			"fajr": "06:00",
 			"dhuhr": "13:00",
 			"asr": "15:30",
-			"maghrib": "16:58",
+			"maghrib": "16:55",
 			"isha": "18:45"
 		},
 		"notes": "Capacity ~400 (MuslimsInBritain.org); Denomination: Maududi / Jamaat-e-Islami; Data: MIB+OSM (mib-316)",
